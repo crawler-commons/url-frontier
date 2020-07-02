@@ -1,4 +1,4 @@
-# url-frontier
+# URL Frontier
 
 Discovering content on the web is possible thanks to web crawlers, luckily there are many excellent open source solutions for this; however, most of them have their own way of storing and accessing the information about the URLs. The aim of the *URL Frontier* project is to develop a crawler-neutral API for the operations that a web crawler when communicating with a web frontier e.g. get the next URLs to crawl, update the information about  URLs already processed, change the crawl rate for a particular hostname, get the list of active hosts, get statistics, etc... 
 
