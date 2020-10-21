@@ -6,3 +6,4 @@ The idea being that it could be used by a variety of open source web crawlers, s
 
 One of the objectives of URL Frontier is to involve as many actors in the web crawling community as possible and get real users to give continuous feedback on our proposals. 
 
+You can find an initial draft of the API on https://app.swaggerhub.com/apis/jnioche/url_frontier/0.1; please use the [project mailing list](crawler-commons@googlegroups.com) for any discussions. 
