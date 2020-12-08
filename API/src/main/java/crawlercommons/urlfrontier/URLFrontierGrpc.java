@@ -21,7 +21,7 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.32.1)",
+    value = "by gRPC proto compiler (version 1.34.0)",
     comments = "Source: urlfrontier.proto")
 public final class URLFrontierGrpc {
 
