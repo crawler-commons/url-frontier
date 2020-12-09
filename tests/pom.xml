@@ -16,26 +16,28 @@
 
 	<description>Test suite for a URLFrontier Service</description>
 
+	<properties>
+		<urlfrontier.host>localhost</urlfrontier.host>
+		<urlfrontier.port>7071</urlfrontier.port>
+	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.12.4</version>
-				<executions>
-					<execution>
-						<id>default-test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>test</goal>
-						</goals>
-					</execution>
-				</executions>
+				<version>2.22.0</version>
 				<configuration>
 					<systemPropertyVariables>
-						<urlfrontier-host>localhost</urlfrontier-host>
-						<urlfrontier-port>7071</urlfrontier-port>
+						<urlfrontier.host>${urlfrontier.host}</urlfrontier.host>
+						<urlfrontier.port>${urlfrontier.port}</urlfrontier.port>
 					</systemPropertyVariables>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.22.0</version>
 			</plugin>
 		</plugins>
 	</build>
@@ -59,13 +61,16 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.30</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.30</version>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
+
 </project>

@@ -25,22 +25,23 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 
-public class URLFrontierServiceTester {
+public class URLFrontierServiceTest {
 
 	private ManagedChannel channel;
 
 	private URLFrontierStub frontier;
 
-	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLFrontierServiceTester.class);
+	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLFrontierServiceTest.class);
 
 	@Before
 	public void init() throws IOException {
-		int port = 6060;
-		String host = "localhost";
+
+		String host = System.getProperty("urlfrontier.host");
+		String port = System.getProperty("urlfrontier.port");
 
 		LOG.info("Initialisation of connection to URLFrontier service on {}:{}", host, port);
 
-		channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+		channel = ManagedChannelBuilder.forAddress(host, Integer.parseInt(port)).usePlaintext().build();
 		frontier = URLFrontierGrpc.newStub(channel);
 	}
 
@@ -59,12 +60,12 @@ public class URLFrontierServiceTester {
 
 			@Override
 			public void onNext(Empty value) {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
 			public void onError(Throwable t) {
 				completed.set(true);
+				LOG.info("Error received", t);
 			}
 
 			@Override

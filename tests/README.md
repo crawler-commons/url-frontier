@@ -1,16 +1,9 @@
-# URL Frontier
+# URL Frontier Test Suite
 
-Discovering content on the web is possible thanks to web crawlers, luckily there are many excellent open source solutions for this; however, most of them have their own way of storing and accessing the information about the URLs. The aim of the *URL Frontier* project is to develop a crawler/language-neutral API for the operations that web crawlers do when communicating with a web frontier e.g. get the next URLs to crawl, update the information about  URLs already processed, change the crawl rate for a particular hostname, get the list of active hosts, get statistics, etc... Such an API can used by a variety of open source web crawlers, regardless whether they are implemented in Java like [StormCrawler](http://stormcrawler.net) and [Heritrix](https://github.com/internetarchive/heritrix3) or in Python like [Scrapy](https://scrapy.org/).
+Runs a series of tests against a running instance of a URLFrontier service.
 
-The outcomes of the project are to design an API with gRPC, provide a Java API and instructions on how to achieve the same for other languages. We will also deliver a robust reference implementation and a validation suite to check that our implementation (as well as others') behaves as expected.
+The service is expected to run locally on port 7071, but the hostname and port values can be overridden on the command line e.g.
 
-One of the objectives of URL Frontier is to involve as many actors in the web crawling community as possible and get real users to give continuous feedback on our proposals. 
+`mvn -Durlfrontier.host=127.0.0.1 -Durlfrontier.port=7071 test`
 
-Please use the [project mailing list](crawler-commons@googlegroups.com) for any discussions. 
-
-This project is funded through the [NGI0 Discovery Fund](https://nlnet.nl/discovery), a fund established by NLnet with financial support from the European Commission's [Next Generation Internet programme](https://ngi.eu/), under the aegis of DG Communications Networks, Content and Technology under grant agreement No 825322. 
-
-![NLNet](https://nlnet.nl/image/logo_nlnet.svg)
-
-![NGI0](https://nlnet.nl/image/logos/NGI0_tag.png)
-
+The test suite also serves as an example of how to communicate with the service using gRPC.
