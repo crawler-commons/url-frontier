@@ -10,11 +10,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
-import crawlercommons.urlfrontier.service.URLFrontierServer;
-
-import crawlercommons.urlfrontier.*;
+import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
+import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
@@ -27,20 +27,18 @@ import io.grpc.stub.StreamObserver;
 
 public class URLFrontierServiceTester {
 
-	URLFrontierServer server;
-
 	private ManagedChannel channel;
 
 	private URLFrontierStub frontier;
 
+	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLFrontierServiceTester.class);
+
 	@Before
-	public void loadServer() throws IOException {
+	public void init() throws IOException {
 		int port = 6060;
-
-		server = new URLFrontierServer(port);
-		server.start();
-
 		String host = "localhost";
+
+		LOG.info("Initialisation of connection to URLFrontier service on {}:{}", host, port);
 
 		channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
 		frontier = URLFrontierGrpc.newStub(channel);
@@ -48,8 +46,8 @@ public class URLFrontierServiceTester {
 
 	@After
 	public void shutdown() {
+		LOG.info("Shutting down connection to URLFrontier service");
 		channel.shutdown();
-		server.stop();
 	}
 
 	@Test
@@ -87,6 +85,8 @@ public class URLFrontierServiceTester {
 
 		streamObserver.onCompleted();
 
+		LOG.info("Sending URL: {}", item);
+
 		// wait for completion
 		while (completed.get() == false) {
 			try {
@@ -101,6 +101,9 @@ public class URLFrontierServiceTester {
 		AtomicInteger numQueues = new AtomicInteger(0);
 
 		// check that we have one queue for it
+
+		LOG.info("Checking existence of queue");
+
 		GetParams request = GetParams.newBuilder().build();
 		StreamObserver<StringList> responseObserver2 = new StreamObserver<Urlfrontier.StringList>() {
 
@@ -136,6 +139,8 @@ public class URLFrontierServiceTester {
 		}
 
 		Assert.assertEquals("incorrect number of queues returned", 1, numQueues.intValue());
+
+		LOG.info("Received {} queue - 1 expected", numQueues.intValue());
 
 	}
 

@@ -27,6 +27,7 @@
 	<modules>
 		<module>API</module>
 		<module>service</module>
+		<module>tests</module>
 	</modules>
 
 </project>
