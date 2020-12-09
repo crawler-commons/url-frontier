@@ -42,8 +42,7 @@ message URLItem {
   }
   Status status = 3;
   Timestamp nextFetchDate = 4;
-  // TODO value can be an array or list
-  map<string, string> metadata = 5;
+  map<string, StringList> metadata = 5;
 }
 
 message Empty {}

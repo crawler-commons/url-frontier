@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.slf4j.LoggerFactory;
 
+import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
@@ -23,7 +24,9 @@ public class URLFrontierServer {
 	private Server server;
 
 	public URLFrontierServer(int port) {
-		this.server = ServerBuilder.forPort(port).addService(new URLFrontierService()).build();
+		// TODO make the implementation configurable
+		URLFrontierImplBase service = new DummyURLFrontierService();
+		this.server = ServerBuilder.forPort(port).addService(service).build();
 	}
 
 	public void start() throws IOException {

@@ -11,13 +11,18 @@ import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.stub.StreamObserver;
 
-public class URLFrontierService extends crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase {
+/**
+ * Dummy implementation of a URL Frontier service using in memory data
+ * structures. Useful for testing the API.
+ **/
 
-	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLFrontierService.class);
+public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase {
+
+	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DummyURLFrontierService.class);
 
 	private final java.util.Map<String, URLItem> queues;
 
-	public URLFrontierService() {
+	public DummyURLFrontierService() {
 		queues = new java.util.HashMap<>();
 	}
 

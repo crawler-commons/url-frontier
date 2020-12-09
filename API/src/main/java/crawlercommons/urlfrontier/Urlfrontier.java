@@ -1415,19 +1415,11 @@ public final class Urlfrontier {
     crawlercommons.urlfrontier.Urlfrontier.TimestampOrBuilder getNextFetchDateOrBuilder();
 
     /**
-     * <pre>
-     * TODO value can be an array or list
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; metadata = 5;</code>
+     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
      */
     int getMetadataCount();
     /**
-     * <pre>
-     * TODO value can be an array or list
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; metadata = 5;</code>
+     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
      */
     boolean containsMetadata(
         java.lang.String key);
@@ -1435,37 +1427,25 @@ public final class Urlfrontier {
      * Use {@link #getMetadataMap()} instead.
      */
     @java.lang.Deprecated
-    java.util.Map<java.lang.String, java.lang.String>
+    java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
     getMetadata();
     /**
-     * <pre>
-     * TODO value can be an array or list
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; metadata = 5;</code>
+     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
      */
-    java.util.Map<java.lang.String, java.lang.String>
+    java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
     getMetadataMap();
     /**
-     * <pre>
-     * TODO value can be an array or list
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; metadata = 5;</code>
+     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
      */
 
-    java.lang.String getMetadataOrDefault(
+    crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue);
+        crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
     /**
-     * <pre>
-     * TODO value can be an array or list
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; metadata = 5;</code>
+     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
      */
 
-    java.lang.String getMetadataOrThrow(
+    crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrThrow(
         java.lang.String key);
   }
   /**
@@ -1554,7 +1534,7 @@ public final class Urlfrontier {
                     MetadataDefaultEntryHolder.defaultEntry);
                 mutable_bitField0_ |= 0x00000001;
               }
-              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+              com.google.protobuf.MapEntry<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
               metadata__ = input.readMessage(
                   MetadataDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
               metadata_.getMutableMap().put(
@@ -1864,18 +1844,18 @@ public final class Urlfrontier {
     public static final int METADATA_FIELD_NUMBER = 5;
     private static final class MetadataDefaultEntryHolder {
       static final com.google.protobuf.MapEntry<
-          java.lang.String, java.lang.String> defaultEntry =
+          java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> defaultEntry =
               com.google.protobuf.MapEntry
-              .<java.lang.String, java.lang.String>newDefaultInstance(
+              .<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>newDefaultInstance(
                   crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLItem_MetadataEntry_descriptor, 
                   com.google.protobuf.WireFormat.FieldType.STRING,
                   "",
-                  com.google.protobuf.WireFormat.FieldType.STRING,
-                  "");
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  crawlercommons.urlfrontier.Urlfrontier.StringList.getDefaultInstance());
     }
     private com.google.protobuf.MapField<
-        java.lang.String, java.lang.String> metadata_;
-    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+        java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> metadata_;
+    private com.google.protobuf.MapField<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
     internalGetMetadata() {
       if (metadata_ == null) {
         return com.google.protobuf.MapField.emptyMapField(
@@ -1888,11 +1868,7 @@ public final class Urlfrontier {
       return internalGetMetadata().getMap().size();
     }
     /**
-     * <pre>
-     * TODO value can be an array or list
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; metadata = 5;</code>
+     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
      */
 
     @java.lang.Override
@@ -1906,51 +1882,39 @@ public final class Urlfrontier {
      */
     @java.lang.Override
     @java.lang.Deprecated
-    public java.util.Map<java.lang.String, java.lang.String> getMetadata() {
+    public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> getMetadata() {
       return getMetadataMap();
     }
     /**
-     * <pre>
-     * TODO value can be an array or list
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; metadata = 5;</code>
+     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
      */
     @java.lang.Override
 
-    public java.util.Map<java.lang.String, java.lang.String> getMetadataMap() {
+    public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> getMetadataMap() {
       return internalGetMetadata().getMap();
     }
     /**
-     * <pre>
-     * TODO value can be an array or list
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; metadata = 5;</code>
+     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
      */
     @java.lang.Override
 
-    public java.lang.String getMetadataOrDefault(
+    public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue) {
+        crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue) {
       if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, java.lang.String> map =
+      java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> map =
           internalGetMetadata().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
     /**
-     * <pre>
-     * TODO value can be an array or list
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; metadata = 5;</code>
+     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
      */
     @java.lang.Override
 
-    public java.lang.String getMetadataOrThrow(
+    public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrThrow(
         java.lang.String key) {
       if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, java.lang.String> map =
+      java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> map =
           internalGetMetadata().getMap();
       if (!map.containsKey(key)) {
         throw new java.lang.IllegalArgumentException();
@@ -2013,9 +1977,9 @@ public final class Urlfrontier {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getNextFetchDate());
       }
-      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+      for (java.util.Map.Entry<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> entry
            : internalGetMetadata().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+        com.google.protobuf.MapEntry<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
         metadata__ = MetadataDefaultEntryHolder.defaultEntry.newBuilderForType()
             .setKey(entry.getKey())
             .setValue(entry.getValue())
@@ -2700,8 +2664,8 @@ public final class Urlfrontier {
       }
 
       private com.google.protobuf.MapField<
-          java.lang.String, java.lang.String> metadata_;
-      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> metadata_;
+      private com.google.protobuf.MapField<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
       internalGetMetadata() {
         if (metadata_ == null) {
           return com.google.protobuf.MapField.emptyMapField(
@@ -2709,7 +2673,7 @@ public final class Urlfrontier {
         }
         return metadata_;
       }
-      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+      private com.google.protobuf.MapField<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
       internalGetMutableMetadata() {
         onChanged();;
         if (metadata_ == null) {
@@ -2726,11 +2690,7 @@ public final class Urlfrontier {
         return internalGetMetadata().getMap().size();
       }
       /**
-       * <pre>
-       * TODO value can be an array or list
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; metadata = 5;</code>
+       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
        */
 
       @java.lang.Override
@@ -2744,51 +2704,39 @@ public final class Urlfrontier {
        */
       @java.lang.Override
       @java.lang.Deprecated
-      public java.util.Map<java.lang.String, java.lang.String> getMetadata() {
+      public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> getMetadata() {
         return getMetadataMap();
       }
       /**
-       * <pre>
-       * TODO value can be an array or list
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; metadata = 5;</code>
+       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
        */
       @java.lang.Override
 
-      public java.util.Map<java.lang.String, java.lang.String> getMetadataMap() {
+      public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> getMetadataMap() {
         return internalGetMetadata().getMap();
       }
       /**
-       * <pre>
-       * TODO value can be an array or list
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; metadata = 5;</code>
+       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
        */
       @java.lang.Override
 
-      public java.lang.String getMetadataOrDefault(
+      public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrDefault(
           java.lang.String key,
-          java.lang.String defaultValue) {
+          crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue) {
         if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, java.lang.String> map =
+        java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> map =
             internalGetMetadata().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
       }
       /**
-       * <pre>
-       * TODO value can be an array or list
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; metadata = 5;</code>
+       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
        */
       @java.lang.Override
 
-      public java.lang.String getMetadataOrThrow(
+      public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrThrow(
           java.lang.String key) {
         if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, java.lang.String> map =
+        java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> map =
             internalGetMetadata().getMap();
         if (!map.containsKey(key)) {
           throw new java.lang.IllegalArgumentException();
@@ -2802,11 +2750,7 @@ public final class Urlfrontier {
         return this;
       }
       /**
-       * <pre>
-       * TODO value can be an array or list
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; metadata = 5;</code>
+       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
        */
 
       public Builder removeMetadata(
@@ -2820,20 +2764,16 @@ public final class Urlfrontier {
        * Use alternate mutation accessors instead.
        */
       @java.lang.Deprecated
-      public java.util.Map<java.lang.String, java.lang.String>
+      public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
       getMutableMetadata() {
         return internalGetMutableMetadata().getMutableMap();
       }
       /**
-       * <pre>
-       * TODO value can be an array or list
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; metadata = 5;</code>
+       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
        */
       public Builder putMetadata(
           java.lang.String key,
-          java.lang.String value) {
+          crawlercommons.urlfrontier.Urlfrontier.StringList value) {
         if (key == null) { throw new java.lang.NullPointerException(); }
         if (value == null) { throw new java.lang.NullPointerException(); }
         internalGetMutableMetadata().getMutableMap()
@@ -2841,15 +2781,11 @@ public final class Urlfrontier {
         return this;
       }
       /**
-       * <pre>
-       * TODO value can be an array or list
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; metadata = 5;</code>
+       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
        */
 
       public Builder putAllMetadata(
-          java.util.Map<java.lang.String, java.lang.String> values) {
+          java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> values) {
         internalGetMutableMetadata().getMutableMap()
             .putAll(values);
         return this;
@@ -3991,22 +3927,23 @@ public final class Urlfrontier {
       "\n\021urlfrontier.proto\022\013urlfrontier\"\034\n\nStri" +
       "ngList\022\016\n\006String\030\001 \003(\t\"D\n\tGetParams\022\027\n\017m" +
       "axUrlsPerQueue\030\001 \001(\005\022\021\n\tmaxQueues\030\002 \001(\005\022" +
-      "\013\n\003key\030\003 \001(\t\"\272\002\n\007URLItem\022\013\n\003url\030\001 \001(\t\022\013\n" +
+      "\013\n\003key\030\003 \001(\t\"\323\002\n\007URLItem\022\013\n\003url\030\001 \001(\t\022\013\n" +
       "\003key\030\002 \001(\t\022+\n\006status\030\003 \001(\0162\033.urlfrontier" +
       ".URLItem.Status\022-\n\rnextFetchDate\030\004 \001(\0132\026" +
       ".urlfrontier.Timestamp\0224\n\010metadata\030\005 \003(\013" +
-      "2\".urlfrontier.URLItem.MetadataEntry\032/\n\r" +
-      "MetadataEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(" +
-      "\t:\0028\001\"R\n\006Status\022\016\n\nDISCOVERED\020\000\022\013\n\007FETCH" +
-      "ED\020\001\022\017\n\013REDIRECTION\020\002\022\017\n\013FETCH_ERROR\020\003\022\t" +
-      "\n\005ERROR\020\004\"\007\n\005Empty\"+\n\tTimestamp\022\017\n\007secon" +
-      "ds\030\001 \001(\003\022\r\n\005nanos\030\002 \001(\0052\304\001\n\013URLFrontier\022" +
-      "?\n\nListQueues\022\026.urlfrontier.GetParams\032\027." +
-      "urlfrontier.StringList\"\000\022;\n\007GetURLs\022\026.ur" +
-      "lfrontier.GetParams\032\024.urlfrontier.URLIte" +
-      "m\"\0000\001\0227\n\007PutURLs\022\024.urlfrontier.URLItem\032\022" +
-      ".urlfrontier.Empty\"\000(\001B\034\n\032crawlercommons" +
-      ".urlfrontierb\006proto3"
+      "2\".urlfrontier.URLItem.MetadataEntry\032H\n\r" +
+      "MetadataEntry\022\013\n\003key\030\001 \001(\t\022&\n\005value\030\002 \001(" +
+      "\0132\027.urlfrontier.StringList:\0028\001\"R\n\006Status" +
+      "\022\016\n\nDISCOVERED\020\000\022\013\n\007FETCHED\020\001\022\017\n\013REDIREC" +
+      "TION\020\002\022\017\n\013FETCH_ERROR\020\003\022\t\n\005ERROR\020\004\"\007\n\005Em" +
+      "pty\"+\n\tTimestamp\022\017\n\007seconds\030\001 \001(\003\022\r\n\005nan" +
+      "os\030\002 \001(\0052\304\001\n\013URLFrontier\022?\n\nListQueues\022\026" +
+      ".urlfrontier.GetParams\032\027.urlfrontier.Str" +
+      "ingList\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetPa" +
+      "rams\032\024.urlfrontier.URLItem\"\0000\001\0227\n\007PutURL" +
+      "s\022\024.urlfrontier.URLItem\032\022.urlfrontier.Em" +
+      "pty\"\000(\001B\034\n\032crawlercommons.urlfrontierb\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
