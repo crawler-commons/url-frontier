@@ -81,8 +81,14 @@ public class URLFrontierServiceTest {
 
 		URLItem item = URLItem.newBuilder().setKey("key1.com").setStatus(Status.DISCOVERED).setUrl("http://key1.com/")
 				.setNextFetchDate(ts).build();
+		
+		// send a duplicate 
+		i = Instant.now();
+		URLItem item2 = URLItem.newBuilder().setKey("key1.com").setStatus(Status.DISCOVERED).setUrl("http://key1.com/")
+				.setNextFetchDate(ts).build();
 
 		streamObserver.onNext(item);
+		streamObserver.onNext(item2);
 
 		streamObserver.onCompleted();
 
