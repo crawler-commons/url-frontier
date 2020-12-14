@@ -81,8 +81,8 @@ public class URLFrontierServiceTest {
 
 		URLItem item = URLItem.newBuilder().setKey("key1.com").setStatus(Status.DISCOVERED).setUrl("http://key1.com/")
 				.setNextFetchDate(ts).build();
-		
-		// send a duplicate 
+
+		// send a duplicate
 		i = Instant.now();
 		URLItem item2 = URLItem.newBuilder().setKey("key1.com").setStatus(Status.DISCOVERED).setUrl("http://key1.com/")
 				.setNextFetchDate(ts).build();
@@ -99,7 +99,6 @@ public class URLFrontierServiceTest {
 			try {
 				Thread.currentThread().sleep(10);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
 		}
 
@@ -111,7 +110,6 @@ public class URLFrontierServiceTest {
 
 		LOG.info("Checking existence of queue");
 
-		GetParams request = GetParams.newBuilder().build();
 		StreamObserver<StringList> responseObserver2 = new StreamObserver<Urlfrontier.StringList>() {
 
 			@Override
@@ -126,6 +124,7 @@ public class URLFrontierServiceTest {
 			@Override
 			public void onError(Throwable t) {
 				completed.set(true);
+				LOG.info("Error received", t);
 			}
 
 			@Override
@@ -134,6 +133,7 @@ public class URLFrontierServiceTest {
 			}
 		};
 
+		GetParams request = GetParams.newBuilder().build();
 		frontier.listQueues(request, responseObserver2);
 
 		// wait for completion
@@ -141,13 +141,52 @@ public class URLFrontierServiceTest {
 			try {
 				Thread.currentThread().sleep(10);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
 		}
 
 		Assert.assertEquals("incorrect number of queues returned", 1, numQueues.intValue());
 
 		LOG.info("Received {} queue - 1 expected", numQueues.intValue());
+
+		/** Get the URLs due for fetching for a specific key **/
+
+		completed.set(false);
+
+		String[] urlreturned = new String[1];
+
+		// want just one URL for that specific key
+		request = GetParams.newBuilder().setKey("key1.com").setMaxUrlsPerQueue(1).build();
+
+		StreamObserver<URLItem> responseObserver3 = new StreamObserver<Urlfrontier.URLItem>() {
+
+			@Override
+			public void onNext(URLItem value) {
+				urlreturned[0] = value.getUrl();
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				completed.set(true);
+				LOG.info("Error received", t);
+			}
+
+			@Override
+			public void onCompleted() {
+				completed.set(true);
+			}
+		};
+
+		frontier.getURLs(request, responseObserver3);
+
+		// wait for completion
+		while (completed.get() == false) {
+			try {
+				Thread.currentThread().sleep(10);
+			} catch (InterruptedException e) {
+			}
+		}
+		
+		Assert.assertEquals("incorrect number of URLs returned", "http://key1.com/", urlreturned[0]);
 
 	}
 

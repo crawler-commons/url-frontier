@@ -3,6 +3,7 @@ package crawlercommons.urlfrontier.service;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
+import crawlercommons.urlfrontier.Urlfrontier.Timestamp;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem.Status;
 import io.grpc.stub.StreamObserver;
@@ -24,7 +26,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DummyURLFrontierService.class);
 
-	private final java.util.Map<String, PriorityQueue<URLItem>> queues;
+	// TODO make sure that the queues are sorted by next fetch date
+	private final java.util.Map<String, PriorityQueue<InternalURL>> queues;
 
 	/**
 	 * simpler than the objects from gRPC + sortable and have equals based on URL
@@ -36,6 +39,10 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		int status;
 		String url;
 		Map<String, StringList> metadata;
+
+		// this is set when the URL is sent for processing
+		// so that a subsequent call to getURLs does not send it again
+		Instant heldUntil;
 
 		private InternalURL() {
 		}
@@ -64,9 +71,22 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			return url.equals(((InternalURL) obj).url);
 		}
 
+		void setHeldUntil(Instant t) {
+			heldUntil = t;
+		}
+
 		@Override
 		public int hashCode() {
 			return url.hashCode();
+		}
+
+		public URLItem toURLItem(String key) {
+			Timestamp ts = Timestamp.newBuilder().setSeconds(nextFetchDate.getEpochSecond())
+					.setNanos(nextFetchDate.getNano()).build();
+			crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder = URLItem.newBuilder().setNextFetchDate(ts)
+					.setStatus(Status.forNumber(status)).setKey(key).setUrl(url);
+			builder.putAllMetadata(metadata);
+			return builder.build();
 		}
 
 	}
@@ -98,7 +118,84 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 	@Override
 	public void getURLs(GetParams request, StreamObserver<URLItem> responseObserver) {
-		throw new RuntimeException("getURLs() not implemented");
+		int maxQueues = request.getMaxQueues();
+		int maxURLsPerQueue = request.getMaxUrlsPerQueue();
+
+		// TODO make it configurable
+		int secsUntilRequestable = 30;
+
+		LOG.info("Received request to get fetchable URLs [max queues {}, max URLs {}]", maxQueues, maxURLsPerQueue);
+
+		String key = request.getKey();
+
+		Instant now = Instant.now();
+
+		// want a specific key only?
+		// default is an empty string so should never be null
+		if (key != null && key.length() >= 1) {
+			PriorityQueue<InternalURL> queue = queues.get(key);
+
+			// the queue does not exist
+			if (queue == null) {
+				responseObserver.onCompleted();
+				return;
+			}
+
+			sendURLsForQueue(queue, key, maxURLsPerQueue, secsUntilRequestable, now, responseObserver);
+			responseObserver.onCompleted();
+			return;
+		}
+
+		Iterator<Entry<String, PriorityQueue<InternalURL>>> iterator = queues.entrySet().iterator();
+		int num = 0;
+		while (iterator.hasNext() && num <= maxQueues) {
+			Entry<String, PriorityQueue<InternalURL>> e = iterator.next();
+			boolean sentOne = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
+					responseObserver);
+			if (sentOne)
+				num++;
+		}
+		responseObserver.onCompleted();
+	}
+
+	/**
+	 * @return true if at least one URL has been sent for this queue, false
+	 *         otherwise
+	 **/
+	private boolean sendURLsForQueue(final PriorityQueue<InternalURL> queue, final String key, final int maxURLsPerQueue,
+			final int secsUntilRequestable, final Instant now, final StreamObserver<URLItem> responseObserver) {
+		Iterator<InternalURL> iter = queue.iterator();
+		int alreadySent = 0;
+		boolean oneFoundForThisQ = false;
+
+		while (iter.hasNext() && alreadySent < maxURLsPerQueue) {
+			InternalURL item = iter.next();
+
+			// check that is is due
+			if (item.nextFetchDate.isAfter(now)) {
+				return oneFoundForThisQ;
+			}
+
+			// check that the URL is not already being processed
+			if (item.heldUntil != null && item.heldUntil.isAfter(now)) {
+				continue;
+			}
+
+			// this one is good to go
+
+			// count one queue
+			oneFoundForThisQ = true;
+
+			URLItem converted = item.toURLItem(key);
+			responseObserver.onNext(converted);
+
+			// mark it as not processable for N secs
+			item.heldUntil = Instant.now().plusSeconds(secsUntilRequestable);
+
+			alreadySent++;
+		}
+
+		return oneFoundForThisQ;
 	}
 
 	@Override
@@ -109,7 +206,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			@Override
 			public void onNext(URLItem value) {
 				// get the priority queue or create one
-				PriorityQueue queue = queues.computeIfAbsent(value.getKey(), (k) -> new PriorityQueue());
+				PriorityQueue<InternalURL> queue = queues.computeIfAbsent(value.getKey(),
+						(k) -> new PriorityQueue<InternalURL>());
 
 				InternalURL iu = InternalURL.from(value);
 
