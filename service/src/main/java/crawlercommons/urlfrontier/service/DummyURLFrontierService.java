@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
+import java.util.SortedMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +28,23 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DummyURLFrontierService.class);
 
-	// TODO make sure that the queues are sorted by next fetch date
-	private final java.util.Map<String, PriorityQueue<InternalURL>> queues;
+	// sorted the queues by next fetch date of the first element they contain
+	private SortedMap<String, URLQueue> queues = new ConcurrentSkipListMap<String, URLQueue>();
+
+	/** Queues are ordered by the nextfetchdate of their first element **/
+	static class URLQueue extends PriorityQueue<InternalURL> implements Comparable<URLQueue> {
+
+		URLQueue(InternalURL initial) {
+			this.add(initial);
+		}
+
+		@Override
+		public int compareTo(URLQueue target) {
+			InternalURL mine = this.peek();
+			InternalURL his = target.peek();
+			return mine.compareTo(his);
+		}
+	}
 
 	/**
 	 * simpler than the objects from gRPC + sortable and have equals based on URL
@@ -91,10 +108,6 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 	}
 
-	public DummyURLFrontierService() {
-		queues = new java.util.HashMap<>();
-	}
-
 	@Override
 	public void listQueues(GetParams request, StreamObserver<StringList> responseObserver) {
 
@@ -146,14 +159,15 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			return;
 		}
 
-		Iterator<Entry<String, PriorityQueue<InternalURL>>> iterator = queues.entrySet().iterator();
+		Iterator<Entry<String, URLQueue>> iterator = queues.entrySet().iterator();
 		int num = 0;
 		while (iterator.hasNext() && num <= maxQueues) {
-			Entry<String, PriorityQueue<InternalURL>> e = iterator.next();
+			Entry<String, URLQueue> e = iterator.next();
 			boolean sentOne = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
 					responseObserver);
-			if (sentOne)
+			if (sentOne) {
 				num++;
+			}
 		}
 		responseObserver.onCompleted();
 	}
@@ -162,8 +176,9 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	 * @return true if at least one URL has been sent for this queue, false
 	 *         otherwise
 	 **/
-	private boolean sendURLsForQueue(final PriorityQueue<InternalURL> queue, final String key, final int maxURLsPerQueue,
-			final int secsUntilRequestable, final Instant now, final StreamObserver<URLItem> responseObserver) {
+	private boolean sendURLsForQueue(final PriorityQueue<InternalURL> queue, final String key,
+			final int maxURLsPerQueue, final int secsUntilRequestable, final Instant now,
+			final StreamObserver<URLItem> responseObserver) {
 		Iterator<InternalURL> iter = queue.iterator();
 		int alreadySent = 0;
 		boolean oneFoundForThisQ = false;
@@ -206,10 +221,13 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			@Override
 			public void onNext(URLItem value) {
 				// get the priority queue or create one
-				PriorityQueue<InternalURL> queue = queues.computeIfAbsent(value.getKey(),
-						(k) -> new PriorityQueue<InternalURL>());
-
 				InternalURL iu = InternalURL.from(value);
+
+				URLQueue queue = queues.get(value.getKey());
+				if (queue == null) {
+					queues.put(value.getKey(), new URLQueue(iu));
+					return;
+				}
 
 				// check whether the URL already exists
 				if (queue.contains(iu)) {
@@ -228,12 +246,13 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 			@Override
 			public void onError(Throwable t) {
-				// TODO Auto-generated method stub
-
+				LOG.error("Throwable caught", t);
 			}
 
 			@Override
 			public void onCompleted() {
+				// create a new queue so that the entries get sorted
+				queues = new ConcurrentSkipListMap<String, URLQueue>(queues);
 				responseObserver.onNext(Empty.newBuilder().build());
 				responseObserver.onCompleted();
 			}
