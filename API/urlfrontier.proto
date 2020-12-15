@@ -6,16 +6,32 @@ package urlfrontier;
 
 // Interface exported by the server.
 service URLFrontier {
-  // Returns the names of up to N active queues
-  // 
-  // a queue is active if it has URLs due for fetching
+  /** Returns the names of up to N active queues
+      a queue is active if it has URLs due for fetching
+  **/
      rpc ListQueues(GetParams) returns (StringList) {}
 
-  // streams URLs due for fetching from M queues with up to N items per queue
+  /** streams URLs due for fetching from M queues with up to N items per queue **/
      rpc GetURLs(GetParams) returns (stream URLItem) {}
 
-  // update a batch of URLs
+  /** update a batch of URLs **/
      rpc PutURLs(stream URLItem) returns (Empty) {}
+
+ /** returns stats for a specific queue or the whole crawl if the value if empty or null **/
+     rpc stats(String) returns (Stats) {}
+}
+
+
+message Stats {
+  uint32 size = 1;
+  uint32 inProcess = 2;
+  map<string, uint32> countsPerStatus = 3;
+  uint32 numberOfQueues = 4;
+}
+
+
+message String {
+  string value = 1;
 }
 
 message StringList {
@@ -24,9 +40,11 @@ message StringList {
 
 
 message GetParams {
-  int32 maxUrlsPerQueue = 1;
-  int32 maxQueues = 2;
+  uint32 maxUrlsPerQueue = 1;
+  uint32 maxQueues = 2;
   string key = 3;
+  // applies to search - amount of time before a URL can be unlocked and sent again for fetching 
+  uint32 delayRequestable = 4;
 }
 
 

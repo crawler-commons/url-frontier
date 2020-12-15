@@ -13,10 +13,12 @@ import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc;
+import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
+import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.Timestamp;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
@@ -31,6 +33,8 @@ public class URLFrontierServiceTest {
 
 	private URLFrontierStub frontier;
 
+	private URLFrontierBlockingStub blockingFrontier;
+
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLFrontierServiceTest.class);
 
 	@Before
@@ -43,6 +47,7 @@ public class URLFrontierServiceTest {
 
 		channel = ManagedChannelBuilder.forAddress(host, Integer.parseInt(port)).usePlaintext().build();
 		frontier = URLFrontierGrpc.newStub(channel);
+		blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 	}
 
 	@After
@@ -102,92 +107,36 @@ public class URLFrontierServiceTest {
 			}
 		}
 
-		completed.set(false);
-
-		AtomicInteger numQueues = new AtomicInteger(0);
+		/** The methods below use the blocking API **/
 
 		// check that we have one queue for it
 
 		LOG.info("Checking existence of queue");
 
-		StreamObserver<StringList> responseObserver2 = new StreamObserver<Urlfrontier.StringList>() {
-
-			@Override
-			public void onNext(Urlfrontier.StringList value) {
-				Iterator<String> iter = value.getStringList().iterator();
-				while (iter.hasNext()) {
-					iter.next();
-					numQueues.incrementAndGet();
-				}
-			}
-
-			@Override
-			public void onError(Throwable t) {
-				completed.set(true);
-				LOG.info("Error received", t);
-			}
-
-			@Override
-			public void onCompleted() {
-				completed.set(true);
-			}
-		};
-
 		GetParams request = GetParams.newBuilder().build();
-		frontier.listQueues(request, responseObserver2);
+		StringList queueslisted = blockingFrontier.listQueues(request);
 
-		// wait for completion
-		while (completed.get() == false) {
-			try {
-				Thread.currentThread().sleep(10);
-			} catch (InterruptedException e) {
-			}
-		}
+		Assert.assertEquals("incorrect number of queues returned", 1, queueslisted.getStringList().size());
 
-		Assert.assertEquals("incorrect number of queues returned", 1, numQueues.intValue());
-
-		LOG.info("Received {} queue - 1 expected", numQueues.intValue());
+		LOG.info("Received {} queue - 1 expected", queueslisted.getStringList().size());
 
 		/** Get the URLs due for fetching for a specific key **/
-
-		completed.set(false);
-
-		String[] urlreturned = new String[1];
 
 		// want just one URL for that specific key
 		request = GetParams.newBuilder().setKey("key1.com").setMaxUrlsPerQueue(1).build();
 
-		StreamObserver<URLItem> responseObserver3 = new StreamObserver<Urlfrontier.URLItem>() {
+		String urlreturned = blockingFrontier.getURLs(request).next().getUrl();
 
-			@Override
-			public void onNext(URLItem value) {
-				urlreturned[0] = value.getUrl();
-			}
+		Assert.assertEquals("incorrect number of URLs returned", "http://key1.com/", urlreturned);
 
-			@Override
-			public void onError(Throwable t) {
-				completed.set(true);
-				LOG.info("Error received", t);
-			}
+		/** Get stats anout the queue **/
 
-			@Override
-			public void onCompleted() {
-				completed.set(true);
-			}
-		};
+		Stats stats = blockingFrontier.stats(Urlfrontier.String.newBuilder().setValue("key1.com").build());
 
-		frontier.getURLs(request, responseObserver3);
+		Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
 
-		// wait for completion
-		while (completed.get() == false) {
-			try {
-				Thread.currentThread().sleep(10);
-			} catch (InterruptedException e) {
-			}
-		}
-		
-		Assert.assertEquals("incorrect number of URLs returned", "http://key1.com/", urlreturned[0]);
-
+		// should still have one URL marked as in process
+		Assert.assertEquals("incorrect number of inprocesss from stats", 1, stats.getInProcess());
 	}
 
 }

@@ -1,6 +1,7 @@
 package crawlercommons.urlfrontier.service;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
+import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.Timestamp;
@@ -43,6 +45,35 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			InternalURL mine = this.peek();
 			InternalURL his = target.peek();
 			return mine.compareTo(his);
+		}
+
+		public int getInProcess() {
+			// a URL in process has a heldUntil and is at the beginning of a queue
+			Iterator<InternalURL> iter = this.iterator();
+			int inproc = 0;
+			while (iter.hasNext()) {
+				if (iter.next().heldUntil != null)
+					inproc++;
+				else
+					return inproc;
+			}
+			return inproc;
+		}
+
+		public Map<String, Integer> getStats() {
+			// a URL in process has a heldUntil and is at the beginning of a queue
+			Iterator<InternalURL> iter = this.iterator();
+			int[] statusCount = new int[5];
+			while (iter.hasNext()) {
+				statusCount[iter.next().status]++;
+			}
+			// convert from index to string value
+			Map<String, Integer> stats = new HashMap<>();
+
+			for (int rank = 0; rank < statusCount.length; rank++) {
+				stats.put(Status.forNumber(rank).name(), statusCount[rank]);
+			}
+			return stats;
 		}
 	}
 
@@ -112,18 +143,25 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	public void listQueues(GetParams request, StreamObserver<StringList> responseObserver) {
 
 		int maxQueues = request.getMaxQueues();
-		// 0 by default but just in case a negative value is set
-		if (maxQueues < 1) {
+		// 0 by default
+		if (maxQueues == 0) {
 			maxQueues = Integer.MAX_VALUE;
 		}
 
 		LOG.info("Received request to list queues [max {}]", maxQueues);
 
-		Iterator<String> iterator = queues.keySet().iterator();
+		Instant now = Instant.now();
 		int num = 0;
 		Builder list = StringList.newBuilder();
+
+		Iterator<Entry<String, URLQueue>> iterator = queues.entrySet().iterator();
 		while (iterator.hasNext() && num <= maxQueues) {
-			list.addString(iterator.next());
+			Entry<String, URLQueue> e = iterator.next();
+			// check that the queue has URLs due for fetching
+			if (e.getValue().peek().nextFetchDate.isBefore(now)) {
+				list.addString(e.getKey());
+				num++;
+			}
 		}
 		responseObserver.onNext(list.build());
 		responseObserver.onCompleted();
@@ -133,11 +171,23 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	public void getURLs(GetParams request, StreamObserver<URLItem> responseObserver) {
 		int maxQueues = request.getMaxQueues();
 		int maxURLsPerQueue = request.getMaxUrlsPerQueue();
+		int secsUntilRequestable = request.getDelayRequestable();
 
-		// TODO make it configurable
-		int secsUntilRequestable = 30;
+		// 0 by default
+		if (maxQueues == 0) {
+			maxQueues = Integer.MAX_VALUE;
+		}
 
-		LOG.info("Received request to get fetchable URLs [max queues {}, max URLs {}]", maxQueues, maxURLsPerQueue);
+		if (maxURLsPerQueue == 0) {
+			maxURLsPerQueue = Integer.MAX_VALUE;
+		}
+
+		if (secsUntilRequestable == 0) {
+			secsUntilRequestable = 30;
+		}
+
+		LOG.info("Received request to get fetchable URLs [max queues {}, max URLs {}, delay {}]", maxQueues,
+				maxURLsPerQueue, secsUntilRequestable);
 
 		String key = request.getKey();
 
@@ -257,6 +307,26 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				responseObserver.onCompleted();
 			}
 		};
+
+	}
+
+	public void stats(crawlercommons.urlfrontier.Urlfrontier.String request,
+			io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats> responseObserver) {
+		// empty request - want for the whole crawl
+		if (request.getValue().isEmpty()) {
+			// TODO
+			super.stats(request, responseObserver);
+			return;
+		}
+
+		// get the stats for a specific queue
+		URLQueue q = queues.get(request.getValue());
+		if (q != null) {
+			Stats stats = Stats.newBuilder().setNumberOfQueues(1).setSize(q.size()).setInProcess(q.getInProcess())
+					.putAllCountsPerStatus(q.getStats()).build();
+			responseObserver.onNext(stats);
+		}
+		responseObserver.onCompleted();
 
 	}
 
