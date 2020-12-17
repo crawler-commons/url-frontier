@@ -60,11 +60,14 @@ public class URLFrontierServiceTest {
 	public void testUpdates() {
 
 		final AtomicBoolean completed = new AtomicBoolean(false);
+		final AtomicInteger acked = new AtomicInteger(0);
 
-		StreamObserver<Empty> responseObserver = new StreamObserver<Empty>() {
+		StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver = new StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>() {
 
 			@Override
-			public void onNext(Empty value) {
+			public void onNext(crawlercommons.urlfrontier.Urlfrontier.String value) {
+				// receives confirmation that the value has been received
+				acked.addAndGet(1);
 			}
 
 			@Override
@@ -106,6 +109,8 @@ public class URLFrontierServiceTest {
 			} catch (InterruptedException e) {
 			}
 		}
+
+		Assert.assertEquals("incorrect number of url acked", 2, acked.get());
 
 		/** The methods below use the blocking API **/
 

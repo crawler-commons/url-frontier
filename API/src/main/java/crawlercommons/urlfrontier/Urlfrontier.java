@@ -5564,14 +5564,14 @@ public final class Urlfrontier {
       "\022\016\n\nDISCOVERED\020\000\022\013\n\007FETCHED\020\001\022\017\n\013REDIREC" +
       "TION\020\002\022\017\n\013FETCH_ERROR\020\003\022\t\n\005ERROR\020\004\"\007\n\005Em" +
       "pty\"+\n\tTimestamp\022\017\n\007seconds\030\001 \001(\003\022\r\n\005nan" +
-      "os\030\002 \001(\0052\370\001\n\013URLFrontier\022?\n\nListQueues\022\026" +
+      "os\030\002 \001(\0052\373\001\n\013URLFrontier\022?\n\nListQueues\022\026" +
       ".urlfrontier.GetParams\032\027.urlfrontier.Str" +
       "ingList\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetPa" +
-      "rams\032\024.urlfrontier.URLItem\"\0000\001\0227\n\007PutURL" +
-      "s\022\024.urlfrontier.URLItem\032\022.urlfrontier.Em" +
-      "pty\"\000(\001\0222\n\005stats\022\023.urlfrontier.String\032\022." +
-      "urlfrontier.Stats\"\000B\034\n\032crawlercommons.ur" +
-      "lfrontierb\006proto3"
+      "rams\032\024.urlfrontier.URLItem\"\0000\001\022:\n\007PutURL" +
+      "s\022\024.urlfrontier.URLItem\032\023.urlfrontier.St" +
+      "ring\"\000(\0010\001\0222\n\005stats\022\023.urlfrontier.String" +
+      "\032\022.urlfrontier.Stats\"\000B\034\n\032crawlercommons" +
+      ".urlfrontierb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

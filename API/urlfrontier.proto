@@ -15,7 +15,7 @@ service URLFrontier {
      rpc GetURLs(GetParams) returns (stream URLItem) {}
 
   /** update a batch of URLs **/
-     rpc PutURLs(stream URLItem) returns (Empty) {}
+     rpc PutURLs(stream URLItem) returns (stream String) {}
 
  /** returns stats for a specific queue or the whole crawl if the value if empty or null **/
      rpc stats(String) returns (Stats) {}
@@ -29,7 +29,7 @@ message Stats {
   uint32 numberOfQueues = 4;
 }
 
-
+/** Replace with StringValue ???  **/
 message String {
   string value = 1;
 }

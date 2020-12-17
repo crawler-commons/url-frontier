@@ -1,5 +1,7 @@
 package crawlercommons.urlfrontier.service;
 
+import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -264,7 +266,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	}
 
 	@Override
-	public StreamObserver<URLItem> putURLs(StreamObserver<Empty> responseObserver) {
+	public StreamObserver<URLItem> putURLs(
+			StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
 
 		return new StreamObserver<URLItem>() {
 
@@ -276,6 +279,9 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				URLQueue queue = queues.get(value.getKey());
 				if (queue == null) {
 					queues.put(value.getKey(), new URLQueue(iu));
+					// ack reception of the URL
+					responseObserver.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+							.setValue(value.getUrl()).build());
 					return;
 				}
 
@@ -283,6 +289,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				if (queue.contains(iu)) {
 					if (value.getStatus().getNumber() == Status.DISCOVERED_VALUE) {
 						// we already discovered it - so no need for it
+						responseObserver.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+								.setValue(value.getUrl()).build());
 						return;
 					} else {
 						// overwrite the existing version
@@ -292,6 +300,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 				// add the new item
 				queue.add(iu);
+				responseObserver.onNext(
+						crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(value.getUrl()).build());
 			}
 
 			@Override
@@ -301,9 +311,9 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 			@Override
 			public void onCompleted() {
+				// will this ever get called if the client is constantly streaming?
 				// create a new queue so that the entries get sorted
 				queues = new ConcurrentSkipListMap<String, URLQueue>(queues);
-				responseObserver.onNext(Empty.newBuilder().build());
 				responseObserver.onCompleted();
 			}
 		};

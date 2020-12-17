@@ -93,28 +93,28 @@ public final class URLFrontierGrpc {
   }
 
   private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.URLItem,
-      crawlercommons.urlfrontier.Urlfrontier.Empty> getPutURLsMethod;
+      crawlercommons.urlfrontier.Urlfrontier.String> getPutURLsMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "PutURLs",
       requestType = crawlercommons.urlfrontier.Urlfrontier.URLItem.class,
-      responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+      responseType = crawlercommons.urlfrontier.Urlfrontier.String.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
   public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.URLItem,
-      crawlercommons.urlfrontier.Urlfrontier.Empty> getPutURLsMethod() {
-    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.URLItem, crawlercommons.urlfrontier.Urlfrontier.Empty> getPutURLsMethod;
+      crawlercommons.urlfrontier.Urlfrontier.String> getPutURLsMethod() {
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.URLItem, crawlercommons.urlfrontier.Urlfrontier.String> getPutURLsMethod;
     if ((getPutURLsMethod = URLFrontierGrpc.getPutURLsMethod) == null) {
       synchronized (URLFrontierGrpc.class) {
         if ((getPutURLsMethod = URLFrontierGrpc.getPutURLsMethod) == null) {
           URLFrontierGrpc.getPutURLsMethod = getPutURLsMethod =
-              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.URLItem, crawlercommons.urlfrontier.Urlfrontier.Empty>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.URLItem, crawlercommons.urlfrontier.Urlfrontier.String>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "PutURLs"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   crawlercommons.urlfrontier.Urlfrontier.URLItem.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance()))
+                  crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance()))
               .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("PutURLs"))
               .build();
         }
@@ -232,7 +232,7 @@ public final class URLFrontierGrpc {
      * </pre>
      */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
-        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
       return asyncUnimplementedStreamingCall(getPutURLsMethod(), responseObserver);
     }
 
@@ -264,10 +264,10 @@ public final class URLFrontierGrpc {
                   this, METHODID_GET_URLS)))
           .addMethod(
             getPutURLsMethod(),
-            asyncClientStreamingCall(
+            asyncBidiStreamingCall(
               new MethodHandlers<
                 crawlercommons.urlfrontier.Urlfrontier.URLItem,
-                crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                crawlercommons.urlfrontier.Urlfrontier.String>(
                   this, METHODID_PUT_URLS)))
           .addMethod(
             getStatsMethod(),
@@ -326,8 +326,8 @@ public final class URLFrontierGrpc {
      * </pre>
      */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
-        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
-      return asyncClientStreamingCall(
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
+      return asyncBidiStreamingCall(
           getChannel().newCall(getPutURLsMethod(), getCallOptions()), responseObserver);
     }
 
@@ -480,7 +480,7 @@ public final class URLFrontierGrpc {
       switch (methodId) {
         case METHODID_PUT_URLS:
           return (io.grpc.stub.StreamObserver<Req>) serviceImpl.putURLs(
-              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
+              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>) responseObserver);
         default:
           throw new AssertionError();
       }
