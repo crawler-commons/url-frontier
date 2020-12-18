@@ -979,6 +979,10 @@ public final class Urlfrontier {
         getValueBytes();
   }
   /**
+   * <pre>
+   ** Replace with StringValue ???  *
+   * </pre>
+   *
    * Protobuf type {@code urlfrontier.String}
    */
   public static final class String extends
@@ -1255,6 +1259,10 @@ public final class Urlfrontier {
       return builder;
     }
     /**
+     * <pre>
+     ** Replace with StringValue ???  *
+     * </pre>
+     *
      * Protobuf type {@code urlfrontier.String}
      */
     public static final class Builder extends
@@ -3006,19 +3014,16 @@ public final class Urlfrontier {
     crawlercommons.urlfrontier.Urlfrontier.URLItem.Status getStatus();
 
     /**
-     * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
-     * @return Whether the nextFetchDate field is set.
-     */
-    boolean hasNextFetchDate();
-    /**
-     * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
+     * <pre>
+     ** Expressed in seconds of UTC time since Unix epoch
+     *1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
+     *9999-12-31T23:59:59Z inclusive.
+     * </pre>
+     *
+     * <code>int64 nextFetchDate = 4;</code>
      * @return The nextFetchDate.
      */
-    crawlercommons.urlfrontier.Urlfrontier.Timestamp getNextFetchDate();
-    /**
-     * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
-     */
-    crawlercommons.urlfrontier.Urlfrontier.TimestampOrBuilder getNextFetchDateOrBuilder();
+    long getNextFetchDate();
 
     /**
      * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 5;</code>
@@ -3121,17 +3126,9 @@ public final class Urlfrontier {
               status_ = rawValue;
               break;
             }
-            case 34: {
-              crawlercommons.urlfrontier.Urlfrontier.Timestamp.Builder subBuilder = null;
-              if (nextFetchDate_ != null) {
-                subBuilder = nextFetchDate_.toBuilder();
-              }
-              nextFetchDate_ = input.readMessage(crawlercommons.urlfrontier.Urlfrontier.Timestamp.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(nextFetchDate_);
-                nextFetchDate_ = subBuilder.buildPartial();
-              }
+            case 32: {
 
+              nextFetchDate_ = input.readInt64();
               break;
             }
             case 42: {
@@ -3422,29 +3419,20 @@ public final class Urlfrontier {
     }
 
     public static final int NEXTFETCHDATE_FIELD_NUMBER = 4;
-    private crawlercommons.urlfrontier.Urlfrontier.Timestamp nextFetchDate_;
+    private long nextFetchDate_;
     /**
-     * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
-     * @return Whether the nextFetchDate field is set.
-     */
-    @java.lang.Override
-    public boolean hasNextFetchDate() {
-      return nextFetchDate_ != null;
-    }
-    /**
-     * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
+     * <pre>
+     ** Expressed in seconds of UTC time since Unix epoch
+     *1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
+     *9999-12-31T23:59:59Z inclusive.
+     * </pre>
+     *
+     * <code>int64 nextFetchDate = 4;</code>
      * @return The nextFetchDate.
      */
     @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.Timestamp getNextFetchDate() {
-      return nextFetchDate_ == null ? crawlercommons.urlfrontier.Urlfrontier.Timestamp.getDefaultInstance() : nextFetchDate_;
-    }
-    /**
-     * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
-     */
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.TimestampOrBuilder getNextFetchDateOrBuilder() {
-      return getNextFetchDate();
+    public long getNextFetchDate() {
+      return nextFetchDate_;
     }
 
     public static final int METADATA_FIELD_NUMBER = 5;
@@ -3551,8 +3539,8 @@ public final class Urlfrontier {
       if (status_ != crawlercommons.urlfrontier.Urlfrontier.URLItem.Status.DISCOVERED.getNumber()) {
         output.writeEnum(3, status_);
       }
-      if (nextFetchDate_ != null) {
-        output.writeMessage(4, getNextFetchDate());
+      if (nextFetchDate_ != 0L) {
+        output.writeInt64(4, nextFetchDate_);
       }
       com.google.protobuf.GeneratedMessageV3
         .serializeStringMapTo(
@@ -3579,9 +3567,9 @@ public final class Urlfrontier {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, status_);
       }
-      if (nextFetchDate_ != null) {
+      if (nextFetchDate_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, getNextFetchDate());
+          .computeInt64Size(4, nextFetchDate_);
       }
       for (java.util.Map.Entry<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> entry
            : internalGetMetadata().getMap().entrySet()) {
@@ -3613,11 +3601,8 @@ public final class Urlfrontier {
       if (!getKey()
           .equals(other.getKey())) return false;
       if (status_ != other.status_) return false;
-      if (hasNextFetchDate() != other.hasNextFetchDate()) return false;
-      if (hasNextFetchDate()) {
-        if (!getNextFetchDate()
-            .equals(other.getNextFetchDate())) return false;
-      }
+      if (getNextFetchDate()
+          != other.getNextFetchDate()) return false;
       if (!internalGetMetadata().equals(
           other.internalGetMetadata())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -3637,10 +3622,9 @@ public final class Urlfrontier {
       hash = (53 * hash) + getKey().hashCode();
       hash = (37 * hash) + STATUS_FIELD_NUMBER;
       hash = (53 * hash) + status_;
-      if (hasNextFetchDate()) {
-        hash = (37 * hash) + NEXTFETCHDATE_FIELD_NUMBER;
-        hash = (53 * hash) + getNextFetchDate().hashCode();
-      }
+      hash = (37 * hash) + NEXTFETCHDATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getNextFetchDate());
       if (!internalGetMetadata().getMap().isEmpty()) {
         hash = (37 * hash) + METADATA_FIELD_NUMBER;
         hash = (53 * hash) + internalGetMetadata().hashCode();
@@ -3806,12 +3790,8 @@ public final class Urlfrontier {
 
         status_ = 0;
 
-        if (nextFetchDateBuilder_ == null) {
-          nextFetchDate_ = null;
-        } else {
-          nextFetchDate_ = null;
-          nextFetchDateBuilder_ = null;
-        }
+        nextFetchDate_ = 0L;
+
         internalGetMutableMetadata().clear();
         return this;
       }
@@ -3843,11 +3823,7 @@ public final class Urlfrontier {
         result.url_ = url_;
         result.key_ = key_;
         result.status_ = status_;
-        if (nextFetchDateBuilder_ == null) {
-          result.nextFetchDate_ = nextFetchDate_;
-        } else {
-          result.nextFetchDate_ = nextFetchDateBuilder_.build();
-        }
+        result.nextFetchDate_ = nextFetchDate_;
         result.metadata_ = internalGetMetadata();
         result.metadata_.makeImmutable();
         onBuilt();
@@ -3909,8 +3885,8 @@ public final class Urlfrontier {
         if (other.status_ != 0) {
           setStatusValue(other.getStatusValue());
         }
-        if (other.hasNextFetchDate()) {
-          mergeNextFetchDate(other.getNextFetchDate());
+        if (other.getNextFetchDate() != 0L) {
+          setNextFetchDate(other.getNextFetchDate());
         }
         internalGetMutableMetadata().mergeFrom(
             other.internalGetMetadata());
@@ -4150,123 +4126,53 @@ public final class Urlfrontier {
         return this;
       }
 
-      private crawlercommons.urlfrontier.Urlfrontier.Timestamp nextFetchDate_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          crawlercommons.urlfrontier.Urlfrontier.Timestamp, crawlercommons.urlfrontier.Urlfrontier.Timestamp.Builder, crawlercommons.urlfrontier.Urlfrontier.TimestampOrBuilder> nextFetchDateBuilder_;
+      private long nextFetchDate_ ;
       /**
-       * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
-       * @return Whether the nextFetchDate field is set.
-       */
-      public boolean hasNextFetchDate() {
-        return nextFetchDateBuilder_ != null || nextFetchDate_ != null;
-      }
-      /**
-       * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
+       * <pre>
+       ** Expressed in seconds of UTC time since Unix epoch
+       *1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
+       *9999-12-31T23:59:59Z inclusive.
+       * </pre>
+       *
+       * <code>int64 nextFetchDate = 4;</code>
        * @return The nextFetchDate.
        */
-      public crawlercommons.urlfrontier.Urlfrontier.Timestamp getNextFetchDate() {
-        if (nextFetchDateBuilder_ == null) {
-          return nextFetchDate_ == null ? crawlercommons.urlfrontier.Urlfrontier.Timestamp.getDefaultInstance() : nextFetchDate_;
-        } else {
-          return nextFetchDateBuilder_.getMessage();
-        }
+      @java.lang.Override
+      public long getNextFetchDate() {
+        return nextFetchDate_;
       }
       /**
-       * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
+       * <pre>
+       ** Expressed in seconds of UTC time since Unix epoch
+       *1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
+       *9999-12-31T23:59:59Z inclusive.
+       * </pre>
+       *
+       * <code>int64 nextFetchDate = 4;</code>
+       * @param value The nextFetchDate to set.
+       * @return This builder for chaining.
        */
-      public Builder setNextFetchDate(crawlercommons.urlfrontier.Urlfrontier.Timestamp value) {
-        if (nextFetchDateBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          nextFetchDate_ = value;
-          onChanged();
-        } else {
-          nextFetchDateBuilder_.setMessage(value);
-        }
-
+      public Builder setNextFetchDate(long value) {
+        
+        nextFetchDate_ = value;
+        onChanged();
         return this;
       }
       /**
-       * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
-       */
-      public Builder setNextFetchDate(
-          crawlercommons.urlfrontier.Urlfrontier.Timestamp.Builder builderForValue) {
-        if (nextFetchDateBuilder_ == null) {
-          nextFetchDate_ = builderForValue.build();
-          onChanged();
-        } else {
-          nextFetchDateBuilder_.setMessage(builderForValue.build());
-        }
-
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
-       */
-      public Builder mergeNextFetchDate(crawlercommons.urlfrontier.Urlfrontier.Timestamp value) {
-        if (nextFetchDateBuilder_ == null) {
-          if (nextFetchDate_ != null) {
-            nextFetchDate_ =
-              crawlercommons.urlfrontier.Urlfrontier.Timestamp.newBuilder(nextFetchDate_).mergeFrom(value).buildPartial();
-          } else {
-            nextFetchDate_ = value;
-          }
-          onChanged();
-        } else {
-          nextFetchDateBuilder_.mergeFrom(value);
-        }
-
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
+       * <pre>
+       ** Expressed in seconds of UTC time since Unix epoch
+       *1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
+       *9999-12-31T23:59:59Z inclusive.
+       * </pre>
+       *
+       * <code>int64 nextFetchDate = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNextFetchDate() {
-        if (nextFetchDateBuilder_ == null) {
-          nextFetchDate_ = null;
-          onChanged();
-        } else {
-          nextFetchDate_ = null;
-          nextFetchDateBuilder_ = null;
-        }
-
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
-       */
-      public crawlercommons.urlfrontier.Urlfrontier.Timestamp.Builder getNextFetchDateBuilder() {
         
+        nextFetchDate_ = 0L;
         onChanged();
-        return getNextFetchDateFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
-       */
-      public crawlercommons.urlfrontier.Urlfrontier.TimestampOrBuilder getNextFetchDateOrBuilder() {
-        if (nextFetchDateBuilder_ != null) {
-          return nextFetchDateBuilder_.getMessageOrBuilder();
-        } else {
-          return nextFetchDate_ == null ?
-              crawlercommons.urlfrontier.Urlfrontier.Timestamp.getDefaultInstance() : nextFetchDate_;
-        }
-      }
-      /**
-       * <code>.urlfrontier.Timestamp nextFetchDate = 4;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          crawlercommons.urlfrontier.Urlfrontier.Timestamp, crawlercommons.urlfrontier.Urlfrontier.Timestamp.Builder, crawlercommons.urlfrontier.Urlfrontier.TimestampOrBuilder> 
-          getNextFetchDateFieldBuilder() {
-        if (nextFetchDateBuilder_ == null) {
-          nextFetchDateBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              crawlercommons.urlfrontier.Urlfrontier.Timestamp, crawlercommons.urlfrontier.Urlfrontier.Timestamp.Builder, crawlercommons.urlfrontier.Urlfrontier.TimestampOrBuilder>(
-                  getNextFetchDate(),
-                  getParentForChildren(),
-                  isClean());
-          nextFetchDate_ = null;
-        }
-        return nextFetchDateBuilder_;
+        return this;
       }
 
       private com.google.protobuf.MapField<
@@ -4867,630 +4773,6 @@ public final class Urlfrontier {
 
   }
 
-  public interface TimestampOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.Timestamp)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * Represents seconds of UTC time since Unix epoch
-     * 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
-     * 9999-12-31T23:59:59Z inclusive.
-     * </pre>
-     *
-     * <code>int64 seconds = 1;</code>
-     * @return The seconds.
-     */
-    long getSeconds();
-
-    /**
-     * <pre>
-     * Non-negative fractions of a second at nanosecond resolution. Negative
-     * second values with fractions must still have non-negative nanos values
-     * that count forward in time. Must be from 0 to 999,999,999
-     * inclusive.
-     * </pre>
-     *
-     * <code>int32 nanos = 2;</code>
-     * @return The nanos.
-     */
-    int getNanos();
-  }
-  /**
-   * Protobuf type {@code urlfrontier.Timestamp}
-   */
-  public static final class Timestamp extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.Timestamp)
-      TimestampOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use Timestamp.newBuilder() to construct.
-    private Timestamp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Timestamp() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new Timestamp();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Timestamp(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              seconds_ = input.readInt64();
-              break;
-            }
-            case 16: {
-
-              nanos_ = input.readInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Timestamp_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Timestamp_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.Timestamp.class, crawlercommons.urlfrontier.Urlfrontier.Timestamp.Builder.class);
-    }
-
-    public static final int SECONDS_FIELD_NUMBER = 1;
-    private long seconds_;
-    /**
-     * <pre>
-     * Represents seconds of UTC time since Unix epoch
-     * 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
-     * 9999-12-31T23:59:59Z inclusive.
-     * </pre>
-     *
-     * <code>int64 seconds = 1;</code>
-     * @return The seconds.
-     */
-    @java.lang.Override
-    public long getSeconds() {
-      return seconds_;
-    }
-
-    public static final int NANOS_FIELD_NUMBER = 2;
-    private int nanos_;
-    /**
-     * <pre>
-     * Non-negative fractions of a second at nanosecond resolution. Negative
-     * second values with fractions must still have non-negative nanos values
-     * that count forward in time. Must be from 0 to 999,999,999
-     * inclusive.
-     * </pre>
-     *
-     * <code>int32 nanos = 2;</code>
-     * @return The nanos.
-     */
-    @java.lang.Override
-    public int getNanos() {
-      return nanos_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (seconds_ != 0L) {
-        output.writeInt64(1, seconds_);
-      }
-      if (nanos_ != 0) {
-        output.writeInt32(2, nanos_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (seconds_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, seconds_);
-      }
-      if (nanos_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, nanos_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Timestamp)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.Timestamp other = (crawlercommons.urlfrontier.Urlfrontier.Timestamp) obj;
-
-      if (getSeconds()
-          != other.getSeconds()) return false;
-      if (getNanos()
-          != other.getNanos()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + SECONDS_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getSeconds());
-      hash = (37 * hash) + NANOS_FIELD_NUMBER;
-      hash = (53 * hash) + getNanos();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.Timestamp prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code urlfrontier.Timestamp}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.Timestamp)
-        crawlercommons.urlfrontier.Urlfrontier.TimestampOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Timestamp_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Timestamp_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.Timestamp.class, crawlercommons.urlfrontier.Urlfrontier.Timestamp.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.Timestamp.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        seconds_ = 0L;
-
-        nanos_ = 0;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Timestamp_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Timestamp getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.Timestamp.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Timestamp build() {
-        crawlercommons.urlfrontier.Urlfrontier.Timestamp result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Timestamp buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.Timestamp result = new crawlercommons.urlfrontier.Urlfrontier.Timestamp(this);
-        result.seconds_ = seconds_;
-        result.nanos_ = nanos_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Timestamp) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Timestamp)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Timestamp other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.Timestamp.getDefaultInstance()) return this;
-        if (other.getSeconds() != 0L) {
-          setSeconds(other.getSeconds());
-        }
-        if (other.getNanos() != 0) {
-          setNanos(other.getNanos());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.Timestamp parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.Timestamp) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private long seconds_ ;
-      /**
-       * <pre>
-       * Represents seconds of UTC time since Unix epoch
-       * 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
-       * 9999-12-31T23:59:59Z inclusive.
-       * </pre>
-       *
-       * <code>int64 seconds = 1;</code>
-       * @return The seconds.
-       */
-      @java.lang.Override
-      public long getSeconds() {
-        return seconds_;
-      }
-      /**
-       * <pre>
-       * Represents seconds of UTC time since Unix epoch
-       * 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
-       * 9999-12-31T23:59:59Z inclusive.
-       * </pre>
-       *
-       * <code>int64 seconds = 1;</code>
-       * @param value The seconds to set.
-       * @return This builder for chaining.
-       */
-      public Builder setSeconds(long value) {
-        
-        seconds_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Represents seconds of UTC time since Unix epoch
-       * 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
-       * 9999-12-31T23:59:59Z inclusive.
-       * </pre>
-       *
-       * <code>int64 seconds = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearSeconds() {
-        
-        seconds_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private int nanos_ ;
-      /**
-       * <pre>
-       * Non-negative fractions of a second at nanosecond resolution. Negative
-       * second values with fractions must still have non-negative nanos values
-       * that count forward in time. Must be from 0 to 999,999,999
-       * inclusive.
-       * </pre>
-       *
-       * <code>int32 nanos = 2;</code>
-       * @return The nanos.
-       */
-      @java.lang.Override
-      public int getNanos() {
-        return nanos_;
-      }
-      /**
-       * <pre>
-       * Non-negative fractions of a second at nanosecond resolution. Negative
-       * second values with fractions must still have non-negative nanos values
-       * that count forward in time. Must be from 0 to 999,999,999
-       * inclusive.
-       * </pre>
-       *
-       * <code>int32 nanos = 2;</code>
-       * @param value The nanos to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNanos(int value) {
-        
-        nanos_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Non-negative fractions of a second at nanosecond resolution. Negative
-       * second values with fractions must still have non-negative nanos values
-       * that count forward in time. Must be from 0 to 999,999,999
-       * inclusive.
-       * </pre>
-       *
-       * <code>int32 nanos = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearNanos() {
-        
-        nanos_ = 0;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.Timestamp)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.Timestamp)
-    private static final crawlercommons.urlfrontier.Urlfrontier.Timestamp DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Timestamp();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Timestamp getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Timestamp>
-        PARSER = new com.google.protobuf.AbstractParser<Timestamp>() {
-      @java.lang.Override
-      public Timestamp parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Timestamp(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<Timestamp> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Timestamp> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.Timestamp getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_urlfrontier_Stats_descriptor;
   private static final 
@@ -5531,11 +4813,6 @@ public final class Urlfrontier {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_urlfrontier_Empty_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_Timestamp_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_Timestamp_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -5554,24 +4831,22 @@ public final class Urlfrontier {
       "\030\001 \001(\t\"\034\n\nStringList\022\016\n\006String\030\001 \003(\t\"^\n\t" +
       "GetParams\022\027\n\017maxUrlsPerQueue\030\001 \001(\r\022\021\n\tma" +
       "xQueues\030\002 \001(\r\022\013\n\003key\030\003 \001(\t\022\030\n\020delayReque" +
-      "stable\030\004 \001(\r\"\323\002\n\007URLItem\022\013\n\003url\030\001 \001(\t\022\013\n" +
+      "stable\030\004 \001(\r\"\273\002\n\007URLItem\022\013\n\003url\030\001 \001(\t\022\013\n" +
       "\003key\030\002 \001(\t\022+\n\006status\030\003 \001(\0162\033.urlfrontier" +
-      ".URLItem.Status\022-\n\rnextFetchDate\030\004 \001(\0132\026" +
-      ".urlfrontier.Timestamp\0224\n\010metadata\030\005 \003(\013" +
-      "2\".urlfrontier.URLItem.MetadataEntry\032H\n\r" +
-      "MetadataEntry\022\013\n\003key\030\001 \001(\t\022&\n\005value\030\002 \001(" +
-      "\0132\027.urlfrontier.StringList:\0028\001\"R\n\006Status" +
-      "\022\016\n\nDISCOVERED\020\000\022\013\n\007FETCHED\020\001\022\017\n\013REDIREC" +
-      "TION\020\002\022\017\n\013FETCH_ERROR\020\003\022\t\n\005ERROR\020\004\"\007\n\005Em" +
-      "pty\"+\n\tTimestamp\022\017\n\007seconds\030\001 \001(\003\022\r\n\005nan" +
-      "os\030\002 \001(\0052\373\001\n\013URLFrontier\022?\n\nListQueues\022\026" +
-      ".urlfrontier.GetParams\032\027.urlfrontier.Str" +
-      "ingList\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetPa" +
-      "rams\032\024.urlfrontier.URLItem\"\0000\001\022:\n\007PutURL" +
-      "s\022\024.urlfrontier.URLItem\032\023.urlfrontier.St" +
-      "ring\"\000(\0010\001\0222\n\005stats\022\023.urlfrontier.String" +
-      "\032\022.urlfrontier.Stats\"\000B\034\n\032crawlercommons" +
-      ".urlfrontierb\006proto3"
+      ".URLItem.Status\022\025\n\rnextFetchDate\030\004 \001(\003\0224" +
+      "\n\010metadata\030\005 \003(\0132\".urlfrontier.URLItem.M" +
+      "etadataEntry\032H\n\rMetadataEntry\022\013\n\003key\030\001 \001" +
+      "(\t\022&\n\005value\030\002 \001(\0132\027.urlfrontier.StringLi" +
+      "st:\0028\001\"R\n\006Status\022\016\n\nDISCOVERED\020\000\022\013\n\007FETC" +
+      "HED\020\001\022\017\n\013REDIRECTION\020\002\022\017\n\013FETCH_ERROR\020\003\022" +
+      "\t\n\005ERROR\020\004\"\007\n\005Empty2\373\001\n\013URLFrontier\022?\n\nL" +
+      "istQueues\022\026.urlfrontier.GetParams\032\027.urlf" +
+      "rontier.StringList\"\000\022;\n\007GetURLs\022\026.urlfro" +
+      "ntier.GetParams\032\024.urlfrontier.URLItem\"\0000" +
+      "\001\022:\n\007PutURLs\022\024.urlfrontier.URLItem\032\023.url" +
+      "frontier.String\"\000(\0010\001\0222\n\005stats\022\023.urlfron" +
+      "tier.String\032\022.urlfrontier.Stats\"\000B\034\n\032cra" +
+      "wlercommons.urlfrontierb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5625,12 +4900,6 @@ public final class Urlfrontier {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_urlfrontier_Empty_descriptor,
         new java.lang.String[] { });
-    internal_static_urlfrontier_Timestamp_descriptor =
-      getDescriptor().getMessageTypes().get(6);
-    internal_static_urlfrontier_Timestamp_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_Timestamp_descriptor,
-        new java.lang.String[] { "Seconds", "Nanos", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

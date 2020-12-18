@@ -1,7 +1,5 @@
 package crawlercommons.urlfrontier.service;
 
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,12 +11,10 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.slf4j.LoggerFactory;
 
-import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
-import crawlercommons.urlfrontier.Urlfrontier.Timestamp;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem.Status;
 import io.grpc.stub.StreamObserver;
@@ -54,7 +50,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			Iterator<InternalURL> iter = this.iterator();
 			int inproc = 0;
 			while (iter.hasNext()) {
-				if (iter.next().heldUntil != null)
+				if (iter.next().heldUntil != -1)
 					inproc++;
 				else
 					return inproc;
@@ -85,14 +81,14 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	 **/
 	static class InternalURL implements Comparable<InternalURL> {
 
-		Instant nextFetchDate;
+		long nextFetchDate;
 		int status;
 		String url;
 		Map<String, StringList> metadata;
 
 		// this is set when the URL is sent for processing
 		// so that a subsequent call to getURLs does not send it again
-		Instant heldUntil;
+		long heldUntil = -1;
 
 		private InternalURL() {
 		}
@@ -101,15 +97,14 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			InternalURL iu = new InternalURL();
 			iu.url = i.getUrl();
 			iu.status = i.getStatus().getNumber();
-			iu.nextFetchDate = Instant.ofEpochSecond(i.getNextFetchDate().getSeconds(),
-					i.getNextFetchDate().getNanos());
+			iu.nextFetchDate = i.getNextFetchDate();
 			iu.metadata = i.getMetadataMap();
 			return iu;
 		}
 
 		@Override
 		public int compareTo(InternalURL arg0) {
-			int comp = nextFetchDate.compareTo(arg0.nextFetchDate);
+			int comp = Long.compare(nextFetchDate, arg0.nextFetchDate);
 			if (comp == 0) {
 				return url.compareTo(arg0.url);
 			}
@@ -121,7 +116,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			return url.equals(((InternalURL) obj).url);
 		}
 
-		void setHeldUntil(Instant t) {
+		void setHeldUntil(long t) {
 			heldUntil = t;
 		}
 
@@ -131,10 +126,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		}
 
 		public URLItem toURLItem(String key) {
-			Timestamp ts = Timestamp.newBuilder().setSeconds(nextFetchDate.getEpochSecond())
-					.setNanos(nextFetchDate.getNano()).build();
-			crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder = URLItem.newBuilder().setNextFetchDate(ts)
-					.setStatus(Status.forNumber(status)).setKey(key).setUrl(url);
+			crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder = URLItem.newBuilder()
+					.setNextFetchDate(nextFetchDate).setStatus(Status.forNumber(status)).setKey(key).setUrl(url);
 			builder.putAllMetadata(metadata);
 			return builder.build();
 		}
@@ -152,7 +145,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 		LOG.info("Received request to list queues [max {}]", maxQueues);
 
-		Instant now = Instant.now();
+		long now = Instant.now().getEpochSecond();
 		int num = 0;
 		Builder list = StringList.newBuilder();
 
@@ -160,7 +153,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		while (iterator.hasNext() && num <= maxQueues) {
 			Entry<String, URLQueue> e = iterator.next();
 			// check that the queue has URLs due for fetching
-			if (e.getValue().peek().nextFetchDate.isBefore(now)) {
+			if (e.getValue().peek().nextFetchDate < now) {
 				list.addString(e.getKey());
 				num++;
 			}
@@ -193,7 +186,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 		String key = request.getKey();
 
-		Instant now = Instant.now();
+		long now = Instant.now().getEpochSecond();
 
 		// want a specific key only?
 		// default is an empty string so should never be null
@@ -229,7 +222,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	 *         otherwise
 	 **/
 	private boolean sendURLsForQueue(final PriorityQueue<InternalURL> queue, final String key,
-			final int maxURLsPerQueue, final int secsUntilRequestable, final Instant now,
+			final int maxURLsPerQueue, final int secsUntilRequestable, final long now,
 			final StreamObserver<URLItem> responseObserver) {
 		Iterator<InternalURL> iter = queue.iterator();
 		int alreadySent = 0;
@@ -239,12 +232,13 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			InternalURL item = iter.next();
 
 			// check that is is due
-			if (item.nextFetchDate.isAfter(now)) {
+			if (item.nextFetchDate > now) {
+				// they are sorted by date no need to go further
 				return oneFoundForThisQ;
 			}
 
 			// check that the URL is not already being processed
-			if (item.heldUntil != null && item.heldUntil.isAfter(now)) {
+			if (item.heldUntil != -1 && item.heldUntil > now) {
 				continue;
 			}
 
@@ -253,11 +247,10 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			// count one queue
 			oneFoundForThisQ = true;
 
-			URLItem converted = item.toURLItem(key);
-			responseObserver.onNext(converted);
+			responseObserver.onNext(item.toURLItem(key));
 
 			// mark it as not processable for N secs
-			item.heldUntil = Instant.now().plusSeconds(secsUntilRequestable);
+			item.heldUntil = Instant.now().plusSeconds(secsUntilRequestable).getEpochSecond();
 
 			alreadySent++;
 		}

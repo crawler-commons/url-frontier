@@ -2,7 +2,6 @@ package crawlercommons.urlfrontier.service;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,11 +15,9 @@ import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier;
-import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
-import crawlercommons.urlfrontier.Urlfrontier.Timestamp;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem.Status;
 import io.grpc.ManagedChannel;
@@ -85,15 +82,14 @@ public class URLFrontierServiceTest {
 		StreamObserver<URLItem> streamObserver = frontier.putURLs(responseObserver);
 
 		Instant i = Instant.now();
-		Timestamp ts = Timestamp.newBuilder().setSeconds(i.getEpochSecond()).setNanos(i.getNano()).build();
 
 		URLItem item = URLItem.newBuilder().setKey("key1.com").setStatus(Status.DISCOVERED).setUrl("http://key1.com/")
-				.setNextFetchDate(ts).build();
+				.setNextFetchDate(i.getEpochSecond()).build();
 
 		// send a duplicate
 		i = Instant.now();
 		URLItem item2 = URLItem.newBuilder().setKey("key1.com").setStatus(Status.DISCOVERED).setUrl("http://key1.com/")
-				.setNextFetchDate(ts).build();
+				.setNextFetchDate(i.getEpochSecond()).build();
 
 		streamObserver.onNext(item);
 		streamObserver.onNext(item2);
