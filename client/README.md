@@ -8,6 +8,6 @@ Implemented in Java for simple interactions with a URLFrontier server
 
 ## Execution
 
-`java -jar /data/url-frontier/client/target/urlfrontier-client*.jar`
+`java -jar ./target/urlfrontier-client*.jar`
 
 _TODO_ describe the operations available
