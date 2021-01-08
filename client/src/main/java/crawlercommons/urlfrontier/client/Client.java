@@ -17,20 +17,30 @@
 
 package crawlercommons.urlfrontier.client;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
+import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
+import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 
 public class Client {
 
@@ -96,20 +106,110 @@ public class Client {
 			crawlercommons.urlfrontier.Urlfrontier.String.Builder builder = crawlercommons.urlfrontier.Urlfrontier.String
 					.newBuilder();
 			if (!commands.isEmpty()) {
-				String jsonString = commands.get(0);
-				JsonFormat.parser().merge(jsonString, builder);
+				String key = commands.get(0);
+				builder.setValue(key);
 			}
 			Stats s = blockingFrontier.stats(builder.build());
 			System.out.println("Number of queues: " + s.getNumberOfQueues());
 			System.out.println("In process: " + s.getInProcess());
+			Map<String, Integer> counts = s.getCountsPerStatusMap();
+			for (Entry<String, Integer> kv : counts.entrySet()) {
+				System.out.println(kv.getKey() + " = " + kv.getValue());
+			}
 			return;
 		}
 
-		if (command.equalsIgnoreCase("inject")) {
+		if (command.equalsIgnoreCase("PutURLs")) {
 			// argument is a file
 			// read each line and send the content as updates
+			if (commands.isEmpty()) {
+				System.err.println("File missing");
+				return;
+			}
+
+			String file = commands.get(0);
+
+			try {
+				List<String> allLines = Files.readAllLines(Paths.get(file));
+
+				URLFrontierStub stub = URLFrontierGrpc.newStub(channel);
+
+				final AtomicBoolean completed = new AtomicBoolean(false);
+				final AtomicInteger acked = new AtomicInteger(0);
+
+				int sent = 0;
+
+				StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver = new StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>() {
+
+					@Override
+					public void onNext(crawlercommons.urlfrontier.Urlfrontier.String value) {
+						// receives confirmation that the value has been received
+						acked.addAndGet(1);
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						completed.set(true);
+						t.printStackTrace();
+					}
+
+					@Override
+					public void onCompleted() {
+						completed.set(true);
+					}
+				};
+
+				StreamObserver<URLItem> streamObserver = stub.putURLs(responseObserver);
+
+				int linenum = 0;
+
+				for (String line : allLines) {
+					URLItem item = parse(line);
+					if (item == null) {
+						System.err.println("Invalid input line " + linenum);
+					} else {
+						streamObserver.onNext(parse(line));
+						sent++;
+					}
+					linenum++;
+				}
+
+				streamObserver.onCompleted();
+
+				// wait for completion
+				while (completed.get() == false) {
+					try {
+						Thread.currentThread().sleep(1000);
+					} catch (InterruptedException e) {
+					}
+				}
+
+				System.out.println("Items sent " + sent + " / acked " + acked.get());
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
 		}
 
+		channel.shutdownNow();
+
+	}
+
+	/**
+	 * input format json
+	 * 
+	 * {url: "http://test.com", key: "test.com", status: "DISCOVERED"}
+	 * 
+	 **/
+	private static URLItem parse(String input) {
+		crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder = URLItem.newBuilder();
+		try {
+			JsonFormat.parser().merge(input, builder);
+		} catch (InvalidProtocolBufferException e) {
+			return null;
+		}
+		return builder.build();
 	}
 
 }
