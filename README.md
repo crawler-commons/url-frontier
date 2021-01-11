@@ -5,6 +5,7 @@ Discovering content on the web is possible thanks to web crawlers, luckily there
 The outcomes of the project are to:
 - design an API with [gRPC](http://grpc.io), provide a Java stubs for the API and instructions on how to achieve the same for other languages (see **[API](API/README.md)**)
 - deliver a robust reference implementation of the URL Frontier service (see **[service](service/README.md)**)
+- implement a command line client for basic interactions with a service (see **[client](client/README.md)**)
 - provide a validation suite to check that any implementation of the API behaves as expected (see **[tests](tests/README.md)**)
 
 One of the objectives of URL Frontier is to involve as many actors in the web crawling community as possible and get real users to give continuous feedback on our proposals. 
