@@ -16,9 +16,6 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
- * <pre>
- * Interface exported by the server.
- * </pre>
  */
 @javax.annotation.Generated(
     value = "by gRPC proto compiler (version 1.34.0)",
@@ -124,34 +121,34 @@ public final class URLFrontierGrpc {
   }
 
   private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String,
-      crawlercommons.urlfrontier.Urlfrontier.Stats> getStatsMethod;
+      crawlercommons.urlfrontier.Urlfrontier.Stats> getGetStatsMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "stats",
+      fullMethodName = SERVICE_NAME + '/' + "GetStats",
       requestType = crawlercommons.urlfrontier.Urlfrontier.String.class,
       responseType = crawlercommons.urlfrontier.Urlfrontier.Stats.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String,
-      crawlercommons.urlfrontier.Urlfrontier.Stats> getStatsMethod() {
-    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String, crawlercommons.urlfrontier.Urlfrontier.Stats> getStatsMethod;
-    if ((getStatsMethod = URLFrontierGrpc.getStatsMethod) == null) {
+      crawlercommons.urlfrontier.Urlfrontier.Stats> getGetStatsMethod() {
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String, crawlercommons.urlfrontier.Urlfrontier.Stats> getGetStatsMethod;
+    if ((getGetStatsMethod = URLFrontierGrpc.getGetStatsMethod) == null) {
       synchronized (URLFrontierGrpc.class) {
-        if ((getStatsMethod = URLFrontierGrpc.getStatsMethod) == null) {
-          URLFrontierGrpc.getStatsMethod = getStatsMethod =
+        if ((getGetStatsMethod = URLFrontierGrpc.getGetStatsMethod) == null) {
+          URLFrontierGrpc.getGetStatsMethod = getGetStatsMethod =
               io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.String, crawlercommons.urlfrontier.Urlfrontier.Stats>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "stats"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetStats"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   crawlercommons.urlfrontier.Urlfrontier.Stats.getDefaultInstance()))
-              .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("stats"))
+              .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("GetStats"))
               .build();
         }
       }
     }
-    return getStatsMethod;
+    return getGetStatsMethod;
   }
 
   /**
@@ -199,9 +196,6 @@ public final class URLFrontierGrpc {
   }
 
   /**
-   * <pre>
-   * Interface exported by the server.
-   * </pre>
    */
   public static abstract class URLFrontierImplBase implements io.grpc.BindableService {
 
@@ -228,7 +222,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** update a batch of URLs *
+     ** update / create a batch of URLs *
      * </pre>
      */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
@@ -241,9 +235,9 @@ public final class URLFrontierGrpc {
      ** returns stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
-    public void stats(crawlercommons.urlfrontier.Urlfrontier.String request,
+    public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats> responseObserver) {
-      asyncUnimplementedUnaryCall(getStatsMethod(), responseObserver);
+      asyncUnimplementedUnaryCall(getGetStatsMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -270,20 +264,17 @@ public final class URLFrontierGrpc {
                 crawlercommons.urlfrontier.Urlfrontier.String>(
                   this, METHODID_PUT_URLS)))
           .addMethod(
-            getStatsMethod(),
+            getGetStatsMethod(),
             asyncUnaryCall(
               new MethodHandlers<
                 crawlercommons.urlfrontier.Urlfrontier.String,
                 crawlercommons.urlfrontier.Urlfrontier.Stats>(
-                  this, METHODID_STATS)))
+                  this, METHODID_GET_STATS)))
           .build();
     }
   }
 
   /**
-   * <pre>
-   * Interface exported by the server.
-   * </pre>
    */
   public static final class URLFrontierStub extends io.grpc.stub.AbstractAsyncStub<URLFrontierStub> {
     private URLFrontierStub(
@@ -322,7 +313,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** update a batch of URLs *
+     ** update / create a batch of URLs *
      * </pre>
      */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
@@ -336,17 +327,14 @@ public final class URLFrontierGrpc {
      ** returns stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
-    public void stats(crawlercommons.urlfrontier.Urlfrontier.String request,
+    public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats> responseObserver) {
       asyncUnaryCall(
-          getChannel().newCall(getStatsMethod(), getCallOptions()), request, responseObserver);
+          getChannel().newCall(getGetStatsMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
   /**
-   * <pre>
-   * Interface exported by the server.
-   * </pre>
    */
   public static final class URLFrontierBlockingStub extends io.grpc.stub.AbstractBlockingStub<URLFrontierBlockingStub> {
     private URLFrontierBlockingStub(
@@ -387,16 +375,13 @@ public final class URLFrontierGrpc {
      ** returns stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
-    public crawlercommons.urlfrontier.Urlfrontier.Stats stats(crawlercommons.urlfrontier.Urlfrontier.String request) {
+    public crawlercommons.urlfrontier.Urlfrontier.Stats getStats(crawlercommons.urlfrontier.Urlfrontier.String request) {
       return blockingUnaryCall(
-          getChannel(), getStatsMethod(), getCallOptions(), request);
+          getChannel(), getGetStatsMethod(), getCallOptions(), request);
     }
   }
 
   /**
-   * <pre>
-   * Interface exported by the server.
-   * </pre>
    */
   public static final class URLFrontierFutureStub extends io.grpc.stub.AbstractFutureStub<URLFrontierFutureStub> {
     private URLFrontierFutureStub(
@@ -427,16 +412,16 @@ public final class URLFrontierGrpc {
      ** returns stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
-    public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Stats> stats(
+    public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Stats> getStats(
         crawlercommons.urlfrontier.Urlfrontier.String request) {
       return futureUnaryCall(
-          getChannel().newCall(getStatsMethod(), getCallOptions()), request);
+          getChannel().newCall(getGetStatsMethod(), getCallOptions()), request);
     }
   }
 
   private static final int METHODID_LIST_QUEUES = 0;
   private static final int METHODID_GET_URLS = 1;
-  private static final int METHODID_STATS = 2;
+  private static final int METHODID_GET_STATS = 2;
   private static final int METHODID_PUT_URLS = 3;
 
   private static final class MethodHandlers<Req, Resp> implements
@@ -464,8 +449,8 @@ public final class URLFrontierGrpc {
           serviceImpl.getURLs((crawlercommons.urlfrontier.Urlfrontier.GetParams) request,
               (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem>) responseObserver);
           break;
-        case METHODID_STATS:
-          serviceImpl.stats((crawlercommons.urlfrontier.Urlfrontier.String) request,
+        case METHODID_GET_STATS:
+          serviceImpl.getStats((crawlercommons.urlfrontier.Urlfrontier.String) request,
               (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats>) responseObserver);
           break;
         default:
@@ -535,7 +520,7 @@ public final class URLFrontierGrpc {
               .addMethod(getListQueuesMethod())
               .addMethod(getGetURLsMethod())
               .addMethod(getPutURLsMethod())
-              .addMethod(getStatsMethod())
+              .addMethod(getGetStatsMethod())
               .build();
         }
       }

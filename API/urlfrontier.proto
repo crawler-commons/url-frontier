@@ -30,11 +30,11 @@ service URLFrontier {
   /** streams URLs due for fetching from M queues with up to N items per queue **/
      rpc GetURLs(GetParams) returns (stream URLItem) {}
 
-  /** update a batch of URLs **/
+  /** update / create a batch of URLs **/
      rpc PutURLs(stream URLItem) returns (stream String) {}
 
  /** returns stats for a specific queue or the whole crawl if the value if empty or null **/
-     rpc stats(String) returns (Stats) {}
+     rpc GetStats(String) returns (Stats) {}
 }
 
 
@@ -45,24 +45,21 @@ message Stats {
   uint32 numberOfQueues = 4;
 }
 
-/** Replace with StringValue ???  **/
 message String {
   string value = 1;
 }
 
 message StringList {
-  repeated string String = 1;
+  repeated string values = 1;
 }
-
 
 message GetParams {
-  uint32 maxUrlsPerQueue = 1;
-  uint32 maxQueues = 2;
+  uint32 max_urls_per_queue = 1;
+  uint32 max_queues = 2;
   string key = 3;
-  // applies to search - amount of time before a URL can be unlocked and sent again for fetching 
-  uint32 delayRequestable = 4;
+  // delay_requestable applies to search - amount of time before a URL can be unlocked and sent again for fetching 
+  uint32 delay_requestable = 4;
 }
-
 
 message URLItem {
   string url = 1;
@@ -74,13 +71,15 @@ message URLItem {
     FETCH_ERROR = 3;
     ERROR = 4;
   }
+  
+  
   Status status = 3;
   /** Expressed in seconds of UTC time since Unix epoch
-      1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
-      9999-12-31T23:59:59Z inclusive.
+      1970-01-01T00:00:00Z. The default value of 0 indicates
+      that a URL should not be refetched if its status is not 
+      DISCOVERED or otherwise that it should be fetched whenever possible. 
   **/
-  int64 nextFetchDate = 4;
+  uint64 next_fetch_date = 4;
   map<string, StringList> metadata = 5;
 }
 
-message Empty {}
