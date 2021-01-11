@@ -17,6 +17,8 @@
 
 package crawlercommons.urlfrontier.service;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -286,6 +288,19 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				// get the priority queue or create one
 				InternalURL iu = InternalURL.from(value);
 
+				String key = value.getKey();
+
+				// if not set use the hostname
+				if (key.equals("")) {
+					try {
+						URL u = new URL(value.getUrl());
+						key = u.getHost();
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+
 				URLQueue queue = queues.get(value.getKey());
 				if (queue == null) {
 					queues.put(value.getKey(), new URLQueue(iu));
@@ -332,10 +347,14 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 	public void stats(crawlercommons.urlfrontier.Urlfrontier.String request,
 			io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats> responseObserver) {
+
+		LOG.info("Received stats request");
+
 		// empty request - want for the whole crawl
 		if (request.getValue().isEmpty()) {
-			// TODO
-			super.stats(request, responseObserver);
+			Stats stats = Stats.newBuilder().setNumberOfQueues(queues.size()).build();
+			responseObserver.onNext(stats);
+			responseObserver.onCompleted();
 			return;
 		}
 

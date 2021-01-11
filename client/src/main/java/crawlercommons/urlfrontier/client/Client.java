@@ -201,13 +201,23 @@ public class Client {
 	 * 
 	 * {url: "http://test.com", key: "test.com", status: "DISCOVERED"}
 	 * 
+	 * or plain text where each line is a URL and the other fields are left to their
+	 * default value i.e. DISCOVERED, no custom metadata, key determined by the
+	 * server (i.e. hostname), no explicit nextFetchDate
+	 * 
+	 * The input file can mix json and text lines.
+	 * 
 	 **/
 	private static URLItem parse(String input) {
 		crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder = URLItem.newBuilder();
-		try {
-			JsonFormat.parser().merge(input, builder);
-		} catch (InvalidProtocolBufferException e) {
-			return null;
+		if (input.trim().startsWith("{")) {
+			try {
+				JsonFormat.parser().merge(input, builder);
+			} catch (InvalidProtocolBufferException e) {
+				return null;
+			}
+		} else {
+			builder.setUrl(input.trim());
 		}
 		return builder.build();
 	}
