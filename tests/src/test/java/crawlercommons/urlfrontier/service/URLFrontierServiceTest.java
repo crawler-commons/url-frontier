@@ -134,9 +134,9 @@ public class URLFrontierServiceTest {
 		GetParams request = GetParams.newBuilder().build();
 		StringList queueslisted = blockingFrontier.listQueues(request);
 
-		Assert.assertEquals("incorrect number of queues returned", 1, queueslisted.getStringList().size());
+		Assert.assertEquals("incorrect number of queues returned", 1, queueslisted.getValuesCount());
 
-		LOG.info("Received {} queue - 1 expected", queueslisted.getStringList().size());
+		LOG.info("Received {} queue - 1 expected", queueslisted.getValuesCount());
 
 		/** Get the URLs due for fetching for a specific key **/
 
@@ -149,7 +149,7 @@ public class URLFrontierServiceTest {
 
 		/** Get stats anout the queue **/
 
-		Stats stats = blockingFrontier.stats(Urlfrontier.String.newBuilder().setValue("key1.com").build());
+		Stats stats = blockingFrontier.getStats(Urlfrontier.String.newBuilder().setValue("key1.com").build());
 
 		Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
 

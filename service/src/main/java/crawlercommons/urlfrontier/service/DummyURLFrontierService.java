@@ -173,7 +173,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			Entry<String, URLQueue> e = iterator.next();
 			// check that the queue has URLs due for fetching
 			if (e.getValue().peek().nextFetchDate < now) {
-				list.addString(e.getKey());
+				list.addValues(e.getKey());
 				num++;
 			}
 		}
@@ -301,9 +301,9 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 					}
 				}
 
-				URLQueue queue = queues.get(value.getKey());
+				URLQueue queue = queues.get(key);
 				if (queue == null) {
-					queues.put(value.getKey(), new URLQueue(iu));
+					queues.put(key, new URLQueue(iu));
 					// ack reception of the URL
 					responseObserver.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
 							.setValue(value.getUrl()).build());

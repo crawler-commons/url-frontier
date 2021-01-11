@@ -96,20 +96,20 @@ public class Client {
 				JsonFormat.parser().merge(jsonString, builder);
 			}
 			StringList list = blockingFrontier.listQueues(builder.build());
-			for (i = 0; i < list.getStringCount(); i++) {
-				System.out.println(list.getString(i));
+			for (i = 0; i < list.getValuesCount(); i++) {
+				System.out.println(list.getValues(i));
 			}
 			return;
 		}
 
-		if (command.equalsIgnoreCase("stats")) {
+		if (command.equalsIgnoreCase("GetStats")) {
 			crawlercommons.urlfrontier.Urlfrontier.String.Builder builder = crawlercommons.urlfrontier.Urlfrontier.String
 					.newBuilder();
 			if (!commands.isEmpty()) {
 				String key = commands.get(0);
 				builder.setValue(key);
 			}
-			Stats s = blockingFrontier.stats(builder.build());
+			Stats s = blockingFrontier.getStats(builder.build());
 			System.out.println("Number of queues: " + s.getNumberOfQueues());
 			System.out.println("In process: " + s.getInProcess());
 			Map<String, Integer> counts = s.getCountsPerStatusMap();
