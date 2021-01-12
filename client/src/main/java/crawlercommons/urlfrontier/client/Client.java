@@ -83,7 +83,7 @@ public class Client {
 		URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
 		if (commands.isEmpty()) {
-			System.err.println("command missing");
+			System.err.println("command missing. Available options are: ListQueues, GetStats, PutURLs.");
 			return;
 		}
 

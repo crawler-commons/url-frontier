@@ -345,7 +345,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 	}
 
-	public void stats(crawlercommons.urlfrontier.Urlfrontier.String request,
+	@Override
+	public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
 			io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats> responseObserver) {
 
 		LOG.info("Received stats request");
