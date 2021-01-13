@@ -5330,7 +5330,7 @@ public final class Urlfrontier {
       "ntry\022\013\n\003key\030\001 \001(\t\022&\n\005value\030\002 \001(\0132\027.urlfr" +
       "ontier.StringList:\0028\001\"R\n\006Status\022\016\n\nDISCO" +
       "VERED\020\000\022\013\n\007FETCHED\020\001\022\017\n\013REDIRECTION\020\002\022\017\n" +
-      "\013FETCH_ERROR\020\003\022\t\n\005ERROR\020\0042\361\002\n\013URLFrontie" +
+      "\013FETCH_ERROR\020\003\022\t\n\005ERROR\020\0042\270\002\n\013URLFrontie" +
       "r\022?\n\nListQueues\022\026.urlfrontier.GetParams\032" +
       "\027.urlfrontier.StringList\"\000\022;\n\007GetURLs\022\026." +
       "urlfrontier.GetParams\032\024.urlfrontier.URLI" +
@@ -5338,9 +5338,8 @@ public final class Urlfrontier {
       "\032\023.urlfrontier.String\"\000(\0010\001\0225\n\010GetStats\022" +
       "\023.urlfrontier.String\032\022.urlfrontier.Stats" +
       "\"\000\0228\n\013DeleteQueue\022\023.urlfrontier.String\032\022" +
-      ".urlfrontier.Empty\"\000\0227\n\tSetActive\022\024.urlf" +
-      "rontier.Boolean\032\022.urlfrontier.Empty\"\000B\034\n" +
-      "\032crawlercommons.urlfrontierb\006proto3"
+      ".urlfrontier.Empty\"\000B\034\n\032crawlercommons.u" +
+      "rlfrontierb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

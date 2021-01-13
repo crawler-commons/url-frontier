@@ -38,9 +38,7 @@ service URLFrontier {
      
      /** Delete  the queue based on the key in parameter **/
      rpc DeleteQueue(String) returns (Empty) {}
-     
-     /** De/activate the crawl **/
-     rpc SetActive(Boolean) returns (Empty) {}
+
 }
 
 

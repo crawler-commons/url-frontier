@@ -181,6 +181,16 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		responseObserver.onCompleted();
 	}
 
+	/**
+	 * <pre>
+	 ** Delete  the queue based on the key in parameter *
+	 * </pre>
+	 */
+	public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
+			io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+		queues.remove(request.getValue());
+	}
+
 	@Override
 	public void getURLs(GetParams request, StreamObserver<URLItem> responseObserver) {
 		int maxQueues = request.getMaxQueues();
