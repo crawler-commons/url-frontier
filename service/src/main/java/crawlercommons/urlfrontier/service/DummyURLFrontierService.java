@@ -363,7 +363,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		URLQueue q = queues.get(request.getValue());
 		if (q != null) {
 			Stats stats = Stats.newBuilder().setNumberOfQueues(1).setSize(q.size()).setInProcess(q.getInProcess())
-					.putAllCountsPerStatus(q.getStats()).build();
+					.putAllCounts(q.getStats()).build();
 			responseObserver.onNext(stats);
 		}
 		responseObserver.onCompleted();

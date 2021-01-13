@@ -112,7 +112,7 @@ public class Client {
 			Stats s = blockingFrontier.getStats(builder.build());
 			System.out.println("Number of queues: " + s.getNumberOfQueues());
 			System.out.println("In process: " + s.getInProcess());
-			Map<String, Integer> counts = s.getCountsPerStatusMap();
+			Map<String, Integer> counts = s.getCountsMap();
 			for (Entry<String, Integer> kv : counts.entrySet()) {
 				System.out.println(kv.getKey() + " = " + kv.getValue());
 			}

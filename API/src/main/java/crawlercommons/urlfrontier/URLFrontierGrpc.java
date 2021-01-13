@@ -151,6 +151,68 @@ public final class URLFrontierGrpc {
     return getGetStatsMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String,
+      crawlercommons.urlfrontier.Urlfrontier.Empty> getDeleteQueueMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteQueue",
+      requestType = crawlercommons.urlfrontier.Urlfrontier.String.class,
+      responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String,
+      crawlercommons.urlfrontier.Urlfrontier.Empty> getDeleteQueueMethod() {
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String, crawlercommons.urlfrontier.Urlfrontier.Empty> getDeleteQueueMethod;
+    if ((getDeleteQueueMethod = URLFrontierGrpc.getDeleteQueueMethod) == null) {
+      synchronized (URLFrontierGrpc.class) {
+        if ((getDeleteQueueMethod = URLFrontierGrpc.getDeleteQueueMethod) == null) {
+          URLFrontierGrpc.getDeleteQueueMethod = getDeleteQueueMethod =
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.String, crawlercommons.urlfrontier.Urlfrontier.Empty>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteQueue"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance()))
+              .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("DeleteQueue"))
+              .build();
+        }
+      }
+    }
+    return getDeleteQueueMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Boolean,
+      crawlercommons.urlfrontier.Urlfrontier.Empty> getSetActiveMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetActive",
+      requestType = crawlercommons.urlfrontier.Urlfrontier.Boolean.class,
+      responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Boolean,
+      crawlercommons.urlfrontier.Urlfrontier.Empty> getSetActiveMethod() {
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Boolean, crawlercommons.urlfrontier.Urlfrontier.Empty> getSetActiveMethod;
+    if ((getSetActiveMethod = URLFrontierGrpc.getSetActiveMethod) == null) {
+      synchronized (URLFrontierGrpc.class) {
+        if ((getSetActiveMethod = URLFrontierGrpc.getSetActiveMethod) == null) {
+          URLFrontierGrpc.getSetActiveMethod = getSetActiveMethod =
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.Boolean, crawlercommons.urlfrontier.Urlfrontier.Empty>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetActive"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.Boolean.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance()))
+              .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("SetActive"))
+              .build();
+        }
+      }
+    }
+    return getSetActiveMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -201,7 +263,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Returns the names of up to N active queues
+     ** Return the names of up to N active queues
      *a queue is active if it has URLs due for fetching
      * </pre>
      */
@@ -212,7 +274,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** streams URLs due for fetching from M queues with up to N items per queue *
+     ** stream URLs due for fetching from M queues with up to N items per queue *
      * </pre>
      */
     public void getURLs(crawlercommons.urlfrontier.Urlfrontier.GetParams request,
@@ -232,12 +294,32 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** returns stats for a specific queue or the whole crawl if the value if empty or null *
+     ** return stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
     public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats> responseObserver) {
       asyncUnimplementedUnaryCall(getGetStatsMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     ** Delete  the queue based on the key in parameter *
+     * </pre>
+     */
+    public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+      asyncUnimplementedUnaryCall(getDeleteQueueMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     ** De/activate the crawl *
+     * </pre>
+     */
+    public void setActive(crawlercommons.urlfrontier.Urlfrontier.Boolean request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetActiveMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -270,6 +352,20 @@ public final class URLFrontierGrpc {
                 crawlercommons.urlfrontier.Urlfrontier.String,
                 crawlercommons.urlfrontier.Urlfrontier.Stats>(
                   this, METHODID_GET_STATS)))
+          .addMethod(
+            getDeleteQueueMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                crawlercommons.urlfrontier.Urlfrontier.String,
+                crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                  this, METHODID_DELETE_QUEUE)))
+          .addMethod(
+            getSetActiveMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                crawlercommons.urlfrontier.Urlfrontier.Boolean,
+                crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                  this, METHODID_SET_ACTIVE)))
           .build();
     }
   }
@@ -290,7 +386,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Returns the names of up to N active queues
+     ** Return the names of up to N active queues
      *a queue is active if it has URLs due for fetching
      * </pre>
      */
@@ -302,7 +398,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** streams URLs due for fetching from M queues with up to N items per queue *
+     ** stream URLs due for fetching from M queues with up to N items per queue *
      * </pre>
      */
     public void getURLs(crawlercommons.urlfrontier.Urlfrontier.GetParams request,
@@ -324,13 +420,35 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** returns stats for a specific queue or the whole crawl if the value if empty or null *
+     ** return stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
     public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getGetStatsMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     ** Delete  the queue based on the key in parameter *
+     * </pre>
+     */
+    public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDeleteQueueMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     ** De/activate the crawl *
+     * </pre>
+     */
+    public void setActive(crawlercommons.urlfrontier.Urlfrontier.Boolean request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetActiveMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -350,7 +468,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Returns the names of up to N active queues
+     ** Return the names of up to N active queues
      *a queue is active if it has URLs due for fetching
      * </pre>
      */
@@ -361,7 +479,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** streams URLs due for fetching from M queues with up to N items per queue *
+     ** stream URLs due for fetching from M queues with up to N items per queue *
      * </pre>
      */
     public java.util.Iterator<crawlercommons.urlfrontier.Urlfrontier.URLItem> getURLs(
@@ -372,12 +490,32 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** returns stats for a specific queue or the whole crawl if the value if empty or null *
+     ** return stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
     public crawlercommons.urlfrontier.Urlfrontier.Stats getStats(crawlercommons.urlfrontier.Urlfrontier.String request) {
       return blockingUnaryCall(
           getChannel(), getGetStatsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     ** Delete  the queue based on the key in parameter *
+     * </pre>
+     */
+    public crawlercommons.urlfrontier.Urlfrontier.Empty deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request) {
+      return blockingUnaryCall(
+          getChannel(), getDeleteQueueMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     ** De/activate the crawl *
+     * </pre>
+     */
+    public crawlercommons.urlfrontier.Urlfrontier.Empty setActive(crawlercommons.urlfrontier.Urlfrontier.Boolean request) {
+      return blockingUnaryCall(
+          getChannel(), getSetActiveMethod(), getCallOptions(), request);
     }
   }
 
@@ -397,7 +535,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Returns the names of up to N active queues
+     ** Return the names of up to N active queues
      *a queue is active if it has URLs due for fetching
      * </pre>
      */
@@ -409,7 +547,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** returns stats for a specific queue or the whole crawl if the value if empty or null *
+     ** return stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Stats> getStats(
@@ -417,12 +555,36 @@ public final class URLFrontierGrpc {
       return futureUnaryCall(
           getChannel().newCall(getGetStatsMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     ** Delete  the queue based on the key in parameter *
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Empty> deleteQueue(
+        crawlercommons.urlfrontier.Urlfrontier.String request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDeleteQueueMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     ** De/activate the crawl *
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Empty> setActive(
+        crawlercommons.urlfrontier.Urlfrontier.Boolean request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetActiveMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_LIST_QUEUES = 0;
   private static final int METHODID_GET_URLS = 1;
   private static final int METHODID_GET_STATS = 2;
-  private static final int METHODID_PUT_URLS = 3;
+  private static final int METHODID_DELETE_QUEUE = 3;
+  private static final int METHODID_SET_ACTIVE = 4;
+  private static final int METHODID_PUT_URLS = 5;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -452,6 +614,14 @@ public final class URLFrontierGrpc {
         case METHODID_GET_STATS:
           serviceImpl.getStats((crawlercommons.urlfrontier.Urlfrontier.String) request,
               (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats>) responseObserver);
+          break;
+        case METHODID_DELETE_QUEUE:
+          serviceImpl.deleteQueue((crawlercommons.urlfrontier.Urlfrontier.String) request,
+              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
+          break;
+        case METHODID_SET_ACTIVE:
+          serviceImpl.setActive((crawlercommons.urlfrontier.Urlfrontier.Boolean) request,
+              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -521,6 +691,8 @@ public final class URLFrontierGrpc {
               .addMethod(getGetURLsMethod())
               .addMethod(getPutURLsMethod())
               .addMethod(getGetStatsMethod())
+              .addMethod(getDeleteQueueMethod())
+              .addMethod(getSetActiveMethod())
               .build();
         }
       }
