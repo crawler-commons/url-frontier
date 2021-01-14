@@ -22,23 +22,27 @@ option java_package = "crawlercommons.urlfrontier";
 package urlfrontier;
 
 service URLFrontier {
-  /** Return the names of up to N active queues
-      a queue is active if it has URLs due for fetching
-  **/
-     rpc ListQueues(GetParams) returns (StringList) {}
+     /** Return the names of up to N active queues
+      a queue is active if it has URLs due for fetching; the default value of 0 sets no limit to the number of queue names to return **/
+     rpc ListQueues(Integer) returns (StringList) {}
 
-  /** stream URLs due for fetching from M queues with up to N items per queue **/
+     /** Stream URLs due for fetching from M queues with up to N items per queue **/
      rpc GetURLs(GetParams) returns (stream URLItem) {}
 
-  /** update / create a batch of URLs **/
+     /** Update / create a batch of URLs **/
      rpc PutURLs(stream URLItem) returns (stream String) {}
 
- /** return stats for a specific queue or the whole crawl if the value if empty or null **/
+     /** Return stats for a specific queue or the whole crawl if the value if empty or null **/
      rpc GetStats(String) returns (Stats) {}
      
      /** Delete  the queue based on the key in parameter **/
      rpc DeleteQueue(String) returns (Empty) {}
 
+     /** Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch
+      1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time
+      indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
+      **/
+     rpc BlockQueueUntil(Integer) returns (Empty) {}
 }
 
 
@@ -60,15 +64,22 @@ message String {
   string value = 1;
 }
 
+message Integer {
+  uint64 value = 1;
+}
+
 message StringList {
   repeated string values = 1;
 }
 
 message GetParams {
+  // maximum number of URLs per queue, the default value of 0 means no limit
   uint32 max_urls_per_queue = 1;
+  // maximum number of queues to get URLs from, the default value of 0 means no limit
   uint32 max_queues = 2;
+  // queue id if restricting to a specific queue
   string key = 3;
-  // delay_requestable applies to search - amount of time before a URL can be unlocked and sent again for fetching 
+  //  amount of time before a URL can be unlocked and sent again for fetching 
   uint32 delay_requestable = 4;
 }
 
@@ -82,8 +93,6 @@ message URLItem {
     FETCH_ERROR = 3;
     ERROR = 4;
   }
-  
-  
   Status status = 3;
   /** Expressed in seconds of UTC time since Unix epoch
       1970-01-01T00:00:00Z. The default value of 0 indicates

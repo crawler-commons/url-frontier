@@ -27,27 +27,27 @@ public final class URLFrontierGrpc {
   public static final String SERVICE_NAME = "urlfrontier.URLFrontier";
 
   // Static method descriptors that strictly reflect the proto.
-  private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.GetParams,
+  private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Integer,
       crawlercommons.urlfrontier.Urlfrontier.StringList> getListQueuesMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "ListQueues",
-      requestType = crawlercommons.urlfrontier.Urlfrontier.GetParams.class,
+      requestType = crawlercommons.urlfrontier.Urlfrontier.Integer.class,
       responseType = crawlercommons.urlfrontier.Urlfrontier.StringList.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.GetParams,
+  public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Integer,
       crawlercommons.urlfrontier.Urlfrontier.StringList> getListQueuesMethod() {
-    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.GetParams, crawlercommons.urlfrontier.Urlfrontier.StringList> getListQueuesMethod;
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Integer, crawlercommons.urlfrontier.Urlfrontier.StringList> getListQueuesMethod;
     if ((getListQueuesMethod = URLFrontierGrpc.getListQueuesMethod) == null) {
       synchronized (URLFrontierGrpc.class) {
         if ((getListQueuesMethod = URLFrontierGrpc.getListQueuesMethod) == null) {
           URLFrontierGrpc.getListQueuesMethod = getListQueuesMethod =
-              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.GetParams, crawlercommons.urlfrontier.Urlfrontier.StringList>newBuilder()
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.Integer, crawlercommons.urlfrontier.Urlfrontier.StringList>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListQueues"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  crawlercommons.urlfrontier.Urlfrontier.GetParams.getDefaultInstance()))
+                  crawlercommons.urlfrontier.Urlfrontier.Integer.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   crawlercommons.urlfrontier.Urlfrontier.StringList.getDefaultInstance()))
               .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("ListQueues"))
@@ -182,6 +182,37 @@ public final class URLFrontierGrpc {
     return getDeleteQueueMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Integer,
+      crawlercommons.urlfrontier.Urlfrontier.Empty> getBlockQueueUntilMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "BlockQueueUntil",
+      requestType = crawlercommons.urlfrontier.Urlfrontier.Integer.class,
+      responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Integer,
+      crawlercommons.urlfrontier.Urlfrontier.Empty> getBlockQueueUntilMethod() {
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Integer, crawlercommons.urlfrontier.Urlfrontier.Empty> getBlockQueueUntilMethod;
+    if ((getBlockQueueUntilMethod = URLFrontierGrpc.getBlockQueueUntilMethod) == null) {
+      synchronized (URLFrontierGrpc.class) {
+        if ((getBlockQueueUntilMethod = URLFrontierGrpc.getBlockQueueUntilMethod) == null) {
+          URLFrontierGrpc.getBlockQueueUntilMethod = getBlockQueueUntilMethod =
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.Integer, crawlercommons.urlfrontier.Urlfrontier.Empty>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "BlockQueueUntil"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.Integer.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance()))
+              .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("BlockQueueUntil"))
+              .build();
+        }
+      }
+    }
+    return getBlockQueueUntilMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -233,17 +264,17 @@ public final class URLFrontierGrpc {
     /**
      * <pre>
      ** Return the names of up to N active queues
-     *a queue is active if it has URLs due for fetching
+     *a queue is active if it has URLs due for fetching; the default value of 0 sets no limit to the number of queue names to return *
      * </pre>
      */
-    public void listQueues(crawlercommons.urlfrontier.Urlfrontier.GetParams request,
+    public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Integer request,
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList> responseObserver) {
       asyncUnimplementedUnaryCall(getListQueuesMethod(), responseObserver);
     }
 
     /**
      * <pre>
-     ** stream URLs due for fetching from M queues with up to N items per queue *
+     ** Stream URLs due for fetching from M queues with up to N items per queue *
      * </pre>
      */
     public void getURLs(crawlercommons.urlfrontier.Urlfrontier.GetParams request,
@@ -253,7 +284,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** update / create a batch of URLs *
+     ** Update / create a batch of URLs *
      * </pre>
      */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
@@ -263,7 +294,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** return stats for a specific queue or the whole crawl if the value if empty or null *
+     ** Return stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
     public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
@@ -281,13 +312,25 @@ public final class URLFrontierGrpc {
       asyncUnimplementedUnaryCall(getDeleteQueueMethod(), responseObserver);
     }
 
+    /**
+     * <pre>
+     ** Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch
+     *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time
+     *indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
+     * </pre>
+     */
+    public void blockQueueUntil(crawlercommons.urlfrontier.Urlfrontier.Integer request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+      asyncUnimplementedUnaryCall(getBlockQueueUntilMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getListQueuesMethod(),
             asyncUnaryCall(
               new MethodHandlers<
-                crawlercommons.urlfrontier.Urlfrontier.GetParams,
+                crawlercommons.urlfrontier.Urlfrontier.Integer,
                 crawlercommons.urlfrontier.Urlfrontier.StringList>(
                   this, METHODID_LIST_QUEUES)))
           .addMethod(
@@ -318,6 +361,13 @@ public final class URLFrontierGrpc {
                 crawlercommons.urlfrontier.Urlfrontier.String,
                 crawlercommons.urlfrontier.Urlfrontier.Empty>(
                   this, METHODID_DELETE_QUEUE)))
+          .addMethod(
+            getBlockQueueUntilMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                crawlercommons.urlfrontier.Urlfrontier.Integer,
+                crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                  this, METHODID_BLOCK_QUEUE_UNTIL)))
           .build();
     }
   }
@@ -339,10 +389,10 @@ public final class URLFrontierGrpc {
     /**
      * <pre>
      ** Return the names of up to N active queues
-     *a queue is active if it has URLs due for fetching
+     *a queue is active if it has URLs due for fetching; the default value of 0 sets no limit to the number of queue names to return *
      * </pre>
      */
-    public void listQueues(crawlercommons.urlfrontier.Urlfrontier.GetParams request,
+    public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Integer request,
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getListQueuesMethod(), getCallOptions()), request, responseObserver);
@@ -350,7 +400,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** stream URLs due for fetching from M queues with up to N items per queue *
+     ** Stream URLs due for fetching from M queues with up to N items per queue *
      * </pre>
      */
     public void getURLs(crawlercommons.urlfrontier.Urlfrontier.GetParams request,
@@ -361,7 +411,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** update / create a batch of URLs *
+     ** Update / create a batch of URLs *
      * </pre>
      */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
@@ -372,7 +422,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** return stats for a specific queue or the whole crawl if the value if empty or null *
+     ** Return stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
     public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
@@ -390,6 +440,19 @@ public final class URLFrontierGrpc {
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getDeleteQueueMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     ** Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch
+     *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time
+     *indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
+     * </pre>
+     */
+    public void blockQueueUntil(crawlercommons.urlfrontier.Urlfrontier.Integer request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getBlockQueueUntilMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -410,17 +473,17 @@ public final class URLFrontierGrpc {
     /**
      * <pre>
      ** Return the names of up to N active queues
-     *a queue is active if it has URLs due for fetching
+     *a queue is active if it has URLs due for fetching; the default value of 0 sets no limit to the number of queue names to return *
      * </pre>
      */
-    public crawlercommons.urlfrontier.Urlfrontier.StringList listQueues(crawlercommons.urlfrontier.Urlfrontier.GetParams request) {
+    public crawlercommons.urlfrontier.Urlfrontier.StringList listQueues(crawlercommons.urlfrontier.Urlfrontier.Integer request) {
       return blockingUnaryCall(
           getChannel(), getListQueuesMethod(), getCallOptions(), request);
     }
 
     /**
      * <pre>
-     ** stream URLs due for fetching from M queues with up to N items per queue *
+     ** Stream URLs due for fetching from M queues with up to N items per queue *
      * </pre>
      */
     public java.util.Iterator<crawlercommons.urlfrontier.Urlfrontier.URLItem> getURLs(
@@ -431,7 +494,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** return stats for a specific queue or the whole crawl if the value if empty or null *
+     ** Return stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
     public crawlercommons.urlfrontier.Urlfrontier.Stats getStats(crawlercommons.urlfrontier.Urlfrontier.String request) {
@@ -447,6 +510,18 @@ public final class URLFrontierGrpc {
     public crawlercommons.urlfrontier.Urlfrontier.Empty deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request) {
       return blockingUnaryCall(
           getChannel(), getDeleteQueueMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     ** Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch
+     *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time
+     *indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
+     * </pre>
+     */
+    public crawlercommons.urlfrontier.Urlfrontier.Empty blockQueueUntil(crawlercommons.urlfrontier.Urlfrontier.Integer request) {
+      return blockingUnaryCall(
+          getChannel(), getBlockQueueUntilMethod(), getCallOptions(), request);
     }
   }
 
@@ -467,18 +542,18 @@ public final class URLFrontierGrpc {
     /**
      * <pre>
      ** Return the names of up to N active queues
-     *a queue is active if it has URLs due for fetching
+     *a queue is active if it has URLs due for fetching; the default value of 0 sets no limit to the number of queue names to return *
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.StringList> listQueues(
-        crawlercommons.urlfrontier.Urlfrontier.GetParams request) {
+        crawlercommons.urlfrontier.Urlfrontier.Integer request) {
       return futureUnaryCall(
           getChannel().newCall(getListQueuesMethod(), getCallOptions()), request);
     }
 
     /**
      * <pre>
-     ** return stats for a specific queue or the whole crawl if the value if empty or null *
+     ** Return stats for a specific queue or the whole crawl if the value if empty or null *
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Stats> getStats(
@@ -497,13 +572,27 @@ public final class URLFrontierGrpc {
       return futureUnaryCall(
           getChannel().newCall(getDeleteQueueMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     ** Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch
+     *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time
+     *indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Empty> blockQueueUntil(
+        crawlercommons.urlfrontier.Urlfrontier.Integer request) {
+      return futureUnaryCall(
+          getChannel().newCall(getBlockQueueUntilMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_LIST_QUEUES = 0;
   private static final int METHODID_GET_URLS = 1;
   private static final int METHODID_GET_STATS = 2;
   private static final int METHODID_DELETE_QUEUE = 3;
-  private static final int METHODID_PUT_URLS = 4;
+  private static final int METHODID_BLOCK_QUEUE_UNTIL = 4;
+  private static final int METHODID_PUT_URLS = 5;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -523,7 +612,7 @@ public final class URLFrontierGrpc {
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
         case METHODID_LIST_QUEUES:
-          serviceImpl.listQueues((crawlercommons.urlfrontier.Urlfrontier.GetParams) request,
+          serviceImpl.listQueues((crawlercommons.urlfrontier.Urlfrontier.Integer) request,
               (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList>) responseObserver);
           break;
         case METHODID_GET_URLS:
@@ -536,6 +625,10 @@ public final class URLFrontierGrpc {
           break;
         case METHODID_DELETE_QUEUE:
           serviceImpl.deleteQueue((crawlercommons.urlfrontier.Urlfrontier.String) request,
+              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
+          break;
+        case METHODID_BLOCK_QUEUE_UNTIL:
+          serviceImpl.blockQueueUntil((crawlercommons.urlfrontier.Urlfrontier.Integer) request,
               (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
           break;
         default:
@@ -607,6 +700,7 @@ public final class URLFrontierGrpc {
               .addMethod(getPutURLsMethod())
               .addMethod(getGetStatsMethod())
               .addMethod(getDeleteQueueMethod())
+              .addMethod(getBlockQueueUntilMethod())
               .build();
         }
       }
