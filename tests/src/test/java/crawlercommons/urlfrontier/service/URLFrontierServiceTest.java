@@ -131,7 +131,7 @@ public class URLFrontierServiceTest {
 
 		LOG.info("Checking existence of queue");
 
-		GetParams request = GetParams.newBuilder().build();
+		crawlercommons.urlfrontier.Urlfrontier.Integer request = crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder().build();
 		StringList queueslisted = blockingFrontier.listQueues(request);
 
 		Assert.assertEquals("incorrect number of queues returned", 1, queueslisted.getValuesCount());
@@ -141,13 +141,13 @@ public class URLFrontierServiceTest {
 		/** Get the URLs due for fetching for a specific key **/
 
 		// want just one URL for that specific key
-		request = GetParams.newBuilder().setKey("key1.com").setMaxUrlsPerQueue(1).build();
+		GetParams request2 = GetParams.newBuilder().setKey("key1.com").setMaxUrlsPerQueue(1).build();
 
-		String urlreturned = blockingFrontier.getURLs(request).next().getUrl();
+		String urlreturned = blockingFrontier.getURLs(request2).next().getUrl();
 
 		Assert.assertEquals("incorrect number of URLs returned", "http://key1.com/", urlreturned);
 
-		/** Get stats anout the queue **/
+		/** Get stats about the queue **/
 
 		Stats stats = blockingFrontier.getStats(Urlfrontier.String.newBuilder().setValue("key1.com").build());
 

@@ -90,10 +90,10 @@ public class Client {
 		String command = commands.remove(0);
 
 		if (command.equalsIgnoreCase("ListQueues")) {
-			Builder builder = GetParams.newBuilder();
+			crawlercommons.urlfrontier.Urlfrontier.Integer.Builder builder = crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder();
+			// takes a number as argument			
 			if (!commands.isEmpty()) {
-				String jsonString = commands.get(0);
-				JsonFormat.parser().merge(jsonString, builder);
+				builder.setValue(Long.parseLong(commands.get(0)));
 			}
 			StringList list = blockingFrontier.listQueues(builder.build());
 			for (i = 0; i < list.getValuesCount(); i++) {
