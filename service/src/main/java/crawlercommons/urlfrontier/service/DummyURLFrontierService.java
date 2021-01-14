@@ -154,7 +154,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	}
 
 	@Override
-	public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Integer request, StreamObserver<StringList> responseObserver) {
+	public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Integer request,
+			StreamObserver<StringList> responseObserver) {
 
 		long maxQueues = request.getValue();
 		// 0 by default
@@ -214,6 +215,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		LOG.info("Received request to get fetchable URLs [max queues {}, max URLs {}, delay {}]", maxQueues,
 				maxURLsPerQueue, secsUntilRequestable);
 
+		long start = System.currentTimeMillis();
+
 		String key = request.getKey();
 
 		long now = Instant.now().getEpochSecond();
@@ -229,21 +232,29 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				return;
 			}
 
-			sendURLsForQueue(queue, key, maxURLsPerQueue, secsUntilRequestable, now, responseObserver);
+			int totalSent = sendURLsForQueue(queue, key, maxURLsPerQueue, secsUntilRequestable, now, responseObserver);
 			responseObserver.onCompleted();
+
+			LOG.info("Sent {} from queue {} in {}", totalSent, key, (System.currentTimeMillis() - start));
+			
 			return;
 		}
 
 		Iterator<Entry<String, URLQueue>> iterator = queues.entrySet().iterator();
-		int num = 0;
-		while (iterator.hasNext() && num <= maxQueues) {
+		int numQueuesSent = 0;
+		int totalSent = 0;
+		while (iterator.hasNext() && numQueuesSent < maxQueues) {
 			Entry<String, URLQueue> e = iterator.next();
-			boolean sentOne = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
+			int sentForQ = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
 					responseObserver);
-			if (sentOne) {
-				num++;
+			if (sentForQ > 0) {
+				totalSent += sentForQ;
+				numQueuesSent++;
 			}
 		}
+
+		LOG.info("Sent {} from {} queue(s) in {}", totalSent, numQueuesSent, (System.currentTimeMillis() - start));
+
 		responseObserver.onCompleted();
 	}
 
@@ -251,12 +262,10 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	 * @return true if at least one URL has been sent for this queue, false
 	 *         otherwise
 	 **/
-	private boolean sendURLsForQueue(final PriorityQueue<InternalURL> queue, final String key,
-			final int maxURLsPerQueue, final int secsUntilRequestable, final long now,
-			final StreamObserver<URLItem> responseObserver) {
+	private int sendURLsForQueue(final PriorityQueue<InternalURL> queue, final String key, final int maxURLsPerQueue,
+			final int secsUntilRequestable, final long now, final StreamObserver<URLItem> responseObserver) {
 		Iterator<InternalURL> iter = queue.iterator();
 		int alreadySent = 0;
-		boolean oneFoundForThisQ = false;
 
 		while (iter.hasNext() && alreadySent < maxURLsPerQueue) {
 			InternalURL item = iter.next();
@@ -264,7 +273,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			// check that is is due
 			if (item.nextFetchDate > now) {
 				// they are sorted by date no need to go further
-				return oneFoundForThisQ;
+				return alreadySent;
 			}
 
 			// check that the URL is not already being processed
@@ -273,10 +282,6 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			}
 
 			// this one is good to go
-
-			// count one queue
-			oneFoundForThisQ = true;
-
 			responseObserver.onNext(item.toURLItem(key));
 
 			// mark it as not processable for N secs
@@ -285,7 +290,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			alreadySent++;
 		}
 
-		return oneFoundForThisQ;
+		return alreadySent;
 	}
 
 	@Override
