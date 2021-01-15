@@ -20,8 +20,10 @@ package crawlercommons.urlfrontier.service;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
@@ -77,7 +79,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			return inproc;
 		}
 
-		public Map<String, Integer> getStats() {
+		public void addToStats(final Map<String, Integer> stats) {
 			// a URL in process has a heldUntil and is at the beginning of a queue
 			Iterator<InternalURL> iter = this.iterator();
 			int[] statusCount = new int[5];
@@ -85,12 +87,9 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				statusCount[iter.next().status]++;
 			}
 			// convert from index to string value
-			Map<String, Integer> stats = new HashMap<>();
-
 			for (int rank = 0; rank < statusCount.length; rank++) {
-				stats.put(Status.forNumber(rank).name(), statusCount[rank]);
+				stats.merge(Status.forNumber(rank).name(), statusCount[rank], (a, b) -> a + b);
 			}
-			return stats;
 		}
 	}
 
@@ -236,7 +235,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			responseObserver.onCompleted();
 
 			LOG.info("Sent {} from queue {} in {}", totalSent, key, (System.currentTimeMillis() - start));
-			
+
 			return;
 		}
 
@@ -367,22 +366,37 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 		LOG.info("Received stats request");
 
-		// empty request - want for the whole crawl
+		final Map<String, Integer> s = new HashMap<>();
+
+		int inProc = 0;
+		int numQueues = 0;
+		int size = 0;
+
+		Collection<URLQueue> _queues = queues.values();
+
+		// specific queue?
 		if (request.getValue().isEmpty()) {
-			Stats stats = Stats.newBuilder().setNumberOfQueues(queues.size()).build();
-			responseObserver.onNext(stats);
-			responseObserver.onCompleted();
-			return;
+			URLQueue q = queues.get(request.getValue());
+			if (q != null) {
+				_queues = new LinkedList<>();
+				_queues.add(q);
+			} else {
+				// TODO notify an error to the client
+			}
 		}
 
-		// get the stats for a specific queue
-		URLQueue q = queues.get(request.getValue());
-		if (q != null) {
-			Stats stats = Stats.newBuilder().setNumberOfQueues(1).setSize(q.size()).setInProcess(q.getInProcess())
-					.putAllCounts(q.getStats()).build();
-			responseObserver.onNext(stats);
+		for (URLQueue q : _queues) {
+			q.addToStats(s);
+			inProc += q.getInProcess();
+			numQueues++;
+			size += q.size();
 		}
+
+		Stats stats = Stats.newBuilder().setNumberOfQueues(numQueues).setSize(size).setInProcess(inProc).putAllCounts(s)
+				.build();
+		responseObserver.onNext(stats);
 		responseObserver.onCompleted();
+		return;
 
 	}
 
