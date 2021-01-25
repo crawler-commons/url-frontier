@@ -7864,7 +7864,7 @@ public final class Urlfrontier {
       "RLFrontier\022=\n\nListQueues\022\024.urlfrontier.I" +
       "nteger\032\027.urlfrontier.StringList\"\000\022;\n\007Get" +
       "URLs\022\026.urlfrontier.GetParams\032\024.urlfronti" +
-      "er.URLItem\"\0000\001\022:\n\007PutURLs\022\024.urlfrontier." +
+      "er.URLInfo\"\0000\001\022:\n\007PutURLs\022\024.urlfrontier." +
       "URLItem\032\023.urlfrontier.String\"\000(\0010\001\0225\n\010Ge" +
       "tStats\022\023.urlfrontier.String\032\022.urlfrontie" +
       "r.Stats\"\000\0228\n\013DeleteQueue\022\023.urlfrontier.S" +

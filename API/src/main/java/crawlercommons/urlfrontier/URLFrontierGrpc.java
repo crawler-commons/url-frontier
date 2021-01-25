@@ -59,28 +59,28 @@ public final class URLFrontierGrpc {
   }
 
   private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.GetParams,
-      crawlercommons.urlfrontier.Urlfrontier.URLItem> getGetURLsMethod;
+      crawlercommons.urlfrontier.Urlfrontier.URLInfo> getGetURLsMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "GetURLs",
       requestType = crawlercommons.urlfrontier.Urlfrontier.GetParams.class,
-      responseType = crawlercommons.urlfrontier.Urlfrontier.URLItem.class,
+      responseType = crawlercommons.urlfrontier.Urlfrontier.URLInfo.class,
       methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
   public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.GetParams,
-      crawlercommons.urlfrontier.Urlfrontier.URLItem> getGetURLsMethod() {
-    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.GetParams, crawlercommons.urlfrontier.Urlfrontier.URLItem> getGetURLsMethod;
+      crawlercommons.urlfrontier.Urlfrontier.URLInfo> getGetURLsMethod() {
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.GetParams, crawlercommons.urlfrontier.Urlfrontier.URLInfo> getGetURLsMethod;
     if ((getGetURLsMethod = URLFrontierGrpc.getGetURLsMethod) == null) {
       synchronized (URLFrontierGrpc.class) {
         if ((getGetURLsMethod = URLFrontierGrpc.getGetURLsMethod) == null) {
           URLFrontierGrpc.getGetURLsMethod = getGetURLsMethod =
-              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.GetParams, crawlercommons.urlfrontier.Urlfrontier.URLItem>newBuilder()
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.GetParams, crawlercommons.urlfrontier.Urlfrontier.URLInfo>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetURLs"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   crawlercommons.urlfrontier.Urlfrontier.GetParams.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  crawlercommons.urlfrontier.Urlfrontier.URLItem.getDefaultInstance()))
+                  crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance()))
               .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("GetURLs"))
               .build();
         }
@@ -278,7 +278,7 @@ public final class URLFrontierGrpc {
      * </pre>
      */
     public void getURLs(crawlercommons.urlfrontier.Urlfrontier.GetParams request,
-        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> responseObserver) {
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLInfo> responseObserver) {
       asyncUnimplementedUnaryCall(getGetURLsMethod(), responseObserver);
     }
 
@@ -338,7 +338,7 @@ public final class URLFrontierGrpc {
             asyncServerStreamingCall(
               new MethodHandlers<
                 crawlercommons.urlfrontier.Urlfrontier.GetParams,
-                crawlercommons.urlfrontier.Urlfrontier.URLItem>(
+                crawlercommons.urlfrontier.Urlfrontier.URLInfo>(
                   this, METHODID_GET_URLS)))
           .addMethod(
             getPutURLsMethod(),
@@ -404,7 +404,7 @@ public final class URLFrontierGrpc {
      * </pre>
      */
     public void getURLs(crawlercommons.urlfrontier.Urlfrontier.GetParams request,
-        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> responseObserver) {
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLInfo> responseObserver) {
       asyncServerStreamingCall(
           getChannel().newCall(getGetURLsMethod(), getCallOptions()), request, responseObserver);
     }
@@ -486,7 +486,7 @@ public final class URLFrontierGrpc {
      ** Stream URLs due for fetching from M queues with up to N items per queue *
      * </pre>
      */
-    public java.util.Iterator<crawlercommons.urlfrontier.Urlfrontier.URLItem> getURLs(
+    public java.util.Iterator<crawlercommons.urlfrontier.Urlfrontier.URLInfo> getURLs(
         crawlercommons.urlfrontier.Urlfrontier.GetParams request) {
       return blockingServerStreamingCall(
           getChannel(), getGetURLsMethod(), getCallOptions(), request);
@@ -617,7 +617,7 @@ public final class URLFrontierGrpc {
           break;
         case METHODID_GET_URLS:
           serviceImpl.getURLs((crawlercommons.urlfrontier.Urlfrontier.GetParams) request,
-              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem>) responseObserver);
+              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLInfo>) responseObserver);
           break;
         case METHODID_GET_STATS:
           serviceImpl.getStats((crawlercommons.urlfrontier.Urlfrontier.String) request,

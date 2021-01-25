@@ -27,7 +27,7 @@ service URLFrontier {
      rpc ListQueues(Integer) returns (StringList) {}
 
      /** Stream URLs due for fetching from M queues with up to N items per queue **/
-     rpc GetURLs(GetParams) returns (stream URLItem) {}
+     rpc GetURLs(GetParams) returns (stream URLInfo) {}
 
      /** Pushes URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems **/
      rpc PutURLs(stream URLItem) returns (stream String) {}

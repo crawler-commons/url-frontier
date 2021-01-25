@@ -33,11 +33,12 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import org.slf4j.LoggerFactory;
 
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
+import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
+import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
-import crawlercommons.urlfrontier.Urlfrontier.URLItem.Status;
 import io.grpc.stub.StreamObserver;
 
 /**
@@ -78,19 +79,6 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			}
 			return inproc;
 		}
-
-		public void addToStats(final Map<String, Integer> stats) {
-			// a URL in process has a heldUntil and is at the beginning of a queue
-			Iterator<InternalURL> iter = this.iterator();
-			int[] statusCount = new int[5];
-			while (iter.hasNext()) {
-				statusCount[iter.next().status]++;
-			}
-			// convert from index to string value
-			for (int rank = 0; rank < statusCount.length; rank++) {
-				stats.merge(Status.forNumber(rank).name(), statusCount[rank], (a, b) -> a + b);
-			}
-		}
 	}
 
 	/**
@@ -100,7 +88,6 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	static class InternalURL implements Comparable<InternalURL> {
 
 		long nextFetchDate;
-		int status;
 		String url;
 		Map<String, StringList> metadata;
 
@@ -111,13 +98,26 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		private InternalURL() {
 		}
 
-		public static InternalURL from(URLItem i) {
+		/*
+		 * Returns the key if any, whether it is a discovered URL or not and an internal
+		 * object to represent it
+		 **/
+		private static Object[] from(URLItem i) {
 			InternalURL iu = new InternalURL();
-			iu.url = i.getUrl();
-			iu.status = i.getStatus().getNumber();
-			iu.nextFetchDate = i.getNextFetchDate();
-			iu.metadata = i.getMetadataMap();
-			return iu;
+			URLInfo info;
+			Boolean disco = Boolean.TRUE;
+			if (i.getDiscovered() != null) {
+				info = i.getDiscovered().getInfo();
+				iu.nextFetchDate = Instant.now().getEpochSecond();
+			} else {
+				KnownURLItem known = i.getKnown();
+				info = known.getInfo();
+				iu.nextFetchDate = known.getRefetchableFromDate();
+				disco = Boolean.FALSE;
+			}
+			iu.metadata = info.getMetadataMap();
+			iu.url = info.getUrl();
+			return new Object[] { info.getKey(), disco, iu };
 		}
 
 		@Override
@@ -143,11 +143,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			return url.hashCode();
 		}
 
-		public URLItem toURLItem(String key) {
-			crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder = URLItem.newBuilder()
-					.setNextFetchDate(nextFetchDate).setStatus(Status.forNumber(status)).setKey(key).setUrl(url);
-			builder.putAllMetadata(metadata);
-			return builder.build();
+		public URLInfo toURLInfo(String key) {
+			return URLInfo.newBuilder().setKey(key).setUrl(url).putAllMetadata(metadata).build();
 		}
 
 	}
@@ -193,7 +190,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	}
 
 	@Override
-	public void getURLs(GetParams request, StreamObserver<URLItem> responseObserver) {
+	public void getURLs(GetParams request, StreamObserver<URLInfo> responseObserver) {
 		int maxQueues = request.getMaxQueues();
 		int maxURLsPerQueue = request.getMaxUrlsPerQueue();
 		int secsUntilRequestable = request.getDelayRequestable();
@@ -262,7 +259,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	 *         otherwise
 	 **/
 	private int sendURLsForQueue(final PriorityQueue<InternalURL> queue, final String key, final int maxURLsPerQueue,
-			final int secsUntilRequestable, final long now, final StreamObserver<URLItem> responseObserver) {
+			final int secsUntilRequestable, final long now, final StreamObserver<URLInfo> responseObserver) {
 		Iterator<InternalURL> iter = queue.iterator();
 		int alreadySent = 0;
 
@@ -281,7 +278,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			}
 
 			// this one is good to go
-			responseObserver.onNext(item.toURLItem(key));
+			responseObserver.onNext(item.toURLInfo(key));
 
 			// mark it as not processable for N secs
 			item.heldUntil = Instant.now().plusSeconds(secsUntilRequestable).getEpochSecond();
@@ -300,15 +297,17 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 			@Override
 			public void onNext(URLItem value) {
-				// get the priority queue or create one
-				InternalURL iu = InternalURL.from(value);
 
-				String key = value.getKey();
+				Object[] parsed = InternalURL.from(value);
+
+				String key = (String) parsed[0];
+				Boolean discovered = (Boolean) parsed[1];
+				InternalURL iu = (InternalURL) parsed[2];
 
 				// if not set use the hostname
 				if (key.equals("")) {
 					try {
-						URL u = new URL(value.getUrl());
+						URL u = new URL(iu.url);
 						key = u.getHost();
 					} catch (MalformedURLException e) {
 						// TODO Auto-generated catch block
@@ -316,21 +315,22 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 					}
 				}
 
+				// get the priority queue or create one
 				URLQueue queue = queues.get(key);
 				if (queue == null) {
 					queues.put(key, new URLQueue(iu));
 					// ack reception of the URL
-					responseObserver.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-							.setValue(value.getUrl()).build());
+					responseObserver.onNext(
+							crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(iu.url).build());
 					return;
 				}
 
 				// check whether the URL already exists
 				if (queue.contains(iu)) {
-					if (value.getStatus().getNumber() == Status.DISCOVERED_VALUE) {
+					if (discovered) {
 						// we already discovered it - so no need for it
-						responseObserver.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-								.setValue(value.getUrl()).build());
+						responseObserver.onNext(
+								crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(iu.url).build());
 						return;
 					} else {
 						// overwrite the existing version
@@ -340,8 +340,8 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 				// add the new item
 				queue.add(iu);
-				responseObserver.onNext(
-						crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(value.getUrl()).build());
+				responseObserver
+						.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(iu.url).build());
 			}
 
 			@Override
@@ -386,7 +386,6 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		}
 
 		for (URLQueue q : _queues) {
-			q.addToStats(s);
 			inProc += q.getInProcess();
 			numQueues++;
 			size += q.size();
