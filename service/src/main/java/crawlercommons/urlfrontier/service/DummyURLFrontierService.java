@@ -22,6 +22,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -60,6 +61,11 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			this.add(initial);
 		}
 
+		// keep a hash of the completed URLs
+		// these won't be refetched
+
+		private HashSet<String> completed = new HashSet<>();
+
 		@Override
 		public int compareTo(URLQueue target) {
 			InternalURL mine = this.peek();
@@ -78,6 +84,23 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 					return inproc;
 			}
 			return inproc;
+		}
+
+		@Override
+		public boolean contains(Object iu) {
+			// been fetched before?
+			if (completed.contains(((InternalURL) iu).url)) {
+				return true;
+			}
+			return super.contains(iu);
+		}
+
+		public void addToCompleted(String url) {
+			completed.add(url);
+		}
+
+		public int getCountCompleted() {
+			return completed.size();
 		}
 	}
 
@@ -169,7 +192,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		while (iterator.hasNext() && num <= maxQueues) {
 			Entry<String, URLQueue> e = iterator.next();
 			// check that the queue has URLs due for fetching
-			if (e.getValue().peek().nextFetchDate < now) {
+			if (e.getValue().peek().nextFetchDate <= now) {
 				list.addValues(e.getKey());
 				num++;
 			}
@@ -339,7 +362,13 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				}
 
 				// add the new item
-				queue.add(iu);
+				// unless it is an update and it's nextFetchDate is 0 == NEVER
+				if (!discovered && iu.nextFetchDate == 0) {
+					queue.addToCompleted(iu.url);
+				} else {
+					queue.add(iu);
+				}
+
 				responseObserver
 						.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(iu.url).build());
 			}
@@ -371,6 +400,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		int inProc = 0;
 		int numQueues = 0;
 		int size = 0;
+		int completed = 0;
 
 		Collection<URLQueue> _queues = queues.values();
 
@@ -389,7 +419,12 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			inProc += q.getInProcess();
 			numQueues++;
 			size += q.size();
+			completed += q.getCountCompleted();
 		}
+
+		// put count completed as custom stats for now
+		// add it as a proper field later?
+		s.put("completed", completed);
 
 		Stats stats = Stats.newBuilder().setNumberOfQueues(numQueues).setSize(size).setInProcess(inProc).putAllCounts(s)
 				.build();
