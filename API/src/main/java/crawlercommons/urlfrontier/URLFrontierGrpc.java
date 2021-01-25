@@ -284,7 +284,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Update / create a batch of URLs *
+     ** Pushes URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems *
      * </pre>
      */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
@@ -411,7 +411,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Update / create a batch of URLs *
+     ** Pushes URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems *
      * </pre>
      */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
