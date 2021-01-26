@@ -182,27 +182,27 @@ public final class URLFrontierGrpc {
     return getDeleteQueueMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Integer,
+  private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams,
       crawlercommons.urlfrontier.Urlfrontier.Empty> getBlockQueueUntilMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "BlockQueueUntil",
-      requestType = crawlercommons.urlfrontier.Urlfrontier.Integer.class,
+      requestType = crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.class,
       responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Integer,
+  public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams,
       crawlercommons.urlfrontier.Urlfrontier.Empty> getBlockQueueUntilMethod() {
-    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Integer, crawlercommons.urlfrontier.Urlfrontier.Empty> getBlockQueueUntilMethod;
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams, crawlercommons.urlfrontier.Urlfrontier.Empty> getBlockQueueUntilMethod;
     if ((getBlockQueueUntilMethod = URLFrontierGrpc.getBlockQueueUntilMethod) == null) {
       synchronized (URLFrontierGrpc.class) {
         if ((getBlockQueueUntilMethod = URLFrontierGrpc.getBlockQueueUntilMethod) == null) {
           URLFrontierGrpc.getBlockQueueUntilMethod = getBlockQueueUntilMethod =
-              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.Integer, crawlercommons.urlfrontier.Urlfrontier.Empty>newBuilder()
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams, crawlercommons.urlfrontier.Urlfrontier.Empty>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "BlockQueueUntil"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  crawlercommons.urlfrontier.Urlfrontier.Integer.getDefaultInstance()))
+                  crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance()))
               .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("BlockQueueUntil"))
@@ -319,7 +319,7 @@ public final class URLFrontierGrpc {
      *indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
      * </pre>
      */
-    public void blockQueueUntil(crawlercommons.urlfrontier.Urlfrontier.Integer request,
+    public void blockQueueUntil(crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams request,
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
       asyncUnimplementedUnaryCall(getBlockQueueUntilMethod(), responseObserver);
     }
@@ -365,7 +365,7 @@ public final class URLFrontierGrpc {
             getBlockQueueUntilMethod(),
             asyncUnaryCall(
               new MethodHandlers<
-                crawlercommons.urlfrontier.Urlfrontier.Integer,
+                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams,
                 crawlercommons.urlfrontier.Urlfrontier.Empty>(
                   this, METHODID_BLOCK_QUEUE_UNTIL)))
           .build();
@@ -449,7 +449,7 @@ public final class URLFrontierGrpc {
      *indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
      * </pre>
      */
-    public void blockQueueUntil(crawlercommons.urlfrontier.Urlfrontier.Integer request,
+    public void blockQueueUntil(crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams request,
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getBlockQueueUntilMethod(), getCallOptions()), request, responseObserver);
@@ -519,7 +519,7 @@ public final class URLFrontierGrpc {
      *indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
      * </pre>
      */
-    public crawlercommons.urlfrontier.Urlfrontier.Empty blockQueueUntil(crawlercommons.urlfrontier.Urlfrontier.Integer request) {
+    public crawlercommons.urlfrontier.Urlfrontier.Empty blockQueueUntil(crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams request) {
       return blockingUnaryCall(
           getChannel(), getBlockQueueUntilMethod(), getCallOptions(), request);
     }
@@ -581,7 +581,7 @@ public final class URLFrontierGrpc {
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Empty> blockQueueUntil(
-        crawlercommons.urlfrontier.Urlfrontier.Integer request) {
+        crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams request) {
       return futureUnaryCall(
           getChannel().newCall(getBlockQueueUntilMethod(), getCallOptions()), request);
     }
@@ -628,7 +628,7 @@ public final class URLFrontierGrpc {
               (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
           break;
         case METHODID_BLOCK_QUEUE_UNTIL:
-          serviceImpl.blockQueueUntil((crawlercommons.urlfrontier.Urlfrontier.Integer) request,
+          serviceImpl.blockQueueUntil((crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams) request,
               (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
           break;
         default:

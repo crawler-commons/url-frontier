@@ -42,7 +42,7 @@ service URLFrontier {
       1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time
       indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
       **/
-     rpc BlockQueueUntil(Integer) returns (Empty) {}
+     rpc BlockQueueUntil(BlockQueueParams) returns (Empty) {}
 }
 
 
@@ -70,6 +70,11 @@ message Integer {
 
 message StringList {
   repeated string values = 1;
+}
+
+message BlockQueueParams {
+  string key = 1;
+  uint64 time = 2;
 }
 
 message GetParams {
