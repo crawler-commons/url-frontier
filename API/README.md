@@ -2,7 +2,7 @@
 
 This module contains the [gRPC](https://grpc.io) schema used in a URL Frontier implementation as well as the Java code generated from it.
 
-## Codegen
+## Code generation
 
 The Java code can be (re)generated as follows; change the OS & processor values if required.
 
@@ -26,4 +26,34 @@ python3 -m pip install grpcio-tools
 mkdir python
 python3 -m grpc_tools.protoc -I. --python_out=python --grpc_python_out=python urlfrontier.proto
 ```
+
+## Concepts (WORK IN PROGRESS)
+
+The endpoints and messages described by the API are meant to be a minimum. Specific implementations can offer additional functions on top of the ones described here.
+
+The two main methods used by a crawler to interact with a URL Frontier service (let's just call it _service_ from now on) are:
+- GetURLs
+- PutURLs
+
+Underpinning them is the concept of *queue(s)*.
+
+### Queues and keys
+
+What the queues should be based on is determined by the client, through the setting of a string value (_key_) associated with the messages sent with the PutURLs method. The value could be the hostname of a URL, its paid level domain, it's IP or anything else. An empty value leaves the service to route the messages into a queue - the hostname being the default behaviour. It is up the the client code to be consistent in the use of the keys.
+
+The keys are used in several functions: _GetStats_, _DeleteQueue_ and _GetURLs_.
+
+### GetURLs
+
+The service returns URLs ready to be fetched. It helps enforcing politeness by limiting the number of URLs per queue to be returned as well the amount of time to wait for until the URLs returned will be eligible to be returned again. This is used to prevent URLs to be in limbo if the client code crashes and is resumed later. It is easier to think about the URLs that have been returned by the GetURLs function as being _in transit_. They remain so until an update is received for them via the *PutURLs* function (see below) or the value set in *delay_requestable* has elapsed.
+
+Internally, the service will rotate on the queues to be pulled from and will aim at an optimal distribution.
+
+### PutURLs
+
+This method is called to add newly discovered URLs to the frontier (e.g. they have been found while parsing a HTML document or a sitemap file) but also to update the information about URLs that have been returned by *GetURLs*. The latter allows to remove them from the _in transit_ status and so, more URLs can then be returned for its queue. Arbitrary metadata can be associated with a URL, for instance to store the depth of links followed since injecting the seeds or the HTTP code last obtained when a known URL has been fetched.
+
+### Discovered vs known
+
+TODO
 
