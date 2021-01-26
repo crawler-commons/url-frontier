@@ -129,7 +129,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			InternalURL iu = new InternalURL();
 			URLInfo info;
 			Boolean disco = Boolean.TRUE;
-			if (i.getDiscovered() != null) {
+			if (i.hasDiscovered()) {
 				info = i.getDiscovered().getInfo();
 				iu.nextFetchDate = Instant.now().getEpochSecond();
 			} else {
@@ -254,7 +254,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			int totalSent = sendURLsForQueue(queue, key, maxURLsPerQueue, secsUntilRequestable, now, responseObserver);
 			responseObserver.onCompleted();
 
-			LOG.info("Sent {} from queue {} in {}", totalSent, key, (System.currentTimeMillis() - start));
+			LOG.info("Sent {} from queue {} in {} msec", totalSent, key, (System.currentTimeMillis() - start));
 
 			return;
 		}
