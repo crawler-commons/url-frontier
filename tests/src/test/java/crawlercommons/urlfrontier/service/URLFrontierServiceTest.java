@@ -18,7 +18,6 @@
 package crawlercommons.urlfrontier.service;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -32,11 +31,12 @@ import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier;
+import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
+import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
-import crawlercommons.urlfrontier.Urlfrontier.URLItem.Status;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -98,18 +98,14 @@ public class URLFrontierServiceTest {
 
 		StreamObserver<URLItem> streamObserver = frontier.putURLs(responseObserver);
 
-		Instant i = Instant.now();
+		// inject 2 duplicate discovered URLs
+		URLInfo info = URLInfo.newBuilder().setUrl("http://key1.com/").setKey("key1.com").build();
 
-		URLItem item = URLItem.newBuilder().setKey("key1.com").setStatus(Status.DISCOVERED).setUrl("http://key1.com/")
-				.setNextFetchDate(i.getEpochSecond()).build();
+		DiscoveredURLItem item = DiscoveredURLItem.newBuilder().setInfo(info).build();
+		DiscoveredURLItem item2 = DiscoveredURLItem.newBuilder().setInfo(info).build();
 
-		// send a duplicate
-		i = Instant.now();
-		URLItem item2 = URLItem.newBuilder().setKey("key1.com").setStatus(Status.DISCOVERED).setUrl("http://key1.com/")
-				.setNextFetchDate(i.getEpochSecond()).build();
-
-		streamObserver.onNext(item);
-		streamObserver.onNext(item2);
+		streamObserver.onNext(URLItem.newBuilder().setDiscovered(item).build());
+		streamObserver.onNext(URLItem.newBuilder().setDiscovered(item2).build());
 
 		streamObserver.onCompleted();
 
@@ -131,7 +127,8 @@ public class URLFrontierServiceTest {
 
 		LOG.info("Checking existence of queue");
 
-		crawlercommons.urlfrontier.Urlfrontier.Integer request = crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder().build();
+		crawlercommons.urlfrontier.Urlfrontier.Integer request = crawlercommons.urlfrontier.Urlfrontier.Integer
+				.newBuilder().build();
 		StringList queueslisted = blockingFrontier.listQueues(request);
 
 		Assert.assertEquals("incorrect number of queues returned", 1, queueslisted.getValuesCount());

@@ -33,10 +33,12 @@ import com.google.protobuf.util.JsonFormat;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
+import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
+import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -90,8 +92,9 @@ public class Client {
 		String command = commands.remove(0);
 
 		if (command.equalsIgnoreCase("ListQueues")) {
-			crawlercommons.urlfrontier.Urlfrontier.Integer.Builder builder = crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder();
-			// takes a number as argument			
+			crawlercommons.urlfrontier.Urlfrontier.Integer.Builder builder = crawlercommons.urlfrontier.Urlfrontier.Integer
+					.newBuilder();
+			// takes a number as argument
 			if (!commands.isEmpty()) {
 				builder.setValue(Long.parseLong(commands.get(0)));
 			}
@@ -199,11 +202,11 @@ public class Client {
 	/**
 	 * input format json
 	 * 
-	 * {url: "http://test.com", key: "test.com", status: "DISCOVERED"}
+	 * {url: "http://test.com", key: "test.com"}
 	 * 
 	 * or plain text where each line is a URL and the other fields are left to their
-	 * default value i.e. DISCOVERED, no custom metadata, key determined by the
-	 * server (i.e. hostname), no explicit nextFetchDate
+	 * default value i.e. no custom metadata, key determined by the server (i.e.
+	 * hostname), no explicit refetchable_from_date.
 	 * 
 	 * The input file can mix json and text lines.
 	 * 
@@ -217,7 +220,10 @@ public class Client {
 				return null;
 			}
 		} else {
-			builder.setUrl(input.trim());
+			String url = input.trim();
+			URLInfo info = URLInfo.newBuilder().setUrl(url).build();
+			DiscoveredURLItem value = DiscoveredURLItem.newBuilder().setInfo(info).build() ;
+			builder.setDiscovered(value);
 		}
 		return builder.build();
 	}
