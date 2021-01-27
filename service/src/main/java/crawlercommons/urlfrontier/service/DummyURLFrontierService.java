@@ -255,31 +255,33 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		// to make sure we don't loop over the ones we already had
 		String firstQueue = null;
 
-		while (!queues.isEmpty() && numQueuesSent < maxQueues) {
-			Iterator<Entry<String, URLQueue>> iterator = queues.entrySet().iterator();
-			Entry<String, URLQueue> e = iterator.next();
-			if (firstQueue == null) {
-				firstQueue = e.getKey();
-			} else if (firstQueue.equals(e.getKey())) {
-				break;
+		synchronized (queues) {
+			while (!queues.isEmpty() && numQueuesSent < maxQueues) {
+				Iterator<Entry<String, URLQueue>> iterator = queues.entrySet().iterator();
+				Entry<String, URLQueue> e = iterator.next();
+				if (firstQueue == null) {
+					firstQueue = e.getKey();
+				} else if (firstQueue.equals(e.getKey())) {
+					break;
+				}
+				// We remove the entry and put it at the end of the map
+				iterator.remove();
+
+				// TODO reap empty queues & put their local caches into a global one
+
+				int sentForQ = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
+						responseObserver);
+				if (sentForQ > 0) {
+					totalSent += sentForQ;
+					numQueuesSent++;
+				}
+
+				// Put the entry at the end no matter the result
+				queues.put(e.getKey(), e.getValue());
 			}
-			// We remove the entry and put it at the end of the map
-			iterator.remove();
-
-			// TODO reap empty queues & put their local caches into a global one
-
-			int sentForQ = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
-					responseObserver);
-			if (sentForQ > 0) {
-				totalSent += sentForQ;
-				numQueuesSent++;
-			}
-
-			// Put the entry at the end no matter the result
-			queues.put(e.getKey(), e.getValue());
 		}
 
-		LOG.info("Sent {} from {} queue(s) in {}", totalSent, numQueuesSent, (System.currentTimeMillis() - start));
+		LOG.info("Sent {} from {} queue(s) in {} msec", totalSent, numQueuesSent, (System.currentTimeMillis() - start));
 
 		responseObserver.onCompleted();
 	}
@@ -346,36 +348,38 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				}
 
 				// get the priority queue or create one
-				URLQueue queue = queues.get(key);
-				if (queue == null) {
-					queues.put(key, new URLQueue(iu));
-					// ack reception of the URL
-					responseObserver.onNext(
-							crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(iu.url).build());
-					return;
-				}
-
-				// check whether the URL already exists
-				if (queue.contains(iu)) {
-					if (discovered) {
-						// we already discovered it - so no need for it
+				synchronized (queues) {
+					URLQueue queue = queues.get(key);
+					if (queue == null) {
+						queues.put(key, new URLQueue(iu));
+						// ack reception of the URL
 						responseObserver.onNext(
 								crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(iu.url).build());
 						return;
+					}
+
+					// check whether the URL already exists
+					if (queue.contains(iu)) {
+						if (discovered) {
+							// we already discovered it - so no need for it
+							responseObserver.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+									.setValue(iu.url).build());
+							return;
+						} else {
+							// overwrite the existing version
+							queue.remove(iu);
+						}
+					}
+
+					// add the new item
+					// unless it is an update and it's nextFetchDate is 0 == NEVER
+					if (!discovered && iu.nextFetchDate == 0) {
+						queue.addToCompleted(iu.url);
 					} else {
-						// overwrite the existing version
-						queue.remove(iu);
+						queue.add(iu);
 					}
 				}
-
-				// add the new item
-				// unless it is an update and it's nextFetchDate is 0 == NEVER
-				if (!discovered && iu.nextFetchDate == 0) {
-					queue.addToCompleted(iu.url);
-				} else {
-					queue.add(iu);
-				}
-
+				
 				responseObserver
 						.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(iu.url).build());
 			}
