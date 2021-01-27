@@ -21,15 +21,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
-import java.util.SortedMap;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.slf4j.LoggerFactory;
 
@@ -51,11 +51,9 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DummyURLFrontierService.class);
 
-	// sorted the queues by next fetch date of the first element they contain
-	private SortedMap<String, URLQueue> queues = new ConcurrentSkipListMap<String, URLQueue>();
+	private Map<String, URLQueue> queues = Collections.synchronizedMap(new LinkedHashMap<String, URLQueue>());
 
-	/** Queues are ordered by the nextfetchdate of their first element **/
-	static class URLQueue extends PriorityQueue<InternalURL> implements Comparable<URLQueue> {
+	static class URLQueue extends PriorityQueue<InternalURL> {
 
 		URLQueue(InternalURL initial) {
 			this.add(initial);
@@ -65,13 +63,6 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		// these won't be refetched
 
 		private HashSet<String> completed = new HashSet<>();
-
-		@Override
-		public int compareTo(URLQueue target) {
-			InternalURL mine = this.peek();
-			InternalURL his = target.peek();
-			return mine.compareTo(his);
-		}
 
 		public int getInProcess() {
 			// a URL in process has a heldUntil and is at the beginning of a queue
@@ -259,17 +250,33 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			return;
 		}
 
-		Iterator<Entry<String, URLQueue>> iterator = queues.entrySet().iterator();
 		int numQueuesSent = 0;
 		int totalSent = 0;
-		while (iterator.hasNext() && numQueuesSent < maxQueues) {
+		// to make sure we don't loop over the ones we already had
+		String firstQueue = null;
+
+		while (!queues.isEmpty() && numQueuesSent < maxQueues) {
+			Iterator<Entry<String, URLQueue>> iterator = queues.entrySet().iterator();
 			Entry<String, URLQueue> e = iterator.next();
+			if (firstQueue == null) {
+				firstQueue = e.getKey();
+			} else if (firstQueue.equals(e.getKey())) {
+				break;
+			}
+			// We remove the entry and put it at the end of the map
+			iterator.remove();
+
+			// TODO reap empty queues & put their local caches into a global one
+
 			int sentForQ = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
 					responseObserver);
 			if (sentForQ > 0) {
 				totalSent += sentForQ;
 				numQueuesSent++;
 			}
+
+			// Put the entry at the end no matter the result
+			queues.put(e.getKey(), e.getValue());
 		}
 
 		LOG.info("Sent {} from {} queue(s) in {}", totalSent, numQueuesSent, (System.currentTimeMillis() - start));
@@ -381,8 +388,6 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			@Override
 			public void onCompleted() {
 				// will this ever get called if the client is constantly streaming?
-				// create a new queue so that the entries get sorted
-				queues = new ConcurrentSkipListMap<String, URLQueue>(queues);
 				responseObserver.onCompleted();
 			}
 		};
