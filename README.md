@@ -12,7 +12,7 @@ The outcomes of the project are to:
 
 One of the objectives of URL Frontier is to involve as many actors in the web crawling community as possible and get real users to give continuous feedback on our proposals. 
 
-Please use the [project mailing list](crawler-commons@googlegroups.com) or [Discussions](https://github.com/crawler-commons/url-frontier/discussions) section for questions, comments or suggestions. 
+Please use the [project mailing list](mailto:crawler-commons@googlegroups.com) or [Discussions](https://github.com/crawler-commons/url-frontier/discussions) section for questions, comments or suggestions. 
 
 This project is funded through the [NGI0 Discovery Fund](https://nlnet.nl/discovery), a fund established by NLnet with financial support from the European Commission's [Next Generation Internet programme](https://ngi.eu/), under the aegis of DG Communications Networks, Content and Technology under grant agreement No 825322. 
 
