@@ -19,22 +19,38 @@ public final class Urlfrontier {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * number of active URLs in queues
+     * </pre>
+     *
      * <code>uint32 size = 1;</code>
      * @return The size.
      */
     int getSize();
 
     /**
+     * <pre>
+     * number of URLs currently in flight
+     * </pre>
+     *
      * <code>uint32 inProcess = 2;</code>
      * @return The inProcess.
      */
     int getInProcess();
 
     /**
+     * <pre>
+     * custom counts 
+     * </pre>
+     *
      * <code>map&lt;string, uint32&gt; counts = 3;</code>
      */
     int getCountsCount();
     /**
+     * <pre>
+     * custom counts 
+     * </pre>
+     *
      * <code>map&lt;string, uint32&gt; counts = 3;</code>
      */
     boolean containsCounts(
@@ -46,11 +62,19 @@ public final class Urlfrontier {
     java.util.Map<java.lang.String, java.lang.Integer>
     getCounts();
     /**
+     * <pre>
+     * custom counts 
+     * </pre>
+     *
      * <code>map&lt;string, uint32&gt; counts = 3;</code>
      */
     java.util.Map<java.lang.String, java.lang.Integer>
     getCountsMap();
     /**
+     * <pre>
+     * custom counts 
+     * </pre>
+     *
      * <code>map&lt;string, uint32&gt; counts = 3;</code>
      */
 
@@ -58,6 +82,10 @@ public final class Urlfrontier {
         java.lang.String key,
         int defaultValue);
     /**
+     * <pre>
+     * custom counts 
+     * </pre>
+     *
      * <code>map&lt;string, uint32&gt; counts = 3;</code>
      */
 
@@ -65,12 +93,21 @@ public final class Urlfrontier {
         java.lang.String key);
 
     /**
+     * <pre>
+     * number of active queues in the frontier
+     * </pre>
+     *
      * <code>uint32 numberOfQueues = 4;</code>
      * @return The numberOfQueues.
      */
     int getNumberOfQueues();
   }
   /**
+   * <pre>
+   ** 
+   * Message returned by the GetStats method
+   * </pre>
+   *
    * Protobuf type {@code urlfrontier.Stats}
    */
   public static final class Stats extends
@@ -191,6 +228,10 @@ public final class Urlfrontier {
     public static final int SIZE_FIELD_NUMBER = 1;
     private int size_;
     /**
+     * <pre>
+     * number of active URLs in queues
+     * </pre>
+     *
      * <code>uint32 size = 1;</code>
      * @return The size.
      */
@@ -202,6 +243,10 @@ public final class Urlfrontier {
     public static final int INPROCESS_FIELD_NUMBER = 2;
     private int inProcess_;
     /**
+     * <pre>
+     * number of URLs currently in flight
+     * </pre>
+     *
      * <code>uint32 inProcess = 2;</code>
      * @return The inProcess.
      */
@@ -237,6 +282,10 @@ public final class Urlfrontier {
       return internalGetCounts().getMap().size();
     }
     /**
+     * <pre>
+     * custom counts 
+     * </pre>
+     *
      * <code>map&lt;string, uint32&gt; counts = 3;</code>
      */
 
@@ -255,6 +304,10 @@ public final class Urlfrontier {
       return getCountsMap();
     }
     /**
+     * <pre>
+     * custom counts 
+     * </pre>
+     *
      * <code>map&lt;string, uint32&gt; counts = 3;</code>
      */
     @java.lang.Override
@@ -263,6 +316,10 @@ public final class Urlfrontier {
       return internalGetCounts().getMap();
     }
     /**
+     * <pre>
+     * custom counts 
+     * </pre>
+     *
      * <code>map&lt;string, uint32&gt; counts = 3;</code>
      */
     @java.lang.Override
@@ -276,6 +333,10 @@ public final class Urlfrontier {
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
     /**
+     * <pre>
+     * custom counts 
+     * </pre>
+     *
      * <code>map&lt;string, uint32&gt; counts = 3;</code>
      */
     @java.lang.Override
@@ -294,6 +355,10 @@ public final class Urlfrontier {
     public static final int NUMBEROFQUEUES_FIELD_NUMBER = 4;
     private int numberOfQueues_;
     /**
+     * <pre>
+     * number of active queues in the frontier
+     * </pre>
+     *
      * <code>uint32 numberOfQueues = 4;</code>
      * @return The numberOfQueues.
      */
@@ -502,6 +567,11 @@ public final class Urlfrontier {
       return builder;
     }
     /**
+     * <pre>
+     ** 
+     * Message returned by the GetStats method
+     * </pre>
+     *
      * Protobuf type {@code urlfrontier.Stats}
      */
     public static final class Builder extends
@@ -691,6 +761,10 @@ public final class Urlfrontier {
 
       private int size_ ;
       /**
+       * <pre>
+       * number of active URLs in queues
+       * </pre>
+       *
        * <code>uint32 size = 1;</code>
        * @return The size.
        */
@@ -699,6 +773,10 @@ public final class Urlfrontier {
         return size_;
       }
       /**
+       * <pre>
+       * number of active URLs in queues
+       * </pre>
+       *
        * <code>uint32 size = 1;</code>
        * @param value The size to set.
        * @return This builder for chaining.
@@ -710,6 +788,10 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       * number of active URLs in queues
+       * </pre>
+       *
        * <code>uint32 size = 1;</code>
        * @return This builder for chaining.
        */
@@ -722,6 +804,10 @@ public final class Urlfrontier {
 
       private int inProcess_ ;
       /**
+       * <pre>
+       * number of URLs currently in flight
+       * </pre>
+       *
        * <code>uint32 inProcess = 2;</code>
        * @return The inProcess.
        */
@@ -730,6 +816,10 @@ public final class Urlfrontier {
         return inProcess_;
       }
       /**
+       * <pre>
+       * number of URLs currently in flight
+       * </pre>
+       *
        * <code>uint32 inProcess = 2;</code>
        * @param value The inProcess to set.
        * @return This builder for chaining.
@@ -741,6 +831,10 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       * number of URLs currently in flight
+       * </pre>
+       *
        * <code>uint32 inProcess = 2;</code>
        * @return This builder for chaining.
        */
@@ -778,6 +872,10 @@ public final class Urlfrontier {
         return internalGetCounts().getMap().size();
       }
       /**
+       * <pre>
+       * custom counts 
+       * </pre>
+       *
        * <code>map&lt;string, uint32&gt; counts = 3;</code>
        */
 
@@ -796,6 +894,10 @@ public final class Urlfrontier {
         return getCountsMap();
       }
       /**
+       * <pre>
+       * custom counts 
+       * </pre>
+       *
        * <code>map&lt;string, uint32&gt; counts = 3;</code>
        */
       @java.lang.Override
@@ -804,6 +906,10 @@ public final class Urlfrontier {
         return internalGetCounts().getMap();
       }
       /**
+       * <pre>
+       * custom counts 
+       * </pre>
+       *
        * <code>map&lt;string, uint32&gt; counts = 3;</code>
        */
       @java.lang.Override
@@ -817,6 +923,10 @@ public final class Urlfrontier {
         return map.containsKey(key) ? map.get(key) : defaultValue;
       }
       /**
+       * <pre>
+       * custom counts 
+       * </pre>
+       *
        * <code>map&lt;string, uint32&gt; counts = 3;</code>
        */
       @java.lang.Override
@@ -838,6 +948,10 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       * custom counts 
+       * </pre>
+       *
        * <code>map&lt;string, uint32&gt; counts = 3;</code>
        */
 
@@ -857,6 +971,10 @@ public final class Urlfrontier {
         return internalGetMutableCounts().getMutableMap();
       }
       /**
+       * <pre>
+       * custom counts 
+       * </pre>
+       *
        * <code>map&lt;string, uint32&gt; counts = 3;</code>
        */
       public Builder putCounts(
@@ -869,6 +987,10 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       * custom counts 
+       * </pre>
+       *
        * <code>map&lt;string, uint32&gt; counts = 3;</code>
        */
 
@@ -881,6 +1003,10 @@ public final class Urlfrontier {
 
       private int numberOfQueues_ ;
       /**
+       * <pre>
+       * number of active queues in the frontier
+       * </pre>
+       *
        * <code>uint32 numberOfQueues = 4;</code>
        * @return The numberOfQueues.
        */
@@ -889,6 +1015,10 @@ public final class Urlfrontier {
         return numberOfQueues_;
       }
       /**
+       * <pre>
+       * number of active queues in the frontier
+       * </pre>
+       *
        * <code>uint32 numberOfQueues = 4;</code>
        * @param value The numberOfQueues to set.
        * @return This builder for chaining.
@@ -900,6 +1030,10 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       * number of active queues in the frontier
+       * </pre>
+       *
        * <code>uint32 numberOfQueues = 4;</code>
        * @return This builder for chaining.
        */
@@ -3569,11 +3703,19 @@ public final class Urlfrontier {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     ** ID for the queue *
+     * </pre>
+     *
      * <code>string key = 1;</code>
      * @return The key.
      */
     java.lang.String getKey();
     /**
+     * <pre>
+     ** ID for the queue *
+     * </pre>
+     *
      * <code>string key = 1;</code>
      * @return The bytes for key.
      */
@@ -3581,12 +3723,21 @@ public final class Urlfrontier {
         getKeyBytes();
 
     /**
+     * <pre>
+     ** Expressed in seconds of UTC time since Unix epoch
+     *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+     * </pre>
+     *
      * <code>uint64 time = 2;</code>
      * @return The time.
      */
     long getTime();
   }
   /**
+   * <pre>
+   ** Parameter message for BlockQueueUntil *
+   * </pre>
+   *
    * Protobuf type {@code urlfrontier.BlockQueueParams}
    */
   public static final class BlockQueueParams extends
@@ -3678,6 +3829,10 @@ public final class Urlfrontier {
     public static final int KEY_FIELD_NUMBER = 1;
     private volatile java.lang.Object key_;
     /**
+     * <pre>
+     ** ID for the queue *
+     * </pre>
+     *
      * <code>string key = 1;</code>
      * @return The key.
      */
@@ -3695,6 +3850,10 @@ public final class Urlfrontier {
       }
     }
     /**
+     * <pre>
+     ** ID for the queue *
+     * </pre>
+     *
      * <code>string key = 1;</code>
      * @return The bytes for key.
      */
@@ -3716,6 +3875,11 @@ public final class Urlfrontier {
     public static final int TIME_FIELD_NUMBER = 2;
     private long time_;
     /**
+     * <pre>
+     ** Expressed in seconds of UTC time since Unix epoch
+     *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+     * </pre>
+     *
      * <code>uint64 time = 2;</code>
      * @return The time.
      */
@@ -3891,6 +4055,10 @@ public final class Urlfrontier {
       return builder;
     }
     /**
+     * <pre>
+     ** Parameter message for BlockQueueUntil *
+     * </pre>
+     *
      * Protobuf type {@code urlfrontier.BlockQueueParams}
      */
     public static final class Builder extends
@@ -4046,6 +4214,10 @@ public final class Urlfrontier {
 
       private java.lang.Object key_ = "";
       /**
+       * <pre>
+       ** ID for the queue *
+       * </pre>
+       *
        * <code>string key = 1;</code>
        * @return The key.
        */
@@ -4062,6 +4234,10 @@ public final class Urlfrontier {
         }
       }
       /**
+       * <pre>
+       ** ID for the queue *
+       * </pre>
+       *
        * <code>string key = 1;</code>
        * @return The bytes for key.
        */
@@ -4079,6 +4255,10 @@ public final class Urlfrontier {
         }
       }
       /**
+       * <pre>
+       ** ID for the queue *
+       * </pre>
+       *
        * <code>string key = 1;</code>
        * @param value The key to set.
        * @return This builder for chaining.
@@ -4094,6 +4274,10 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       ** ID for the queue *
+       * </pre>
+       *
        * <code>string key = 1;</code>
        * @return This builder for chaining.
        */
@@ -4104,6 +4288,10 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       ** ID for the queue *
+       * </pre>
+       *
        * <code>string key = 1;</code>
        * @param value The bytes for key to set.
        * @return This builder for chaining.
@@ -4122,6 +4310,11 @@ public final class Urlfrontier {
 
       private long time_ ;
       /**
+       * <pre>
+       ** Expressed in seconds of UTC time since Unix epoch
+       *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+       * </pre>
+       *
        * <code>uint64 time = 2;</code>
        * @return The time.
        */
@@ -4130,6 +4323,11 @@ public final class Urlfrontier {
         return time_;
       }
       /**
+       * <pre>
+       ** Expressed in seconds of UTC time since Unix epoch
+       *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+       * </pre>
+       *
        * <code>uint64 time = 2;</code>
        * @param value The time to set.
        * @return This builder for chaining.
@@ -4141,6 +4339,11 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       ** Expressed in seconds of UTC time since Unix epoch
+       *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+       * </pre>
+       *
        * <code>uint64 time = 2;</code>
        * @return This builder for chaining.
        */
@@ -4258,6 +4461,10 @@ public final class Urlfrontier {
     int getDelayRequestable();
   }
   /**
+   * <pre>
+   ** Parameter message for GetURLs *
+   * </pre>
+   *
    * Protobuf type {@code urlfrontier.GetParams}
    */
   public static final class GetParams extends
@@ -4635,6 +4842,10 @@ public final class Urlfrontier {
       return builder;
     }
     /**
+     * <pre>
+     ** Parameter message for GetURLs *
+     * </pre>
+     *
      * Protobuf type {@code urlfrontier.GetParams}
      */
     public static final class Builder extends
@@ -5114,6 +5325,10 @@ public final class Urlfrontier {
     public crawlercommons.urlfrontier.Urlfrontier.URLItem.ItemCase getItemCase();
   }
   /**
+   * <pre>
+   ** Wrapper for a KnownURLItem or DiscoveredURLItem *
+   * </pre>
+   *
    * Protobuf type {@code urlfrontier.URLItem}
    */
   public static final class URLItem extends
@@ -5505,6 +5720,10 @@ public final class Urlfrontier {
       return builder;
     }
     /**
+     * <pre>
+     ** Wrapper for a KnownURLItem or DiscoveredURLItem *
+     * </pre>
+     *
      * Protobuf type {@code urlfrontier.URLItem}
      */
     public static final class Builder extends
@@ -6029,11 +6248,19 @@ public final class Urlfrontier {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     ** URL *
+     * </pre>
+     *
      * <code>string url = 1;</code>
      * @return The url.
      */
     java.lang.String getUrl();
     /**
+     * <pre>
+     ** URL *
+     * </pre>
+     *
      * <code>string url = 1;</code>
      * @return The bytes for url.
      */
@@ -6041,11 +6268,21 @@ public final class Urlfrontier {
         getUrlBytes();
 
     /**
+     * <pre>
+     ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+     *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+     * </pre>
+     *
      * <code>string key = 2;</code>
      * @return The key.
      */
     java.lang.String getKey();
     /**
+     * <pre>
+     ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+     *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+     * </pre>
+     *
      * <code>string key = 2;</code>
      * @return The bytes for key.
      */
@@ -6053,10 +6290,20 @@ public final class Urlfrontier {
         getKeyBytes();
 
     /**
+     * <pre>
+     ** 
+     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+     * </pre>
+     *
      * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
      */
     int getMetadataCount();
     /**
+     * <pre>
+     ** 
+     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+     * </pre>
+     *
      * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
      */
     boolean containsMetadata(
@@ -6068,11 +6315,21 @@ public final class Urlfrontier {
     java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
     getMetadata();
     /**
+     * <pre>
+     ** 
+     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+     * </pre>
+     *
      * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
      */
     java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
     getMetadataMap();
     /**
+     * <pre>
+     ** 
+     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+     * </pre>
+     *
      * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
      */
 
@@ -6080,6 +6337,11 @@ public final class Urlfrontier {
         java.lang.String key,
         crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
     /**
+     * <pre>
+     ** 
+     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+     * </pre>
+     *
      * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
      */
 
@@ -6206,6 +6468,10 @@ public final class Urlfrontier {
     public static final int URL_FIELD_NUMBER = 1;
     private volatile java.lang.Object url_;
     /**
+     * <pre>
+     ** URL *
+     * </pre>
+     *
      * <code>string url = 1;</code>
      * @return The url.
      */
@@ -6223,6 +6489,10 @@ public final class Urlfrontier {
       }
     }
     /**
+     * <pre>
+     ** URL *
+     * </pre>
+     *
      * <code>string url = 1;</code>
      * @return The bytes for url.
      */
@@ -6244,6 +6514,11 @@ public final class Urlfrontier {
     public static final int KEY_FIELD_NUMBER = 2;
     private volatile java.lang.Object key_;
     /**
+     * <pre>
+     ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+     *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+     * </pre>
+     *
      * <code>string key = 2;</code>
      * @return The key.
      */
@@ -6261,6 +6536,11 @@ public final class Urlfrontier {
       }
     }
     /**
+     * <pre>
+     ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+     *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+     * </pre>
+     *
      * <code>string key = 2;</code>
      * @return The bytes for key.
      */
@@ -6306,6 +6586,11 @@ public final class Urlfrontier {
       return internalGetMetadata().getMap().size();
     }
     /**
+     * <pre>
+     ** 
+     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+     * </pre>
+     *
      * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
      */
 
@@ -6324,6 +6609,11 @@ public final class Urlfrontier {
       return getMetadataMap();
     }
     /**
+     * <pre>
+     ** 
+     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+     * </pre>
+     *
      * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
      */
     @java.lang.Override
@@ -6332,6 +6622,11 @@ public final class Urlfrontier {
       return internalGetMetadata().getMap();
     }
     /**
+     * <pre>
+     ** 
+     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+     * </pre>
+     *
      * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
      */
     @java.lang.Override
@@ -6345,6 +6640,11 @@ public final class Urlfrontier {
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
     /**
+     * <pre>
+     ** 
+     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+     * </pre>
+     *
      * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
      */
     @java.lang.Override
@@ -6732,6 +7032,10 @@ public final class Urlfrontier {
 
       private java.lang.Object url_ = "";
       /**
+       * <pre>
+       ** URL *
+       * </pre>
+       *
        * <code>string url = 1;</code>
        * @return The url.
        */
@@ -6748,6 +7052,10 @@ public final class Urlfrontier {
         }
       }
       /**
+       * <pre>
+       ** URL *
+       * </pre>
+       *
        * <code>string url = 1;</code>
        * @return The bytes for url.
        */
@@ -6765,6 +7073,10 @@ public final class Urlfrontier {
         }
       }
       /**
+       * <pre>
+       ** URL *
+       * </pre>
+       *
        * <code>string url = 1;</code>
        * @param value The url to set.
        * @return This builder for chaining.
@@ -6780,6 +7092,10 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       ** URL *
+       * </pre>
+       *
        * <code>string url = 1;</code>
        * @return This builder for chaining.
        */
@@ -6790,6 +7106,10 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       ** URL *
+       * </pre>
+       *
        * <code>string url = 1;</code>
        * @param value The bytes for url to set.
        * @return This builder for chaining.
@@ -6808,6 +7128,11 @@ public final class Urlfrontier {
 
       private java.lang.Object key_ = "";
       /**
+       * <pre>
+       ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+       *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+       * </pre>
+       *
        * <code>string key = 2;</code>
        * @return The key.
        */
@@ -6824,6 +7149,11 @@ public final class Urlfrontier {
         }
       }
       /**
+       * <pre>
+       ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+       *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+       * </pre>
+       *
        * <code>string key = 2;</code>
        * @return The bytes for key.
        */
@@ -6841,6 +7171,11 @@ public final class Urlfrontier {
         }
       }
       /**
+       * <pre>
+       ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+       *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+       * </pre>
+       *
        * <code>string key = 2;</code>
        * @param value The key to set.
        * @return This builder for chaining.
@@ -6856,6 +7191,11 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+       *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+       * </pre>
+       *
        * <code>string key = 2;</code>
        * @return This builder for chaining.
        */
@@ -6866,6 +7206,11 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+       *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+       * </pre>
+       *
        * <code>string key = 2;</code>
        * @param value The bytes for key to set.
        * @return This builder for chaining.
@@ -6909,6 +7254,11 @@ public final class Urlfrontier {
         return internalGetMetadata().getMap().size();
       }
       /**
+       * <pre>
+       ** 
+       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+       * </pre>
+       *
        * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
        */
 
@@ -6927,6 +7277,11 @@ public final class Urlfrontier {
         return getMetadataMap();
       }
       /**
+       * <pre>
+       ** 
+       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+       * </pre>
+       *
        * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
        */
       @java.lang.Override
@@ -6935,6 +7290,11 @@ public final class Urlfrontier {
         return internalGetMetadata().getMap();
       }
       /**
+       * <pre>
+       ** 
+       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+       * </pre>
+       *
        * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
        */
       @java.lang.Override
@@ -6948,6 +7308,11 @@ public final class Urlfrontier {
         return map.containsKey(key) ? map.get(key) : defaultValue;
       }
       /**
+       * <pre>
+       ** 
+       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+       * </pre>
+       *
        * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
        */
       @java.lang.Override
@@ -6969,6 +7334,11 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       ** 
+       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+       * </pre>
+       *
        * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
        */
 
@@ -6988,6 +7358,11 @@ public final class Urlfrontier {
         return internalGetMutableMetadata().getMutableMap();
       }
       /**
+       * <pre>
+       ** 
+       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+       * </pre>
+       *
        * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
        */
       public Builder putMetadata(
@@ -7000,6 +7375,11 @@ public final class Urlfrontier {
         return this;
       }
       /**
+       * <pre>
+       ** 
+       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+       * </pre>
+       *
        * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
        */
 
@@ -7094,6 +7474,13 @@ public final class Urlfrontier {
     long getRefetchableFromDate();
   }
   /**
+   * <pre>
+   **
+   *URL which was already known in the frontier, was returned by GetURLs() and processed by the crawler. Used for updating the information 
+   *about it in the frontier. If the date is not set, the URL will be considered done and won't be resubmitted for fetching, otherwise
+   *it will be elligible for fetching after the delay has elapsed.
+   * </pre>
+   *
    * Protobuf type {@code urlfrontier.KnownURLItem}
    */
   public static final class KnownURLItem extends
@@ -7404,6 +7791,13 @@ public final class Urlfrontier {
       return builder;
     }
     /**
+     * <pre>
+     **
+     *URL which was already known in the frontier, was returned by GetURLs() and processed by the crawler. Used for updating the information 
+     *about it in the frontier. If the date is not set, the URL will be considered done and won't be resubmitted for fetching, otherwise
+     *it will be elligible for fetching after the delay has elapsed.
+     * </pre>
+     *
      * Protobuf type {@code urlfrontier.KnownURLItem}
      */
     public static final class Builder extends
@@ -7804,6 +8198,11 @@ public final class Urlfrontier {
     crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder();
   }
   /**
+   * <pre>
+   **
+   *URL discovered during the crawl, might already be known in the URL Frontier or not.
+   * </pre>
+   *
    * Protobuf type {@code urlfrontier.DiscoveredURLItem}
    */
   public static final class DiscoveredURLItem extends
@@ -8080,6 +8479,11 @@ public final class Urlfrontier {
       return builder;
     }
     /**
+     * <pre>
+     **
+     *URL discovered during the crawl, might already be known in the URL Frontier or not.
+     * </pre>
+     *
      * Protobuf type {@code urlfrontier.DiscoveredURLItem}
      */
     public static final class Builder extends

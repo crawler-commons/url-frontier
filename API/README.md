@@ -27,6 +27,11 @@ mkdir python
 python3 -m grpc_tools.protoc -I. --python_out=python --grpc_python_out=python urlfrontier.proto
 ```
 
+## Documentation generation
+
+``` docker run --rm -v $(pwd):/out -v $(pwd):/protos pseudomuto/protoc-gen-doc --doc_opt=markdown,urlfrontier.md ```
+
+
 ## Main concepts
 
 The endpoints and messages described by the API are meant to be a minimum. Specific implementations can offer additional functions on top of the ones described here.

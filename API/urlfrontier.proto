@@ -45,11 +45,17 @@ service URLFrontier {
      rpc BlockQueueUntil(BlockQueueParams) returns (Empty) {}
 }
 
-
+/** 
+* Message returned by the GetStats method
+**/
 message Stats {
+  // number of active URLs in queues
   uint32 size = 1;
+  // number of URLs currently in flight
   uint32 inProcess = 2;
+  // custom counts 
   map<string, uint32> counts = 3;
+  // number of active queues in the frontier
   uint32 numberOfQueues = 4;
 }
 
@@ -72,11 +78,17 @@ message StringList {
   repeated string values = 1;
 }
 
+/** Parameter message for BlockQueueUntil **/
 message BlockQueueParams {
+  /** ID for the queue **/
   string key = 1;
+  /** Expressed in seconds of UTC time since Unix epoch
+      1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+  **/
   uint64 time = 2;
 }
 
+/** Parameter message for GetURLs **/
 message GetParams {
   // maximum number of URLs per queue, the default value of 0 means no limit
   uint32 max_urls_per_queue = 1;
@@ -88,6 +100,7 @@ message GetParams {
   uint32 delay_requestable = 4;
 }
 
+/** Wrapper for a KnownURLItem or DiscoveredURLItem **/
 message URLItem {
 oneof item {
     DiscoveredURLItem discovered = 1;
@@ -96,11 +109,23 @@ oneof item {
 }
 
 message URLInfo {
+  /** URL **/
   string url = 1;
+  /** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+    domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+  **/
   string key = 2;
+  /** 
+  Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+  **/
   map<string, StringList> metadata = 3;
 }
 
+/**
+ URL which was already known in the frontier, was returned by GetURLs() and processed by the crawler. Used for updating the information 
+ about it in the frontier. If the date is not set, the URL will be considered done and won't be resubmitted for fetching, otherwise
+ it will be elligible for fetching after the delay has elapsed.
+**/
 message KnownURLItem {
   URLInfo info = 1;
   /** Expressed in seconds of UTC time since Unix epoch
@@ -110,6 +135,9 @@ message KnownURLItem {
   uint64 refetchable_from_date = 2;
 }
 
+/**
+ URL discovered during the crawl, might already be known in the URL Frontier or not.
+**/
 message DiscoveredURLItem {
   URLInfo info = 1;
 }
