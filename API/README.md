@@ -77,6 +77,12 @@ mkdir python
 python3 -m grpc_tools.protoc -I. --python_out=python --grpc_python_out=python urlfrontier.proto
 ```
 
+Alternatively, [docker-protoc](https://github.com/namely/docker-protoc) can be used to generate the code in various languages:
+
+```
+docker run -v `pwd`:/defs namely/protoc-all -f urlfrontier.proto -l java -o src/main/java
+```
+
 # Documentation generation
 
 ``` docker run --rm -v $(pwd):/out -v $(pwd):/protos pseudomuto/protoc-gen-doc --doc_opt=markdown,urlfrontier.md ```
