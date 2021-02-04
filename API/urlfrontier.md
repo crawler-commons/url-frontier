@@ -99,7 +99,7 @@ Parameter message for GetURLs *
 | max_urls_per_queue | [uint32](#uint32) |  | maximum number of URLs per queue, the default value of 0 means no limit |
 | max_queues | [uint32](#uint32) |  | maximum number of queues to get URLs from, the default value of 0 means no limit |
 | key | [string](#string) |  | queue id if restricting to a specific queue |
-| delay_requestable | [uint32](#uint32) |  | amount of time before a URL can be unlocked and sent again for fetching |
+| delay_requestable | [uint32](#uint32) |  | delay in seconds before a URL can be unlocked and sent again for fetching |
 
 
 
@@ -147,10 +147,10 @@ Message returned by the GetStats method
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| size | [uint32](#uint32) |  | number of active URLs in queues |
+| size | [uint64](#uint64) |  | number of active URLs in queues |
 | inProcess | [uint32](#uint32) |  | number of URLs currently in flight |
 | counts | [Stats.CountsEntry](#urlfrontier.Stats.CountsEntry) | repeated | custom counts |
-| numberOfQueues | [uint32](#uint32) |  | number of active queues in the frontier |
+| numberOfQueues | [uint64](#uint64) |  | number of active queues in the frontier |
 
 
 
@@ -166,7 +166,7 @@ Message returned by the GetStats method
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | key | [string](#string) |  |  |
-| value | [uint32](#uint32) |  |  |
+| value | [uint64](#uint64) |  |  |
 
 
 

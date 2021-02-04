@@ -404,12 +404,12 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 		LOG.info("Received stats request");
 
-		final Map<String, Integer> s = new HashMap<>();
+		final Map<String, Long> s = new HashMap<>();
 
 		int inProc = 0;
 		int numQueues = 0;
 		int size = 0;
-		int completed = 0;
+		long completed = 0;
 
 		Collection<URLQueue> _queues = queues.values();
 

@@ -34,8 +34,6 @@ import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
-import crawlercommons.urlfrontier.Urlfrontier.GetParams;
-import crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
@@ -115,8 +113,8 @@ public class Client {
 			Stats s = blockingFrontier.getStats(builder.build());
 			System.out.println("Number of queues: " + s.getNumberOfQueues());
 			System.out.println("In process: " + s.getInProcess());
-			Map<String, Integer> counts = s.getCountsMap();
-			for (Entry<String, Integer> kv : counts.entrySet()) {
+			Map<String, Long> counts = s.getCountsMap();
+			for (Entry<String, Long> kv : counts.entrySet()) {
 				System.out.println(kv.getKey() + " = " + kv.getValue());
 			}
 			return;

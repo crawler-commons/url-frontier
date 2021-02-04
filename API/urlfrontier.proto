@@ -50,13 +50,13 @@ service URLFrontier {
 **/
 message Stats {
   // number of active URLs in queues
-  uint32 size = 1;
+  uint64 size = 1;
   // number of URLs currently in flight
   uint32 inProcess = 2;
   // custom counts 
-  map<string, uint32> counts = 3;
+  map<string, uint64> counts = 3;
   // number of active queues in the frontier
-  uint32 numberOfQueues = 4;
+  uint64 numberOfQueues = 4;
 }
 
 message Empty {
@@ -96,7 +96,7 @@ message GetParams {
   uint32 max_queues = 2;
   // queue id if restricting to a specific queue
   string key = 3;
-  //  amount of time before a URL can be unlocked and sent again for fetching 
+  //  delay in seconds before a URL can be unlocked and sent again for fetching 
   uint32 delay_requestable = 4;
 }
 

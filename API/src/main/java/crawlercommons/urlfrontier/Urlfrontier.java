@@ -23,10 +23,10 @@ public final class Urlfrontier {
      * number of active URLs in queues
      * </pre>
      *
-     * <code>uint32 size = 1;</code>
+     * <code>uint64 size = 1;</code>
      * @return The size.
      */
-    int getSize();
+    long getSize();
 
     /**
      * <pre>
@@ -43,7 +43,7 @@ public final class Urlfrontier {
      * custom counts 
      * </pre>
      *
-     * <code>map&lt;string, uint32&gt; counts = 3;</code>
+     * <code>map&lt;string, uint64&gt; counts = 3;</code>
      */
     int getCountsCount();
     /**
@@ -51,7 +51,7 @@ public final class Urlfrontier {
      * custom counts 
      * </pre>
      *
-     * <code>map&lt;string, uint32&gt; counts = 3;</code>
+     * <code>map&lt;string, uint64&gt; counts = 3;</code>
      */
     boolean containsCounts(
         java.lang.String key);
@@ -59,37 +59,37 @@ public final class Urlfrontier {
      * Use {@link #getCountsMap()} instead.
      */
     @java.lang.Deprecated
-    java.util.Map<java.lang.String, java.lang.Integer>
+    java.util.Map<java.lang.String, java.lang.Long>
     getCounts();
     /**
      * <pre>
      * custom counts 
      * </pre>
      *
-     * <code>map&lt;string, uint32&gt; counts = 3;</code>
+     * <code>map&lt;string, uint64&gt; counts = 3;</code>
      */
-    java.util.Map<java.lang.String, java.lang.Integer>
+    java.util.Map<java.lang.String, java.lang.Long>
     getCountsMap();
     /**
      * <pre>
      * custom counts 
      * </pre>
      *
-     * <code>map&lt;string, uint32&gt; counts = 3;</code>
+     * <code>map&lt;string, uint64&gt; counts = 3;</code>
      */
 
-    int getCountsOrDefault(
+    long getCountsOrDefault(
         java.lang.String key,
-        int defaultValue);
+        long defaultValue);
     /**
      * <pre>
      * custom counts 
      * </pre>
      *
-     * <code>map&lt;string, uint32&gt; counts = 3;</code>
+     * <code>map&lt;string, uint64&gt; counts = 3;</code>
      */
 
-    int getCountsOrThrow(
+    long getCountsOrThrow(
         java.lang.String key);
 
     /**
@@ -97,10 +97,10 @@ public final class Urlfrontier {
      * number of active queues in the frontier
      * </pre>
      *
-     * <code>uint32 numberOfQueues = 4;</code>
+     * <code>uint64 numberOfQueues = 4;</code>
      * @return The numberOfQueues.
      */
-    int getNumberOfQueues();
+    long getNumberOfQueues();
   }
   /**
    * <pre>
@@ -155,7 +155,7 @@ public final class Urlfrontier {
               break;
             case 8: {
 
-              size_ = input.readUInt32();
+              size_ = input.readUInt64();
               break;
             }
             case 16: {
@@ -169,7 +169,7 @@ public final class Urlfrontier {
                     CountsDefaultEntryHolder.defaultEntry);
                 mutable_bitField0_ |= 0x00000001;
               }
-              com.google.protobuf.MapEntry<java.lang.String, java.lang.Integer>
+              com.google.protobuf.MapEntry<java.lang.String, java.lang.Long>
               counts__ = input.readMessage(
                   CountsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
               counts_.getMutableMap().put(
@@ -178,7 +178,7 @@ public final class Urlfrontier {
             }
             case 32: {
 
-              numberOfQueues_ = input.readUInt32();
+              numberOfQueues_ = input.readUInt64();
               break;
             }
             default: {
@@ -226,17 +226,17 @@ public final class Urlfrontier {
     }
 
     public static final int SIZE_FIELD_NUMBER = 1;
-    private int size_;
+    private long size_;
     /**
      * <pre>
      * number of active URLs in queues
      * </pre>
      *
-     * <code>uint32 size = 1;</code>
+     * <code>uint64 size = 1;</code>
      * @return The size.
      */
     @java.lang.Override
-    public int getSize() {
+    public long getSize() {
       return size_;
     }
 
@@ -258,18 +258,18 @@ public final class Urlfrontier {
     public static final int COUNTS_FIELD_NUMBER = 3;
     private static final class CountsDefaultEntryHolder {
       static final com.google.protobuf.MapEntry<
-          java.lang.String, java.lang.Integer> defaultEntry =
+          java.lang.String, java.lang.Long> defaultEntry =
               com.google.protobuf.MapEntry
-              .<java.lang.String, java.lang.Integer>newDefaultInstance(
+              .<java.lang.String, java.lang.Long>newDefaultInstance(
                   crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Stats_CountsEntry_descriptor, 
                   com.google.protobuf.WireFormat.FieldType.STRING,
                   "",
-                  com.google.protobuf.WireFormat.FieldType.UINT32,
-                  0);
+                  com.google.protobuf.WireFormat.FieldType.UINT64,
+                  0L);
     }
     private com.google.protobuf.MapField<
-        java.lang.String, java.lang.Integer> counts_;
-    private com.google.protobuf.MapField<java.lang.String, java.lang.Integer>
+        java.lang.String, java.lang.Long> counts_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.Long>
     internalGetCounts() {
       if (counts_ == null) {
         return com.google.protobuf.MapField.emptyMapField(
@@ -286,7 +286,7 @@ public final class Urlfrontier {
      * custom counts 
      * </pre>
      *
-     * <code>map&lt;string, uint32&gt; counts = 3;</code>
+     * <code>map&lt;string, uint64&gt; counts = 3;</code>
      */
 
     @java.lang.Override
@@ -300,7 +300,7 @@ public final class Urlfrontier {
      */
     @java.lang.Override
     @java.lang.Deprecated
-    public java.util.Map<java.lang.String, java.lang.Integer> getCounts() {
+    public java.util.Map<java.lang.String, java.lang.Long> getCounts() {
       return getCountsMap();
     }
     /**
@@ -308,11 +308,11 @@ public final class Urlfrontier {
      * custom counts 
      * </pre>
      *
-     * <code>map&lt;string, uint32&gt; counts = 3;</code>
+     * <code>map&lt;string, uint64&gt; counts = 3;</code>
      */
     @java.lang.Override
 
-    public java.util.Map<java.lang.String, java.lang.Integer> getCountsMap() {
+    public java.util.Map<java.lang.String, java.lang.Long> getCountsMap() {
       return internalGetCounts().getMap();
     }
     /**
@@ -320,15 +320,15 @@ public final class Urlfrontier {
      * custom counts 
      * </pre>
      *
-     * <code>map&lt;string, uint32&gt; counts = 3;</code>
+     * <code>map&lt;string, uint64&gt; counts = 3;</code>
      */
     @java.lang.Override
 
-    public int getCountsOrDefault(
+    public long getCountsOrDefault(
         java.lang.String key,
-        int defaultValue) {
+        long defaultValue) {
       if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, java.lang.Integer> map =
+      java.util.Map<java.lang.String, java.lang.Long> map =
           internalGetCounts().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
@@ -337,14 +337,14 @@ public final class Urlfrontier {
      * custom counts 
      * </pre>
      *
-     * <code>map&lt;string, uint32&gt; counts = 3;</code>
+     * <code>map&lt;string, uint64&gt; counts = 3;</code>
      */
     @java.lang.Override
 
-    public int getCountsOrThrow(
+    public long getCountsOrThrow(
         java.lang.String key) {
       if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, java.lang.Integer> map =
+      java.util.Map<java.lang.String, java.lang.Long> map =
           internalGetCounts().getMap();
       if (!map.containsKey(key)) {
         throw new java.lang.IllegalArgumentException();
@@ -353,17 +353,17 @@ public final class Urlfrontier {
     }
 
     public static final int NUMBEROFQUEUES_FIELD_NUMBER = 4;
-    private int numberOfQueues_;
+    private long numberOfQueues_;
     /**
      * <pre>
      * number of active queues in the frontier
      * </pre>
      *
-     * <code>uint32 numberOfQueues = 4;</code>
+     * <code>uint64 numberOfQueues = 4;</code>
      * @return The numberOfQueues.
      */
     @java.lang.Override
-    public int getNumberOfQueues() {
+    public long getNumberOfQueues() {
       return numberOfQueues_;
     }
 
@@ -381,8 +381,8 @@ public final class Urlfrontier {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (size_ != 0) {
-        output.writeUInt32(1, size_);
+      if (size_ != 0L) {
+        output.writeUInt64(1, size_);
       }
       if (inProcess_ != 0) {
         output.writeUInt32(2, inProcess_);
@@ -393,8 +393,8 @@ public final class Urlfrontier {
           internalGetCounts(),
           CountsDefaultEntryHolder.defaultEntry,
           3);
-      if (numberOfQueues_ != 0) {
-        output.writeUInt32(4, numberOfQueues_);
+      if (numberOfQueues_ != 0L) {
+        output.writeUInt64(4, numberOfQueues_);
       }
       unknownFields.writeTo(output);
     }
@@ -405,17 +405,17 @@ public final class Urlfrontier {
       if (size != -1) return size;
 
       size = 0;
-      if (size_ != 0) {
+      if (size_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(1, size_);
+          .computeUInt64Size(1, size_);
       }
       if (inProcess_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(2, inProcess_);
       }
-      for (java.util.Map.Entry<java.lang.String, java.lang.Integer> entry
+      for (java.util.Map.Entry<java.lang.String, java.lang.Long> entry
            : internalGetCounts().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.String, java.lang.Integer>
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.Long>
         counts__ = CountsDefaultEntryHolder.defaultEntry.newBuilderForType()
             .setKey(entry.getKey())
             .setValue(entry.getValue())
@@ -423,9 +423,9 @@ public final class Urlfrontier {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(3, counts__);
       }
-      if (numberOfQueues_ != 0) {
+      if (numberOfQueues_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(4, numberOfQueues_);
+          .computeUInt64Size(4, numberOfQueues_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -462,7 +462,8 @@ public final class Urlfrontier {
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + SIZE_FIELD_NUMBER;
-      hash = (53 * hash) + getSize();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSize());
       hash = (37 * hash) + INPROCESS_FIELD_NUMBER;
       hash = (53 * hash) + getInProcess();
       if (!internalGetCounts().getMap().isEmpty()) {
@@ -470,7 +471,8 @@ public final class Urlfrontier {
         hash = (53 * hash) + internalGetCounts().hashCode();
       }
       hash = (37 * hash) + NUMBEROFQUEUES_FIELD_NUMBER;
-      hash = (53 * hash) + getNumberOfQueues();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getNumberOfQueues());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -631,12 +633,12 @@ public final class Urlfrontier {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        size_ = 0;
+        size_ = 0L;
 
         inProcess_ = 0;
 
         internalGetMutableCounts().clear();
-        numberOfQueues_ = 0;
+        numberOfQueues_ = 0L;
 
         return this;
       }
@@ -718,7 +720,7 @@ public final class Urlfrontier {
 
       public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Stats other) {
         if (other == crawlercommons.urlfrontier.Urlfrontier.Stats.getDefaultInstance()) return this;
-        if (other.getSize() != 0) {
+        if (other.getSize() != 0L) {
           setSize(other.getSize());
         }
         if (other.getInProcess() != 0) {
@@ -726,7 +728,7 @@ public final class Urlfrontier {
         }
         internalGetMutableCounts().mergeFrom(
             other.internalGetCounts());
-        if (other.getNumberOfQueues() != 0) {
+        if (other.getNumberOfQueues() != 0L) {
           setNumberOfQueues(other.getNumberOfQueues());
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -759,17 +761,17 @@ public final class Urlfrontier {
       }
       private int bitField0_;
 
-      private int size_ ;
+      private long size_ ;
       /**
        * <pre>
        * number of active URLs in queues
        * </pre>
        *
-       * <code>uint32 size = 1;</code>
+       * <code>uint64 size = 1;</code>
        * @return The size.
        */
       @java.lang.Override
-      public int getSize() {
+      public long getSize() {
         return size_;
       }
       /**
@@ -777,11 +779,11 @@ public final class Urlfrontier {
        * number of active URLs in queues
        * </pre>
        *
-       * <code>uint32 size = 1;</code>
+       * <code>uint64 size = 1;</code>
        * @param value The size to set.
        * @return This builder for chaining.
        */
-      public Builder setSize(int value) {
+      public Builder setSize(long value) {
         
         size_ = value;
         onChanged();
@@ -792,12 +794,12 @@ public final class Urlfrontier {
        * number of active URLs in queues
        * </pre>
        *
-       * <code>uint32 size = 1;</code>
+       * <code>uint64 size = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearSize() {
         
-        size_ = 0;
+        size_ = 0L;
         onChanged();
         return this;
       }
@@ -846,8 +848,8 @@ public final class Urlfrontier {
       }
 
       private com.google.protobuf.MapField<
-          java.lang.String, java.lang.Integer> counts_;
-      private com.google.protobuf.MapField<java.lang.String, java.lang.Integer>
+          java.lang.String, java.lang.Long> counts_;
+      private com.google.protobuf.MapField<java.lang.String, java.lang.Long>
       internalGetCounts() {
         if (counts_ == null) {
           return com.google.protobuf.MapField.emptyMapField(
@@ -855,7 +857,7 @@ public final class Urlfrontier {
         }
         return counts_;
       }
-      private com.google.protobuf.MapField<java.lang.String, java.lang.Integer>
+      private com.google.protobuf.MapField<java.lang.String, java.lang.Long>
       internalGetMutableCounts() {
         onChanged();;
         if (counts_ == null) {
@@ -876,7 +878,7 @@ public final class Urlfrontier {
        * custom counts 
        * </pre>
        *
-       * <code>map&lt;string, uint32&gt; counts = 3;</code>
+       * <code>map&lt;string, uint64&gt; counts = 3;</code>
        */
 
       @java.lang.Override
@@ -890,7 +892,7 @@ public final class Urlfrontier {
        */
       @java.lang.Override
       @java.lang.Deprecated
-      public java.util.Map<java.lang.String, java.lang.Integer> getCounts() {
+      public java.util.Map<java.lang.String, java.lang.Long> getCounts() {
         return getCountsMap();
       }
       /**
@@ -898,11 +900,11 @@ public final class Urlfrontier {
        * custom counts 
        * </pre>
        *
-       * <code>map&lt;string, uint32&gt; counts = 3;</code>
+       * <code>map&lt;string, uint64&gt; counts = 3;</code>
        */
       @java.lang.Override
 
-      public java.util.Map<java.lang.String, java.lang.Integer> getCountsMap() {
+      public java.util.Map<java.lang.String, java.lang.Long> getCountsMap() {
         return internalGetCounts().getMap();
       }
       /**
@@ -910,15 +912,15 @@ public final class Urlfrontier {
        * custom counts 
        * </pre>
        *
-       * <code>map&lt;string, uint32&gt; counts = 3;</code>
+       * <code>map&lt;string, uint64&gt; counts = 3;</code>
        */
       @java.lang.Override
 
-      public int getCountsOrDefault(
+      public long getCountsOrDefault(
           java.lang.String key,
-          int defaultValue) {
+          long defaultValue) {
         if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, java.lang.Integer> map =
+        java.util.Map<java.lang.String, java.lang.Long> map =
             internalGetCounts().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
       }
@@ -927,14 +929,14 @@ public final class Urlfrontier {
        * custom counts 
        * </pre>
        *
-       * <code>map&lt;string, uint32&gt; counts = 3;</code>
+       * <code>map&lt;string, uint64&gt; counts = 3;</code>
        */
       @java.lang.Override
 
-      public int getCountsOrThrow(
+      public long getCountsOrThrow(
           java.lang.String key) {
         if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, java.lang.Integer> map =
+        java.util.Map<java.lang.String, java.lang.Long> map =
             internalGetCounts().getMap();
         if (!map.containsKey(key)) {
           throw new java.lang.IllegalArgumentException();
@@ -952,7 +954,7 @@ public final class Urlfrontier {
        * custom counts 
        * </pre>
        *
-       * <code>map&lt;string, uint32&gt; counts = 3;</code>
+       * <code>map&lt;string, uint64&gt; counts = 3;</code>
        */
 
       public Builder removeCounts(
@@ -966,7 +968,7 @@ public final class Urlfrontier {
        * Use alternate mutation accessors instead.
        */
       @java.lang.Deprecated
-      public java.util.Map<java.lang.String, java.lang.Integer>
+      public java.util.Map<java.lang.String, java.lang.Long>
       getMutableCounts() {
         return internalGetMutableCounts().getMutableMap();
       }
@@ -975,11 +977,11 @@ public final class Urlfrontier {
        * custom counts 
        * </pre>
        *
-       * <code>map&lt;string, uint32&gt; counts = 3;</code>
+       * <code>map&lt;string, uint64&gt; counts = 3;</code>
        */
       public Builder putCounts(
           java.lang.String key,
-          int value) {
+          long value) {
         if (key == null) { throw new java.lang.NullPointerException(); }
         
         internalGetMutableCounts().getMutableMap()
@@ -991,27 +993,27 @@ public final class Urlfrontier {
        * custom counts 
        * </pre>
        *
-       * <code>map&lt;string, uint32&gt; counts = 3;</code>
+       * <code>map&lt;string, uint64&gt; counts = 3;</code>
        */
 
       public Builder putAllCounts(
-          java.util.Map<java.lang.String, java.lang.Integer> values) {
+          java.util.Map<java.lang.String, java.lang.Long> values) {
         internalGetMutableCounts().getMutableMap()
             .putAll(values);
         return this;
       }
 
-      private int numberOfQueues_ ;
+      private long numberOfQueues_ ;
       /**
        * <pre>
        * number of active queues in the frontier
        * </pre>
        *
-       * <code>uint32 numberOfQueues = 4;</code>
+       * <code>uint64 numberOfQueues = 4;</code>
        * @return The numberOfQueues.
        */
       @java.lang.Override
-      public int getNumberOfQueues() {
+      public long getNumberOfQueues() {
         return numberOfQueues_;
       }
       /**
@@ -1019,11 +1021,11 @@ public final class Urlfrontier {
        * number of active queues in the frontier
        * </pre>
        *
-       * <code>uint32 numberOfQueues = 4;</code>
+       * <code>uint64 numberOfQueues = 4;</code>
        * @param value The numberOfQueues to set.
        * @return This builder for chaining.
        */
-      public Builder setNumberOfQueues(int value) {
+      public Builder setNumberOfQueues(long value) {
         
         numberOfQueues_ = value;
         onChanged();
@@ -1034,12 +1036,12 @@ public final class Urlfrontier {
        * number of active queues in the frontier
        * </pre>
        *
-       * <code>uint32 numberOfQueues = 4;</code>
+       * <code>uint64 numberOfQueues = 4;</code>
        * @return This builder for chaining.
        */
       public Builder clearNumberOfQueues() {
         
-        numberOfQueues_ = 0;
+        numberOfQueues_ = 0L;
         onChanged();
         return this;
       }
@@ -4452,7 +4454,7 @@ public final class Urlfrontier {
 
     /**
      * <pre>
-     *  amount of time before a URL can be unlocked and sent again for fetching 
+     *  delay in seconds before a URL can be unlocked and sent again for fetching 
      * </pre>
      *
      * <code>uint32 delay_requestable = 4;</code>
@@ -4643,7 +4645,7 @@ public final class Urlfrontier {
     private int delayRequestable_;
     /**
      * <pre>
-     *  amount of time before a URL can be unlocked and sent again for fetching 
+     *  delay in seconds before a URL can be unlocked and sent again for fetching 
      * </pre>
      *
      * <code>uint32 delay_requestable = 4;</code>
@@ -5196,7 +5198,7 @@ public final class Urlfrontier {
       private int delayRequestable_ ;
       /**
        * <pre>
-       *  amount of time before a URL can be unlocked and sent again for fetching 
+       *  delay in seconds before a URL can be unlocked and sent again for fetching 
        * </pre>
        *
        * <code>uint32 delay_requestable = 4;</code>
@@ -5208,7 +5210,7 @@ public final class Urlfrontier {
       }
       /**
        * <pre>
-       *  amount of time before a URL can be unlocked and sent again for fetching 
+       *  delay in seconds before a URL can be unlocked and sent again for fetching 
        * </pre>
        *
        * <code>uint32 delay_requestable = 4;</code>
@@ -5223,7 +5225,7 @@ public final class Urlfrontier {
       }
       /**
        * <pre>
-       *  amount of time before a URL can be unlocked and sent again for fetching 
+       *  delay in seconds before a URL can be unlocked and sent again for fetching 
        * </pre>
        *
        * <code>uint32 delay_requestable = 4;</code>
@@ -8889,10 +8891,10 @@ public final class Urlfrontier {
   static {
     java.lang.String[] descriptorData = {
       "\n\021urlfrontier.proto\022\013urlfrontier\"\237\001\n\005Sta" +
-      "ts\022\014\n\004size\030\001 \001(\r\022\021\n\tinProcess\030\002 \001(\r\022.\n\006c" +
+      "ts\022\014\n\004size\030\001 \001(\004\022\021\n\tinProcess\030\002 \001(\r\022.\n\006c" +
       "ounts\030\003 \003(\0132\036.urlfrontier.Stats.CountsEn" +
-      "try\022\026\n\016numberOfQueues\030\004 \001(\r\032-\n\013CountsEnt" +
-      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\r:\0028\001\"\007\n\005Em" +
+      "try\022\026\n\016numberOfQueues\030\004 \001(\004\032-\n\013CountsEnt" +
+      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\004:\0028\001\"\007\n\005Em" +
       "pty\"\030\n\007Boolean\022\r\n\005state\030\001 \001(\010\"\027\n\006String\022" +
       "\r\n\005value\030\001 \001(\t\"\030\n\007Integer\022\r\n\005value\030\001 \001(\004" +
       "\"\034\n\nStringList\022\016\n\006values\030\001 \003(\t\"-\n\020BlockQ" +
