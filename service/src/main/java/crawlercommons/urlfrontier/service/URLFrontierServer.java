@@ -17,38 +17,54 @@
 
 package crawlercommons.urlfrontier.service;
 
-import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import org.slf4j.LoggerFactory;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
-public class URLFrontierServer {
-
-	public static final int DEFAULT_PORT = 7071;
+@Command(name = "URL Frontier Server", mixinStandardHelpOptions = true, version = "1.0")
+public class URLFrontierServer implements Callable<Integer> {
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLFrontierServer.class);
 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		// TODO READ CONFIG FILE AND TAKE PORT FROM THERE OR COMMAND LINE
-		URLFrontierServer server = new URLFrontierServer(DEFAULT_PORT);
-		server.start();
-		server.blockUntilShutdown();
-	}
+	@Option(names = { "-p",
+			"--port" }, defaultValue = "7071", paramLabel = "NUM", description = "URL Frontier port (default to 7071)")
+	int port;
 
 	private Server server;
 
-	public URLFrontierServer(int port) {
-		// TODO make the implementation configurable
-		URLFrontierImplBase service = new DummyURLFrontierService();
-		this.server = ServerBuilder.forPort(port).addService(service).build();
+	public static void main(String... args) {
+		CommandLine cli = new CommandLine(new URLFrontierServer());
+		int exitCode = cli.execute(args);
+		System.exit(exitCode);
 	}
 
-	public void start() throws IOException {
+	@Override
+	public Integer call() {
+		try {
+			start();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return -1;
+		}
+		return 0;
+	}
+
+	public void start() throws Exception {
+		// TODO make the implementation configurable
+		URLFrontierImplBase service = new DummyURLFrontierService();
+
+		this.server = ServerBuilder.forPort(port).addService(service).build();
 		server.start();
 		LOG.info("Started URLFrontierServer on port {}", server.getPort());
+
+		blockUntilShutdown();
 	}
 
 	public void stop() {
