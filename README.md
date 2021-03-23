@@ -1,4 +1,4 @@
-<img src="https://docs.google.com/uc?export=download&id=171QnHaJLGg3aCa-ysVK-xyhlGGeCQYWX" alt="URL Frontier" width="250"/>
+<img src="logo.svg" alt="URL Frontier" width="250"/>
 
 Discovering content on the web is possible thanks to web crawlers, luckily there are many excellent open source solutions for this; however, most of them have their own way of storing and accessing the information about the URLs.
 
