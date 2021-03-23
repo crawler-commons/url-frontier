@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.github.crawler-commons</groupId>
 		<artifactId>urlfrontier</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>0.1-SNAPSHOT</version>
 	</parent>
 
 	<name>urlfrontier-test-suite</name>
@@ -16,9 +16,17 @@
 
 	<description>Test suite for a URLFrontier Service</description>
 
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
 	<properties>
 		<urlfrontier.host>localhost</urlfrontier.host>
 		<urlfrontier.port>7071</urlfrontier.port>
+		<maven.test.skip>true</maven.test.skip>
 	</properties>
 
 	<build>
