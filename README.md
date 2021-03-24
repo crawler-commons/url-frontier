@@ -17,6 +17,6 @@ Please use the [project mailing list](mailto:crawler-commons@googlegroups.com) o
 This project is funded through the [NGI0 Discovery Fund](https://nlnet.nl/discovery), a fund established by NLnet with financial support from the European Commission's [Next Generation Internet programme](https://ngi.eu/), under the aegis of DG Communications Networks, Content and Technology under grant agreement No 825322. 
 
 ![NLNet](https://nlnet.nl/image/logo_nlnet.svg)
-
-![NGI0](https://nlnet.nl/image/logos/NGI0_tag.png)
+<br>
+<img src="https://nlnet.nl/image/logos/NGI0_tag.png" alt="NGI0" height="80"/>
 
