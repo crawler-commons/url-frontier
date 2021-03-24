@@ -64,7 +64,19 @@ public class URLFrontierServer implements Callable<Integer> {
 		server.start();
 		LOG.info("Started URLFrontierServer on port {}", server.getPort());
 
+		registerShutdownHook();
+
 		blockUntilShutdown();
+	}
+
+	private void registerShutdownHook() {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			try {
+				stop();
+			} catch (Exception e) {
+				LOG.error("Error when trying to shutdown a lifecycle component: " + this.getClass().getName(), e);
+			}
+		}));
 	}
 
 	public void stop() {
