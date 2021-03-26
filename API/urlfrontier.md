@@ -11,6 +11,7 @@
     - [GetParams](#urlfrontier.GetParams)
     - [Integer](#urlfrontier.Integer)
     - [KnownURLItem](#urlfrontier.KnownURLItem)
+    - [QueueDelayParams](#urlfrontier.QueueDelayParams)
     - [Stats](#urlfrontier.Stats)
     - [Stats.CountsEntry](#urlfrontier.Stats.CountsEntry)
     - [String](#urlfrontier.String)
@@ -133,6 +134,22 @@ it will be elligible for fetching after the delay has elapsed.
 | ----- | ---- | ----- | ----------- |
 | info | [URLInfo](#urlfrontier.URLInfo) |  |  |
 | refetchable_from_date | [uint64](#uint64) |  | Expressed in seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. Optional, the default value of 0 indicates that a URL should not be refetched. |
+
+
+
+
+
+
+<a name="urlfrontier.QueueDelayParams"></a>
+
+### QueueDelayParams
+Parameter message for SetDelay *
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  | ID for the queue - an empty value sets the default for all the queues * |
+| delay_requestable | [uint32](#uint32) |  | delay in seconds before a queue can provide new URLs |
 
 
 
@@ -267,10 +284,12 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 | ----------- | ------------ | ------------- | ------------|
 | ListQueues | [Integer](#urlfrontier.Integer) | [StringList](#urlfrontier.StringList) | Return the names of up to N active queues a queue is active if it has URLs due for fetching; the default value of 0 sets no limit to the number of queue names to return * |
 | GetURLs | [GetParams](#urlfrontier.GetParams) | [URLInfo](#urlfrontier.URLInfo) stream | Stream URLs due for fetching from M queues with up to N items per queue * |
-| PutURLs | [URLItem](#urlfrontier.URLItem) stream | [String](#urlfrontier.String) stream | Pushes URL items to the server; they get created (if they don&#39;t already exist) in case of DiscoveredURLItems or updated if KnownURLItems * |
+| PutURLs | [URLItem](#urlfrontier.URLItem) stream | [String](#urlfrontier.String) stream | Push URL items to the server; they get created (if they don&#39;t already exist) in case of DiscoveredURLItems or updated if KnownURLItems * |
 | GetStats | [String](#urlfrontier.String) | [Stats](#urlfrontier.Stats) | Return stats for a specific queue or the whole crawl if the value if empty or null * |
 | DeleteQueue | [String](#urlfrontier.String) | [Empty](#urlfrontier.Empty) | Delete the queue based on the key in parameter * |
 | BlockQueueUntil | [BlockQueueParams](#urlfrontier.BlockQueueParams) | [Empty](#urlfrontier.Empty) | Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. |
+| SetActive | [Boolean](#urlfrontier.Boolean) | [Empty](#urlfrontier.Empty) | De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. * |
+| SetDelay | [QueueDelayParams](#urlfrontier.QueueDelayParams) | [Empty](#urlfrontier.Empty) | Set a delay from a given queue. No URLs will be obtained via GetURLs for this queue until the number of seconds specified has elapsed since the last time URLs were retrieved. Usually informed by the delay setting of robots.txt. |
 
  
 

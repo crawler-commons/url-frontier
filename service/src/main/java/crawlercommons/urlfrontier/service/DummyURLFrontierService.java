@@ -33,8 +33,11 @@ import java.util.PriorityQueue;
 
 import org.slf4j.LoggerFactory;
 
+import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
+import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
@@ -53,6 +56,10 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 	private Map<String, URLQueue> queues = Collections.synchronizedMap(new LinkedHashMap<String, URLQueue>());
 
+	private boolean active = true;
+
+	private int defaultDelayForQueues = 1;
+
 	static class URLQueue extends PriorityQueue<InternalURL> {
 
 		URLQueue(InternalURL initial) {
@@ -63,6 +70,12 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		// these won't be refetched
 
 		private HashSet<String> completed = new HashSet<>();
+
+		private long blockedUntil = -1;
+
+		private int delay = 1;
+
+		private long lastProduced = 0;
 
 		public int getInProcess() {
 			// a URL in process has a heldUntil and is at the beginning of a queue
@@ -93,6 +106,31 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		public int getCountCompleted() {
 			return completed.size();
 		}
+
+		public void setBlockedUntil(long until) {
+			blockedUntil = until;
+		}
+
+		public long getBlockedUntil() {
+			return blockedUntil;
+		}
+
+		public void setDelay(int delayRequestable) {
+			this.delay = delayRequestable;
+		}
+
+		public long getLastProduced() {
+			return lastProduced;
+		}
+
+		public void setLastProduced(long lastProduced) {
+			this.lastProduced = lastProduced;
+		}
+
+		public int getDelay() {
+			return delay;
+		}
+
 	}
 
 	/**
@@ -182,6 +220,11 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		Iterator<Entry<String, URLQueue>> iterator = queues.entrySet().iterator();
 		while (iterator.hasNext() && num <= maxQueues) {
 			Entry<String, URLQueue> e = iterator.next();
+			// check that it isn't blocked
+			if (e.getValue().getBlockedUntil() >= now) {
+				continue;
+			}
+
 			// check that the queue has URLs due for fetching
 			if (e.getValue().peek().nextFetchDate <= now) {
 				list.addValues(e.getKey());
@@ -205,6 +248,13 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 	@Override
 	public void getURLs(GetParams request, StreamObserver<URLInfo> responseObserver) {
+
+		// on hold
+		if (!active) {
+			responseObserver.onCompleted();
+			return;
+		}
+
 		int maxQueues = request.getMaxQueues();
 		int maxURLsPerQueue = request.getMaxUrlsPerQueue();
 		int secsUntilRequestable = request.getDelayRequestable();
@@ -234,10 +284,22 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		// want a specific key only?
 		// default is an empty string so should never be null
 		if (key != null && key.length() >= 1) {
-			PriorityQueue<InternalURL> queue = queues.get(key);
+			URLQueue queue = queues.get(key);
 
 			// the queue does not exist
 			if (queue == null) {
+				responseObserver.onCompleted();
+				return;
+			}
+
+			// it is locked
+			if (queue.getBlockedUntil() >= now) {
+				responseObserver.onCompleted();
+				return;
+			}
+
+			// too early?
+			if (queue.getLastProduced() + queue.getDelay() >= now) {
 				responseObserver.onCompleted();
 				return;
 			}
@@ -246,6 +308,10 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			responseObserver.onCompleted();
 
 			LOG.info("Sent {} from queue {} in {} msec", totalSent, key, (System.currentTimeMillis() - start));
+
+			if (totalSent != 0) {
+				queue.setLastProduced(now);
+			}
 
 			return;
 		}
@@ -267,17 +333,27 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				// We remove the entry and put it at the end of the map
 				iterator.remove();
 
-				// TODO reap empty queues & put their local caches into a global one
+				// Put the entry at the end
+				queues.put(e.getKey(), e.getValue());
+
+				// it is locked
+				if (e.getValue().getBlockedUntil() >= now) {
+					continue;
+				}
+
+				// too early?
+				if (e.getValue().getLastProduced() + e.getValue().getDelay() >= now) {
+					continue;
+				}
 
 				int sentForQ = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
 						responseObserver);
 				if (sentForQ > 0) {
+					e.getValue().setLastProduced(now);
 					totalSent += sentForQ;
 					numQueuesSent++;
 				}
 
-				// Put the entry at the end no matter the result
-				queues.put(e.getKey(), e.getValue());
 			}
 		}
 
@@ -379,7 +455,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 						queue.add(iu);
 					}
 				}
-				
+
 				responseObserver
 						.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(iu.url).build());
 			}
@@ -439,8 +515,37 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				.build();
 		responseObserver.onNext(stats);
 		responseObserver.onCompleted();
-		return;
+	}
 
+	@Override
+	public void setActive(crawlercommons.urlfrontier.Urlfrontier.Boolean request,
+			StreamObserver<Empty> responseObserver) {
+		active = request.getState();
+		responseObserver.onNext(Empty.getDefaultInstance());
+		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void blockQueueUntil(BlockQueueParams request, StreamObserver<Empty> responseObserver) {
+		URLQueue queue = queues.get(request.getKey());
+		if (queue != null) {
+			queue.setBlockedUntil(request.getTime());
+		}
+		responseObserver.onNext(Empty.getDefaultInstance());
+		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void setDelay(QueueDelayParams request, StreamObserver<Empty> responseObserver) {
+		String key = request.getKey();
+		if (key.isEmpty()) {
+			this.defaultDelayForQueues = request.getDelayRequestable();
+		} else {
+			URLQueue queue = queues.get(request.getKey());
+			if (queue != null) {
+				queue.setDelay(request.getDelayRequestable());
+			}
+		}
 	}
 
 }

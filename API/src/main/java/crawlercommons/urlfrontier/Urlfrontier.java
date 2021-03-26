@@ -3700,6 +3700,708 @@ public final class Urlfrontier {
 
   }
 
+  public interface QueueDelayParamsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:urlfrontier.QueueDelayParams)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     ** ID for the queue - an empty value sets the default for all the queues *
+     * </pre>
+     *
+     * <code>string key = 1;</code>
+     * @return The key.
+     */
+    java.lang.String getKey();
+    /**
+     * <pre>
+     ** ID for the queue - an empty value sets the default for all the queues *
+     * </pre>
+     *
+     * <code>string key = 1;</code>
+     * @return The bytes for key.
+     */
+    com.google.protobuf.ByteString
+        getKeyBytes();
+
+    /**
+     * <pre>
+     *  delay in seconds before a queue can provide new URLs
+     * </pre>
+     *
+     * <code>uint32 delay_requestable = 2;</code>
+     * @return The delayRequestable.
+     */
+    int getDelayRequestable();
+  }
+  /**
+   * <pre>
+   ** Parameter message for SetDelay *
+   * </pre>
+   *
+   * Protobuf type {@code urlfrontier.QueueDelayParams}
+   */
+  public static final class QueueDelayParams extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:urlfrontier.QueueDelayParams)
+      QueueDelayParamsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use QueueDelayParams.newBuilder() to construct.
+    private QueueDelayParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private QueueDelayParams() {
+      key_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new QueueDelayParams();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private QueueDelayParams(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              key_ = s;
+              break;
+            }
+            case 16: {
+
+              delayRequestable_ = input.readUInt32();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueDelayParams_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.class, crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.Builder.class);
+    }
+
+    public static final int KEY_FIELD_NUMBER = 1;
+    private volatile java.lang.Object key_;
+    /**
+     * <pre>
+     ** ID for the queue - an empty value sets the default for all the queues *
+     * </pre>
+     *
+     * <code>string key = 1;</code>
+     * @return The key.
+     */
+    @java.lang.Override
+    public java.lang.String getKey() {
+      java.lang.Object ref = key_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        key_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     ** ID for the queue - an empty value sets the default for all the queues *
+     * </pre>
+     *
+     * <code>string key = 1;</code>
+     * @return The bytes for key.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKeyBytes() {
+      java.lang.Object ref = key_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        key_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DELAY_REQUESTABLE_FIELD_NUMBER = 2;
+    private int delayRequestable_;
+    /**
+     * <pre>
+     *  delay in seconds before a queue can provide new URLs
+     * </pre>
+     *
+     * <code>uint32 delay_requestable = 2;</code>
+     * @return The delayRequestable.
+     */
+    @java.lang.Override
+    public int getDelayRequestable() {
+      return delayRequestable_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getKeyBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
+      }
+      if (delayRequestable_ != 0) {
+        output.writeUInt32(2, delayRequestable_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getKeyBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
+      }
+      if (delayRequestable_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(2, delayRequestable_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams)) {
+        return super.equals(obj);
+      }
+      crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams other = (crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) obj;
+
+      if (!getKey()
+          .equals(other.getKey())) return false;
+      if (getDelayRequestable()
+          != other.getDelayRequestable()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + KEY_FIELD_NUMBER;
+      hash = (53 * hash) + getKey().hashCode();
+      hash = (37 * hash) + DELAY_REQUESTABLE_FIELD_NUMBER;
+      hash = (53 * hash) + getDelayRequestable();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     ** Parameter message for SetDelay *
+     * </pre>
+     *
+     * Protobuf type {@code urlfrontier.QueueDelayParams}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:urlfrontier.QueueDelayParams)
+        crawlercommons.urlfrontier.Urlfrontier.QueueDelayParamsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueDelayParams_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.class, crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.Builder.class);
+      }
+
+      // Construct using crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        key_ = "";
+
+        delayRequestable_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueDelayParams_descriptor;
+      }
+
+      @java.lang.Override
+      public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams getDefaultInstanceForType() {
+        return crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams build() {
+        crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams buildPartial() {
+        crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams result = new crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams(this);
+        result.key_ = key_;
+        result.delayRequestable_ = delayRequestable_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) {
+          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams other) {
+        if (other == crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.getDefaultInstance()) return this;
+        if (!other.getKey().isEmpty()) {
+          key_ = other.key_;
+          onChanged();
+        }
+        if (other.getDelayRequestable() != 0) {
+          setDelayRequestable(other.getDelayRequestable());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object key_ = "";
+      /**
+       * <pre>
+       ** ID for the queue - an empty value sets the default for all the queues *
+       * </pre>
+       *
+       * <code>string key = 1;</code>
+       * @return The key.
+       */
+      public java.lang.String getKey() {
+        java.lang.Object ref = key_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          key_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       ** ID for the queue - an empty value sets the default for all the queues *
+       * </pre>
+       *
+       * <code>string key = 1;</code>
+       * @return The bytes for key.
+       */
+      public com.google.protobuf.ByteString
+          getKeyBytes() {
+        java.lang.Object ref = key_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          key_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       ** ID for the queue - an empty value sets the default for all the queues *
+       * </pre>
+       *
+       * <code>string key = 1;</code>
+       * @param value The key to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKey(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        key_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       ** ID for the queue - an empty value sets the default for all the queues *
+       * </pre>
+       *
+       * <code>string key = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKey() {
+        
+        key_ = getDefaultInstance().getKey();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       ** ID for the queue - an empty value sets the default for all the queues *
+       * </pre>
+       *
+       * <code>string key = 1;</code>
+       * @param value The bytes for key to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKeyBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        key_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int delayRequestable_ ;
+      /**
+       * <pre>
+       *  delay in seconds before a queue can provide new URLs
+       * </pre>
+       *
+       * <code>uint32 delay_requestable = 2;</code>
+       * @return The delayRequestable.
+       */
+      @java.lang.Override
+      public int getDelayRequestable() {
+        return delayRequestable_;
+      }
+      /**
+       * <pre>
+       *  delay in seconds before a queue can provide new URLs
+       * </pre>
+       *
+       * <code>uint32 delay_requestable = 2;</code>
+       * @param value The delayRequestable to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDelayRequestable(int value) {
+        
+        delayRequestable_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *  delay in seconds before a queue can provide new URLs
+       * </pre>
+       *
+       * <code>uint32 delay_requestable = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDelayRequestable() {
+        
+        delayRequestable_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:urlfrontier.QueueDelayParams)
+    }
+
+    // @@protoc_insertion_point(class_scope:urlfrontier.QueueDelayParams)
+    private static final crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams();
+    }
+
+    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<QueueDelayParams>
+        PARSER = new com.google.protobuf.AbstractParser<QueueDelayParams>() {
+      @java.lang.Override
+      public QueueDelayParams parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new QueueDelayParams(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<QueueDelayParams> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<QueueDelayParams> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface BlockQueueParamsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:urlfrontier.BlockQueueParams)
       com.google.protobuf.MessageOrBuilder {
@@ -8847,6 +9549,11 @@ public final class Urlfrontier {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_urlfrontier_StringList_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_urlfrontier_QueueDelayParams_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_urlfrontier_BlockQueueParams_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -8897,32 +9604,37 @@ public final class Urlfrontier {
       "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\004:\0028\001\"\007\n\005Em" +
       "pty\"\030\n\007Boolean\022\r\n\005state\030\001 \001(\010\"\027\n\006String\022" +
       "\r\n\005value\030\001 \001(\t\"\030\n\007Integer\022\r\n\005value\030\001 \001(\004" +
-      "\"\034\n\nStringList\022\016\n\006values\030\001 \003(\t\"-\n\020BlockQ" +
-      "ueueParams\022\013\n\003key\030\001 \001(\t\022\014\n\004time\030\002 \001(\004\"c\n" +
-      "\tGetParams\022\032\n\022max_urls_per_queue\030\001 \001(\r\022\022" +
-      "\n\nmax_queues\030\002 \001(\r\022\013\n\003key\030\003 \001(\t\022\031\n\021delay" +
-      "_requestable\030\004 \001(\r\"s\n\007URLItem\0224\n\ndiscove" +
-      "red\030\001 \001(\0132\036.urlfrontier.DiscoveredURLIte" +
-      "mH\000\022*\n\005known\030\002 \001(\0132\031.urlfrontier.KnownUR" +
-      "LItemH\000B\006\n\004item\"\243\001\n\007URLInfo\022\013\n\003url\030\001 \001(\t" +
-      "\022\013\n\003key\030\002 \001(\t\0224\n\010metadata\030\003 \003(\0132\".urlfro" +
-      "ntier.URLInfo.MetadataEntry\032H\n\rMetadataE" +
-      "ntry\022\013\n\003key\030\001 \001(\t\022&\n\005value\030\002 \001(\0132\027.urlfr" +
-      "ontier.StringList:\0028\001\"Q\n\014KnownURLItem\022\"\n" +
-      "\004info\030\001 \001(\0132\024.urlfrontier.URLInfo\022\035\n\025ref" +
-      "etchable_from_date\030\002 \001(\004\"7\n\021DiscoveredUR" +
-      "LItem\022\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLInf" +
-      "o2\376\002\n\013URLFrontier\022=\n\nListQueues\022\024.urlfro" +
-      "ntier.Integer\032\027.urlfrontier.StringList\"\000" +
-      "\022;\n\007GetURLs\022\026.urlfrontier.GetParams\032\024.ur" +
-      "lfrontier.URLInfo\"\0000\001\022:\n\007PutURLs\022\024.urlfr" +
-      "ontier.URLItem\032\023.urlfrontier.String\"\000(\0010" +
-      "\001\0225\n\010GetStats\022\023.urlfrontier.String\032\022.url" +
-      "frontier.Stats\"\000\0228\n\013DeleteQueue\022\023.urlfro" +
-      "ntier.String\032\022.urlfrontier.Empty\"\000\022F\n\017Bl" +
-      "ockQueueUntil\022\035.urlfrontier.BlockQueuePa" +
-      "rams\032\022.urlfrontier.Empty\"\000B\034\n\032crawlercom" +
-      "mons.urlfrontierb\006proto3"
+      "\"\034\n\nStringList\022\016\n\006values\030\001 \003(\t\":\n\020QueueD" +
+      "elayParams\022\013\n\003key\030\001 \001(\t\022\031\n\021delay_request" +
+      "able\030\002 \001(\r\"-\n\020BlockQueueParams\022\013\n\003key\030\001 " +
+      "\001(\t\022\014\n\004time\030\002 \001(\004\"c\n\tGetParams\022\032\n\022max_ur" +
+      "ls_per_queue\030\001 \001(\r\022\022\n\nmax_queues\030\002 \001(\r\022\013" +
+      "\n\003key\030\003 \001(\t\022\031\n\021delay_requestable\030\004 \001(\r\"s" +
+      "\n\007URLItem\0224\n\ndiscovered\030\001 \001(\0132\036.urlfront" +
+      "ier.DiscoveredURLItemH\000\022*\n\005known\030\002 \001(\0132\031" +
+      ".urlfrontier.KnownURLItemH\000B\006\n\004item\"\243\001\n\007" +
+      "URLInfo\022\013\n\003url\030\001 \001(\t\022\013\n\003key\030\002 \001(\t\0224\n\010met" +
+      "adata\030\003 \003(\0132\".urlfrontier.URLInfo.Metada" +
+      "taEntry\032H\n\rMetadataEntry\022\013\n\003key\030\001 \001(\t\022&\n" +
+      "\005value\030\002 \001(\0132\027.urlfrontier.StringList:\0028" +
+      "\001\"Q\n\014KnownURLItem\022\"\n\004info\030\001 \001(\0132\024.urlfro" +
+      "ntier.URLInfo\022\035\n\025refetchable_from_date\030\002" +
+      " \001(\004\"7\n\021DiscoveredURLItem\022\"\n\004info\030\001 \001(\0132" +
+      "\024.urlfrontier.URLInfo2\370\003\n\013URLFrontier\022=\n" +
+      "\nListQueues\022\024.urlfrontier.Integer\032\027.urlf" +
+      "rontier.StringList\"\000\022;\n\007GetURLs\022\026.urlfro" +
+      "ntier.GetParams\032\024.urlfrontier.URLInfo\"\0000" +
+      "\001\022:\n\007PutURLs\022\024.urlfrontier.URLItem\032\023.url" +
+      "frontier.String\"\000(\0010\001\0225\n\010GetStats\022\023.urlf" +
+      "rontier.String\032\022.urlfrontier.Stats\"\000\0228\n\013" +
+      "DeleteQueue\022\023.urlfrontier.String\032\022.urlfr" +
+      "ontier.Empty\"\000\022F\n\017BlockQueueUntil\022\035.urlf" +
+      "rontier.BlockQueueParams\032\022.urlfrontier.E" +
+      "mpty\"\000\0227\n\tSetActive\022\024.urlfrontier.Boolea" +
+      "n\032\022.urlfrontier.Empty\"\000\022?\n\010SetDelay\022\035.ur" +
+      "lfrontier.QueueDelayParams\032\022.urlfrontier" +
+      ".Empty\"\000B\034\n\032crawlercommons.urlfrontierb\006" +
+      "proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -8970,26 +9682,32 @@ public final class Urlfrontier {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_urlfrontier_StringList_descriptor,
         new java.lang.String[] { "Values", });
-    internal_static_urlfrontier_BlockQueueParams_descriptor =
+    internal_static_urlfrontier_QueueDelayParams_descriptor =
       getDescriptor().getMessageTypes().get(6);
+    internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_urlfrontier_QueueDelayParams_descriptor,
+        new java.lang.String[] { "Key", "DelayRequestable", });
+    internal_static_urlfrontier_BlockQueueParams_descriptor =
+      getDescriptor().getMessageTypes().get(7);
     internal_static_urlfrontier_BlockQueueParams_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_urlfrontier_BlockQueueParams_descriptor,
         new java.lang.String[] { "Key", "Time", });
     internal_static_urlfrontier_GetParams_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_urlfrontier_GetParams_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_urlfrontier_GetParams_descriptor,
         new java.lang.String[] { "MaxUrlsPerQueue", "MaxQueues", "Key", "DelayRequestable", });
     internal_static_urlfrontier_URLItem_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_urlfrontier_URLItem_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_urlfrontier_URLItem_descriptor,
         new java.lang.String[] { "Discovered", "Known", "Item", });
     internal_static_urlfrontier_URLInfo_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_urlfrontier_URLInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_urlfrontier_URLInfo_descriptor,
@@ -9001,13 +9719,13 @@ public final class Urlfrontier {
         internal_static_urlfrontier_URLInfo_MetadataEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_urlfrontier_KnownURLItem_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_urlfrontier_KnownURLItem_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_urlfrontier_KnownURLItem_descriptor,
         new java.lang.String[] { "Info", "RefetchableFromDate", });
     internal_static_urlfrontier_DiscoveredURLItem_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_urlfrontier_DiscoveredURLItem_descriptor,

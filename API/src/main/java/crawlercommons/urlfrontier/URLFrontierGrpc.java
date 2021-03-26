@@ -213,6 +213,68 @@ public final class URLFrontierGrpc {
     return getBlockQueueUntilMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Boolean,
+      crawlercommons.urlfrontier.Urlfrontier.Empty> getSetActiveMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetActive",
+      requestType = crawlercommons.urlfrontier.Urlfrontier.Boolean.class,
+      responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Boolean,
+      crawlercommons.urlfrontier.Urlfrontier.Empty> getSetActiveMethod() {
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Boolean, crawlercommons.urlfrontier.Urlfrontier.Empty> getSetActiveMethod;
+    if ((getSetActiveMethod = URLFrontierGrpc.getSetActiveMethod) == null) {
+      synchronized (URLFrontierGrpc.class) {
+        if ((getSetActiveMethod = URLFrontierGrpc.getSetActiveMethod) == null) {
+          URLFrontierGrpc.getSetActiveMethod = getSetActiveMethod =
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.Boolean, crawlercommons.urlfrontier.Urlfrontier.Empty>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetActive"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.Boolean.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance()))
+              .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("SetActive"))
+              .build();
+        }
+      }
+    }
+    return getSetActiveMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams,
+      crawlercommons.urlfrontier.Urlfrontier.Empty> getSetDelayMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetDelay",
+      requestType = crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.class,
+      responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams,
+      crawlercommons.urlfrontier.Urlfrontier.Empty> getSetDelayMethod() {
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams, crawlercommons.urlfrontier.Urlfrontier.Empty> getSetDelayMethod;
+    if ((getSetDelayMethod = URLFrontierGrpc.getSetDelayMethod) == null) {
+      synchronized (URLFrontierGrpc.class) {
+        if ((getSetDelayMethod = URLFrontierGrpc.getSetDelayMethod) == null) {
+          URLFrontierGrpc.getSetDelayMethod = getSetDelayMethod =
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams, crawlercommons.urlfrontier.Urlfrontier.Empty>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetDelay"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance()))
+              .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("SetDelay"))
+              .build();
+        }
+      }
+    }
+    return getSetDelayMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -284,7 +346,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Pushes URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems *
+     ** Push URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems *
      * </pre>
      */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
@@ -322,6 +384,29 @@ public final class URLFrontierGrpc {
     public void blockQueueUntil(crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams request,
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
       asyncUnimplementedUnaryCall(getBlockQueueUntilMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     ** De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. *
+     * </pre>
+     */
+    public void setActive(crawlercommons.urlfrontier.Urlfrontier.Boolean request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetActiveMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     ** Set a delay from a given queue.
+     *No URLs will be obtained via GetURLs for this queue until the number of seconds specified has 
+     *elapsed since the last time URLs were retrieved.
+     *Usually informed by the delay setting of robots.txt.
+     * </pre>
+     */
+    public void setDelay(crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetDelayMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -368,6 +453,20 @@ public final class URLFrontierGrpc {
                 crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams,
                 crawlercommons.urlfrontier.Urlfrontier.Empty>(
                   this, METHODID_BLOCK_QUEUE_UNTIL)))
+          .addMethod(
+            getSetActiveMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                crawlercommons.urlfrontier.Urlfrontier.Boolean,
+                crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                  this, METHODID_SET_ACTIVE)))
+          .addMethod(
+            getSetDelayMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams,
+                crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                  this, METHODID_SET_DELAY)))
           .build();
     }
   }
@@ -411,7 +510,7 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Pushes URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems *
+     ** Push URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems *
      * </pre>
      */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
@@ -453,6 +552,31 @@ public final class URLFrontierGrpc {
         io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getBlockQueueUntilMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     ** De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. *
+     * </pre>
+     */
+    public void setActive(crawlercommons.urlfrontier.Urlfrontier.Boolean request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetActiveMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     ** Set a delay from a given queue.
+     *No URLs will be obtained via GetURLs for this queue until the number of seconds specified has 
+     *elapsed since the last time URLs were retrieved.
+     *Usually informed by the delay setting of robots.txt.
+     * </pre>
+     */
+    public void setDelay(crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetDelayMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -523,6 +647,29 @@ public final class URLFrontierGrpc {
       return blockingUnaryCall(
           getChannel(), getBlockQueueUntilMethod(), getCallOptions(), request);
     }
+
+    /**
+     * <pre>
+     ** De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. *
+     * </pre>
+     */
+    public crawlercommons.urlfrontier.Urlfrontier.Empty setActive(crawlercommons.urlfrontier.Urlfrontier.Boolean request) {
+      return blockingUnaryCall(
+          getChannel(), getSetActiveMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     ** Set a delay from a given queue.
+     *No URLs will be obtained via GetURLs for this queue until the number of seconds specified has 
+     *elapsed since the last time URLs were retrieved.
+     *Usually informed by the delay setting of robots.txt.
+     * </pre>
+     */
+    public crawlercommons.urlfrontier.Urlfrontier.Empty setDelay(crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams request) {
+      return blockingUnaryCall(
+          getChannel(), getSetDelayMethod(), getCallOptions(), request);
+    }
   }
 
   /**
@@ -585,6 +732,31 @@ public final class URLFrontierGrpc {
       return futureUnaryCall(
           getChannel().newCall(getBlockQueueUntilMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     ** De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. *
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Empty> setActive(
+        crawlercommons.urlfrontier.Urlfrontier.Boolean request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetActiveMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     ** Set a delay from a given queue.
+     *No URLs will be obtained via GetURLs for this queue until the number of seconds specified has 
+     *elapsed since the last time URLs were retrieved.
+     *Usually informed by the delay setting of robots.txt.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Empty> setDelay(
+        crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetDelayMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_LIST_QUEUES = 0;
@@ -592,7 +764,9 @@ public final class URLFrontierGrpc {
   private static final int METHODID_GET_STATS = 2;
   private static final int METHODID_DELETE_QUEUE = 3;
   private static final int METHODID_BLOCK_QUEUE_UNTIL = 4;
-  private static final int METHODID_PUT_URLS = 5;
+  private static final int METHODID_SET_ACTIVE = 5;
+  private static final int METHODID_SET_DELAY = 6;
+  private static final int METHODID_PUT_URLS = 7;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -629,6 +803,14 @@ public final class URLFrontierGrpc {
           break;
         case METHODID_BLOCK_QUEUE_UNTIL:
           serviceImpl.blockQueueUntil((crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams) request,
+              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
+          break;
+        case METHODID_SET_ACTIVE:
+          serviceImpl.setActive((crawlercommons.urlfrontier.Urlfrontier.Boolean) request,
+              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
+          break;
+        case METHODID_SET_DELAY:
+          serviceImpl.setDelay((crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) request,
               (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
           break;
         default:
@@ -701,6 +883,8 @@ public final class URLFrontierGrpc {
               .addMethod(getGetStatsMethod())
               .addMethod(getDeleteQueueMethod())
               .addMethod(getBlockQueueUntilMethod())
+              .addMethod(getSetActiveMethod())
+              .addMethod(getSetDelayMethod())
               .build();
         }
       }

@@ -29,7 +29,7 @@ service URLFrontier {
      /** Stream URLs due for fetching from M queues with up to N items per queue **/
      rpc GetURLs(GetParams) returns (stream URLInfo) {}
 
-     /** Pushes URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems **/
+     /** Push URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems **/
      rpc PutURLs(stream URLItem) returns (stream String) {}
 
      /** Return stats for a specific queue or the whole crawl if the value if empty or null **/
@@ -43,6 +43,16 @@ service URLFrontier {
       indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
       **/
      rpc BlockQueueUntil(BlockQueueParams) returns (Empty) {}
+     
+     /** De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. **/
+     rpc SetActive(Boolean) returns (Empty) {}
+     
+     /** Set a delay from a given queue.
+      No URLs will be obtained via GetURLs for this queue until the number of seconds specified has 
+      elapsed since the last time URLs were retrieved.
+       Usually informed by the delay setting of robots.txt.
+      **/
+     rpc SetDelay(QueueDelayParams) returns (Empty) {}
 }
 
 /** 
@@ -76,6 +86,14 @@ message Integer {
 
 message StringList {
   repeated string values = 1;
+}
+
+/** Parameter message for SetDelay **/
+message QueueDelayParams {
+  /** ID for the queue - an empty value sets the default for all the queues **/
+  string key = 1;
+  //  delay in seconds before a queue can provide new URLs
+  uint32 delay_requestable = 2;
 }
 
 /** Parameter message for BlockQueueUntil **/
