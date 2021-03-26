@@ -73,7 +73,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 
 		private long blockedUntil = -1;
 
-		private int delay = 1;
+		private int delay = -1;
 
 		private long lastProduced = 0;
 
@@ -299,7 +299,10 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 			}
 
 			// too early?
-			if (queue.getLastProduced() + queue.getDelay() >= now) {
+			int delay = queue.getDelay();
+			if (delay == -1)
+				delay = defaultDelayForQueues;
+			if (queue.getLastProduced() + delay >= now) {
 				responseObserver.onCompleted();
 				return;
 			}
@@ -342,7 +345,10 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 				}
 
 				// too early?
-				if (e.getValue().getLastProduced() + e.getValue().getDelay() >= now) {
+				int delay = e.getValue().getDelay();
+				if (delay == -1)
+					delay = defaultDelayForQueues;
+				if (e.getValue().getLastProduced() + delay >= now) {
 					continue;
 				}
 
