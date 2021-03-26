@@ -21,4 +21,5 @@ Commands:
   ListQueues  Prints out active queues
   GetStats    Prints out stats from the Frontier
   PutURLs     Send URLs from a file into a Frontier
+  SetActive   Pause or resume the Frontier
 ```
