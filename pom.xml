@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -12,7 +10,7 @@
 	<groupId>com.github.crawler-commons</groupId>
 	<artifactId>urlfrontier</artifactId>
 	<packaging>pom</packaging>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<name>urlfrontier</name>
 
 	<url>https://github.com/crawler-commons/url-frontier</url>
@@ -26,7 +24,7 @@
 		<url>https://github.com/crawler-commons/url-frontier</url>
 		<connection>scm:git:git://github.com/crawler-commons/url-frontier.git</connection>
 		<developerConnection>scm:git:git@github.com:crawler-commons/url-frontier.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>urlfrontier-0.1</tag>
 	</scm>
 
 	<distributionManagement>
