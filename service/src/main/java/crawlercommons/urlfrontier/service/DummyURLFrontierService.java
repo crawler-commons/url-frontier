@@ -46,7 +46,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.stub.StreamObserver;
 
 /**
- * Dummy implementation of a URL Frontier service using in memory data
+ * A simple implementation of a URL Frontier service using in memory data
  * structures. Useful for testing the API.
  **/
 
