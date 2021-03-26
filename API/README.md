@@ -52,6 +52,21 @@ To be added in a future version of the API or handled by the services as extensi
 
 --------------------------------------
 
+# Maven dependencies
+
+The Java code generated from the schema is available as a Maven dependency.
+
+```
+	<dependencies>
+		<dependency>
+			<groupId>com.github.crawler-commons</groupId>
+			<artifactId>urlfrontier-API</artifactId>
+			<version>0.1</version>
+		</dependency>
+	</dependencies>
+```
+
+
 # Code generation
 
 The Java code can be (re)generated as follows; change the OS & processor values if required.
