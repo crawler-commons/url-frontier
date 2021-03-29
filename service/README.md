@@ -6,7 +6,7 @@ The easiest way to run the Frontier is to use Docker and do
 
 ```
  docker pull crawlercommons/url-frontier:0.1
- docker run --rm crawlercommons/url-frontier:0.1
+ docker run --rm --name frontier -p 7071:7071 crawlercommons/url-frontier:0.1
 ```
 
 The service will run on the default port (7071). Clients can connect to it using the gRPC code generated from the API.
