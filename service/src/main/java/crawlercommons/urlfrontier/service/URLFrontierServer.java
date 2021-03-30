@@ -17,18 +17,24 @@
 
 package crawlercommons.urlfrontier.service;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.concurrent.Callable;
 
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase;
+import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Command(name = "URL Frontier Server", mixinStandardHelpOptions = true, version = "1.0")
+@Command(name = "URL Frontier Server", mixinStandardHelpOptions = true, version = "0.2")
 public class URLFrontierServer implements Callable<Integer> {
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLFrontierServer.class);
@@ -36,6 +42,10 @@ public class URLFrontierServer implements Callable<Integer> {
 	@Option(names = { "-p",
 			"--port" }, defaultValue = "7071", paramLabel = "NUM", description = "URL Frontier port (default to 7071)")
 	int port;
+
+	@Option(names = { "-c",
+			"--config" }, required = false, paramLabel = "STRING", description = "JSON configuration file")
+	String config;
 
 	private Server server;
 
@@ -57,12 +67,47 @@ public class URLFrontierServer implements Callable<Integer> {
 	}
 
 	public void start() throws Exception {
-		// TODO make the implementation configurable
-		URLFrontierImplBase service = new DummyURLFrontierService();
+
+		String implementationClassName = MemoryFrontierService.class.getName();
+
+		JsonNode configurationNode = null;
+
+		if (config != null) {
+			try {
+				configurationNode = new ObjectMapper().readTree(new File(config));
+				implementationClassName = configurationNode.get("implementation").asText();
+			} catch (Exception e) {
+				LOG.error("Exception caught when reading the configuration from {}", config, e);
+				System.exit(-1);
+			}
+		}
+
+		Class<?> implementationClass = Class.forName(implementationClassName);
+
+		if (!URLFrontierImplBase.class.isAssignableFrom(implementationClass)) {
+			LOG.error("Implementation class {} does not extend URLFrontierImplBase", implementationClassName);
+			System.exit(-1);
+		}
+
+		URLFrontierImplBase service = null;
+
+		// can it take a JSON node as constructor?
+		if (configurationNode != null) {
+			try {
+				Constructor<?> c = implementationClass.getConstructor(JsonNode.class);
+				c.setAccessible(true);
+				service = (URLFrontierImplBase) c.newInstance(configurationNode);
+			} catch (Exception e) {
+			}
+		}
+
+		if (service == null) {
+			service = (URLFrontierImplBase) implementationClass.newInstance();
+		}
 
 		this.server = ServerBuilder.forPort(port).addService(service).build();
 		server.start();
-		LOG.info("Started URLFrontierServer on port {}", server.getPort());
+		LOG.info("Started URLFrontierServer [{}] on port {}", service.getClass().getSimpleName(), server.getPort());
 
 		registerShutdownHook();
 

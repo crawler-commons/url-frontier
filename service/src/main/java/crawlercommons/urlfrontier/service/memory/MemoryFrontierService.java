@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.urlfrontier.service;
+package crawlercommons.urlfrontier.service.memory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,6 +43,7 @@ import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import io.grpc.stub.StreamObserver;
 
 /**
@@ -50,13 +51,11 @@ import io.grpc.stub.StreamObserver;
  * structures. Useful for testing the API.
  **/
 
-public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase {
+public class MemoryFrontierService extends AbstractFrontierService {
 
-	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DummyURLFrontierService.class);
+	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MemoryFrontierService.class);
 
 	private Map<String, URLQueue> queues = Collections.synchronizedMap(new LinkedHashMap<String, URLQueue>());
-
-	private boolean active = true;
 
 	private int defaultDelayForQueues = 1;
 
@@ -250,7 +249,7 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 	public void getURLs(GetParams request, StreamObserver<URLInfo> responseObserver) {
 
 		// on hold
-		if (!active) {
+		if (!isActive()) {
 			responseObserver.onCompleted();
 			return;
 		}
@@ -520,14 +519,6 @@ public class DummyURLFrontierService extends crawlercommons.urlfrontier.URLFront
 		Stats stats = Stats.newBuilder().setNumberOfQueues(numQueues).setSize(size).setInProcess(inProc).putAllCounts(s)
 				.build();
 		responseObserver.onNext(stats);
-		responseObserver.onCompleted();
-	}
-
-	@Override
-	public void setActive(crawlercommons.urlfrontier.Urlfrontier.Boolean request,
-			StreamObserver<Empty> responseObserver) {
-		active = request.getState();
-		responseObserver.onNext(Empty.getDefaultInstance());
 		responseObserver.onCompleted();
 	}
 

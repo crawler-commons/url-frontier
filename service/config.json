@@ -1,0 +1,3 @@
+{
+	"implementation": "crawlercommons.urlfrontier.service.elasticsearch.ESService"
+}
