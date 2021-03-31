@@ -17,7 +17,9 @@
 
 package crawlercommons.urlfrontier.service;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.concurrent.Callable;
 
@@ -48,6 +50,8 @@ public class URLFrontierServer implements Callable<Integer> {
 	String config;
 
 	private Server server;
+
+	private URLFrontierImplBase service = null;
 
 	public static void main(String... args) {
 		CommandLine cli = new CommandLine(new URLFrontierServer());
@@ -89,8 +93,6 @@ public class URLFrontierServer implements Callable<Integer> {
 			System.exit(-1);
 		}
 
-		URLFrontierImplBase service = null;
-
 		// can it take a JSON node as constructor?
 		if (configurationNode != null) {
 			try {
@@ -98,6 +100,8 @@ public class URLFrontierServer implements Callable<Integer> {
 				c.setAccessible(true);
 				service = (URLFrontierImplBase) c.newInstance(configurationNode);
 			} catch (Exception e) {
+				LOG.error("Exception caught when initialising the service", e);
+				System.exit(-1);
 			}
 		}
 
@@ -125,6 +129,15 @@ public class URLFrontierServer implements Callable<Integer> {
 	}
 
 	public void stop() {
+		// terminate the service if possible
+		if (service != null && Closeable.class.isAssignableFrom(service.getClass())) {
+			try {
+				((Closeable) service).close();
+			} catch (IOException e) {
+				LOG.error("Error when closing service: ", e);
+			}
+		}
+
 		if (server != null) {
 			LOG.info("Shutting down URLFrontierServer on port {}", server.getPort());
 			server.shutdown();
