@@ -23,7 +23,6 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -32,6 +31,8 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 
 import org.slf4j.LoggerFactory;
+
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
@@ -44,7 +45,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.InternalURL;
-import crawlercommons.urlfrontier.service.QueueInterface;
+import crawlercommons.urlfrontier.service.URLQueue;
 import io.grpc.stub.StreamObserver;
 
 /**
@@ -56,131 +57,14 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MemoryFrontierService.class);
 
-	private Map<String, URLQueue> queues = Collections.synchronizedMap(new LinkedHashMap<String, URLQueue>());
+	protected Map<String, URLQueue> queues;
 
-	static class URLQueue extends PriorityQueue<InternalURL> implements QueueInterface {
-
-		URLQueue(InternalURL initial) {
-			this.add(initial);
-		}
-
-		// keep a hash of the completed URLs
-		// these won't be refetched
-
-		private HashSet<String> completed = new HashSet<>();
-
-		private long blockedUntil = -1;
-
-		private int delay = -1;
-
-		private long lastProduced = 0;
-
-		public int getInProcess(long now) {
-			// a URL in process has a heldUntil and is at the beginning of a queue
-			Iterator<InternalURL> iter = this.iterator();
-			int inproc = 0;
-			while (iter.hasNext()) {
-				InternalURL iu = iter.next();
-				if (iu.heldUntil > now)
-					inproc++;
-				// can stop if no heldUntil at all
-				else if (iu.heldUntil == -1)
-					return inproc;
-			}
-			return inproc;
-		}
-
-		@Override
-		public boolean contains(Object iu) {
-			// been fetched before?
-			if (completed.contains(((InternalURL) iu).url)) {
-				return true;
-			}
-			return super.contains(iu);
-		}
-
-		public void addToCompleted(String url) {
-			completed.add(url);
-		}
-
-		public int getCountCompleted() {
-			return completed.size();
-		}
-
-		public void setBlockedUntil(long until) {
-			blockedUntil = until;
-		}
-
-		public long getBlockedUntil() {
-			return blockedUntil;
-		}
-
-		public void setDelay(int delayRequestable) {
-			this.delay = delayRequestable;
-		}
-
-		public long getLastProduced() {
-			return lastProduced;
-		}
-
-		public void setLastProduced(long lastProduced) {
-			this.lastProduced = lastProduced;
-		}
-
-		public int getDelay() {
-			return delay;
-		}
-
+	public MemoryFrontierService(){
+		queues = Collections.synchronizedMap(new LinkedHashMap<String, URLQueue>());
 	}
-
-	@Override
-	public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Integer request,
-			StreamObserver<StringList> responseObserver) {
-
-		long maxQueues = request.getValue();
-		// 0 by default
-		if (maxQueues == 0) {
-			maxQueues = Long.MAX_VALUE;
-		}
-
-		LOG.info("Received request to list queues [max {}]", maxQueues);
-
-		long now = Instant.now().getEpochSecond();
-		int num = 0;
-		Builder list = StringList.newBuilder();
-
-		Iterator<Entry<String, URLQueue>> iterator = queues.entrySet().iterator();
-		while (iterator.hasNext() && num <= maxQueues) {
-			Entry<String, URLQueue> e = iterator.next();
-			// check that it isn't blocked
-			if (e.getValue().getBlockedUntil() >= now) {
-				continue;
-			}
-
-			// check that the queue has URLs due for fetching
-			if (e.getValue().peek().nextFetchDate <= now) {
-				list.addValues(e.getKey());
-				num++;
-			}
-		}
-		responseObserver.onNext(list.build());
-		responseObserver.onCompleted();
-	}
-
-	/**
-	 * <pre>
-	 ** Delete  the queue based on the key in parameter *
-	 * </pre>
-	 */
-	@Override
-	public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
-			io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
-		queues.remove(request.getValue());
-	}
-
+	
 	@Override
 	public void getURLs(GetParams request, StreamObserver<URLInfo> responseObserver) {
-
 		// on hold
 		if (!isActive()) {
 			responseObserver.onCompleted();
@@ -324,12 +208,16 @@ public class MemoryFrontierService extends AbstractFrontierService {
 			}
 
 			// this one is good to go
-			responseObserver.onNext(item.toURLInfo(key));
+			try {
+				responseObserver.onNext(item.toURLInfo(key));
 
-			// mark it as not processable for N secs
-			item.heldUntil = Instant.now().plusSeconds(secsUntilRequestable).getEpochSecond();
+				// mark it as not processable for N secs
+				item.heldUntil = Instant.now().plusSeconds(secsUntilRequestable).getEpochSecond();
 
-			alreadySent++;
+				alreadySent++;
+			} catch (InvalidProtocolBufferException e) {
+				LOG.error("Caught unlikely error ", e);
+			}
 		}
 
 		return alreadySent;
@@ -409,13 +297,11 @@ public class MemoryFrontierService extends AbstractFrontierService {
 				responseObserver.onCompleted();
 			}
 		};
-
 	}
 
 	@Override
 	public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
-			io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats> responseObserver) {
-
+			StreamObserver<Stats> responseObserver) {
 		LOG.info("Received stats request");
 
 		final Map<String, Long> s = new HashMap<>();
@@ -428,7 +314,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 		Collection<URLQueue> _queues = queues.values();
 
 		// specific queue?
-		if (request.getValue().isEmpty()) {
+		if (!request.getValue().isEmpty()) {
 			URLQueue q = queues.get(request.getValue());
 			if (q != null) {
 				_queues = new LinkedList<>();
@@ -458,6 +344,52 @@ public class MemoryFrontierService extends AbstractFrontierService {
 	}
 
 	@Override
+	public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Integer request,
+			StreamObserver<StringList> responseObserver) {
+		long maxQueues = request.getValue();
+		// 0 by default
+		if (maxQueues == 0) {
+			maxQueues = Long.MAX_VALUE;
+		}
+
+		LOG.info("Received request to list queues [max {}]", maxQueues);
+
+		long now = Instant.now().getEpochSecond();
+		int num = 0;
+		Builder list = StringList.newBuilder();
+
+		Iterator<Entry<String, URLQueue>> iterator = queues.entrySet().iterator();
+		while (iterator.hasNext() && num <= maxQueues) {
+			Entry<String, URLQueue> e = iterator.next();
+			// check that it isn't blocked
+			if (e.getValue().getBlockedUntil() >= now) {
+				continue;
+			}
+
+			// check that the queue has URLs due for fetching
+			if (e.getValue().peek().nextFetchDate <= now) {
+				list.addValues(e.getKey());
+				num++;
+			}
+		}
+		responseObserver.onNext(list.build());
+		responseObserver.onCompleted();
+	}
+
+	/**
+	 * <pre>
+	 ** Delete  the queue based on the key in parameter *
+	 * </pre>
+	 */
+	@Override
+	public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
+			StreamObserver<Empty> responseObserver) {
+		queues.remove(request.getValue());
+		responseObserver.onNext(Empty.getDefaultInstance());
+		responseObserver.onCompleted();
+	}
+
+	@Override
 	public void blockQueueUntil(BlockQueueParams request, StreamObserver<Empty> responseObserver) {
 		URLQueue queue = queues.get(request.getKey());
 		if (queue != null) {
@@ -478,6 +410,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
 				queue.setDelay(request.getDelayRequestable());
 			}
 		}
+		responseObserver.onNext(Empty.getDefaultInstance());
+		responseObserver.onCompleted();
 	}
 
 }

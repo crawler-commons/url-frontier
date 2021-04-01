@@ -32,6 +32,7 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
@@ -173,7 +174,15 @@ public class URLFrontierServiceTest {
 
 		Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
 		Assert.assertEquals("incorrect number of inprocesss from stats", 0, stats.getInProcess());
+	}
 
+	@Test
+	public void testDeleteQueue() {
+		Empty deleted = blockingFrontier.deleteQueue(Urlfrontier.String.newBuilder().setValue("key1.com").build());
+
+		Stats stats = blockingFrontier.getStats(Urlfrontier.String.newBuilder().setValue("key1.com").build());
+
+		Assert.assertEquals("incorrect number of queues from stats", 0, stats.getNumberOfQueues());
 	}
 
 }
