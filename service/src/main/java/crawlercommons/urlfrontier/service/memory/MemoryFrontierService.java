@@ -76,14 +76,16 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
 		private long lastProduced = 0;
 
-		public int getInProcess() {
+		public int getInProcess(long now) {
 			// a URL in process has a heldUntil and is at the beginning of a queue
 			Iterator<InternalURL> iter = this.iterator();
 			int inproc = 0;
 			while (iter.hasNext()) {
-				if (iter.next().heldUntil != -1)
+				InternalURL iu = iter.next();
+				if (iu.heldUntil > now)
 					inproc++;
-				else
+				// can stop if no heldUntil at all
+				else if (iu.heldUntil == -1)
 					return inproc;
 			}
 			return inproc;
@@ -386,7 +388,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 			}
 
 			// check that the URL is not already being processed
-			if (item.heldUntil != -1 && item.heldUntil > now) {
+			if (item.heldUntil > now) {
 				continue;
 			}
 
@@ -505,8 +507,10 @@ public class MemoryFrontierService extends AbstractFrontierService {
 			}
 		}
 
+		long now = Instant.now().getEpochSecond();
+
 		for (URLQueue q : _queues) {
-			inProc += q.getInProcess();
+			inProc += q.getInProcess(now);
 			numQueues++;
 			size += q.size();
 			completed += q.getCountCompleted();
