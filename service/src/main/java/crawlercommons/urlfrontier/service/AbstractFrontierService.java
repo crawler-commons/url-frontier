@@ -23,6 +23,16 @@ import io.grpc.stub.StreamObserver;
 public abstract class AbstractFrontierService extends crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase {
 
 	private boolean active = true;
+	
+	private int defaultDelayForQueues = 1;
+	
+	public int getDefaultDelayForQueues() {
+		return defaultDelayForQueues;
+	}
+
+	public void setDefaultDelayForQueues(int defaultDelayForQueues) {
+		this.defaultDelayForQueues = defaultDelayForQueues;
+	}
 
 	protected boolean isActive() {
 		return active;

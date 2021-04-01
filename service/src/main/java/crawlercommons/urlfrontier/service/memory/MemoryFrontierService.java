@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
-import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
@@ -44,6 +43,8 @@ import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
+import crawlercommons.urlfrontier.service.InternalURL;
+import crawlercommons.urlfrontier.service.QueueInterface;
 import io.grpc.stub.StreamObserver;
 
 /**
@@ -57,9 +58,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
 	private Map<String, URLQueue> queues = Collections.synchronizedMap(new LinkedHashMap<String, URLQueue>());
 
-	private int defaultDelayForQueues = 1;
-
-	static class URLQueue extends PriorityQueue<InternalURL> {
+	static class URLQueue extends PriorityQueue<InternalURL> implements QueueInterface {
 
 		URLQueue(InternalURL initial) {
 			this.add(initial);
@@ -130,74 +129,6 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
 		public int getDelay() {
 			return delay;
-		}
-
-	}
-
-	/**
-	 * simpler than the objects from gRPC + sortable and have equals based on URL
-	 * only
-	 **/
-	static class InternalURL implements Comparable<InternalURL> {
-
-		long nextFetchDate;
-		String url;
-		Map<String, StringList> metadata;
-
-		// this is set when the URL is sent for processing
-		// so that a subsequent call to getURLs does not send it again
-		long heldUntil = -1;
-
-		private InternalURL() {
-		}
-
-		/*
-		 * Returns the key if any, whether it is a discovered URL or not and an internal
-		 * object to represent it
-		 **/
-		private static Object[] from(URLItem i) {
-			InternalURL iu = new InternalURL();
-			URLInfo info;
-			Boolean disco = Boolean.TRUE;
-			if (i.hasDiscovered()) {
-				info = i.getDiscovered().getInfo();
-				iu.nextFetchDate = Instant.now().getEpochSecond();
-			} else {
-				KnownURLItem known = i.getKnown();
-				info = known.getInfo();
-				iu.nextFetchDate = known.getRefetchableFromDate();
-				disco = Boolean.FALSE;
-			}
-			iu.metadata = info.getMetadataMap();
-			iu.url = info.getUrl();
-			return new Object[] { info.getKey(), disco, iu };
-		}
-
-		@Override
-		public int compareTo(InternalURL arg0) {
-			int comp = Long.compare(nextFetchDate, arg0.nextFetchDate);
-			if (comp == 0) {
-				return url.compareTo(arg0.url);
-			}
-			return comp;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return url.equals(((InternalURL) obj).url);
-		}
-
-		void setHeldUntil(long t) {
-			heldUntil = t;
-		}
-
-		@Override
-		public int hashCode() {
-			return url.hashCode();
-		}
-
-		public URLInfo toURLInfo(String key) {
-			return URLInfo.newBuilder().setKey(key).setUrl(url).putAllMetadata(metadata).build();
 		}
 
 	}
@@ -302,7 +233,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 			// too early?
 			int delay = queue.getDelay();
 			if (delay == -1)
-				delay = defaultDelayForQueues;
+				delay = getDefaultDelayForQueues();
 			if (queue.getLastProduced() + delay >= now) {
 				responseObserver.onCompleted();
 				return;
@@ -348,7 +279,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 				// too early?
 				int delay = e.getValue().getDelay();
 				if (delay == -1)
-					delay = defaultDelayForQueues;
+					delay = getDefaultDelayForQueues();
 				if (e.getValue().getLastProduced() + delay >= now) {
 					continue;
 				}
@@ -540,7 +471,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 	public void setDelay(QueueDelayParams request, StreamObserver<Empty> responseObserver) {
 		String key = request.getKey();
 		if (key.isEmpty()) {
-			this.defaultDelayForQueues = request.getDelayRequestable();
+			setDefaultDelayForQueues(request.getDelayRequestable());
 		} else {
 			URLQueue queue = queues.get(request.getKey());
 			if (queue != null) {

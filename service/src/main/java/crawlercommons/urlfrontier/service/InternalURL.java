@@ -1,0 +1,77 @@
+package crawlercommons.urlfrontier.service;
+
+import java.time.Instant;
+import java.util.Map;
+
+import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.StringList;
+import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
+import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+
+/**
+ * simpler than the objects from gRPC + sortable and have equals based on URL
+ * only
+ **/
+public class InternalURL implements Comparable<InternalURL> {
+
+	public long nextFetchDate;
+	public String url;
+	public Map<String, StringList> metadata;
+
+	// this is set when the URL is sent for processing
+	// so that a subsequent call to getURLs does not send it again
+	public long heldUntil = -1;
+
+	private InternalURL() {
+	}
+
+	/*
+	 * Returns the key if any, whether it is a discovered URL or not and an internal
+	 * object to represent it
+	 **/
+	public static Object[] from(URLItem i) {
+		InternalURL iu = new InternalURL();
+		URLInfo info;
+		Boolean disco = Boolean.TRUE;
+		if (i.hasDiscovered()) {
+			info = i.getDiscovered().getInfo();
+			iu.nextFetchDate = Instant.now().getEpochSecond();
+		} else {
+			KnownURLItem known = i.getKnown();
+			info = known.getInfo();
+			iu.nextFetchDate = known.getRefetchableFromDate();
+			disco = Boolean.FALSE;
+		}
+		iu.metadata = info.getMetadataMap();
+		iu.url = info.getUrl();
+		return new Object[] { info.getKey(), disco, iu };
+	}
+
+	@Override
+	public int compareTo(InternalURL arg0) {
+		int comp = Long.compare(nextFetchDate, arg0.nextFetchDate);
+		if (comp == 0) {
+			return url.compareTo(arg0.url);
+		}
+		return comp;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return url.equals(((InternalURL) obj).url);
+	}
+
+	void setHeldUntil(long t) {
+		heldUntil = t;
+	}
+
+	@Override
+	public int hashCode() {
+		return url.hashCode();
+	}
+
+	public URLInfo toURLInfo(String key) {
+		return URLInfo.newBuilder().setKey(key).setUrl(url).putAllMetadata(metadata).build();
+	}
+
+}
