@@ -40,7 +40,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
-import crawlercommons.urlfrontier.service.InternalURL;
 import io.grpc.stub.StreamObserver;
 
 public class RocksDBService extends AbstractFrontierService implements Closeable {
@@ -64,7 +63,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 		// connect to ES
 		String path = "./rocksdb";
-		JsonNode tempNode = configurationNode.get("h2.path");
+		JsonNode tempNode = configurationNode.get("rocksdb.path");
 		if (tempNode != null && !tempNode.isNull()) {
 			path = tempNode.asText(path);
 		}
@@ -141,12 +140,24 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 				synchronized (queueMD) {
 					// TODO known - remove from queues
+					// how to we remember what key it was associated with in the queue?
 					if (!discovered) {
 
-					} else {
-						// brand new
+					}
+					// brand new!
+					else {
 
 					}
+				}
+
+				// it is either brand new or already known
+				// update what we know about it in the store either way
+				byte[] urlinfoasbytes = null;
+				try {
+					rocksDB.put(iu.url.getBytes(), urlinfoasbytes);
+				} catch (RocksDBException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 
 				responseObserver

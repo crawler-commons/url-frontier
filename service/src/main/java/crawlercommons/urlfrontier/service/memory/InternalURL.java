@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package crawlercommons.urlfrontier.service;
+package crawlercommons.urlfrontier.service.memory;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -30,7 +30,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
  * simpler than the objects from gRPC + sortable and have equals based on URL
  * only. The metadata key values are compressed into a single byte array.
  **/
-public class InternalURL implements Comparable<InternalURL>, Serializable{
+class InternalURL implements Comparable<InternalURL>, Serializable {
 
 	public long nextFetchDate;
 	public String url;

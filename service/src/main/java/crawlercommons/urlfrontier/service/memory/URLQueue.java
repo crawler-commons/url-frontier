@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package crawlercommons.urlfrontier.service;
+package crawlercommons.urlfrontier.service.memory;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
-public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterface {
+public class URLQueue extends PriorityQueue<InternalURL> {
 
 	public URLQueue(InternalURL initial) {
 		this.add(initial);

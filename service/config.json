@@ -1,4 +1,4 @@
 {
-	"implementation": "crawlercommons.urlfrontier.service.h2.H2Service",
-	"h2.path": "/tmp/h2"
+	"implementation": "crawlercommons.urlfrontier.service.rocksdb.RocksDBService",
+	"rocksdb.path": "/tmp/rocksdb"
 }

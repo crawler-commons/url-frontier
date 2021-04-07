@@ -17,11 +17,10 @@
 
 package crawlercommons.urlfrontier.service.rocksdb;
 
-import crawlercommons.urlfrontier.service.QueueInterface;
+public class QueueMetadata {
 
-public class QueueMetadata implements QueueInterface {
-
-	QueueMetadata() {}
+	QueueMetadata() {
+	}
 
 	private long completed = 0;
 
@@ -32,6 +31,13 @@ public class QueueMetadata implements QueueInterface {
 	private long lastProduced = 0;
 
 	private int inproc = 0;
+
+	/** used to rank the URLs in the FIFO queue **/
+	private long lastPrefix = -1;
+
+	public long incrememntAndGetLastPrefix() {
+		return ++lastPrefix;
+	}
 
 	public int getInProcess(long now) {
 		return inproc;

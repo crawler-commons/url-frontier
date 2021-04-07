@@ -44,8 +44,6 @@ import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
-import crawlercommons.urlfrontier.service.InternalURL;
-import crawlercommons.urlfrontier.service.URLQueue;
 import io.grpc.stub.StreamObserver;
 
 /**
