@@ -84,7 +84,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			e.printStackTrace();
 		}
 
-		// TODO scan the queues to populate the map
+		// TODO scan the queues to populate the map of queue metadata
 
 	}
 
@@ -97,11 +97,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			@Override
 			public void onNext(URLItem value) {
 
-				Object[] parsed = InternalURL.from(value);
-
-				String key = (String) parsed[0];
-				Boolean discovered = (Boolean) parsed[1];
-				InternalURL iu = (InternalURL) parsed[2];
+				InternalURL iu = InternalURL.from(value);
 
 				byte[] urlInfo = null;
 
@@ -111,21 +107,22 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 				} catch (RocksDBException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					return;
 				}
 
 				// already known? ignore if discovered
-				if (urlInfo != null && discovered) {
+				if (urlInfo != null && iu.isDiscovered()) {
 					responseObserver.onNext(
 							crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(iu.url).build());
 					return;
 				}
 
 				// has a key been defined? if not use the hostname
-				if (key.equals("")) {
+				if (iu.Qkey.equals("")) {
 					LOG.debug("key missing for {}", iu.url);
 					try {
 						URL u = new URL(iu.url);
-						key = u.getHost();
+						iu.Qkey = u.getHost();
 					} catch (MalformedURLException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -136,12 +133,12 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 				}
 
 				// get the priority queue or create one
-				QueueMetadata queueMD = queues.computeIfAbsent(key, s -> new QueueMetadata());
+				QueueMetadata queueMD = queues.computeIfAbsent(iu.Qkey, s -> new QueueMetadata());
 
 				synchronized (queueMD) {
 					// TODO known - remove from queues
 					// how to we remember what key it was associated with in the queue?
-					if (!discovered) {
+					if (!iu.isDiscovered()) {
 
 					}
 					// brand new!
@@ -152,9 +149,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 				// it is either brand new or already known
 				// update what we know about it in the store either way
-				byte[] urlinfoasbytes = null;
 				try {
-					rocksDB.put(iu.url.getBytes(), urlinfoasbytes);
+					rocksDB.put(iu.url.getBytes(), iu.asBytes());
 				} catch (RocksDBException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

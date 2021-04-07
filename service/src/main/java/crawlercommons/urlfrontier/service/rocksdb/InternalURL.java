@@ -17,28 +17,31 @@
 
 package crawlercommons.urlfrontier.service.rocksdb;
 
-import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-
-import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Map;
 
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 
-/**
- * simpler than the objects from gRPC + sortable and have equals based on URL
- * only. The metadata key values are compressed into a single byte array.
- **/
-class InternalURL implements Comparable<InternalURL>, Serializable {
+/** Transitional object **/
+class InternalURL {
 
 	public long nextFetchDate;
 	public String url;
-	public byte[] serialised;
+
+	// key for the queue this URL is attached to
+	public String Qkey;
 
 	// this is set when the URL is sent for processing
 	// so that a subsequent call to getURLs does not send it again
 	public long heldUntil = -1;
+
+	private Map<String, StringList> metadata;
+
+	private boolean discovered = false;
 
 	private InternalURL() {
 	}
@@ -47,10 +50,10 @@ class InternalURL implements Comparable<InternalURL>, Serializable {
 	 * Returns the key if any, whether it is a discovered URL or not and an internal
 	 * object to represent it
 	 **/
-	public static Object[] from(URLItem i) {
+	public static InternalURL from(URLItem i) {
 		InternalURL iu = new InternalURL();
 		URLInfo info;
-		Boolean disco = Boolean.TRUE;
+		iu.discovered = Boolean.TRUE;
 		if (i.hasDiscovered()) {
 			info = i.getDiscovered().getInfo();
 			iu.nextFetchDate = Instant.now().getEpochSecond();
@@ -58,44 +61,37 @@ class InternalURL implements Comparable<InternalURL>, Serializable {
 			KnownURLItem known = i.getKnown();
 			info = known.getInfo();
 			iu.nextFetchDate = known.getRefetchableFromDate();
-			disco = Boolean.FALSE;
+			iu.discovered = Boolean.FALSE;
 		}
-		// keep the whole original serialization into memory
-		iu.serialised = info.toByteArray();
+		iu.metadata = info.getMetadataMap();
+		iu.Qkey = info.getKey();
 		iu.url = info.getUrl();
-		return new Object[] { info.getKey(), disco, iu };
-	}
-
-	@Override
-	public int compareTo(InternalURL arg0) {
-		int comp = Long.compare(nextFetchDate, arg0.nextFetchDate);
-		if (comp == 0) {
-			return url.compareTo(arg0.url);
-		}
-		return comp;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return url.equals(((InternalURL) obj).url);
+		return iu;
 	}
 
 	void setHeldUntil(long t) {
 		heldUntil = t;
 	}
 
-	@Override
-	public int hashCode() {
-		return url.hashCode();
+	public boolean isDiscovered() {
+		return discovered;
 	}
 
-	public URLInfo toURLInfo(String key) throws InvalidProtocolBufferException {
-		URLInfo unfrozen = URLInfo.parseFrom(serialised);
-		return URLInfo.newBuilder().setKey(key).setUrl(url).putAllMetadata(unfrozen.getMetadataMap()).build();
+	public URLInfo fromBytes(byte[] bytes) {
+		String asString = new String(bytes, StandardCharsets.UTF_8);
+
+		// TODO parse the string to extract the URL, Q key and metadata
+
+		return URLInfo.newBuilder().build();
 	}
 
 	public byte[] asBytes() {
-		return null;
+		// put all the info into a string and get the bytes from them
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(url).append("\t").append(Qkey);
+
+		return sb.toString().getBytes(StandardCharsets.UTF_8);
 	}
 
 }
