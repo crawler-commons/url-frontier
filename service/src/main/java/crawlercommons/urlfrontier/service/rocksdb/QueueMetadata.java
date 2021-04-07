@@ -17,6 +17,9 @@
 
 package crawlercommons.urlfrontier.service.rocksdb;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class QueueMetadata {
 
 	QueueMetadata() {
@@ -30,21 +33,48 @@ public class QueueMetadata {
 
 	private long lastProduced = 0;
 
-	private int inproc = 0;
+	private Map<String, Long> beingProcessed = null;
 
-	/** used to rank the URLs in the FIFO queue **/
-	private long lastPrefix = -1;
-
-	public long incrememntAndGetLastPrefix() {
-		return ++lastPrefix;
+	public int getInProcess() {
+		if (beingProcessed == null)
+			return 0;
+		return beingProcessed.size();
 	}
 
-	public int getInProcess(long now) {
-		return inproc;
+	public void holdUntil(String url, long now) {
+		if (beingProcessed == null)
+			beingProcessed = new LinkedHashMap<>();
+		beingProcessed.put(url, now);
+	}
+
+	public boolean isHeld(String url, long now) {
+		if (beingProcessed == null)
+			return false;
+		Long timeout = beingProcessed.get(url);
+		if (timeout != null) {
+			if (timeout.longValue() < now) {
+				// release!
+				beingProcessed.remove(url);
+				return false;
+			} else
+				return true;
+		} else {
+			// should not happen
+			beingProcessed.remove(url);
+		}
+		return false;
 	}
 
 	public void addToCompleted(String url) {
-		completed++;
+		// should not happen
+		if (beingProcessed == null)
+			return;
+
+		// remove from ephemeral cache of URLs in process?
+		Long timeout = beingProcessed.remove(url);
+
+		if (timeout != null)
+			completed++;
 	}
 
 	public long getCountCompleted() {
