@@ -19,6 +19,7 @@ package crawlercommons.urlfrontier.service.rocksdb;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
@@ -26,25 +27,25 @@ import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 
-/** Transitional object **/
+/**
+ * Transitional object - makes it easier to expose the info from the protobuf
+ * objects
+ **/
 class InternalURL {
 
-	public long nextFetchDate;
+	private InternalURL() {
+	}
+
 	public String url;
 
 	// key for the queue this URL is attached to
 	public String Qkey;
 
-	// this is set when the URL is sent for processing
-	// so that a subsequent call to getURLs does not send it again
-	public long heldUntil = -1;
+	public long nextFetchDate;
 
 	private Map<String, StringList> metadata;
 
-	private boolean discovered = false;
-
-	private InternalURL() {
-	}
+	public boolean discovered = false;
 
 	/*
 	 * Returns the key if any, whether it is a discovered URL or not and an internal
@@ -69,20 +70,46 @@ class InternalURL {
 		return iu;
 	}
 
-	void setHeldUntil(long t) {
-		heldUntil = t;
-	}
-
 	public boolean isDiscovered() {
 		return discovered;
 	}
 
-	public URLInfo fromBytes(byte[] bytes) {
-		String asString = new String(bytes, StandardCharsets.UTF_8);
+	public static URLInfo fromBytes(byte[] bytes) {
+		String input = new String(bytes, StandardCharsets.UTF_8);
 
-		// TODO parse the string to extract the URL, Q key and metadata
+		// parse the string to extract the URL, Q key and metadata
+		// bit rubbish but could be improved later
 
-		return URLInfo.newBuilder().build();
+		String[] tokens = input.split("\t");
+		if (tokens.length < 1)
+			return null;
+
+		String url = tokens[0];
+		String Qkey = tokens[1];
+
+		Map<String, StringList.Builder> metadata = new HashMap<>();
+
+		for (int i = 2; i < tokens.length; i++) {
+			String token = tokens[i];
+			// split into key & value
+			int firstequals = token.indexOf("=");
+			String value = null;
+			String key = token;
+			if (firstequals != -1) {
+				key = token.substring(0, firstequals);
+				value = token.substring(firstequals + 1);
+				StringList.Builder builder = metadata.computeIfAbsent(key, k -> StringList.newBuilder());
+				builder.addValues(value);
+			}
+		}
+
+		URLInfo.Builder bbuilder = URLInfo.newBuilder().setKey(Qkey).setUrl(url);
+
+		metadata.forEach((k, v) -> {
+			bbuilder.putMetadata(k, v.build());
+		});
+
+		return bbuilder.build();
 	}
 
 	public byte[] asBytes() {
@@ -90,6 +117,10 @@ class InternalURL {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(url).append("\t").append(Qkey);
+
+		metadata.forEach((k, v) -> {
+			v.getValuesList().forEach(s -> sb.append("\t").append(k).append("=").append(s));
+		});
 
 		return sb.toString().getBytes(StandardCharsets.UTF_8);
 	}
