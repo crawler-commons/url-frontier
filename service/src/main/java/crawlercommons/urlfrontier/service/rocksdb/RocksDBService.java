@@ -25,9 +25,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,11 +47,18 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
+import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
+import crawlercommons.urlfrontier.Urlfrontier.Stats;
+import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
+import crawlercommons.urlfrontier.service.memory.URLQueue;
 import io.grpc.stub.StreamObserver;
 
 public class RocksDBService extends AbstractFrontierService implements Closeable {
@@ -66,7 +76,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 	private final List<ColumnFamilyHandle> columnFamilyHandleList = new ArrayList<>();
 
 	// in memory map of metadata for each queue
-	private Map<String, QueueMetadata> queues = Collections.synchronizedMap(new LinkedHashMap<String, QueueMetadata>());
+	private final Map<String, QueueMetadata> queues = Collections
+			.synchronizedMap(new LinkedHashMap<String, QueueMetadata>());
 
 	public RocksDBService(JsonNode configurationNode) {
 
@@ -85,9 +96,16 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, cfOpts),
 					new ColumnFamilyDescriptor("queues".getBytes(), cfOpts));
 
+			long start = System.currentTimeMillis();
+
 			try (DBOptions options = new DBOptions().setCreateIfMissing(true).setCreateMissingColumnFamilies(true)) {
 				rocksDB = RocksDB.open(options, path, cfDescriptors, columnFamilyHandleList);
 			}
+
+			long end = System.currentTimeMillis();
+
+			LOG.info("RocksDB loaded in {} msec", end - start);
+
 		} catch (RocksDBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -241,7 +259,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 				String[] splits = currentKey.split("_");
 
 				// not for this queue anymore?
-				if (!splits.equals(splits[0])) {
+				if (!queueID.equals(splits[0])) {
 					return alreadySent;
 				}
 
@@ -360,6 +378,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 							schedulingKey = (Qkey + "_" + nextFetchDate + "_" + url).getBytes(StandardCharsets.UTF_8);
 							// add to the scheduling
 							rocksDB.put(columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
+							queueMD.incrementActive();
 						}
 						// update the link to its queue
 						// TODO put in a batch? rocksDB.write(new WriteOptions(), writeBatch);
@@ -386,6 +405,123 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			}
 
 		};
+	}
+
+	@Override
+	public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
+			StreamObserver<Stats> responseObserver) {
+		LOG.info("Received stats request");
+
+		final Map<String, Long> s = new HashMap<>();
+
+		int inProc = 0;
+		int numQueues = 0;
+		int size = 0;
+		long completed = 0;
+
+		Collection<QueueMetadata> _queues = queues.values();
+
+		// specific queue?
+		if (!request.getValue().isEmpty()) {
+			QueueMetadata q = queues.get(request.getValue());
+			if (q != null) {
+				_queues = new LinkedList<>();
+				_queues.add(q);
+			} else {
+				// TODO notify an error to the client
+			}
+		}
+
+		for (QueueMetadata q : _queues) {
+			inProc += q.getInProcess();
+			numQueues++;
+			size += q.size();
+			completed += q.getCountCompleted();
+		}
+
+		// put count completed as custom stats for now
+		// add it as a proper field later?
+		s.put("completed", completed);
+
+		Stats stats = Stats.newBuilder().setNumberOfQueues(numQueues).setSize(size).setInProcess(inProc).putAllCounts(s)
+				.build();
+		responseObserver.onNext(stats);
+		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Integer request,
+			StreamObserver<StringList> responseObserver) {
+		long maxQueues = request.getValue();
+		// 0 by default
+		if (maxQueues == 0) {
+			maxQueues = Long.MAX_VALUE;
+		}
+
+		LOG.info("Received request to list queues [max {}]", maxQueues);
+
+		long now = Instant.now().getEpochSecond();
+		int num = 0;
+		Builder list = StringList.newBuilder();
+
+		Iterator<Entry<String, QueueMetadata>> iterator = queues.entrySet().iterator();
+		while (iterator.hasNext() && num <= maxQueues) {
+			Entry<String, QueueMetadata> e = iterator.next();
+			// check that it isn't blocked
+			if (e.getValue().getBlockedUntil() >= now) {
+				continue;
+			}
+
+			// ignore whether the queue has URLs due for fetching
+//			if (e.getValue().peek().nextFetchDate <= now) {
+//				list.addValues(e.getKey());
+//				num++;
+//			}
+		}
+		responseObserver.onNext(list.build());
+		responseObserver.onCompleted();
+	}
+
+	/**
+	 * <pre>
+	 ** Delete  the queue based on the key in parameter *
+	 * </pre>
+	 */
+	@Override
+	public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
+			StreamObserver<Empty> responseObserver) {
+		queues.remove(request.getValue());
+
+		// TODO delete the ranges in the queues table as well as the URLs already
+		// processed
+
+		responseObserver.onNext(Empty.getDefaultInstance());
+		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void blockQueueUntil(BlockQueueParams request, StreamObserver<Empty> responseObserver) {
+		QueueMetadata queue = queues.get(request.getKey());
+		if (queue != null) {
+			queue.setBlockedUntil(request.getTime());
+		}
+		responseObserver.onNext(Empty.getDefaultInstance());
+		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void setDelay(QueueDelayParams request, StreamObserver<Empty> responseObserver) {
+		String key = request.getKey();
+		if (key.isEmpty()) {
+			setDefaultDelayForQueues(request.getDelayRequestable());
+		} else {
+			QueueMetadata queue = queues.get(request.getKey());
+			if (queue != null) {
+				queue.setDelay(request.getDelayRequestable());
+			}
+		}
+		responseObserver.onNext(Empty.getDefaultInstance());
+		responseObserver.onCompleted();
 	}
 
 	@Override

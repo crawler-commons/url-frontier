@@ -26,6 +26,8 @@ public class QueueMetadata {
 	}
 
 	private long completed = 0;
+	
+	private int active = 0;
 
 	private long blockedUntil = -1;
 
@@ -73,6 +75,8 @@ public class QueueMetadata {
 		// remove from ephemeral cache of URLs in process?
 		Long timeout = beingProcessed.remove(url);
 
+		active--;
+		
 		if (timeout != null)
 			completed++;
 	}
@@ -103,6 +107,14 @@ public class QueueMetadata {
 
 	public int getDelay() {
 		return delay;
+	}
+
+	public void incrementActive() {
+		active++;
+	}
+	
+	public int size() {
+		return active;
 	}
 
 }
