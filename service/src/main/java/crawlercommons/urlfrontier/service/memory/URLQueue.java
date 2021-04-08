@@ -21,7 +21,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
-public class URLQueue extends PriorityQueue<InternalURL> {
+import crawlercommons.urlfrontier.service.QueueInterface;
+
+public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterface {
 
 	public URLQueue(InternalURL initial) {
 		this.add(initial);
@@ -38,6 +40,7 @@ public class URLQueue extends PriorityQueue<InternalURL> {
 
 	private long lastProduced = 0;
 
+	@Override
 	public int getInProcess(long now) {
 		// a URL in process has a heldUntil and is at the beginning of a queue
 		Iterator<InternalURL> iter = this.iterator();
@@ -66,32 +69,44 @@ public class URLQueue extends PriorityQueue<InternalURL> {
 		completed.add(url);
 	}
 
+	@Override
 	public int getCountCompleted() {
 		return completed.size();
 	}
 
+	@Override
 	public void setBlockedUntil(long until) {
 		blockedUntil = until;
 	}
 
+	@Override
 	public long getBlockedUntil() {
 		return blockedUntil;
 	}
 
+	@Override
 	public void setDelay(int delayRequestable) {
 		this.delay = delayRequestable;
 	}
 
+	@Override
 	public long getLastProduced() {
 		return lastProduced;
 	}
 
+	@Override
 	public void setLastProduced(long lastProduced) {
 		this.lastProduced = lastProduced;
 	}
 
+	@Override
 	public int getDelay() {
 		return delay;
+	}
+
+	@Override
+	public int countActive() {
+		return this.size();
 	}
 
 }

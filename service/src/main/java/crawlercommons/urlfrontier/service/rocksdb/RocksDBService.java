@@ -18,22 +18,17 @@
 package crawlercommons.urlfrontier.service.rocksdb;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
@@ -47,18 +42,12 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
-import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
-import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
-import crawlercommons.urlfrontier.Urlfrontier.Stats;
-import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
-import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
-import crawlercommons.urlfrontier.service.memory.URLQueue;
+import crawlercommons.urlfrontier.service.QueueInterface;
 import io.grpc.stub.StreamObserver;
 
 public class RocksDBService extends AbstractFrontierService implements Closeable {
@@ -75,17 +64,22 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 	// opened
 	private final List<ColumnFamilyHandle> columnFamilyHandleList = new ArrayList<>();
 
-	// in memory map of metadata for each queue
-	private final Map<String, QueueMetadata> queues = Collections
-			.synchronizedMap(new LinkedHashMap<String, QueueMetadata>());
-
 	public RocksDBService(JsonNode configurationNode) {
 
-		// connect to ES
+		// where to store it?
 		String path = "./rocksdb";
 		JsonNode tempNode = configurationNode.get("rocksdb.path");
 		if (tempNode != null && !tempNode.isNull()) {
 			path = tempNode.asText(path);
+		}
+
+		tempNode = configurationNode.get("rocksdb.purge");
+		if (tempNode != null && !tempNode.isNull()) {
+			try {
+				Files.walk(Paths.get(path)).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+			} catch (IOException e) {
+				LOG.error("Couldn't delete path {}", path);
+			}
 		}
 
 		try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions().optimizeUniversalStyleCompaction()) {
@@ -106,147 +100,73 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 			LOG.info("RocksDB loaded in {} msec", end - start);
 
+			recoveryQscan();
+
+			long end2 = System.currentTimeMillis();
+
+			LOG.info("{} queues discovered in {} msec", queues.size(), (end2 - end));
+
 		} catch (RocksDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("RocksDB exception ", e);
 		}
 
-		// TODO scan the queues to populate the map of queue metadata
+	}
 
+	/** Resurrects the queues from the tables and does sanity checks **/
+	private void recoveryQscan() {
+		try (final RocksIterator rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(1))) {
+			for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
+				String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+				String[] splits = currentKey.split("_");
+				String Qkey = splits[0];
+				QueueMetadata queueMD = (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
+				queueMD.incrementActive();
+			}
+		}
+		// now get the counts of URLs already finished
+		try (final RocksIterator rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(0))) {
+
+			String previousQueueID = null;
+			long numScheduled = 0;
+
+			for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
+				String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+				String[] splits = currentKey.split("_");
+				String Qkey = splits[0];
+
+				// changed ID? check that the previous one had the correct values
+				if (previousQueueID == null) {
+					previousQueueID = Qkey;
+				} else if (!previousQueueID.equals(Qkey)) {
+					QueueMetadata previousQueue = (QueueMetadata) queues.get(previousQueueID);
+					if (previousQueue.countActive() != numScheduled)
+						throw new RuntimeException("Incorrect number of active URLs for queue " + previousQueue);
+					previousQueueID = Qkey;
+					numScheduled = 0;
+				}
+
+				// queue MUST exist
+				QueueMetadata queueMD = (QueueMetadata) queues.get(Qkey);
+				if (queueMD == null) {
+					throw new RuntimeException("Scan of table found missing queue " + Qkey);
+				}
+				// check the value - if it is an empty byte array it means that the URL has been
+				// processed and is not scheduled
+				// otherwise it is scheduled
+				boolean done = rocksIterator.value().length == 0;
+				if (done) {
+					queueMD.incrementCompleted();
+				} else {
+					// double check the number of scheduled
+					numScheduled++;
+				}
+			}
+		}
 	}
 
 	@Override
-	public void getURLs(GetParams request, StreamObserver<URLInfo> responseObserver) {
-		// on hold
-		if (!isActive()) {
-			responseObserver.onCompleted();
-			return;
-		}
-
-		int maxQueues = request.getMaxQueues();
-		int maxURLsPerQueue = request.getMaxUrlsPerQueue();
-		int secsUntilRequestable = request.getDelayRequestable();
-
-		// 0 by default
-		if (maxQueues == 0) {
-			maxQueues = Integer.MAX_VALUE;
-		}
-
-		if (maxURLsPerQueue == 0) {
-			maxURLsPerQueue = Integer.MAX_VALUE;
-		}
-
-		if (secsUntilRequestable == 0) {
-			secsUntilRequestable = 30;
-		}
-
-		LOG.info("Received request to get fetchable URLs [max queues {}, max URLs {}, delay {}]", maxQueues,
-				maxURLsPerQueue, secsUntilRequestable);
-
-		long start = System.currentTimeMillis();
-
-		String key = request.getKey();
-
-		long now = Instant.now().getEpochSecond();
-
-		// want a specific key only?
-		// default is an empty string so should never be null
-		if (key != null && key.length() >= 1) {
-			QueueMetadata queue = queues.get(key);
-
-			// the queue does not exist
-			if (queue == null) {
-				responseObserver.onCompleted();
-				return;
-			}
-
-			// it is locked
-			if (queue.getBlockedUntil() >= now) {
-				responseObserver.onCompleted();
-				return;
-			}
-
-			// too early?
-			int delay = queue.getDelay();
-			if (delay == -1)
-				delay = getDefaultDelayForQueues();
-			if (queue.getLastProduced() + delay >= now) {
-				responseObserver.onCompleted();
-				return;
-			}
-
-			int totalSent = sendURLsForQueue(queue, key, maxURLsPerQueue, secsUntilRequestable, now, responseObserver);
-			responseObserver.onCompleted();
-
-			LOG.info("Sent {} from queue {} in {} msec", totalSent, key, (System.currentTimeMillis() - start));
-
-			if (totalSent != 0) {
-				queue.setLastProduced(now);
-			}
-
-			return;
-		}
-
-		int numQueuesSent = 0;
-		int totalSent = 0;
-		// to make sure we don't loop over the ones we already had
-		String firstQueue = null;
-
-		synchronized (queues) {
-			while (!queues.isEmpty() && numQueuesSent < maxQueues) {
-				Iterator<Entry<String, QueueMetadata>> iterator = queues.entrySet().iterator();
-				Entry<String, QueueMetadata> e = iterator.next();
-				if (firstQueue == null) {
-					firstQueue = e.getKey();
-				} else if (firstQueue.equals(e.getKey())) {
-					break;
-				}
-				// We remove the entry and put it at the end of the map
-				iterator.remove();
-
-				// Put the entry at the end
-				queues.put(e.getKey(), e.getValue());
-
-				// it is locked
-				if (e.getValue().getBlockedUntil() >= now) {
-					continue;
-				}
-
-				// too early?
-				int delay = e.getValue().getDelay();
-				if (delay == -1)
-					delay = getDefaultDelayForQueues();
-				if (e.getValue().getLastProduced() + delay >= now) {
-					continue;
-				}
-
-				// already has its fill of URLs in process
-				if (e.getValue().getInProcess() >= maxURLsPerQueue) {
-					continue;
-				}
-
-				int sentForQ = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
-						responseObserver);
-				if (sentForQ > 0) {
-					e.getValue().setLastProduced(now);
-					totalSent += sentForQ;
-					numQueuesSent++;
-				}
-
-			}
-		}
-
-		LOG.info("Sent {} from {} queue(s) in {} msec", totalSent, numQueuesSent, (System.currentTimeMillis() - start));
-
-		responseObserver.onCompleted();
-	}
-
-	/**
-	 * @return true if at least one URL has been sent for this queue, false
-	 *         otherwise
-	 **/
-	private int sendURLsForQueue(final QueueMetadata queue, final String queueID, final int maxURLsPerQueue,
-			final int secsUntilRequestable, final long now, final StreamObserver<URLInfo> responseObserver) {
+	protected int sendURLsForQueue(QueueInterface queue, String queueID, int maxURLsPerQueue, int secsUntilRequestable,
+			long now, StreamObserver<URLInfo> responseObserver) {
 
 		int alreadySent = 0;
 		byte[] prefixKey = (queueID + "_").getBytes(StandardCharsets.UTF_8);
@@ -271,7 +191,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 				}
 
 				// check that the URL is not already being processed
-				if (queue.isHeld(splits[2], now)) {
+				if (((QueueMetadata) queue).isHeld(splits[2], now)) {
 					continue;
 				}
 
@@ -280,7 +200,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					responseObserver.onNext(URLInfo.parseFrom(rocksIterator.value()));
 
 					// mark it as not processable for N secs
-					queue.holdUntil(splits[2], Instant.now().plusSeconds(secsUntilRequestable).getEpochSecond());
+					((QueueMetadata) queue).holdUntil(splits[2],
+							Instant.now().plusSeconds(secsUntilRequestable).getEpochSecond());
 
 					alreadySent++;
 				} catch (InvalidProtocolBufferException e) {
@@ -318,14 +239,30 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 				String Qkey = info.getKey();
 				String url = info.getUrl();
 
+				// has a queue key been defined? if not use the hostname
+				if (Qkey.equals("")) {
+					LOG.debug("key missing for {}", url);
+					Qkey = provideMissingKey(url);
+					if (Qkey == null) {
+						LOG.error("Malformed URL {}", url);
+						responseObserver.onNext(
+								crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(url).build());
+						return;
+					}
+					// make a new info object ready to return
+					info = URLInfo.newBuilder(info).setKey(Qkey).build();
+				}
+
 				byte[] schedulingKey = null;
+
+				final byte[] existenceKey = (Qkey + "_" + url).getBytes(StandardCharsets.UTF_8);
 
 				// is this URL already known?
 				try {
-					schedulingKey = rocksDB.get(url.getBytes());
+					schedulingKey = rocksDB.get(existenceKey);
 				} catch (RocksDBException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error("RocksDB exception", e);
+					// TODO notify the client
 					return;
 				}
 
@@ -336,26 +273,10 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					return;
 				}
 
-				// has a queue key been defined? if not use the hostname
-				if (Qkey.equals("")) {
-					LOG.debug("key missing for {}", url);
-					try {
-						URL u = new URL(url);
-						Qkey = u.getHost();
-						// make a new info object ready to return
-						info = URLInfo.newBuilder(info).setKey(Qkey).build();
-					} catch (MalformedURLException e) {
-						LOG.error("Malformed URL {}", url);
-						responseObserver.onNext(
-								crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(url).build());
-						return;
-					}
-				}
-
-				// get the priority queue or create one
-				QueueMetadata queueMD = queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
-
-				synchronized (queueMD) {
+				// block on the whole queues so that we don't add to one which is being deleted
+				synchronized (queues) {
+					// get the priority queue or create one
+					QueueMetadata queueMD = (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
 					try {
 						// known - remove from queues
 						// its key in the queues was stored in the default cf
@@ -368,7 +289,6 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 						// add the new item
 						// unless it is an update and it's nextFetchDate is 0 == NEVER
 						if (!discovered && nextFetchDate == 0) {
-							// TODO mark as completed in the queue md
 							// does not need scheduling
 							// remove any scheduling key from its value
 							schedulingKey = new byte[] {};
@@ -382,7 +302,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 						}
 						// update the link to its queue
 						// TODO put in a batch? rocksDB.write(new WriteOptions(), writeBatch);
-						rocksDB.put(columnFamilyHandleList.get(0), url.getBytes(), schedulingKey);
+						rocksDB.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
 
 					} catch (RocksDBException e) {
 						LOG.error("RocksDB exception", e);
@@ -407,81 +327,6 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 		};
 	}
 
-	@Override
-	public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
-			StreamObserver<Stats> responseObserver) {
-		LOG.info("Received stats request");
-
-		final Map<String, Long> s = new HashMap<>();
-
-		int inProc = 0;
-		int numQueues = 0;
-		int size = 0;
-		long completed = 0;
-
-		Collection<QueueMetadata> _queues = queues.values();
-
-		// specific queue?
-		if (!request.getValue().isEmpty()) {
-			QueueMetadata q = queues.get(request.getValue());
-			if (q != null) {
-				_queues = new LinkedList<>();
-				_queues.add(q);
-			} else {
-				// TODO notify an error to the client
-			}
-		}
-
-		for (QueueMetadata q : _queues) {
-			inProc += q.getInProcess();
-			numQueues++;
-			size += q.size();
-			completed += q.getCountCompleted();
-		}
-
-		// put count completed as custom stats for now
-		// add it as a proper field later?
-		s.put("completed", completed);
-
-		Stats stats = Stats.newBuilder().setNumberOfQueues(numQueues).setSize(size).setInProcess(inProc).putAllCounts(s)
-				.build();
-		responseObserver.onNext(stats);
-		responseObserver.onCompleted();
-	}
-
-	@Override
-	public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Integer request,
-			StreamObserver<StringList> responseObserver) {
-		long maxQueues = request.getValue();
-		// 0 by default
-		if (maxQueues == 0) {
-			maxQueues = Long.MAX_VALUE;
-		}
-
-		LOG.info("Received request to list queues [max {}]", maxQueues);
-
-		long now = Instant.now().getEpochSecond();
-		int num = 0;
-		Builder list = StringList.newBuilder();
-
-		Iterator<Entry<String, QueueMetadata>> iterator = queues.entrySet().iterator();
-		while (iterator.hasNext() && num <= maxQueues) {
-			Entry<String, QueueMetadata> e = iterator.next();
-			// check that it isn't blocked
-			if (e.getValue().getBlockedUntil() >= now) {
-				continue;
-			}
-
-			// ignore whether the queue has URLs due for fetching
-//			if (e.getValue().peek().nextFetchDate <= now) {
-//				list.addValues(e.getKey());
-//				num++;
-//			}
-		}
-		responseObserver.onNext(list.build());
-		responseObserver.onCompleted();
-	}
-
 	/**
 	 * <pre>
 	 ** Delete  the queue based on the key in parameter *
@@ -490,36 +335,38 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 	@Override
 	public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
 			StreamObserver<Empty> responseObserver) {
-		queues.remove(request.getValue());
+		final String Qkey = request.getValue();
+		synchronized (queues) {
+			// find the next key by alphabetical order
+			String[] array = new String[queues.size()];
+			array = queues.keySet().toArray(array);
+			Arrays.sort(array);
+			boolean wantNext = false;
+			byte[] endKey = null;
+			for (String s : array) {
+				if (wantNext) {
+					endKey = (s + "_").getBytes(StandardCharsets.UTF_8);
+					break;
+				} else if (s.equals(Qkey))
+					wantNext = true;
+			}
 
-		// TODO delete the ranges in the queues table as well as the URLs already
-		// processed
-
-		responseObserver.onNext(Empty.getDefaultInstance());
-		responseObserver.onCompleted();
-	}
-
-	@Override
-	public void blockQueueUntil(BlockQueueParams request, StreamObserver<Empty> responseObserver) {
-		QueueMetadata queue = queues.get(request.getKey());
-		if (queue != null) {
-			queue.setBlockedUntil(request.getTime());
-		}
-		responseObserver.onNext(Empty.getDefaultInstance());
-		responseObserver.onCompleted();
-	}
-
-	@Override
-	public void setDelay(QueueDelayParams request, StreamObserver<Empty> responseObserver) {
-		String key = request.getKey();
-		if (key.isEmpty()) {
-			setDefaultDelayForQueues(request.getDelayRequestable());
-		} else {
-			QueueMetadata queue = queues.get(request.getKey());
-			if (queue != null) {
-				queue.setDelay(request.getDelayRequestable());
+			try {
+				// TODO what if is is the last one?
+				if (endKey != null) {
+					// delete the ranges in the queues table as well as the URLs already
+					// processed
+					rocksDB.deleteRange(columnFamilyHandleList.get(1), (Qkey + "_").getBytes(StandardCharsets.UTF_8),
+							endKey);
+					rocksDB.deleteRange(columnFamilyHandleList.get(0), (Qkey + "_").getBytes(StandardCharsets.UTF_8),
+							endKey);
+				}
+				queues.remove(Qkey);
+			} catch (RocksDBException e) {
+				LOG.error("RocksDBException", e);
 			}
 		}
+
 		responseObserver.onNext(Empty.getDefaultInstance());
 		responseObserver.onCompleted();
 	}
@@ -540,5 +387,4 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 		}
 
 	}
-
 }

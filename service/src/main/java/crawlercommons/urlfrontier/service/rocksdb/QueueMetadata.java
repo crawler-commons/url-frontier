@@ -20,13 +20,16 @@ package crawlercommons.urlfrontier.service.rocksdb;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class QueueMetadata {
+import crawlercommons.urlfrontier.service.QueueInterface;
+
+public class QueueMetadata implements QueueInterface {
 
 	QueueMetadata() {
 	}
 
-	private long completed = 0;
-	
+	private int completed = 0;
+
+	/** number of URLs scheduled in the queue **/
 	private int active = 0;
 
 	private long blockedUntil = -1;
@@ -37,16 +40,21 @@ public class QueueMetadata {
 
 	private Map<String, Long> beingProcessed = null;
 
-	public int getInProcess() {
+	@Override
+	public int getInProcess(long now) {
 		if (beingProcessed == null)
 			return 0;
+		// check that the content of beingProcessed is still valid
+		beingProcessed.entrySet().removeIf(e -> {
+			return e.getValue().longValue() < now;
+		});
 		return beingProcessed.size();
 	}
 
-	public void holdUntil(String url, long now) {
+	public void holdUntil(String url, long timeinSec) {
 		if (beingProcessed == null)
 			beingProcessed = new LinkedHashMap<>();
-		beingProcessed.put(url, now);
+		beingProcessed.put(url, timeinSec);
 	}
 
 	public boolean isHeld(String url, long now) {
@@ -76,35 +84,42 @@ public class QueueMetadata {
 		Long timeout = beingProcessed.remove(url);
 
 		active--;
-		
+
 		if (timeout != null)
 			completed++;
 	}
 
-	public long getCountCompleted() {
+	@Override
+	public int getCountCompleted() {
 		return completed;
 	}
 
+	@Override
 	public void setBlockedUntil(long until) {
 		blockedUntil = until;
 	}
 
+	@Override
 	public long getBlockedUntil() {
 		return blockedUntil;
 	}
 
+	@Override
 	public void setDelay(int delayRequestable) {
 		this.delay = delayRequestable;
 	}
 
+	@Override
 	public long getLastProduced() {
 		return lastProduced;
 	}
 
+	@Override
 	public void setLastProduced(long lastProduced) {
 		this.lastProduced = lastProduced;
 	}
 
+	@Override
 	public int getDelay() {
 		return delay;
 	}
@@ -112,8 +127,13 @@ public class QueueMetadata {
 	public void incrementActive() {
 		active++;
 	}
-	
-	public int size() {
+
+	public void incrementCompleted() {
+		completed++;
+	}
+
+	@Override
+	public int countActive() {
 		return active;
 	}
 
