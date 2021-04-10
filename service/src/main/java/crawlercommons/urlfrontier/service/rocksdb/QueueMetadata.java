@@ -19,6 +19,7 @@ package crawlercommons.urlfrontier.service.rocksdb;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import crawlercommons.urlfrontier.service.QueueInterface;
 
@@ -27,10 +28,11 @@ public class QueueMetadata implements QueueInterface {
 	QueueMetadata() {
 	}
 
-	private int completed = 0;
+	/** number of URLs that are not scheduled anymore **/
+	private AtomicInteger completed = new AtomicInteger(0);
 
 	/** number of URLs scheduled in the queue **/
-	private int active = 0;
+	private AtomicInteger active = new AtomicInteger(0);
 
 	private long blockedUntil = -1;
 
@@ -42,56 +44,59 @@ public class QueueMetadata implements QueueInterface {
 
 	@Override
 	public int getInProcess(long now) {
-		if (beingProcessed == null)
-			return 0;
-		// check that the content of beingProcessed is still valid
-		beingProcessed.entrySet().removeIf(e -> {
-			return e.getValue().longValue() < now;
-		});
-		return beingProcessed.size();
+		synchronized (beingProcessed) {
+			if (beingProcessed == null)
+				return 0;
+			// check that the content of beingProcessed is still valid
+			beingProcessed.entrySet().removeIf(e -> {
+				return e.getValue().longValue() < now;
+			});
+			return beingProcessed.size();
+		}
 	}
 
 	public void holdUntil(String url, long timeinSec) {
-		if (beingProcessed == null)
-			beingProcessed = new LinkedHashMap<>();
-		beingProcessed.put(url, timeinSec);
+		synchronized (beingProcessed) {
+			if (beingProcessed == null)
+				beingProcessed = new LinkedHashMap<>();
+			beingProcessed.put(url, timeinSec);
+		}
 	}
 
 	public boolean isHeld(String url, long now) {
-		if (beingProcessed == null)
-			return false;
-		Long timeout = beingProcessed.get(url);
-		if (timeout != null) {
-			if (timeout.longValue() < now) {
-				// release!
-				beingProcessed.remove(url);
+		synchronized (beingProcessed) {
+			if (beingProcessed == null)
 				return false;
-			} else
-				return true;
-		} else {
-			// should not happen
-			beingProcessed.remove(url);
+			Long timeout = beingProcessed.get(url);
+			if (timeout != null) {
+				if (timeout.longValue() < now) {
+					// release!
+					beingProcessed.remove(url);
+					return false;
+				} else
+					return true;
+			}
+			return false;
 		}
-		return false;
 	}
 
 	public void addToCompleted(String url) {
-		// should not happen
-		if (beingProcessed == null)
-			return;
+		synchronized (beingProcessed) {
+			// should not happen
+			if (beingProcessed == null)
+				return;
 
-		// remove from ephemeral cache of URLs in process?
-		Long timeout = beingProcessed.remove(url);
-
-		active--;
-
-		if (timeout != null)
-			completed++;
+			// remove from ephemeral cache of URLs in process?
+			Long timeout = beingProcessed.remove(url);
+			active.decrementAndGet();
+			if (timeout != null)
+				completed.incrementAndGet();
+		}
 	}
 
 	@Override
 	public int getCountCompleted() {
-		return completed;
+		return completed.get();
 	}
 
 	@Override
@@ -102,6 +107,11 @@ public class QueueMetadata implements QueueInterface {
 	@Override
 	public long getBlockedUntil() {
 		return blockedUntil;
+	}
+
+	@Override
+	public int getDelay() {
+		return delay;
 	}
 
 	@Override
@@ -119,22 +129,17 @@ public class QueueMetadata implements QueueInterface {
 		this.lastProduced = lastProduced;
 	}
 
-	@Override
-	public int getDelay() {
-		return delay;
-	}
-
 	public void incrementActive() {
-		active++;
+		active.incrementAndGet();
 	}
 
 	public void incrementCompleted() {
-		completed++;
+		completed.incrementAndGet();
 	}
 
 	@Override
 	public int countActive() {
-		return active;
+		return active.get();
 	}
 
 }
