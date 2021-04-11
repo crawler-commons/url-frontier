@@ -123,12 +123,12 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 				queueMD.incrementActive();
 			}
 		}
+
+		String previousQueueID = null;
+		long numScheduled = 0;
+
 		// now get the counts of URLs already finished
 		try (final RocksIterator rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(0))) {
-
-			String previousQueueID = null;
-			long numScheduled = 0;
-
 			for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
 				String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
 				String[] splits = currentKey.split("_");
@@ -138,18 +138,16 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 				if (previousQueueID == null) {
 					previousQueueID = Qkey;
 				} else if (!previousQueueID.equals(Qkey)) {
-					QueueMetadata previousQueue = (QueueMetadata) queues.get(previousQueueID);
-					if (previousQueue.countActive() != numScheduled)
-						throw new RuntimeException("Incorrect number of active URLs for queue " + previousQueue);
+					if (queues.get(previousQueueID).countActive() != numScheduled)
+						throw new RuntimeException("Incorrect number of active URLs for queue " + previousQueueID);
 					previousQueueID = Qkey;
 					numScheduled = 0;
 				}
 
-				// queue MUST exist
-				QueueMetadata queueMD = (QueueMetadata) queues.get(Qkey);
-				if (queueMD == null) {
-					throw new RuntimeException("Scan of table found missing queue " + Qkey);
-				}
+				// queue might not exist if it had nothing scheduled for it
+				// i.e. all done
+				QueueMetadata queueMD = (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
+
 				// check the value - if it is an empty byte array it means that the URL has been
 				// processed and is not scheduled
 				// otherwise it is scheduled
@@ -157,10 +155,14 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 				if (done) {
 					queueMD.incrementCompleted();
 				} else {
-					// double check the number of scheduled
+					// double check the number of scheduled later on
 					numScheduled++;
 				}
 			}
+		}
+		// check the last key
+		if (previousQueueID != null && queues.get(previousQueueID).countActive() != numScheduled) {
+			throw new RuntimeException("Incorrect number of active URLs for queue " + previousQueueID);
 		}
 	}
 
