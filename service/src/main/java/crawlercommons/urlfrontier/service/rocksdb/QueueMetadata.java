@@ -44,7 +44,7 @@ public class QueueMetadata implements QueueInterface {
 
 	@Override
 	public int getInProcess(long now) {
-		synchronized (beingProcessed) {
+		synchronized (this) {
 			if (beingProcessed == null)
 				return 0;
 			// check that the content of beingProcessed is still valid
@@ -56,7 +56,7 @@ public class QueueMetadata implements QueueInterface {
 	}
 
 	public void holdUntil(String url, long timeinSec) {
-		synchronized (beingProcessed) {
+		synchronized (this) {
 			if (beingProcessed == null)
 				beingProcessed = new LinkedHashMap<>();
 			beingProcessed.put(url, timeinSec);
@@ -64,7 +64,7 @@ public class QueueMetadata implements QueueInterface {
 	}
 
 	public boolean isHeld(String url, long now) {
-		synchronized (beingProcessed) {
+		synchronized (this) {
 			if (beingProcessed == null)
 				return false;
 			Long timeout = beingProcessed.get(url);
@@ -81,7 +81,7 @@ public class QueueMetadata implements QueueInterface {
 	}
 
 	public void addToCompleted(String url) {
-		synchronized (beingProcessed) {
+		synchronized (this) {
 			// should not happen
 			if (beingProcessed == null)
 				return;
