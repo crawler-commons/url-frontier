@@ -53,7 +53,9 @@ public class GetStats implements Runnable {
 
 		Stats s = blockingFrontier.getStats(builder.build());
 		System.out.println("Number of queues: " + s.getNumberOfQueues());
+		System.out.println("Active URLs: " + s.getSize());
 		System.out.println("In process: " + s.getInProcess());
+		
 		Map<String, Long> counts = s.getCountsMap();
 		for (Entry<String, Long> kv : counts.entrySet()) {
 			System.out.println(kv.getKey() + " = " + kv.getValue());
