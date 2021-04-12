@@ -19,4 +19,13 @@ then run with
 
 `java -Xmx2G -cp target/urlfrontier-service-*.jar crawlercommons.urlfrontier.service.URLFrontierServer`
 
+You can specify the implementation to use for the service and its configuration by passing a configuration file with '-c'.
 
+The configuration file below will set RocksDBService as the implementation to use and configure the path where its data should be stored. 
+
+```
+{
+	"implementation": "crawlercommons.urlfrontier.service.rocksdb.RocksDBService",
+	"rocksdb.path": "/tmp/rocksdb"
+}
+```
