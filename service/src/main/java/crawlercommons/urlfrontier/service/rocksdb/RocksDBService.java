@@ -202,8 +202,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					responseObserver.onNext(URLInfo.parseFrom(rocksIterator.value()));
 
 					// mark it as not processable for N secs
-					((QueueMetadata) queue).holdUntil(splits[2],
-							Instant.now().plusSeconds(secsUntilRequestable).getEpochSecond());
+					((QueueMetadata) queue).holdUntil(splits[2], now + secsUntilRequestable);
 
 					alreadySent++;
 				} catch (InvalidProtocolBufferException e) {
@@ -356,7 +355,19 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			}
 
 			try {
-				// TODO what if is is the last one?
+				// what if is is the last one?
+				boolean endKeyMustAlsoDie = false;
+				if (endKey == null) {
+					try (RocksIterator iter = rocksDB.newIterator(columnFamilyHandleList.get(0))) {
+						iter.seekToLast();
+						if (iter.isValid()) {
+							// this is the last known URL
+							endKey = iter.key();
+							endKeyMustAlsoDie = true;
+						}
+					}
+				}
+
 				if (endKey != null) {
 					// delete the ranges in the queues table as well as the URLs already
 					// processed
@@ -364,6 +375,10 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 							endKey);
 					rocksDB.deleteRange(columnFamilyHandleList.get(0), (Qkey + "_").getBytes(StandardCharsets.UTF_8),
 							endKey);
+					if (endKeyMustAlsoDie) {
+						rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
+						rocksDB.delete(columnFamilyHandleList.get(0), endKey);
+					}
 				}
 				queues.remove(Qkey);
 			} catch (RocksDBException e) {
@@ -373,6 +388,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 		responseObserver.onNext(Empty.getDefaultInstance());
 		responseObserver.onCompleted();
+
 	}
 
 	@Override

@@ -73,7 +73,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 				responseObserver.onNext(item.toURLInfo(key));
 
 				// mark it as not processable for N secs
-				item.heldUntil = Instant.now().plusSeconds(secsUntilRequestable).getEpochSecond();
+				item.heldUntil = now + secsUntilRequestable;
 
 				alreadySent++;
 			} catch (InvalidProtocolBufferException e) {

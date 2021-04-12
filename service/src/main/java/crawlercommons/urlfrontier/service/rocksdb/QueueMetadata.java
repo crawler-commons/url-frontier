@@ -49,7 +49,7 @@ public class QueueMetadata implements QueueInterface {
 				return 0;
 			// check that the content of beingProcessed is still valid
 			beingProcessed.entrySet().removeIf(e -> {
-				return e.getValue().longValue() < now;
+				return e.getValue().longValue() <= now;
 			});
 			return beingProcessed.size();
 		}

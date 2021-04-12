@@ -173,7 +173,7 @@ public class URLFrontierServiceTest {
 		stats = blockingFrontier.getStats(Urlfrontier.String.newBuilder().setValue("key1.com").build());
 
 		Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
-		Assert.assertEquals("incorrect number of inprocesss from stats", 0, stats.getInProcess());
+		Assert.assertEquals("incorrect number of in process from stats", 0, stats.getInProcess());
 	}
 
 	@Test
