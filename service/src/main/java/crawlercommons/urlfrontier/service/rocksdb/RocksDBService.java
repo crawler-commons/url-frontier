@@ -285,7 +285,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 						if (schedulingKey != null) {
 							rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
 							// remove from queue metadata
-							queueMD.addToCompleted(url);
+							queueMD.removeFromProcessed(url);
+							queueMD.decrementActive();
 						}
 
 						// add the new item
@@ -294,6 +295,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 							// does not need scheduling
 							// remove any scheduling key from its value
 							schedulingKey = new byte[] {};
+							queueMD.incrementCompleted();
 						} else {
 							// it is either brand new or already known
 							// create a scheduling key for it

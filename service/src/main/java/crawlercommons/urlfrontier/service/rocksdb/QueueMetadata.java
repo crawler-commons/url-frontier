@@ -80,17 +80,14 @@ public class QueueMetadata implements QueueInterface {
 		}
 	}
 
-	public void addToCompleted(String url) {
+	public void removeFromProcessed(String url) {
 		synchronized (this) {
 			// should not happen
 			if (beingProcessed == null)
 				return;
 
-			// remove from ephemeral cache of URLs in process?
-			Long timeout = beingProcessed.remove(url);
-			active.decrementAndGet();
-			if (timeout != null)
-				completed.incrementAndGet();
+			// remove from ephemeral cache of URLs in process
+			beingProcessed.remove(url);
 		}
 	}
 
@@ -129,6 +126,10 @@ public class QueueMetadata implements QueueInterface {
 		this.lastProduced = lastProduced;
 	}
 
+	public void decrementActive() {
+		active.decrementAndGet();
+	}
+	
 	public void incrementActive() {
 		active.incrementAndGet();
 	}
