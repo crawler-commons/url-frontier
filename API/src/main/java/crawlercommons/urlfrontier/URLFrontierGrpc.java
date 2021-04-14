@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2020 Crawler-commons
+// SPDX-License-Identifier: Apache-2.0
+
 package crawlercommons.urlfrontier;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
