@@ -116,9 +116,9 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 	private void recoveryQscan() {
 		try (final RocksIterator rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(1))) {
 			for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
-				String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-				String[] splits = currentKey.split("_");
-				String Qkey = splits[0];
+				final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+				final int pos = currentKey.indexOf('_');
+				final String Qkey = keyDeNormalisation(currentKey.substring(0, pos));
 				QueueMetadata queueMD = (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
 				queueMD.incrementActive();
 			}
@@ -130,9 +130,9 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 		// now get the counts of URLs already finished
 		try (final RocksIterator rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(0))) {
 			for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
-				String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-				String[] splits = currentKey.split("_");
-				String Qkey = splits[0];
+				final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+				final int pos = currentKey.indexOf('_');
+				final String Qkey = keyDeNormalisation(currentKey.substring(0, pos));
 
 				// changed ID? check that the previous one had the correct values
 				if (previousQueueID == null) {
@@ -171,29 +171,35 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			long now, StreamObserver<URLInfo> responseObserver) {
 
 		int alreadySent = 0;
-		byte[] prefixKey = (queueID + "_").getBytes(StandardCharsets.UTF_8);
+		final byte[] prefixKey = (keyNormalisation(queueID) + "_").getBytes(StandardCharsets.UTF_8);
 		// scan the scheduling table
 		try (final RocksIterator rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(1))) {
 			for (rocksIterator.seek(prefixKey); rocksIterator.isValid() && alreadySent < maxURLsPerQueue; rocksIterator
 					.next()) {
 
-				String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-				String[] splits = currentKey.split("_");
+				final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+
+				// don't want to split the whole string _ as the URL part is left as is
+				final int pos = currentKey.indexOf('_');
+				final int pos2 = currentKey.indexOf('_', pos + 1);
+
+				final String keyPart = currentKey.substring(0, pos);
+				final String urlPart = currentKey.substring(pos2 + 1);
 
 				// not for this queue anymore?
-				if (!queueID.equals(splits[0])) {
+				if (!queueID.equals(keyPart)) {
 					return alreadySent;
 				}
 
 				// too early for it?
-				long scheduled = Long.parseLong(splits[1]);
+				long scheduled = Long.parseLong(currentKey.substring(pos + 1, pos2));
 				if (scheduled > now) {
 					// they are sorted by date no need to go further
 					return alreadySent;
 				}
 
 				// check that the URL is not already being processed
-				if (((QueueMetadata) queue).isHeld(splits[2], now)) {
+				if (((QueueMetadata) queue).isHeld(urlPart, now)) {
 					continue;
 				}
 
@@ -202,7 +208,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					responseObserver.onNext(URLInfo.parseFrom(rocksIterator.value()));
 
 					// mark it as not processable for N secs
-					((QueueMetadata) queue).holdUntil(splits[2], now + secsUntilRequestable);
+					((QueueMetadata) queue).holdUntil(urlPart, now + secsUntilRequestable);
 
 					alreadySent++;
 				} catch (InvalidProtocolBufferException e) {
@@ -256,7 +262,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 				byte[] schedulingKey = null;
 
-				final byte[] existenceKey = (Qkey + "_" + url).getBytes(StandardCharsets.UTF_8);
+				final byte[] existenceKey = (keyNormalisation(Qkey) + "_" + url).getBytes(StandardCharsets.UTF_8);
 
 				// is this URL already known?
 				try {
@@ -298,7 +304,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 						} else {
 							// it is either brand new or already known
 							// create a scheduling key for it
-							schedulingKey = (Qkey + "_" + nextFetchDate + "_" + url).getBytes(StandardCharsets.UTF_8);
+							schedulingKey = (keyNormalisation(Qkey) + "_" + nextFetchDate + "_" + url)
+									.getBytes(StandardCharsets.UTF_8);
 							// add to the scheduling
 							rocksDB.put(columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
 							queueMD.incrementActive();
@@ -348,10 +355,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			byte[] endKey = null;
 			for (String s : array) {
 				if (wantNext) {
-					endKey = (s + "_").getBytes(StandardCharsets.UTF_8);
+					endKey = (keyNormalisation(s) + "_").getBytes(StandardCharsets.UTF_8);
 					break;
-				} else if (s.equals(Qkey))
+				} else if (s.equals(Qkey)) {
 					wantNext = true;
+				}
 			}
 
 			try {
@@ -371,10 +379,10 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 				if (endKey != null) {
 					// delete the ranges in the queues table as well as the URLs already
 					// processed
-					rocksDB.deleteRange(columnFamilyHandleList.get(1), (Qkey + "_").getBytes(StandardCharsets.UTF_8),
-							endKey);
-					rocksDB.deleteRange(columnFamilyHandleList.get(0), (Qkey + "_").getBytes(StandardCharsets.UTF_8),
-							endKey);
+					rocksDB.deleteRange(columnFamilyHandleList.get(1),
+							(keyNormalisation(Qkey) + "_").getBytes(StandardCharsets.UTF_8), endKey);
+					rocksDB.deleteRange(columnFamilyHandleList.get(0),
+							(keyNormalisation(Qkey) + "_").getBytes(StandardCharsets.UTF_8), endKey);
 					if (endKeyMustAlsoDie) {
 						rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
 						rocksDB.delete(columnFamilyHandleList.get(0), endKey);
@@ -389,6 +397,17 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 		responseObserver.onNext(Empty.getDefaultInstance());
 		responseObserver.onCompleted();
 
+	}
+
+	/**
+	 * underscores being used as separator for the keys, we need to make sure that
+	 **/
+	private static final String keyNormalisation(String key) {
+		return key.replaceAll("_", "%5F");
+	}
+
+	private static final String keyDeNormalisation(String key) {
+		return key.replaceAll("%5F", "_");
 	}
 
 	@Override
