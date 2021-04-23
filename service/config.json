@@ -1,5 +1,0 @@
-{
-	"implementation": "crawlercommons.urlfrontier.service.rocksdb.RocksDBService",
-	"rocksdb.path": "/tmp/rocksdb",
-	"rocksdb.purge": true
-}

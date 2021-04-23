@@ -21,20 +21,23 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase;
-import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
+import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 @Command(name = "URL Frontier Server", mixinStandardHelpOptions = true, version = "0.2")
 public class URLFrontierServer implements Callable<Integer> {
@@ -46,8 +49,11 @@ public class URLFrontierServer implements Callable<Integer> {
 	int port;
 
 	@Option(names = { "-c",
-			"--config" }, required = false, paramLabel = "STRING", description = "JSON configuration file")
+			"--config" }, required = false, paramLabel = "STRING", description = "key value configuration file")
 	String config;
+
+	@Parameters
+	List<String> positional;
 
 	private Server server;
 
@@ -72,19 +78,40 @@ public class URLFrontierServer implements Callable<Integer> {
 
 	public void start() throws Exception {
 
-		String implementationClassName = MemoryFrontierService.class.getName();
+		// default implementation
+		String implementationClassName = RocksDBService.class.getName();
 
-		JsonNode configurationNode = null;
+		Map<String, String> configuration = new HashMap<>();
 
 		if (config != null) {
 			try {
-				configurationNode = new ObjectMapper().readTree(new File(config));
-				implementationClassName = configurationNode.get("implementation").asText();
+				// check that the file exists
+				if (!new File(config).exists()) {
+					LOG.error("Config file not found : {}", config);
+					System.exit(-1);
+				}
+				// populate the config with the content of the file
+				for (String line : Files.readAllLines(Paths.get(config))) {
+					line = line.trim();
+					if (line.startsWith("#"))
+						continue;
+					addToConfig(configuration, line);
+				}
 			} catch (Exception e) {
 				LOG.error("Exception caught when reading the configuration from {}", config, e);
 				System.exit(-1);
 			}
 		}
+
+		// override or add K/V with entries from args
+		if (positional != null) {
+			for (String l : positional) {
+				addToConfig(configuration, l);
+			}
+		}
+
+		// get the implementation class from the config if set
+		implementationClassName = configuration.getOrDefault("implementation", implementationClassName);
 
 		Class<?> implementationClass = Class.forName(implementationClassName);
 
@@ -93,12 +120,12 @@ public class URLFrontierServer implements Callable<Integer> {
 			System.exit(-1);
 		}
 
-		// can it take a JSON node as constructor?
-		if (configurationNode != null) {
+		// can it take a Map as constructor?
+		if (configuration.size() > 0) {
 			try {
-				Constructor<?> c = implementationClass.getConstructor(JsonNode.class);
+				Constructor<?> c = implementationClass.getConstructor(Map.class);
 				c.setAccessible(true);
-				service = (URLFrontierImplBase) c.newInstance(configurationNode);
+				service = (URLFrontierImplBase) c.newInstance(configuration);
 			} catch (Exception e) {
 				LOG.error("Exception caught when initialising the service", e);
 				System.exit(-1);
@@ -152,6 +179,27 @@ public class URLFrontierServer implements Callable<Integer> {
 		if (server != null) {
 			server.awaitTermination();
 		}
+	}
+
+	private static final void addToConfig(final Map<String, String> config, String line) {
+		if (line == null || line.length() == 0)
+			return;
+
+		line = line.trim();
+
+		if (line.length() == 0)
+			return;
+
+		// = to separate key from value
+		int pos = line.indexOf('=');
+		// no value
+		if (pos == -1) {
+			config.put(line, null);
+			return;
+		}
+		String key = line.substring(0, pos).trim();
+		String value = line.substring(pos + 1).trim();
+		config.put(key, value);
 	}
 
 }

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
@@ -39,7 +40,6 @@ import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
@@ -64,17 +64,12 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 	// opened
 	private final List<ColumnFamilyHandle> columnFamilyHandleList = new ArrayList<>();
 
-	public RocksDBService(JsonNode configurationNode) {
+	public RocksDBService(final Map<String, String> configuration) {
 
 		// where to store it?
-		String path = "./rocksdb";
-		JsonNode tempNode = configurationNode.get("rocksdb.path");
-		if (tempNode != null && !tempNode.isNull()) {
-			path = tempNode.asText(path);
-		}
+		String path = configuration.getOrDefault("rocksdb.path", "./rocksdb");
 
-		tempNode = configurationNode.get("rocksdb.purge");
-		if (tempNode != null && !tempNode.isNull()) {
+		if (configuration.containsKey("rocksdb.purge")) {
 			try {
 				Files.walk(Paths.get(path)).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
 			} catch (IOException e) {
