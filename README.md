@@ -20,3 +20,6 @@ This project is funded through the [NGI0 Discovery Fund](https://nlnet.nl/discov
 <br>
 <img src="https://nlnet.nl/image/logos/NGI0_tag.png" alt="NGI0" height="80"/>
 
+# License information
+
+This project is available as open source under the terms of Apache 2.0. For accurate information, please check individual files.

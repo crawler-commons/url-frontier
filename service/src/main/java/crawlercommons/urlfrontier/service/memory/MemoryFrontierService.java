@@ -1,4 +1,6 @@
 /**
+ * SPDX-FileCopyrightText: 2020 Crawler-commons
+ * SPDX-License-Identifier: Apache-2.0 
  * Licensed to Crawler-Commons under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,7 +19,6 @@
 
 package crawlercommons.urlfrontier.service.memory;
 
-import java.time.Instant;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
