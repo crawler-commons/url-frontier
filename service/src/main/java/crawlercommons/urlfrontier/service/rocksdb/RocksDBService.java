@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
@@ -341,8 +340,9 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 	 */
 	@Override
 	public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
-			StreamObserver<Empty> responseObserver) {
+			StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
 		final String Qkey = request.getValue();
+		int sizeQueue = 0;
 		synchronized (queues) {
 			// find the next key by alphabetical order
 			String[] array = new String[queues.size()];
@@ -385,15 +385,16 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 						rocksDB.delete(columnFamilyHandleList.get(0), endKey);
 					}
 				}
-				queues.remove(Qkey);
+				QueueInterface q = queues.remove(Qkey);
+				sizeQueue += q.countActive();
+				sizeQueue += q.getCountCompleted();
 			} catch (RocksDBException e) {
 				LOG.error("RocksDBException", e);
 			}
 		}
 
-		responseObserver.onNext(Empty.getDefaultInstance());
+		responseObserver.onNext(crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder().setValue(sizeQueue).build());
 		responseObserver.onCompleted();
-
 	}
 
 	/**

@@ -34,7 +34,6 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
-import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
@@ -180,7 +179,7 @@ public class URLFrontierServiceTest {
 
 	@Test
 	public void testDeleteQueue() {
-		Empty deleted = blockingFrontier.deleteQueue(Urlfrontier.String.newBuilder().setValue("key1.com").build());
+		crawlercommons.urlfrontier.Urlfrontier.Integer deleted = blockingFrontier.deleteQueue(Urlfrontier.String.newBuilder().setValue("key1.com").build());
 
 		Stats stats = blockingFrontier.getStats(Urlfrontier.String.newBuilder().setValue("key1.com").build());
 

@@ -41,7 +41,6 @@ import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
-import crawlercommons.urlfrontier.service.rocksdb.QueueMetadata;
 import io.grpc.stub.StreamObserver;
 
 public abstract class AbstractFrontierService extends crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase {
@@ -149,9 +148,9 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 	 */
 	@Override
 	public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
-			StreamObserver<Empty> responseObserver) {
-		queues.remove(request.getValue());
-		responseObserver.onNext(Empty.getDefaultInstance());
+			StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
+		QueueInterface q = queues.remove(request.getValue());
+		responseObserver.onNext(crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder().setValue(q.countActive()).build());
 		responseObserver.onCompleted();
 	}
 
