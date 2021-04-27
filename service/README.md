@@ -1,21 +1,17 @@
 # URL Frontier Service
 
-Implementation of the URL Frontier Service.
+Implementation of the URL Frontier Service. There are currently 2 implementations available:
+- a simple memory-based which was used primarily for testing
+- the default one which is scalable, persistent and is based on [RocksDB](https://rocksdb.org/).
 
-The easiest way to run the Frontier is to use Docker and do 
-
-```
- docker pull crawlercommons/url-frontier:0.1
- docker run --rm --name frontier -p 7071:7071 crawlercommons/url-frontier:0.1
-```
-
-The service will run on the default port (7071). Clients can connect to it using the gRPC code generated from the API.
+Web crawlers can connect to it using the gRPC code generated from the API. There is also a simple client available 
+which can do basic interactions with a Frontier.
 
 ## Compilation
 
 To build and run the service from source, compile with `mvn clean package`
 
-then run with 
+## Execution
 
 `java -Xmx2G -cp target/urlfrontier-service-*.jar crawlercommons.urlfrontier.service.URLFrontierServer`
 
@@ -33,3 +29,15 @@ the call above can have the following equivalent without the config file:
 
 `java -Xmx2G -cp target/urlfrontier-service-*.jar crawlercommons.urlfrontier.service.URLFrontierServer rocksdb.path=/pathToCrawlDir/rocksdb` 
 
+## Docker
+
+The easiest way to run the Frontier is to use Docker
+
+```
+ docker pull crawlercommons/url-frontier:0.2
+ docker run --rm --name frontier -p 7071:7071 crawlercommons/url-frontier:0.2
+```
+
+The service will run on the default port (7071). Additional parameters can simply be added to the command, for instance, to persist RocksDB between runs
+
+`docker run --rm --name frontier -v /pathOnDisk:/crawldir -p 7071:7071 crawlercommons/url-frontier:0.2 rocksdb.path=/crawldir/rocksdb`
