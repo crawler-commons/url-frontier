@@ -35,8 +35,8 @@ service URLFrontier {
      /** Return stats for a specific queue or the whole crawl if the value if empty or null **/
      rpc GetStats(String) returns (Stats) {}
      
-     /** Delete  the queue based on the key in parameter **/
-     rpc DeleteQueue(String) returns (Empty) {}
+     /** Delete the queue based on the key in parameter, returns the number of URLs removed this way **/
+     rpc DeleteQueue(String) returns (Integer) {}
 
      /** Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch
       1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time

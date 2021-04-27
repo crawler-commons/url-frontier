@@ -152,28 +152,28 @@ public final class URLFrontierGrpc {
   }
 
   private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String,
-      crawlercommons.urlfrontier.Urlfrontier.Empty> getDeleteQueueMethod;
+      crawlercommons.urlfrontier.Urlfrontier.Integer> getDeleteQueueMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "DeleteQueue",
       requestType = crawlercommons.urlfrontier.Urlfrontier.String.class,
-      responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+      responseType = crawlercommons.urlfrontier.Urlfrontier.Integer.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String,
-      crawlercommons.urlfrontier.Urlfrontier.Empty> getDeleteQueueMethod() {
-    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String, crawlercommons.urlfrontier.Urlfrontier.Empty> getDeleteQueueMethod;
+      crawlercommons.urlfrontier.Urlfrontier.Integer> getDeleteQueueMethod() {
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.String, crawlercommons.urlfrontier.Urlfrontier.Integer> getDeleteQueueMethod;
     if ((getDeleteQueueMethod = URLFrontierGrpc.getDeleteQueueMethod) == null) {
       synchronized (URLFrontierGrpc.class) {
         if ((getDeleteQueueMethod = URLFrontierGrpc.getDeleteQueueMethod) == null) {
           URLFrontierGrpc.getDeleteQueueMethod = getDeleteQueueMethod =
-              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.String, crawlercommons.urlfrontier.Urlfrontier.Empty>newBuilder()
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.String, crawlercommons.urlfrontier.Urlfrontier.Integer>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteQueue"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance()))
+                  crawlercommons.urlfrontier.Urlfrontier.Integer.getDefaultInstance()))
               .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("DeleteQueue"))
               .build();
         }
@@ -366,11 +366,11 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Delete  the queue based on the key in parameter *
+     ** Delete the queue based on the key in parameter, returns the number of URLs removed this way *
      * </pre>
      */
     public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
-        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
       asyncUnimplementedUnaryCall(getDeleteQueueMethod(), responseObserver);
     }
 
@@ -444,7 +444,7 @@ public final class URLFrontierGrpc {
             asyncUnaryCall(
               new MethodHandlers<
                 crawlercommons.urlfrontier.Urlfrontier.String,
-                crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                crawlercommons.urlfrontier.Urlfrontier.Integer>(
                   this, METHODID_DELETE_QUEUE)))
           .addMethod(
             getBlockQueueUntilMethod(),
@@ -532,11 +532,11 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Delete  the queue based on the key in parameter *
+     ** Delete the queue based on the key in parameter, returns the number of URLs removed this way *
      * </pre>
      */
     public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
-        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty> responseObserver) {
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getDeleteQueueMethod(), getCallOptions()), request, responseObserver);
     }
@@ -628,10 +628,10 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Delete  the queue based on the key in parameter *
+     ** Delete the queue based on the key in parameter, returns the number of URLs removed this way *
      * </pre>
      */
-    public crawlercommons.urlfrontier.Urlfrontier.Empty deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request) {
+    public crawlercommons.urlfrontier.Urlfrontier.Integer deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request) {
       return blockingUnaryCall(
           getChannel(), getDeleteQueueMethod(), getCallOptions(), request);
     }
@@ -711,10 +711,10 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Delete  the queue based on the key in parameter *
+     ** Delete the queue based on the key in parameter, returns the number of URLs removed this way *
      * </pre>
      */
-    public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Empty> deleteQueue(
+    public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.Integer> deleteQueue(
         crawlercommons.urlfrontier.Urlfrontier.String request) {
       return futureUnaryCall(
           getChannel().newCall(getDeleteQueueMethod(), getCallOptions()), request);
@@ -799,7 +799,7 @@ public final class URLFrontierGrpc {
           break;
         case METHODID_DELETE_QUEUE:
           serviceImpl.deleteQueue((crawlercommons.urlfrontier.Urlfrontier.String) request,
-              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>) responseObserver);
+              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>) responseObserver);
           break;
         case METHODID_BLOCK_QUEUE_UNTIL:
           serviceImpl.blockQueueUntil((crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams) request,
