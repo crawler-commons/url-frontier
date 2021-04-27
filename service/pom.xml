@@ -6,7 +6,7 @@
 	<groupId>com.github.crawler-commons</groupId>
 	<artifactId>urlfrontier-service</artifactId>
 	<packaging>jar</packaging>
-	<version>0.2</version>
+	<version>0.3-SNAPSHOT</version>
 
 	<description>Implementation of the URLFrontier Service</description>
 
