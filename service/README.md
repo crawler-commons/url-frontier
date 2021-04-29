@@ -1,6 +1,6 @@
 # URL Frontier Service
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/crawlercommons/url-frontier.svg?maxAge=604800)][hub]
+[![Docker Pulls](https://img.shields.io/docker/pulls/crawlercommons/url-frontier)](https://hub.docker.com/r/crawlercommons/url-frontier)
 
 Implementation of the URL Frontier Service. There are currently 2 implementations available:
 - a simple memory-based which was used primarily for testing
