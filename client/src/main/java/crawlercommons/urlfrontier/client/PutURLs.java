@@ -91,6 +91,16 @@ public class PutURLs implements Runnable {
 		try {
 			allLines = Files.readAllLines(Paths.get(file));
 			for (String line : allLines) {
+
+				// don't sent too many in one go
+				while (sent > acked.get() + 10000) {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
+
 				URLItem item = parse(line);
 				if (item == null) {
 					System.err.println("Invalid input line " + linenum);
@@ -107,17 +117,17 @@ public class PutURLs implements Runnable {
 		streamObserver.onCompleted();
 
 		// wait for completion
-		while (completed.get() == false) {
+		while (!completed.get()) {
 			try {
-				Thread.currentThread().sleep(1000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 			}
 		}
 
 		System.out.println("Items sent " + sent + " / acked " + acked.get());
 
 		channel.shutdownNow();
-
 	}
 
 	/**
