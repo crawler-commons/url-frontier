@@ -1,5 +1,6 @@
 # URL Frontier Service
 
+[![Docker Image Version (latest semver)](https://img.shields.io/docker/v/crawlercommons/url-frontier)](https://hub.docker.com/r/crawlercommons/url-frontier)
 [![Docker Pulls](https://img.shields.io/docker/pulls/crawlercommons/url-frontier)](https://hub.docker.com/r/crawlercommons/url-frontier)
 
 Implementation of the URL Frontier Service. There are currently 2 implementations available:
