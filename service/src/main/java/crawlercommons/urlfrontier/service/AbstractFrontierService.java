@@ -74,13 +74,25 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 		responseObserver.onCompleted();
 	}
 
-	protected String provideMissingKey(String url) {
-		try {
-			URL u = new URL(url);
-			return u.getHost();
-		} catch (MalformedURLException e) {
-			return null;
+	protected String provideMissingKey(final String url) {
+		String host = url;
+		// find protocol part
+		int protocolPos = host.indexOf("://");
+		if (protocolPos != -1) {
+			host = url.substring(protocolPos + 3);
 		}
+		int sep = host.indexOf("/");
+		if (sep != -1) {
+			host = host.substring(0, sep);
+		}
+		int port = host.indexOf(":");
+		if (port != -1) {
+			host = host.substring(0, port);
+		}
+
+		if (host.length() == 0)
+			return null;
+		return host;
 	}
 
 	@Override
