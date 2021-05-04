@@ -3,9 +3,9 @@
 [![license](https://img.shields.io/github/license/crawler-commons/url-frontier)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/crawlercommons/url-frontier)](https://hub.docker.com/r/crawlercommons/url-frontier)
 
-Discovering content on the web is possible thanks to web crawlers, luckily there are many excellent open source solutions for this; however, most of them have their own way of storing and accessing the information about the URLs.
+Discovering content on the web is possible thanks to web crawlers, luckily there are many excellent open-source solutions for this; however, most of them have their own way of storing and accessing the information about the URLs.
 
-The aim of the *URL Frontier* project is to develop a crawler/language-neutral API for the operations that web crawlers do when communicating with a web frontier e.g. get the next URLs to crawl, update the information about  URLs already processed, change the crawl rate for a particular hostname, get the list of active hosts, get statistics, etc... Such an API can used by a variety of open source web crawlers, regardless whether they are implemented in Java like [StormCrawler](http://stormcrawler.net) and [Heritrix](https://github.com/internetarchive/heritrix3) or in Python like [Scrapy](https://scrapy.org/).
+The aim of the *URL Frontier* project is to develop a crawler/language-neutral API for the operations that web crawlers do when communicating with a web frontier e.g. get the next URLs to crawl, update the information about  URLs already processed, change the crawl rate for a particular hostname, get the list of active hosts, get statistics, etc... Such an API can used by a variety of web crawlers, regardless of whether they are implemented in Java like [StormCrawler](http://stormcrawler.net) and [Heritrix](https://github.com/internetarchive/heritrix3) or in Python like [Scrapy](https://scrapy.org/).
 
 The outcomes of the project are to:
 - design an **[API](API/README.md)** with [gRPC](http://grpc.io), provide a Java stubs for the API and instructions on how to achieve the same for other languages
