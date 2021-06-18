@@ -1,4 +1,4 @@
-FROM maven:3.8.1-jdk-8 AS build
+FROM maven:3-jdk-8 AS build
 
 RUN mkdir /urlfrontier
 
