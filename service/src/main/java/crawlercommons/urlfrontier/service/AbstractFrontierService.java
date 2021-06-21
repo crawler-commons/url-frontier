@@ -19,8 +19,6 @@
 
 package crawlercommons.urlfrontier.service;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
