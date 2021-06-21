@@ -1,12 +1,14 @@
 FROM maven:3-jdk-8 AS build
 
-RUN mkdir /urlfrontier
+RUN useradd -m urlfrontier
+
+USER urlfrontier
+
+WORKDIR /home/urlfrontier
 
 # copy the source tree and the pom.xml to our new container
-COPY ./src /urlfrontier/src
-COPY ./pom.xml /urlfrontier
-
-WORKDIR /urlfrontier
+COPY ./src src
+COPY ./pom.xml .
 
 RUN mvn clean package
 
@@ -15,6 +17,10 @@ RUN cp target/*.jar urlfrontier-service.jar
 
 FROM openjdk:8-jdk-slim
 
-COPY --from=build /urlfrontier/urlfrontier-service.jar urlfrontier-service.jar
+RUN useradd -m urlfrontier
+
+COPY --chown=urlfrontier --from=build /home/urlfrontier/urlfrontier-service.jar urlfrontier-service.jar
+
+USER urlfrontier
 
 ENTRYPOINT ["java", "-Xmx2G", "-jar", "urlfrontier-service.jar"]
