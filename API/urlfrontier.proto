@@ -46,6 +46,9 @@ service URLFrontier {
      
      /** De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. **/
      rpc SetActive(Boolean) returns (Empty) {}
+
+     /** Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) **/
+     rpc GetActive(Empty) returns (Boolean) {}
      
      /** Set a delay from a given queue.
       No URLs will be obtained via GetURLs for this queue until the number of seconds specified has 

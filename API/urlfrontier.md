@@ -289,6 +289,7 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 | DeleteQueue | [String](#urlfrontier.String) | [Integer](#urlfrontier.Integer) | Delete the queue based on the key in parameter, returns the number of URLs removed this way * |
 | BlockQueueUntil | [BlockQueueParams](#urlfrontier.BlockQueueParams) | [Empty](#urlfrontier.Empty) | Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. |
 | SetActive | [Boolean](#urlfrontier.Boolean) | [Empty](#urlfrontier.Empty) | De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. * |
+| GetActive | [Empty](#urlfrontier.Empty) | [Boolean](#urlfrontier.Boolean) | Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) * |
 | SetDelay | [QueueDelayParams](#urlfrontier.QueueDelayParams) | [Empty](#urlfrontier.Empty) | Set a delay from a given queue. No URLs will be obtained via GetURLs for this queue until the number of seconds specified has elapsed since the last time URLs were retrieved. Usually informed by the delay setting of robots.txt. |
 
  

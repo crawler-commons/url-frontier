@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 import org.slf4j.LoggerFactory;
 
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
+import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
@@ -69,6 +70,12 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 			StreamObserver<Empty> responseObserver) {
 		active = request.getState();
 		responseObserver.onNext(Empty.getDefaultInstance());
+		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void getActive(Empty request, StreamObserver<Boolean> responseObserver) {
+		responseObserver.onNext(Boolean.newBuilder().setState(active).build());
 		responseObserver.onCompleted();
 	}
 
@@ -160,7 +167,8 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 	public void deleteQueue(crawlercommons.urlfrontier.Urlfrontier.String request,
 			StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
 		QueueInterface q = queues.remove(request.getValue());
-		responseObserver.onNext(crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder().setValue(q.countActive()).build());
+		responseObserver
+				.onNext(crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder().setValue(q.countActive()).build());
 		responseObserver.onCompleted();
 	}
 
@@ -215,50 +223,50 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 			responseObserver.onCompleted();
 			return;
 		}
-	
+
 		int maxQueues = request.getMaxQueues();
 		int maxURLsPerQueue = request.getMaxUrlsPerQueue();
 		int secsUntilRequestable = request.getDelayRequestable();
-	
+
 		// 0 by default
 		if (maxQueues == 0) {
 			maxQueues = Integer.MAX_VALUE;
 		}
-	
+
 		if (maxURLsPerQueue == 0) {
 			maxURLsPerQueue = Integer.MAX_VALUE;
 		}
-	
+
 		if (secsUntilRequestable == 0) {
 			secsUntilRequestable = 30;
 		}
-	
+
 		LOG.info("Received request to get fetchable URLs [max queues {}, max URLs {}, delay {}]", maxQueues,
 				maxURLsPerQueue, secsUntilRequestable);
-	
+
 		long start = System.currentTimeMillis();
-	
+
 		String key = request.getKey();
-	
+
 		long now = Instant.now().getEpochSecond();
-	
+
 		// want a specific key only?
 		// default is an empty string so should never be null
 		if (key != null && key.length() >= 1) {
 			QueueInterface queue = queues.get(key);
-	
+
 			// the queue does not exist
 			if (queue == null) {
 				responseObserver.onCompleted();
 				return;
 			}
-	
+
 			// it is locked
 			if (queue.getBlockedUntil() >= now) {
 				responseObserver.onCompleted();
 				return;
 			}
-	
+
 			// too early?
 			int delay = queue.getDelay();
 			if (delay == -1)
@@ -267,24 +275,24 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 				responseObserver.onCompleted();
 				return;
 			}
-	
+
 			int totalSent = sendURLsForQueue(queue, key, maxURLsPerQueue, secsUntilRequestable, now, responseObserver);
 			responseObserver.onCompleted();
-	
+
 			LOG.info("Sent {} from queue {} in {} msec", totalSent, key, (System.currentTimeMillis() - start));
-	
+
 			if (totalSent != 0) {
 				queue.setLastProduced(now);
 			}
-	
+
 			return;
 		}
-	
+
 		int numQueuesSent = 0;
 		int totalSent = 0;
 		// to make sure we don't loop over the ones we already had
 		String firstQueue = null;
-	
+
 		synchronized (queues) {
 			while (!queues.isEmpty() && numQueuesSent < maxQueues) {
 				Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
@@ -296,15 +304,15 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 				}
 				// We remove the entry and put it at the end of the map
 				iterator.remove();
-	
+
 				// Put the entry at the end
 				queues.put(e.getKey(), e.getValue());
-	
+
 				// it is locked
 				if (e.getValue().getBlockedUntil() >= now) {
 					continue;
 				}
-	
+
 				// too early?
 				int delay = e.getValue().getDelay();
 				if (delay == -1)
@@ -312,25 +320,25 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 				if (e.getValue().getLastProduced() + delay >= now) {
 					continue;
 				}
-	
+
 				// already has its fill of URLs in process
 				if (e.getValue().getInProcess(now) >= maxURLsPerQueue) {
 					continue;
 				}
-	
-				int sentForQ = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue,
-						secsUntilRequestable, now, responseObserver);
+
+				int sentForQ = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
+						responseObserver);
 				if (sentForQ > 0) {
 					e.getValue().setLastProduced(now);
 					totalSent += sentForQ;
 					numQueuesSent++;
 				}
-	
+
 			}
 		}
-	
+
 		LOG.info("Sent {} from {} queue(s) in {} msec", totalSent, numQueuesSent, (System.currentTimeMillis() - start));
-	
+
 		responseObserver.onCompleted();
 	}
 

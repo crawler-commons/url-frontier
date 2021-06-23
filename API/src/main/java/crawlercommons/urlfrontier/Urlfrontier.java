@@ -9620,7 +9620,7 @@ public final class Urlfrontier {
       "\001\"Q\n\014KnownURLItem\022\"\n\004info\030\001 \001(\0132\024.urlfro" +
       "ntier.URLInfo\022\035\n\025refetchable_from_date\030\002" +
       " \001(\004\"7\n\021DiscoveredURLItem\022\"\n\004info\030\001 \001(\0132" +
-      "\024.urlfrontier.URLInfo2\372\003\n\013URLFrontier\022=\n" +
+      "\024.urlfrontier.URLInfo2\263\004\n\013URLFrontier\022=\n" +
       "\nListQueues\022\024.urlfrontier.Integer\032\027.urlf" +
       "rontier.StringList\"\000\022;\n\007GetURLs\022\026.urlfro" +
       "ntier.GetParams\032\024.urlfrontier.URLInfo\"\0000" +
@@ -9631,10 +9631,11 @@ public final class Urlfrontier {
       "ontier.Integer\"\000\022F\n\017BlockQueueUntil\022\035.ur" +
       "lfrontier.BlockQueueParams\032\022.urlfrontier" +
       ".Empty\"\000\0227\n\tSetActive\022\024.urlfrontier.Bool" +
-      "ean\032\022.urlfrontier.Empty\"\000\022?\n\010SetDelay\022\035." +
-      "urlfrontier.QueueDelayParams\032\022.urlfronti" +
-      "er.Empty\"\000B\034\n\032crawlercommons.urlfrontier" +
-      "b\006proto3"
+      "ean\032\022.urlfrontier.Empty\"\000\0227\n\tGetActive\022\022" +
+      ".urlfrontier.Empty\032\024.urlfrontier.Boolean" +
+      "\"\000\022?\n\010SetDelay\022\035.urlfrontier.QueueDelayP" +
+      "arams\032\022.urlfrontier.Empty\"\000B\034\n\032crawlerco" +
+      "mmons.urlfrontierb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
