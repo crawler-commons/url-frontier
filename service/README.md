@@ -32,6 +32,8 @@ the call above can have the following equivalent without the config file:
 
 `java -Xmx2G -cp target/urlfrontier-service-*.jar crawlercommons.urlfrontier.service.URLFrontierServer rocksdb.path=/pathToCrawlDir/rocksdb` 
 
+If no path is set explicitly for RocksDB,  the default value _./rocksdb_ will be used.
+
 ## Docker
 
 The easiest way to run the Frontier is to use Docker

@@ -30,6 +30,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,11 +65,18 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 	// a list which will hold the handles for the column families once the db is
 	// opened
 	private final List<ColumnFamilyHandle> columnFamilyHandleList = new ArrayList<>();
+	
+	// no explicit config
+	public RocksDBService() {
+		this (new HashMap<String, String> ());
+	}
 
 	public RocksDBService(final Map<String, String> configuration) {
 
 		// where to store it?
 		String path = configuration.getOrDefault("rocksdb.path", "./rocksdb");
+		
+		LOG.info("RocksDB data stored in {} ", path);
 
 		if (configuration.containsKey("rocksdb.purge")) {
 			try {
