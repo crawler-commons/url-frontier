@@ -33,6 +33,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
@@ -65,17 +66,19 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 	// a list which will hold the handles for the column families once the db is
 	// opened
 	private final List<ColumnFamilyHandle> columnFamilyHandleList = new ArrayList<>();
-	
+
 	// no explicit config
 	public RocksDBService() {
-		this (new HashMap<String, String> ());
+		this(new HashMap<String, String>());
 	}
+
+	private final ConcurrentHashMap<String, String> queuesBeingDeleted = new ConcurrentHashMap<>();
 
 	public RocksDBService(final Map<String, String> configuration) {
 
 		// where to store it?
 		String path = configuration.getOrDefault("rocksdb.path", "./rocksdb");
-		
+
 		LOG.info("RocksDB data stored in {} ", path);
 
 		if (configuration.containsKey("rocksdb.purge")) {
@@ -284,43 +287,47 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					return;
 				}
 
-				// block on the whole queues so that we don't add to one which is being deleted
-				synchronized (queues) {
-					// get the priority queue or create one
-					QueueMetadata queueMD = (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
-					try {
-						// known - remove from queues
-						// its key in the queues was stored in the default cf
-						if (schedulingKey != null) {
-							rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
-							// remove from queue metadata
-							queueMD.removeFromProcessed(url);
-							queueMD.decrementActive();
-						}
+				// ignore this url if the queue is being deleted
+				if (queuesBeingDeleted.containsKey(Qkey)) {
+					LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
+					responseObserver
+							.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(url).build());
+				}
 
-						// add the new item
-						// unless it is an update and it's nextFetchDate is 0 == NEVER
-						if (!discovered && nextFetchDate == 0) {
-							// does not need scheduling
-							// remove any scheduling key from its value
-							schedulingKey = new byte[] {};
-							queueMD.incrementCompleted();
-						} else {
-							// it is either brand new or already known
-							// create a scheduling key for it
-							schedulingKey = (keyNormalisation(Qkey) + "_" + nextFetchDate + "_" + url)
-									.getBytes(StandardCharsets.UTF_8);
-							// add to the scheduling
-							rocksDB.put(columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
-							queueMD.incrementActive();
-						}
-						// update the link to its queue
-						// TODO put in a batch? rocksDB.write(new WriteOptions(), writeBatch);
-						rocksDB.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
-
-					} catch (RocksDBException e) {
-						LOG.error("RocksDB exception", e);
+				// get the priority queue or create one
+				QueueMetadata queueMD = (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
+				try {
+					// known - remove from queues
+					// its key in the queues was stored in the default cf
+					if (schedulingKey != null) {
+						rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
+						// remove from queue metadata
+						queueMD.removeFromProcessed(url);
+						queueMD.decrementActive();
 					}
+
+					// add the new item
+					// unless it is an update and it's nextFetchDate is 0 == NEVER
+					if (!discovered && nextFetchDate == 0) {
+						// does not need scheduling
+						// remove any scheduling key from its value
+						schedulingKey = new byte[] {};
+						queueMD.incrementCompleted();
+					} else {
+						// it is either brand new or already known
+						// create a scheduling key for it
+						schedulingKey = (keyNormalisation(Qkey) + "_" + nextFetchDate + "_" + url)
+								.getBytes(StandardCharsets.UTF_8);
+						// add to the scheduling
+						rocksDB.put(columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
+						queueMD.incrementActive();
+					}
+					// update the link to its queue
+					// TODO put in a batch? rocksDB.write(new WriteOptions(), writeBatch);
+					rocksDB.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
+
+				} catch (RocksDBException e) {
+					LOG.error("RocksDB exception", e);
 				}
 
 				responseObserver
@@ -351,57 +358,72 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
 		final String Qkey = request.getValue();
 		int sizeQueue = 0;
-		synchronized (queues) {
-			// find the next key by alphabetical order
-			String[] array = new String[queues.size()];
-			array = queues.keySet().toArray(array);
-			Arrays.sort(array);
-			boolean wantNext = false;
-			byte[] endKey = null;
-			for (String s : array) {
-				if (wantNext) {
-					endKey = (keyNormalisation(s) + "_").getBytes(StandardCharsets.UTF_8);
-					break;
-				} else if (s.equals(Qkey)) {
-					wantNext = true;
-				}
-			}
 
-			try {
-				// what if is is the last one?
-				boolean endKeyMustAlsoDie = false;
-				if (endKey == null) {
-					try (RocksIterator iter = rocksDB.newIterator(columnFamilyHandleList.get(0))) {
-						iter.seekToLast();
-						if (iter.isValid()) {
-							// this is the last known URL
-							endKey = iter.key();
-							endKeyMustAlsoDie = true;
-						}
-					}
-				}
+		// is this queue is already being deleted?
+		// no need to do it again
+		if (queuesBeingDeleted.contains(Qkey)) {
+			responseObserver
+					.onNext(crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder().setValue(sizeQueue).build());
+			responseObserver.onCompleted();
+			return;
+		}
 
-				if (endKey != null) {
-					// delete the ranges in the queues table as well as the URLs already
-					// processed
-					rocksDB.deleteRange(columnFamilyHandleList.get(1),
-							(keyNormalisation(Qkey) + "_").getBytes(StandardCharsets.UTF_8), endKey);
-					rocksDB.deleteRange(columnFamilyHandleList.get(0),
-							(keyNormalisation(Qkey) + "_").getBytes(StandardCharsets.UTF_8), endKey);
-					if (endKeyMustAlsoDie) {
-						rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
-						rocksDB.delete(columnFamilyHandleList.get(0), endKey);
-					}
-				}
-				QueueInterface q = queues.remove(Qkey);
-				sizeQueue += q.countActive();
-				sizeQueue += q.getCountCompleted();
-			} catch (RocksDBException e) {
-				LOG.error("RocksDBException", e);
+		queuesBeingDeleted.put(Qkey, null);
+
+		// find the next key by alphabetical order
+		String[] array = new String[queues.size()];
+		array = queues.keySet().toArray(array);
+		Arrays.sort(array);
+		boolean wantNext = false;
+		byte[] endKey = null;
+		for (String s : array) {
+			if (wantNext) {
+				endKey = (keyNormalisation(s) + "_").getBytes(StandardCharsets.UTF_8);
+				break;
+			} else if (s.equals(Qkey)) {
+				wantNext = true;
 			}
 		}
 
-		responseObserver.onNext(crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder().setValue(sizeQueue).build());
+		try {
+			// what if is is the last one?
+			boolean endKeyMustAlsoDie = false;
+			if (endKey == null) {
+				try (RocksIterator iter = rocksDB.newIterator(columnFamilyHandleList.get(0))) {
+					iter.seekToLast();
+					if (iter.isValid()) {
+						// this is the last known URL
+						endKey = iter.key();
+						endKeyMustAlsoDie = true;
+					}
+				}
+			}
+
+			if (endKey != null) {
+				// delete the ranges in the queues table as well as the URLs already
+				// processed
+				rocksDB.deleteRange(columnFamilyHandleList.get(1),
+						(keyNormalisation(Qkey) + "_").getBytes(StandardCharsets.UTF_8), endKey);
+				rocksDB.deleteRange(columnFamilyHandleList.get(0),
+						(keyNormalisation(Qkey) + "_").getBytes(StandardCharsets.UTF_8), endKey);
+				if (endKeyMustAlsoDie) {
+					rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
+					rocksDB.delete(columnFamilyHandleList.get(0), endKey);
+				}
+			}
+
+		} catch (RocksDBException e) {
+			LOG.error("RocksDBException", e);
+		}
+
+		QueueInterface q = queues.remove(Qkey);
+		sizeQueue += q.countActive();
+		sizeQueue += q.getCountCompleted();
+
+		queuesBeingDeleted.remove(Qkey);
+
+		responseObserver
+				.onNext(crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder().setValue(sizeQueue).build());
 		responseObserver.onCompleted();
 	}
 
