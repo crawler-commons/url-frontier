@@ -111,7 +111,15 @@ public class MemoryFrontierService extends AbstractFrontierService {
 						return;
 					}
 				}
-
+				
+				// check that the key is not too long
+				if (key.length() > 255) {
+					LOG.error("Key too long: {}", key);
+					responseObserver.onNext(
+							crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(iu.url).build());
+					return;
+				}
+				
 				// get the priority queue or create one
 				synchronized (queues) {
 					URLQueue queue = (URLQueue) queues.get(key);
