@@ -23,8 +23,8 @@ package urlfrontier;
 
 service URLFrontier {
      /** Return the names of up to N active queues
-      a queue is active if it has URLs due for fetching; the default value of 0 sets no limit to the number of queue names to return **/
-     rpc ListQueues(Integer) returns (StringList) {}
+      a queue is active if it has URLs due for fetching; by default the service will return up to 100 results from offset 0 **/
+     rpc ListQueues(Pagination) returns (QueueList) {}
 
      /** Stream URLs due for fetching from M queues with up to N items per queue **/
      rpc GetURLs(GetParams) returns (stream URLInfo) {}
@@ -72,6 +72,13 @@ message Stats {
   uint64 numberOfQueues = 4;
 }
 
+message Pagination {
+  // position of the first result in the list; defaults to 0
+  uint32 start = 0
+  // max number of values; defaults to 100
+  uint32 size = 1;
+}
+
 message Empty {
 }
 
@@ -87,8 +94,15 @@ message Integer {
   uint64 value = 1;
 }
 
-message StringList {
+/** Returned by ListQueues **/
+message QueueList {
   repeated string values = 1;
+  // total number of queues
+  uint64 total = 2;
+  // position of the first result in the list
+  uint32 start = 3
+  // number of values returned
+  uint32 size = 4;
 }
 
 /** Parameter message for SetDelay **/
