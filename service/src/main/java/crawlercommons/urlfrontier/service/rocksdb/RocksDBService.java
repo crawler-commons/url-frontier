@@ -266,6 +266,14 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					// make a new info object ready to return
 					info = URLInfo.newBuilder(info).setKey(Qkey).build();
 				}
+				
+				// check that the key is not too long
+				if (Qkey.length() > 255) {
+					LOG.error("Key too long: {}", Qkey);
+					responseObserver.onNext(
+							crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(url).build());
+					return;
+				}
 
 				byte[] schedulingKey = null;
 
