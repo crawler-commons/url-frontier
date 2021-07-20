@@ -35,8 +35,8 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
+import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
-import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
@@ -129,9 +129,9 @@ public class URLFrontierServiceTest {
 
 		LOG.info("Checking existence of queue");
 
-		crawlercommons.urlfrontier.Urlfrontier.Integer request = crawlercommons.urlfrontier.Urlfrontier.Integer
+		crawlercommons.urlfrontier.Urlfrontier.Pagination request = crawlercommons.urlfrontier.Urlfrontier.Pagination
 				.newBuilder().build();
-		StringList queueslisted = blockingFrontier.listQueues(request);
+		QueueList queueslisted = blockingFrontier.listQueues(request);
 
 		Assert.assertEquals("incorrect number of queues returned", 1, queueslisted.getValuesCount());
 
@@ -179,7 +179,8 @@ public class URLFrontierServiceTest {
 
 	@Test
 	public void testDeleteQueue() {
-		crawlercommons.urlfrontier.Urlfrontier.Integer deleted = blockingFrontier.deleteQueue(Urlfrontier.String.newBuilder().setValue("key1.com").build());
+		crawlercommons.urlfrontier.Urlfrontier.Integer deleted = blockingFrontier
+				.deleteQueue(Urlfrontier.String.newBuilder().setValue("key1.com").build());
 
 		Stats stats = blockingFrontier.getStats(Urlfrontier.String.newBuilder().setValue("key1.com").build());
 

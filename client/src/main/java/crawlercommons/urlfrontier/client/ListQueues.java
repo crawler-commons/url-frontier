@@ -21,7 +21,8 @@ package crawlercommons.urlfrontier.client;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
-import crawlercommons.urlfrontier.Urlfrontier.StringList;
+import crawlercommons.urlfrontier.Urlfrontier.Pagination.Builder;
+import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import picocli.CommandLine.Command;
@@ -35,24 +36,29 @@ public class ListQueues implements Runnable {
 	private Client parent;
 
 	@Option(names = { "-n",
-			"--number_queues" }, defaultValue = "-1", paramLabel = "NUM", description = "maximum number of queues to return")
-	private long maxNumQueues;
+			"--number_queues" }, defaultValue = "100", paramLabel = "NUM", description = "maximum number of queues to return")
+	private int maxNumQueues;
+
+	@Option(names = { "-s",
+			"--start" }, defaultValue = "0", paramLabel = "NUM", description = "starting position of queue to return")
+	private int start;
 
 	@Override
 	public void run() {
 		ManagedChannel channel = ManagedChannelBuilder.forAddress(parent.hostname, parent.port).usePlaintext().build();
 		URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
-		crawlercommons.urlfrontier.Urlfrontier.Integer.Builder builder = crawlercommons.urlfrontier.Urlfrontier.Integer
-				.newBuilder();
-		if (maxNumQueues > 0) {
-			builder.setValue(maxNumQueues);
+		Builder builder = crawlercommons.urlfrontier.Urlfrontier.Pagination.newBuilder();
+
+		builder.setSize(maxNumQueues);
+		builder.setStart(start);
+
+		QueueList queueslisted = blockingFrontier.listQueues(builder.build());
+
+		for (int i = 0; i < queueslisted.getValuesCount(); i++) {
+			System.out.println(queueslisted.getValues(i));
 		}
 
-		StringList list = blockingFrontier.listQueues(builder.build());
-		for (int i = 0; i < list.getValuesCount(); i++) {
-			System.out.println(list.getValues(i));
-		}
 		channel.shutdownNow();
 	}
 

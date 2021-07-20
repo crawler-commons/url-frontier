@@ -36,9 +36,8 @@ import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
+import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
-import crawlercommons.urlfrontier.Urlfrontier.StringList;
-import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import io.grpc.stub.StreamObserver;
 
@@ -101,19 +100,22 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 	}
 
 	@Override
-	public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Integer request,
-			StreamObserver<StringList> responseObserver) {
-		long maxQueues = request.getValue();
-		// 0 by default
+	public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Pagination request,
+			io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.QueueList> responseObserver) {
+
+		long maxQueues = request.getSize();
+		long start = request.getStart();
+
+		// 100 by default
 		if (maxQueues == 0) {
-			maxQueues = Long.MAX_VALUE;
+			maxQueues = 100;
 		}
 
-		LOG.info("Received request to list queues [max {}]", maxQueues);
+		LOG.info("Received request to list queues [size {}; start {}]", maxQueues, start);
 
 		long now = Instant.now().getEpochSecond();
 		int num = 0;
-		Builder list = StringList.newBuilder();
+		crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder list = QueueList.newBuilder();
 
 		Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
 		while (iterator.hasNext() && num <= maxQueues) {
@@ -125,7 +127,9 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 
 			// ignore the nextfetchdate
 			if (e.getValue().countActive() > 0) {
-				list.addValues(e.getKey());
+				if (num >= start) {
+					list.addValues(e.getKey());
+				}
 				num++;
 			}
 		}
