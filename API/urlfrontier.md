@@ -11,7 +11,9 @@
     - [GetParams](#urlfrontier.GetParams)
     - [Integer](#urlfrontier.Integer)
     - [KnownURLItem](#urlfrontier.KnownURLItem)
+    - [Pagination](#urlfrontier.Pagination)
     - [QueueDelayParams](#urlfrontier.QueueDelayParams)
+    - [QueueList](#urlfrontier.QueueList)
     - [Stats](#urlfrontier.Stats)
     - [Stats.CountsEntry](#urlfrontier.Stats.CountsEntry)
     - [String](#urlfrontier.String)
@@ -140,6 +142,22 @@ it will be elligible for fetching after the delay has elapsed.
 
 
 
+<a name="urlfrontier.Pagination"></a>
+
+### Pagination
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| start | [uint32](#uint32) |  | position of the first result in the list; defaults to 0 |
+| size | [uint32](#uint32) |  | max number of values; defaults to 100 |
+
+
+
+
+
+
 <a name="urlfrontier.QueueDelayParams"></a>
 
 ### QueueDelayParams
@@ -150,6 +168,24 @@ Parameter message for SetDelay *
 | ----- | ---- | ----- | ----------- |
 | key | [string](#string) |  | ID for the queue - an empty value sets the default for all the queues * |
 | delay_requestable | [uint32](#uint32) |  | delay in seconds before a queue can provide new URLs |
+
+
+
+
+
+
+<a name="urlfrontier.QueueList"></a>
+
+### QueueList
+Returned by ListQueues *
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| values | [string](#string) | repeated |  |
+| total | [uint64](#uint64) |  | total number of queues |
+| start | [uint32](#uint32) |  | position of the first result in the list |
+| size | [uint32](#uint32) |  | number of values returned |
 
 
 
@@ -282,7 +318,7 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| ListQueues | [Integer](#urlfrontier.Integer) | [StringList](#urlfrontier.StringList) | Return the names of up to N active queues a queue is active if it has URLs due for fetching; the default value of 0 sets no limit to the number of queue names to return * |
+| ListQueues | [Pagination](#urlfrontier.Pagination) | [QueueList](#urlfrontier.QueueList) | Return the names of up to N active queues a queue is active if it has URLs due for fetching; by default the service will return up to 100 results from offset 0 * |
 | GetURLs | [GetParams](#urlfrontier.GetParams) | [URLInfo](#urlfrontier.URLInfo) stream | Stream URLs due for fetching from M queues with up to N items per queue * |
 | PutURLs | [URLItem](#urlfrontier.URLItem) stream | [String](#urlfrontier.String) stream | Push URL items to the server; they get created (if they don&#39;t already exist) in case of DiscoveredURLItems or updated if KnownURLItems * |
 | GetStats | [String](#urlfrontier.String) | [Stats](#urlfrontier.Stats) | Return stats for a specific queue or the whole crawl if the value if empty or null * |

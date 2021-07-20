@@ -74,9 +74,9 @@ message Stats {
 
 message Pagination {
   // position of the first result in the list; defaults to 0
-  uint32 start = 0
+  uint32 start = 1;
   // max number of values; defaults to 100
-  uint32 size = 1;
+  uint32 size = 2;
 }
 
 message Empty {
@@ -100,10 +100,15 @@ message QueueList {
   // total number of queues
   uint64 total = 2;
   // position of the first result in the list
-  uint32 start = 3
+  uint32 start = 3;
   // number of values returned
   uint32 size = 4;
 }
+
+message StringList {
+  repeated string values = 1;
+}
+
 
 /** Parameter message for SetDelay **/
 message QueueDelayParams {
