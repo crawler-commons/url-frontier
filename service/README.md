@@ -39,8 +39,8 @@ If no path is set explicitly for RocksDB,  the default value _./rocksdb_ will be
 The easiest way to run the Frontier is to use Docker
 
 ```
- docker pull crawlercommons/url-frontier:0.2
- docker run --rm --name frontier -p 7071:7071 crawlercommons/url-frontier:0.2
+ docker pull crawlercommons/url-frontier:0.3
+ docker run --rm --name frontier -p 7071:7071 crawlercommons/url-frontier:0.3
 ```
 
 The service will run on the default port (7071). Additional parameters can simply be added to the command, for instance, to persist RocksDB between runs
