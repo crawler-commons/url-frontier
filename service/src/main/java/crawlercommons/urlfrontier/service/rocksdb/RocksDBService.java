@@ -101,6 +101,9 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 			try (DBOptions options = new DBOptions().setCreateIfMissing(true).setCreateMissingColumnFamilies(true)) {
 				rocksDB = RocksDB.open(options, path, cfDescriptors, columnFamilyHandleList);
+			} catch (RocksDBException e) {
+				LOG.error("RocksDB exception ", e);
+				throw new RuntimeException(e);
 			}
 
 			long end = System.currentTimeMillis();
@@ -112,9 +115,6 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			long end2 = System.currentTimeMillis();
 
 			LOG.info("{} queues discovered in {} msec", queues.size(), (end2 - end));
-
-		} catch (RocksDBException e) {
-			LOG.error("RocksDB exception ", e);
 		}
 
 	}
@@ -269,12 +269,12 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					// make a new info object ready to return
 					info = URLInfo.newBuilder(info).setKey(Qkey).build();
 				}
-				
+
 				// check that the key is not too long
 				if (Qkey.length() > 255) {
 					LOG.error("Key too long: {}", Qkey);
-					responseObserver.onNext(
-							crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(url).build());
+					responseObserver
+							.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(url).build());
 					return;
 				}
 

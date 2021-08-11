@@ -135,7 +135,12 @@ public class URLFrontierServer implements Callable<Integer> {
 		}
 
 		if (service == null) {
-			service = (URLFrontierImplBase) implementationClass.newInstance();
+			try {
+				service = (URLFrontierImplBase) implementationClass.newInstance();
+			} catch (Exception e) {
+				LOG.error("Exception caught when initialising the service", e);
+				System.exit(-1);
+			}
 		}
 
 		this.server = ServerBuilder.forPort(port).addService(service).build();
