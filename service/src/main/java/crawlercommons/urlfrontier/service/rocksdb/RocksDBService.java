@@ -121,6 +121,9 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 	/** Resurrects the queues from the tables and does sanity checks **/
 	private void recoveryQscan() {
+		
+		LOG.info("Recovering queues from existing RocksDB");
+		
 		try (final RocksIterator rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(1))) {
 			for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
 				final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
@@ -300,6 +303,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
 					responseObserver
 							.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(url).build());
+					return;
 				}
 
 				// get the priority queue or create one
