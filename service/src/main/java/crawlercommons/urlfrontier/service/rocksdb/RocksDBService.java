@@ -380,7 +380,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			return;
 		}
 
-		queuesBeingDeleted.put(Qkey, null);
+		queuesBeingDeleted.put(Qkey, Qkey);
 
 		// find the next key by alphabetical order
 		String[] array = new String[queues.size()];

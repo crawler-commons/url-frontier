@@ -175,16 +175,71 @@ public class URLFrontierServiceTest {
 
 		Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
 		Assert.assertEquals("incorrect number of in process from stats", 0, stats.getInProcess());
-	}
 
-	@Test
-	public void testDeleteQueue() {
 		crawlercommons.urlfrontier.Urlfrontier.Integer deleted = blockingFrontier
 				.deleteQueue(Urlfrontier.String.newBuilder().setValue("key1.com").build());
 
-		Stats stats = blockingFrontier.getStats(Urlfrontier.String.newBuilder().setValue("key1.com").build());
+		Assert.assertEquals("incorrect number of queues deleted", 1, deleted.getValue());
+
+		stats = blockingFrontier.getStats(Urlfrontier.String.newBuilder().setValue("key1.com").build());
 
 		Assert.assertEquals("incorrect number of queues from stats", 0, stats.getNumberOfQueues());
+	}
+
+	@Test
+	public void testQueueNames() {
+		final AtomicBoolean completed = new AtomicBoolean(false);
+		final AtomicInteger acked = new AtomicInteger(0);
+
+		StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver = new StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>() {
+
+			@Override
+			public void onNext(crawlercommons.urlfrontier.Urlfrontier.String value) {
+				// receives confirmation that the value has been received
+				acked.addAndGet(1);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				completed.set(true);
+				LOG.info("Error received", t);
+			}
+
+			@Override
+			public void onCompleted() {
+				completed.set(true);
+			}
+		};
+
+		StreamObserver<URLItem> streamObserver = frontier.putURLs(responseObserver);
+
+		URLInfo info = URLInfo.newBuilder().setUrl("http://gac.icann.org?language_id=9").build();
+
+		DiscoveredURLItem item = DiscoveredURLItem.newBuilder().setInfo(info).build();
+
+		streamObserver.onNext(URLItem.newBuilder().setDiscovered(item).build());
+
+		streamObserver.onCompleted();
+
+		LOG.info("Sending URL: {}", item);
+
+		// wait for completion
+		while (completed.get() == false) {
+			try {
+				Thread.currentThread().sleep(10);
+			} catch (InterruptedException e) {
+			}
+		}
+
+		Stats stats = blockingFrontier
+				.getStats(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue("gac.icann.org").build());
+		Assert.assertEquals("number of queues matching", 1, stats.getSize());
+
+		crawlercommons.urlfrontier.Urlfrontier.Integer deleted = blockingFrontier
+				.deleteQueue(Urlfrontier.String.newBuilder().setValue("gac.icann.org").build());
+
+		Assert.assertEquals("incorrect number of queues deleted", 1, deleted.getValue());
+
 	}
 
 }

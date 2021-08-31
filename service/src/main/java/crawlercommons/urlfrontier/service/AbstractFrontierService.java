@@ -85,17 +85,30 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 		if (protocolPos != -1) {
 			host = url.substring(protocolPos + 3);
 		}
-		int sep = host.indexOf("/");
-		if (sep != -1) {
-			host = host.substring(0, sep);
-		}
+
 		int port = host.indexOf(":");
 		if (port != -1) {
 			host = host.substring(0, port);
 		}
 
+		int sep = host.indexOf("/");
+		if (sep != -1) {
+			host = host.substring(0, sep);
+		}
+
+		sep = host.indexOf("?");
+		if (sep != -1) {
+			host = host.substring(0, sep);
+		}
+
+		sep = host.indexOf("&");
+		if (sep != -1) {
+			host = host.substring(0, sep);
+		}
+
 		if (host.length() == 0)
 			return null;
+		
 		return host;
 	}
 
@@ -192,9 +205,10 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 
 		// specific queue?
 		if (!request.getValue().isEmpty()) {
+			_queues = new LinkedList<>();
+
 			QueueInterface q = queues.get(request.getValue());
 			if (q != null) {
-				_queues = new LinkedList<>();
 				_queues.add(q);
 			} else {
 				// TODO notify an error to the client
