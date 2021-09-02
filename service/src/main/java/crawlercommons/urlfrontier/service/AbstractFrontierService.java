@@ -50,7 +50,7 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 	private int defaultDelayForQueues = 1;
 
 	// in memory map of metadata for each queue
-	final protected Map<String, QueueInterface> queues = Collections.synchronizedMap(new LinkedHashMap<>());
+	protected final Map<String, QueueInterface> queues = Collections.synchronizedMap(new LinkedHashMap<>());
 
 	public int getDefaultDelayForQueues() {
 		return defaultDelayForQueues;
@@ -108,7 +108,7 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 
 		if (host.length() == 0)
 			return null;
-		
+
 		return host;
 	}
 
@@ -130,20 +130,22 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 		int num = 0;
 		crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder list = QueueList.newBuilder();
 
-		Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
-		while (iterator.hasNext() && num <= maxQueues) {
-			Entry<String, QueueInterface> e = iterator.next();
-			// check that it isn't blocked
-			if (e.getValue().getBlockedUntil() >= now) {
-				continue;
-			}
-
-			// ignore the nextfetchdate
-			if (e.getValue().countActive() > 0) {
-				if (num >= start) {
-					list.addValues(e.getKey());
+		synchronized (queues) {
+			Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
+			while (iterator.hasNext() && num <= maxQueues) {
+				Entry<String, QueueInterface> e = iterator.next();
+				// check that it isn't blocked
+				if (e.getValue().getBlockedUntil() >= now) {
+					continue;
 				}
-				num++;
+
+				// ignore the nextfetchdate
+				if (e.getValue().countActive() > 0) {
+					if (num >= start) {
+						list.addValues(e.getKey());
+					}
+					num++;
+				}
 			}
 		}
 		responseObserver.onNext(list.build());
@@ -308,13 +310,23 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 
 		int numQueuesSent = 0;
 		int totalSent = 0;
-		// to make sure we don't loop over the ones we already had
 		String firstQueue = null;
 
-		synchronized (queues) {
-			while (!queues.isEmpty() && numQueuesSent < maxQueues) {
+		if (queues.isEmpty()) {
+			LOG.info("No queues to get URLs from!");
+			responseObserver.onCompleted();
+			return;
+		}
+
+		while (numQueuesSent < maxQueues) {
+
+			String currentQueueKey = null;
+			QueueInterface currentQueue = null;
+
+			synchronized (queues) {
 				Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
 				Entry<String, QueueInterface> e = iterator.next();
+				// to make sure we don't loop over the ones we already processed
 				if (firstQueue == null) {
 					firstQueue = e.getKey();
 				} else if (firstQueue.equals(e.getKey())) {
@@ -322,37 +334,38 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 				}
 				// We remove the entry and put it at the end of the map
 				iterator.remove();
+				queues.put(currentQueueKey, currentQueue);
 
-				// Put the entry at the end
-				queues.put(e.getKey(), e.getValue());
-
-				// it is locked
-				if (e.getValue().getBlockedUntil() >= now) {
-					continue;
-				}
-
-				// too early?
-				int delay = e.getValue().getDelay();
-				if (delay == -1)
-					delay = getDefaultDelayForQueues();
-				if (e.getValue().getLastProduced() + delay >= now) {
-					continue;
-				}
-
-				// already has its fill of URLs in process
-				if (e.getValue().getInProcess(now) >= maxURLsPerQueue) {
-					continue;
-				}
-
-				int sentForQ = sendURLsForQueue(e.getValue(), e.getKey(), maxURLsPerQueue, secsUntilRequestable, now,
-						responseObserver);
-				if (sentForQ > 0) {
-					e.getValue().setLastProduced(now);
-					totalSent += sentForQ;
-					numQueuesSent++;
-				}
-
+				currentQueueKey = e.getKey();
+				currentQueue = e.getValue();
 			}
+
+			// it is locked
+			if (currentQueue.getBlockedUntil() >= now) {
+				continue;
+			}
+
+			// too early?
+			int delay = currentQueue.getDelay();
+			if (delay == -1)
+				delay = getDefaultDelayForQueues();
+			if (currentQueue.getLastProduced() + delay >= now) {
+				continue;
+			}
+
+			// already has its fill of URLs in process
+			if (currentQueue.getInProcess(now) >= maxURLsPerQueue) {
+				continue;
+			}
+
+			int sentForQ = sendURLsForQueue(currentQueue, currentQueueKey, maxURLsPerQueue, secsUntilRequestable, now,
+					responseObserver);
+			if (sentForQ > 0) {
+				currentQueue.setLastProduced(now);
+				totalSent += sentForQ;
+				numQueuesSent++;
+			}
+
 		}
 
 		LOG.info("Sent {} from {} queue(s) in {} msec", totalSent, numQueuesSent, (System.currentTimeMillis() - start));
