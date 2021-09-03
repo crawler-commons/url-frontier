@@ -326,18 +326,19 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 			synchronized (queues) {
 				Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
 				Entry<String, QueueInterface> e = iterator.next();
+				currentQueueKey = e.getKey();
+				currentQueue = e.getValue();
+
 				// to make sure we don't loop over the ones we already processed
 				if (firstQueue == null) {
-					firstQueue = e.getKey();
-				} else if (firstQueue.equals(e.getKey())) {
+					firstQueue = currentQueueKey;
+				} else if (firstQueue.equals(currentQueueKey)) {
 					break;
 				}
 				// We remove the entry and put it at the end of the map
 				iterator.remove();
-				queues.put(currentQueueKey, currentQueue);
 
-				currentQueueKey = e.getKey();
-				currentQueue = e.getValue();
+				queues.put(currentQueueKey, currentQueue);
 			}
 
 			// it is locked
