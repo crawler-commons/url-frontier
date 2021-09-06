@@ -42,11 +42,14 @@ import org.rocksdb.DBOptions;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
+import org.rocksdb.Statistics;
+import org.rocksdb.StatsLevel;
 import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
@@ -66,6 +69,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 	// a list which will hold the handles for the column families once the db is
 	// opened
 	private final List<ColumnFamilyHandle> columnFamilyHandleList = new ArrayList<>();
+
+	private Statistics statistics;
 
 	// no explicit config
 	public RocksDBService() {
@@ -89,7 +94,14 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			}
 		}
 
-		try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions().optimizeUniversalStyleCompaction()) {
+		if (configuration.containsKey("rocksdb.stats")) {
+			statistics = new Statistics();
+			statistics.setStatsLevel(StatsLevel.ALL);
+		}
+
+		try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()) {
+
+			cfOpts.optimizeUniversalStyleCompaction();
 
 			// list of column family descriptors, first entry must always be default column
 			// family
@@ -99,7 +111,13 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 			long start = System.currentTimeMillis();
 
-			try (DBOptions options = new DBOptions().setCreateIfMissing(true).setCreateMissingColumnFamilies(true)) {
+			try (final DBOptions options = new DBOptions()) {
+				options.setCreateIfMissing(true).setCreateMissingColumnFamilies(true);
+
+				if (statistics != null) {
+					options.setStatistics(statistics);
+				}
+
 				rocksDB = RocksDB.open(options, path, cfDescriptors, columnFamilyHandleList);
 			} catch (RocksDBException e) {
 				LOG.error("RocksDB exception ", e);
@@ -121,9 +139,9 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 	/** Resurrects the queues from the tables and does sanity checks **/
 	private void recoveryQscan() {
-		
+
 		LOG.info("Recovering queues from existing RocksDB");
-		
+
 		try (final RocksIterator rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(1))) {
 			for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
 				final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
@@ -270,6 +288,14 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					info = URLInfo.newBuilder(info).setKey(Qkey).build();
 				}
 
+				// ignore this url if the queue is being deleted
+				if (queuesBeingDeleted.containsKey(Qkey)) {
+					LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
+					responseObserver
+							.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(url).build());
+					return;
+				}
+
 				// check that the key is not too long
 				if (Qkey.length() > 255) {
 					LOG.error("Key too long: {}", Qkey);
@@ -293,14 +319,6 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 				// already known? ignore if discovered
 				if (schedulingKey != null && discovered) {
-					responseObserver
-							.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(url).build());
-					return;
-				}
-
-				// ignore this url if the queue is being deleted
-				if (queuesBeingDeleted.containsKey(Qkey)) {
-					LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
 					responseObserver
 							.onNext(crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().setValue(url).build());
 					return;
@@ -451,10 +469,23 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 	}
 
 	@Override
+	public void getStats(crawlercommons.urlfrontier.Urlfrontier.String request,
+			StreamObserver<Stats> responseObserver) {
+		if (statistics != null) {
+			LOG.info("RockdSB stats: {}", statistics);
+		}
+		super.getStats(request, responseObserver);
+	}
+
+	@Override
 	public void close() throws IOException {
 
 		for (final ColumnFamilyHandle columnFamilyHandle : columnFamilyHandleList) {
 			columnFamilyHandle.close();
+		}
+
+		if (statistics != null) {
+			statistics.close();
 		}
 
 		if (rocksDB != null) {
