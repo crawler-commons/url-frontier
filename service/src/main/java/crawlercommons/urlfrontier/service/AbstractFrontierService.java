@@ -219,11 +219,15 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 
 		long now = Instant.now().getEpochSecond();
 
-		for (QueueInterface q : _queues) {
-			inProc += q.getInProcess(now);
-			numQueues++;
-			size += q.countActive();
-			completed += q.getCountCompleted();
+		// backed by the queues so can result in a
+		// ConcurrentModificationException
+		synchronized (queues) {
+			for (QueueInterface q : _queues) {
+				inProc += q.getInProcess(now);
+				numQueues++;
+				size += q.countActive();
+				completed += q.getCountCompleted();
+			}
 		}
 
 		// put count completed as custom stats for now
