@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.rocksdb.BlockBasedTableConfig;
+import org.rocksdb.BloomFilter;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ColumnFamilyOptions;
@@ -98,6 +100,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			statistics = new Statistics();
 			statistics.setStatsLevel(StatsLevel.ALL);
 		}
+		
+		boolean bloomFilters = configuration.containsKey("rocksdb.bloom.filters");
 
 		try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()) {
 
@@ -111,10 +115,16 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 			long start = System.currentTimeMillis();
 
+			if (bloomFilters) {
+				LOG.info("Configuring Bloom filters");
+				cfOpts.setTableFormatConfig(new BlockBasedTableConfig().setFilterPolicy(new BloomFilter(10, false)));
+			}
+			
 			try (final DBOptions options = new DBOptions()) {
 				options.setCreateIfMissing(true).setCreateMissingColumnFamilies(true);
 
 				if (statistics != null) {
+					LOG.info("Allowing stats from RocksDB to be displayed when GetStats is called");
 					options.setStatistics(statistics);
 				}
 
