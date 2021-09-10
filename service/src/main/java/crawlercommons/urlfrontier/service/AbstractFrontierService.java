@@ -202,6 +202,7 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 		int numQueues = 0;
 		int size = 0;
 		long completed = 0;
+		long activeQueues = 0;
 
 		Collection<QueueInterface> _queues = queues.values();
 
@@ -223,9 +224,14 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 		// ConcurrentModificationException
 		synchronized (queues) {
 			for (QueueInterface q : _queues) {
-				inProc += q.getInProcess(now);
+				final int inProcForQ = q.getInProcess(now);
+				final int activeForQ = q.countActive();
+				if (inProcForQ > 0 || activeForQ > 0) {
+					activeQueues++;
+				}
+				inProc += inProcForQ;
 				numQueues++;
-				size += q.countActive();
+				size += activeForQ;
 				completed += q.getCountCompleted();
 			}
 		}
@@ -233,6 +239,8 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 		// put count completed as custom stats for now
 		// add it as a proper field later?
 		s.put("completed", completed);
+		// same for active_queues
+		s.put("active_queues", activeQueues);
 
 		Stats stats = Stats.newBuilder().setNumberOfQueues(numQueues).setSize(size).setInProcess(inProc).putAllCounts(s)
 				.build();
