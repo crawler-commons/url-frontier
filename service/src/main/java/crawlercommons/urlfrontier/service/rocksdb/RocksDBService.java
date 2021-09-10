@@ -137,6 +137,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			long end = System.currentTimeMillis();
 
 			LOG.info("RocksDB loaded in {} msec", end - start);
+			
+			LOG.info("Scanning tables to rebuild queues... (can take a long time)");
 
 			recoveryQscan();
 
