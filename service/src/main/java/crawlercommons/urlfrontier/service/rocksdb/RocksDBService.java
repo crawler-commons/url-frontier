@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,6 +62,8 @@ import io.grpc.stub.StreamObserver;
 public class RocksDBService extends AbstractFrontierService implements Closeable {
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBService.class);
+	
+	private static final DecimalFormat DF = new DecimalFormat("0000000000");
 
 	static {
 		RocksDB.loadLibrary();
@@ -358,7 +361,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 					} else {
 						// it is either brand new or already known
 						// create a scheduling key for it
-						schedulingKey = (keyNormalisation(Qkey) + "_" + nextFetchDate + "_" + url)
+						schedulingKey = (keyNormalisation(Qkey) + "_" + DF.format(nextFetchDate) + "_" + url)
 								.getBytes(StandardCharsets.UTF_8);
 						// add to the scheduling
 						rocksDB.put(columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
