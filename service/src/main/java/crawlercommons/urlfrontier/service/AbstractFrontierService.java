@@ -127,13 +127,18 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 		LOG.info("Received request to list queues [size {}; start {}]", maxQueues, start);
 
 		long now = Instant.now().getEpochSecond();
-		int num = 0;
+		int pos = -1;
+		int sent = 0;
+
 		crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder list = QueueList.newBuilder();
 
 		synchronized (queues) {
 			Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
-			while (iterator.hasNext() && num <= maxQueues) {
+
+			while (iterator.hasNext() && sent <= maxQueues) {
 				Entry<String, QueueInterface> e = iterator.next();
+				pos++;
+
 				// check that it isn't blocked
 				if (e.getValue().getBlockedUntil() >= now) {
 					continue;
@@ -141,10 +146,10 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 
 				// ignore the nextfetchdate
 				if (e.getValue().countActive() > 0) {
-					if (num >= start) {
+					if (pos >= start) {
 						list.addValues(e.getKey());
+						sent++;
 					}
-					num++;
 				}
 			}
 		}
