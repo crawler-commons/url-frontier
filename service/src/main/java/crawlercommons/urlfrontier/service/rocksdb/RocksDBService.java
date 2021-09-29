@@ -62,7 +62,7 @@ import io.grpc.stub.StreamObserver;
 public class RocksDBService extends AbstractFrontierService implements Closeable {
 
 	private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBService.class);
-	
+
 	private static final DecimalFormat DF = new DecimalFormat("0000000000");
 
 	static {
@@ -103,7 +103,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			statistics = new Statistics();
 			statistics.setStatsLevel(StatsLevel.ALL);
 		}
-		
+
 		boolean bloomFilters = configuration.containsKey("rocksdb.bloom.filters");
 
 		try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()) {
@@ -122,9 +122,20 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 				LOG.info("Configuring Bloom filters");
 				cfOpts.setTableFormatConfig(new BlockBasedTableConfig().setFilterPolicy(new BloomFilter(10, false)));
 			}
-			
+
 			try (final DBOptions options = new DBOptions()) {
 				options.setCreateIfMissing(true).setCreateMissingColumnFamilies(true);
+
+				String smaxBackgroundJobs = configuration.get("rocksdb.max_background_jobs");
+				if (smaxBackgroundJobs != null) {
+					options.setMaxBackgroundJobs(Integer.parseInt(smaxBackgroundJobs));
+				}
+				
+				// Options.max_subcompactions: 1
+				String smax_subcompactions = configuration.get("rocksdb.max_subcompactions");
+				if (smax_subcompactions != null) {
+					options.setMaxSubcompactions(Integer.parseInt(smax_subcompactions));
+				}
 
 				if (statistics != null) {
 					LOG.info("Allowing stats from RocksDB to be displayed when GetStats is called");
@@ -140,7 +151,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 			long end = System.currentTimeMillis();
 
 			LOG.info("RocksDB loaded in {} msec", end - start);
-			
+
 			LOG.info("Scanning tables to rebuild queues... (can take a long time)");
 
 			recoveryQscan();
