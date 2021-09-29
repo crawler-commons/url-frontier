@@ -19,6 +19,14 @@
 
 package crawlercommons.urlfrontier.client;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+
+import com.google.common.io.CharSink;
+import com.google.common.io.FileWriteMode;
+import com.google.common.io.Files;
+
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.Pagination.Builder;
@@ -36,29 +44,64 @@ public class ListQueues implements Runnable {
 	private Client parent;
 
 	@Option(names = { "-n",
-			"--number_queues" }, defaultValue = "100", paramLabel = "NUM", description = "maximum number of queues to return")
+			"--number_queues" }, defaultValue = "100", paramLabel = "NUM", description = "maximum number of queues to return (default 100)")
 	private int maxNumQueues;
 
 	@Option(names = { "-s",
-			"--start" }, defaultValue = "0", paramLabel = "NUM", description = "starting position of queue to return")
+			"--start" }, defaultValue = "0", paramLabel = "NUM", description = "starting position of queue to return (default 0)")
 	private int start;
+
+	@Option(names = { "-o",
+			"--output" }, defaultValue = "", paramLabel = "STRING", description = "output file to dump all the queues")
+	private String output;
 
 	@Override
 	public void run() {
 		ManagedChannel channel = ManagedChannelBuilder.forAddress(parent.hostname, parent.port).usePlaintext().build();
 		URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
-		Builder builder = crawlercommons.urlfrontier.Urlfrontier.Pagination.newBuilder();
+		if (output.length() > 0) {
 
-		builder.setSize(maxNumQueues);
-		builder.setStart(start);
+			File f = new File(output);
+			f.delete();
+			CharSink sink = Files.asCharSink(f, Charset.defaultCharset(), FileWriteMode.APPEND);
 
-		QueueList queueslisted = blockingFrontier.listQueues(builder.build());
+			while (true) {
 
-		for (int i = 0; i < queueslisted.getValuesCount(); i++) {
-			System.out.println(queueslisted.getValues(i));
+				Builder builder = crawlercommons.urlfrontier.Urlfrontier.Pagination.newBuilder();
+
+				builder.setSize(maxNumQueues);
+				builder.setStart(start);
+
+				QueueList queueslisted = blockingFrontier.listQueues(builder.build());
+
+				if (queueslisted.getValuesCount() == 0)
+					break;
+
+				for (int i = 0; i < queueslisted.getValuesCount(); i++) {
+					try {
+						sink.write(queueslisted.getValues(i));
+						sink.write("\n");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+
+				start += maxNumQueues;
+			}
+
+		} else {
+			Builder builder = crawlercommons.urlfrontier.Urlfrontier.Pagination.newBuilder();
+
+			builder.setSize(maxNumQueues);
+			builder.setStart(start);
+
+			QueueList queueslisted = blockingFrontier.listQueues(builder.build());
+
+			for (int i = 0; i < queueslisted.getValuesCount(); i++) {
+				System.out.println(queueslisted.getValues(i));
+			}
 		}
-
 		channel.shutdownNow();
 	}
 
