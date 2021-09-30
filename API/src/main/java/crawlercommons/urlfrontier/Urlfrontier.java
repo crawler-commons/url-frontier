@@ -1121,6 +1121,16 @@ public final class Urlfrontier {
      * @return The size.
      */
     int getSize();
+
+    /**
+     * <pre>
+     * include inactive queues; defaults to false
+     * </pre>
+     *
+     * <code>bool include_inactive = 3;</code>
+     * @return The includeInactive.
+     */
+    boolean getIncludeInactive();
   }
   /**
    * Protobuf type {@code urlfrontier.Pagination}
@@ -1175,6 +1185,11 @@ public final class Urlfrontier {
             case 16: {
 
               size_ = input.readUInt32();
+              break;
+            }
+            case 24: {
+
+              includeInactive_ = input.readBool();
               break;
             }
             default: {
@@ -1239,6 +1254,21 @@ public final class Urlfrontier {
       return size_;
     }
 
+    public static final int INCLUDE_INACTIVE_FIELD_NUMBER = 3;
+    private boolean includeInactive_;
+    /**
+     * <pre>
+     * include inactive queues; defaults to false
+     * </pre>
+     *
+     * <code>bool include_inactive = 3;</code>
+     * @return The includeInactive.
+     */
+    @java.lang.Override
+    public boolean getIncludeInactive() {
+      return includeInactive_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1259,6 +1289,9 @@ public final class Urlfrontier {
       if (size_ != 0) {
         output.writeUInt32(2, size_);
       }
+      if (includeInactive_ != false) {
+        output.writeBool(3, includeInactive_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1275,6 +1308,10 @@ public final class Urlfrontier {
       if (size_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(2, size_);
+      }
+      if (includeInactive_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, includeInactive_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1295,6 +1332,8 @@ public final class Urlfrontier {
           != other.getStart()) return false;
       if (getSize()
           != other.getSize()) return false;
+      if (getIncludeInactive()
+          != other.getIncludeInactive()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1310,6 +1349,9 @@ public final class Urlfrontier {
       hash = (53 * hash) + getStart();
       hash = (37 * hash) + SIZE_FIELD_NUMBER;
       hash = (53 * hash) + getSize();
+      hash = (37 * hash) + INCLUDE_INACTIVE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getIncludeInactive());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1447,6 +1489,8 @@ public final class Urlfrontier {
 
         size_ = 0;
 
+        includeInactive_ = false;
+
         return this;
       }
 
@@ -1475,6 +1519,7 @@ public final class Urlfrontier {
         crawlercommons.urlfrontier.Urlfrontier.Pagination result = new crawlercommons.urlfrontier.Urlfrontier.Pagination(this);
         result.start_ = start_;
         result.size_ = size_;
+        result.includeInactive_ = includeInactive_;
         onBuilt();
         return result;
       }
@@ -1528,6 +1573,9 @@ public final class Urlfrontier {
         }
         if (other.getSize() != 0) {
           setSize(other.getSize());
+        }
+        if (other.getIncludeInactive() != false) {
+          setIncludeInactive(other.getIncludeInactive());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1640,6 +1688,49 @@ public final class Urlfrontier {
       public Builder clearSize() {
         
         size_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean includeInactive_ ;
+      /**
+       * <pre>
+       * include inactive queues; defaults to false
+       * </pre>
+       *
+       * <code>bool include_inactive = 3;</code>
+       * @return The includeInactive.
+       */
+      @java.lang.Override
+      public boolean getIncludeInactive() {
+        return includeInactive_;
+      }
+      /**
+       * <pre>
+       * include inactive queues; defaults to false
+       * </pre>
+       *
+       * <code>bool include_inactive = 3;</code>
+       * @param value The includeInactive to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIncludeInactive(boolean value) {
+        
+        includeInactive_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * include inactive queues; defaults to false
+       * </pre>
+       *
+       * <code>bool include_inactive = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIncludeInactive() {
+        
+        includeInactive_ = false;
         onChanged();
         return this;
       }
@@ -11126,44 +11217,45 @@ public final class Urlfrontier {
       "ts\022\014\n\004size\030\001 \001(\004\022\021\n\tinProcess\030\002 \001(\r\022.\n\006c" +
       "ounts\030\003 \003(\0132\036.urlfrontier.Stats.CountsEn" +
       "try\022\026\n\016numberOfQueues\030\004 \001(\004\032-\n\013CountsEnt" +
-      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\004:\0028\001\")\n\nPa" +
-      "gination\022\r\n\005start\030\001 \001(\r\022\014\n\004size\030\002 \001(\r\"\007\n" +
-      "\005Empty\"\030\n\007Boolean\022\r\n\005state\030\001 \001(\010\"\027\n\006Stri" +
-      "ng\022\r\n\005value\030\001 \001(\t\"\030\n\007Integer\022\r\n\005value\030\001 " +
-      "\001(\004\"G\n\tQueueList\022\016\n\006values\030\001 \003(\t\022\r\n\005tota" +
-      "l\030\002 \001(\004\022\r\n\005start\030\003 \001(\r\022\014\n\004size\030\004 \001(\r\"\034\n\n" +
-      "StringList\022\016\n\006values\030\001 \003(\t\":\n\020QueueDelay" +
-      "Params\022\013\n\003key\030\001 \001(\t\022\031\n\021delay_requestable" +
-      "\030\002 \001(\r\"-\n\020BlockQueueParams\022\013\n\003key\030\001 \001(\t\022" +
-      "\014\n\004time\030\002 \001(\004\"c\n\tGetParams\022\032\n\022max_urls_p" +
-      "er_queue\030\001 \001(\r\022\022\n\nmax_queues\030\002 \001(\r\022\013\n\003ke" +
-      "y\030\003 \001(\t\022\031\n\021delay_requestable\030\004 \001(\r\"s\n\007UR" +
-      "LItem\0224\n\ndiscovered\030\001 \001(\0132\036.urlfrontier." +
-      "DiscoveredURLItemH\000\022*\n\005known\030\002 \001(\0132\031.url" +
-      "frontier.KnownURLItemH\000B\006\n\004item\"\243\001\n\007URLI" +
-      "nfo\022\013\n\003url\030\001 \001(\t\022\013\n\003key\030\002 \001(\t\0224\n\010metadat" +
-      "a\030\003 \003(\0132\".urlfrontier.URLInfo.MetadataEn" +
-      "try\032H\n\rMetadataEntry\022\013\n\003key\030\001 \001(\t\022&\n\005val" +
-      "ue\030\002 \001(\0132\027.urlfrontier.StringList:\0028\001\"Q\n" +
-      "\014KnownURLItem\022\"\n\004info\030\001 \001(\0132\024.urlfrontie" +
-      "r.URLInfo\022\035\n\025refetchable_from_date\030\002 \001(\004" +
-      "\"7\n\021DiscoveredURLItem\022\"\n\004info\030\001 \001(\0132\024.ur" +
-      "lfrontier.URLInfo2\265\004\n\013URLFrontier\022?\n\nLis" +
-      "tQueues\022\027.urlfrontier.Pagination\032\026.urlfr" +
-      "ontier.QueueList\"\000\022;\n\007GetURLs\022\026.urlfront" +
-      "ier.GetParams\032\024.urlfrontier.URLInfo\"\0000\001\022" +
-      ":\n\007PutURLs\022\024.urlfrontier.URLItem\032\023.urlfr" +
-      "ontier.String\"\000(\0010\001\0225\n\010GetStats\022\023.urlfro" +
-      "ntier.String\032\022.urlfrontier.Stats\"\000\022:\n\013De" +
-      "leteQueue\022\023.urlfrontier.String\032\024.urlfron" +
-      "tier.Integer\"\000\022F\n\017BlockQueueUntil\022\035.urlf" +
-      "rontier.BlockQueueParams\032\022.urlfrontier.E" +
-      "mpty\"\000\0227\n\tSetActive\022\024.urlfrontier.Boolea" +
-      "n\032\022.urlfrontier.Empty\"\000\0227\n\tGetActive\022\022.u" +
-      "rlfrontier.Empty\032\024.urlfrontier.Boolean\"\000" +
-      "\022?\n\010SetDelay\022\035.urlfrontier.QueueDelayPar" +
-      "ams\032\022.urlfrontier.Empty\"\000B\034\n\032crawlercomm" +
-      "ons.urlfrontierb\006proto3"
+      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\004:\0028\001\"C\n\nPa" +
+      "gination\022\r\n\005start\030\001 \001(\r\022\014\n\004size\030\002 \001(\r\022\030\n" +
+      "\020include_inactive\030\003 \001(\010\"\007\n\005Empty\"\030\n\007Bool" +
+      "ean\022\r\n\005state\030\001 \001(\010\"\027\n\006String\022\r\n\005value\030\001 " +
+      "\001(\t\"\030\n\007Integer\022\r\n\005value\030\001 \001(\004\"G\n\tQueueLi" +
+      "st\022\016\n\006values\030\001 \003(\t\022\r\n\005total\030\002 \001(\004\022\r\n\005sta" +
+      "rt\030\003 \001(\r\022\014\n\004size\030\004 \001(\r\"\034\n\nStringList\022\016\n\006" +
+      "values\030\001 \003(\t\":\n\020QueueDelayParams\022\013\n\003key\030" +
+      "\001 \001(\t\022\031\n\021delay_requestable\030\002 \001(\r\"-\n\020Bloc" +
+      "kQueueParams\022\013\n\003key\030\001 \001(\t\022\014\n\004time\030\002 \001(\004\"" +
+      "c\n\tGetParams\022\032\n\022max_urls_per_queue\030\001 \001(\r" +
+      "\022\022\n\nmax_queues\030\002 \001(\r\022\013\n\003key\030\003 \001(\t\022\031\n\021del" +
+      "ay_requestable\030\004 \001(\r\"s\n\007URLItem\0224\n\ndisco" +
+      "vered\030\001 \001(\0132\036.urlfrontier.DiscoveredURLI" +
+      "temH\000\022*\n\005known\030\002 \001(\0132\031.urlfrontier.Known" +
+      "URLItemH\000B\006\n\004item\"\243\001\n\007URLInfo\022\013\n\003url\030\001 \001" +
+      "(\t\022\013\n\003key\030\002 \001(\t\0224\n\010metadata\030\003 \003(\0132\".urlf" +
+      "rontier.URLInfo.MetadataEntry\032H\n\rMetadat" +
+      "aEntry\022\013\n\003key\030\001 \001(\t\022&\n\005value\030\002 \001(\0132\027.url" +
+      "frontier.StringList:\0028\001\"Q\n\014KnownURLItem\022" +
+      "\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLInfo\022\035\n\025r" +
+      "efetchable_from_date\030\002 \001(\004\"7\n\021Discovered" +
+      "URLItem\022\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLI" +
+      "nfo2\265\004\n\013URLFrontier\022?\n\nListQueues\022\027.urlf" +
+      "rontier.Pagination\032\026.urlfrontier.QueueLi" +
+      "st\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetParams\032" +
+      "\024.urlfrontier.URLInfo\"\0000\001\022:\n\007PutURLs\022\024.u" +
+      "rlfrontier.URLItem\032\023.urlfrontier.String\"" +
+      "\000(\0010\001\0225\n\010GetStats\022\023.urlfrontier.String\032\022" +
+      ".urlfrontier.Stats\"\000\022:\n\013DeleteQueue\022\023.ur" +
+      "lfrontier.String\032\024.urlfrontier.Integer\"\000" +
+      "\022F\n\017BlockQueueUntil\022\035.urlfrontier.BlockQ" +
+      "ueueParams\032\022.urlfrontier.Empty\"\000\0227\n\tSetA" +
+      "ctive\022\024.urlfrontier.Boolean\032\022.urlfrontie" +
+      "r.Empty\"\000\0227\n\tGetActive\022\022.urlfrontier.Emp" +
+      "ty\032\024.urlfrontier.Boolean\"\000\022?\n\010SetDelay\022\035" +
+      ".urlfrontier.QueueDelayParams\032\022.urlfront" +
+      "ier.Empty\"\000B\034\n\032crawlercommons.urlfrontie" +
+      "rb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -11186,7 +11278,7 @@ public final class Urlfrontier {
     internal_static_urlfrontier_Pagination_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_urlfrontier_Pagination_descriptor,
-        new java.lang.String[] { "Start", "Size", });
+        new java.lang.String[] { "Start", "Size", "IncludeInactive", });
     internal_static_urlfrontier_Empty_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_urlfrontier_Empty_fieldAccessorTable = new

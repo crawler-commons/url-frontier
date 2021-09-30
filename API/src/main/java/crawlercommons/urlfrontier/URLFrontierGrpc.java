@@ -343,8 +343,8 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Return the names of up to N active queues
-     *a queue is active if it has URLs due for fetching; by default the service will return up to 100 results from offset 0 *
+     ** Return a list of queues. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
+     *by default the service will return up to 100 results from offset 0 and exclude inactive queues.*
      * </pre>
      */
     public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Pagination request,
@@ -522,8 +522,8 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Return the names of up to N active queues
-     *a queue is active if it has URLs due for fetching; by default the service will return up to 100 results from offset 0 *
+     ** Return a list of queues. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
+     *by default the service will return up to 100 results from offset 0 and exclude inactive queues.*
      * </pre>
      */
     public void listQueues(crawlercommons.urlfrontier.Urlfrontier.Pagination request,
@@ -642,8 +642,8 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Return the names of up to N active queues
-     *a queue is active if it has URLs due for fetching; by default the service will return up to 100 results from offset 0 *
+     ** Return a list of queues. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
+     *by default the service will return up to 100 results from offset 0 and exclude inactive queues.*
      * </pre>
      */
     public crawlercommons.urlfrontier.Urlfrontier.QueueList listQueues(crawlercommons.urlfrontier.Urlfrontier.Pagination request) {
@@ -744,8 +744,8 @@ public final class URLFrontierGrpc {
 
     /**
      * <pre>
-     ** Return the names of up to N active queues
-     *a queue is active if it has URLs due for fetching; by default the service will return up to 100 results from offset 0 *
+     ** Return a list of queues. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
+     *by default the service will return up to 100 results from offset 0 and exclude inactive queues.*
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<crawlercommons.urlfrontier.Urlfrontier.QueueList> listQueues(

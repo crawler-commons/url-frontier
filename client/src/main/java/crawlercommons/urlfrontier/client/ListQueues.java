@@ -55,6 +55,10 @@ public class ListQueues implements Runnable {
 			"--output" }, defaultValue = "", paramLabel = "STRING", description = "output file to dump all the queues")
 	private String output;
 
+	@Option(names = { "-i",
+			"--include_inactive" }, defaultValue = "false", paramLabel = "BOOLEAN", description = "include inactive queues in the results")
+	private boolean inactive;
+
 	@Override
 	public void run() {
 		ManagedChannel channel = ManagedChannelBuilder.forAddress(parent.hostname, parent.port).usePlaintext().build();
@@ -72,6 +76,7 @@ public class ListQueues implements Runnable {
 
 				builder.setSize(maxNumQueues);
 				builder.setStart(start);
+				builder.setIncludeInactive(inactive);
 
 				QueueList queueslisted = blockingFrontier.listQueues(builder.build());
 
@@ -95,6 +100,7 @@ public class ListQueues implements Runnable {
 
 			builder.setSize(maxNumQueues);
 			builder.setStart(start);
+			builder.setIncludeInactive(inactive);
 
 			QueueList queueslisted = blockingFrontier.listQueues(builder.build());
 
