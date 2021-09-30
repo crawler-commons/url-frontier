@@ -118,13 +118,15 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 
 		long maxQueues = request.getSize();
 		long start = request.getStart();
+		
+		boolean include_inactive = request.getIncludeInactive();
 
 		// 100 by default
 		if (maxQueues == 0) {
 			maxQueues = 100;
 		}
 
-		LOG.info("Received request to list queues [size {}; start {}]", maxQueues, start);
+		LOG.info("Received request to list queues [size {}; start {}; inactive {}]", maxQueues, start, include_inactive);
 
 		long now = Instant.now().getEpochSecond();
 		int pos = -1;
@@ -140,12 +142,12 @@ public abstract class AbstractFrontierService extends crawlercommons.urlfrontier
 				pos++;
 
 				// check that it isn't blocked
-				if (e.getValue().getBlockedUntil() >= now) {
+				if (!include_inactive && e.getValue().getBlockedUntil() >= now) {
 					continue;
 				}
 
 				// ignore the nextfetchdate
-				if (e.getValue().countActive() > 0) {
+				if (include_inactive || e.getValue().countActive() > 0) {
 					if (pos >= start) {
 						list.addValues(e.getKey());
 						sent++;

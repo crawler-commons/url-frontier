@@ -152,6 +152,7 @@ it will be elligible for fetching after the delay has elapsed.
 | ----- | ---- | ----- | ----------- |
 | start | [uint32](#uint32) |  | position of the first result in the list; defaults to 0 |
 | size | [uint32](#uint32) |  | max number of values; defaults to 100 |
+| include_inactive | [bool](#bool) |  | include inactive queues; defaults to false |
 
 
 
@@ -318,7 +319,7 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| ListQueues | [Pagination](#urlfrontier.Pagination) | [QueueList](#urlfrontier.QueueList) | Return the names of up to N active queues a queue is active if it has URLs due for fetching; by default the service will return up to 100 results from offset 0 * |
+| ListQueues | [Pagination](#urlfrontier.Pagination) | [QueueList](#urlfrontier.QueueList) | Return a list of queues. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching); by default the service will return up to 100 results from offset 0 and exclude inactive queues.* |
 | GetURLs | [GetParams](#urlfrontier.GetParams) | [URLInfo](#urlfrontier.URLInfo) stream | Stream URLs due for fetching from M queues with up to N items per queue * |
 | PutURLs | [URLItem](#urlfrontier.URLItem) stream | [String](#urlfrontier.String) stream | Push URL items to the server; they get created (if they don&#39;t already exist) in case of DiscoveredURLItems or updated if KnownURLItems * |
 | GetStats | [String](#urlfrontier.String) | [Stats](#urlfrontier.Stats) | Return stats for a specific queue or the whole crawl if the value if empty or null * |
