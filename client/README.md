@@ -23,4 +23,5 @@ Commands:
   PutURLs     Send URLs from a file into a Frontier
   SetActive   Pause or resume the Frontier
   GetActive   Check whether the Frontier has been paused
+  GetURLs     Get URLs from a Frontier and display in the standard output
 ```
