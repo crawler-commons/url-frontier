@@ -108,6 +108,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
 		try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()) {
 
+			String sMaxBytesForLevelBase = configuration.get("rocksdb.max_bytes_for_level_base");
+			if (sMaxBytesForLevelBase != null) {
+				cfOpts.setMaxBytesForLevelBase(Long.parseLong(sMaxBytesForLevelBase));
+			}
+			
 			cfOpts.optimizeUniversalStyleCompaction();
 
 			// list of column family descriptors, first entry must always be default column
