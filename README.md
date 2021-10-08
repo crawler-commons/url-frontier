@@ -17,6 +17,8 @@ One of the objectives of URL Frontier is to involve as many actors in the web cr
 
 Please use the [project mailing list](https://groups.google.com/g/crawler-commons) or [Discussions](https://github.com/crawler-commons/url-frontier/discussions) section for questions, comments or suggestions. 
 
+There are many ways to [get involved](https://github.com/crawler-commons/url-frontier/wiki/Ways-to-help) if you want to.
+
 This project is funded through the [NGI0 Discovery Fund](https://nlnet.nl/discovery), a fund established by NLnet with financial support from the European Commission's [Next Generation Internet programme](https://ngi.eu/), under the aegis of DG Communications Networks, Content and Technology under grant agreement No 825322. 
 
 ![NLNet](https://nlnet.nl/image/logo_nlnet.svg)
