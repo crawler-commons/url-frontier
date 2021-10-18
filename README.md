@@ -1,6 +1,7 @@
 <img src="logo.svg" alt="URL Frontier" width="350"/>
 
 [![license](https://img.shields.io/github/license/crawler-commons/url-frontier)](http://www.apache.org/licenses/LICENSE-2.0)
+![Build Status](https://github.com/crawler-commons/url-frontier/actions/workflows/maven.yml/badge.svg)
 [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/crawlercommons/url-frontier)](https://hub.docker.com/r/crawlercommons/url-frontier)
 
 Discovering content on the web is possible thanks to web crawlers, luckily there are many excellent open-source solutions for this; however, most of them have their own way of storing and accessing the information about the URLs.
