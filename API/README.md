@@ -24,7 +24,7 @@ The keys are used in several functions: _GetStats_, _DeleteQueue_ and _GetURLs_.
 
 The service returns URLs ready to be fetched. It helps enforcing politeness by limiting the number of URLs per queue to be returned as well the amount of time to wait for until the URLs returned will be eligible to be returned again. This is used to prevent URLs to be in limbo if the client code crashes and is resumed later. It is easier to think about the URLs that have been returned by the GetURLs function as being _in transit_. They remain so until an update is received for them via the *PutURLs* function (see below) or the value set in *delay_requestable* has elapsed.
 
-Internally, the service will rotate on the queues to be pulled from and will aim at an optimal distribution. Multiple clients can call _getURLs_ on a single instance and will each get URLs from a different set of queues.
+Internally, the service will rotate on the queues to be pulled from and will aim at an optimal distribution. Multiple clients can call _getURLs_ on a single instance and will each get URLs from across queues as URLs are prioritized by the service.
 
 ## PutURLs
 
