@@ -4,11366 +4,12226 @@
 package crawlercommons.urlfrontier;
 
 public final class Urlfrontier {
-  private Urlfrontier() {}
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistryLite registry) {
-  }
+    private Urlfrontier() {}
 
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistry registry) {
-    registerAllExtensions(
-        (com.google.protobuf.ExtensionRegistryLite) registry);
-  }
-  public interface StatsOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.Stats)
-      com.google.protobuf.MessageOrBuilder {
+    public static void registerAllExtensions(com.google.protobuf.ExtensionRegistryLite registry) {}
 
+    public static void registerAllExtensions(com.google.protobuf.ExtensionRegistry registry) {
+        registerAllExtensions((com.google.protobuf.ExtensionRegistryLite) registry);
+    }
+
+    public interface StatsOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.Stats)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         *
+         *
+         * <pre>
+         * number of active URLs in queues
+         * </pre>
+         *
+         * <code>uint64 size = 1;</code>
+         *
+         * @return The size.
+         */
+        long getSize();
+
+        /**
+         *
+         *
+         * <pre>
+         * number of URLs currently in flight
+         * </pre>
+         *
+         * <code>uint32 inProcess = 2;</code>
+         *
+         * @return The inProcess.
+         */
+        int getInProcess();
+
+        /**
+         *
+         *
+         * <pre>
+         * custom counts
+         * </pre>
+         *
+         * <code>map&lt;string, uint64&gt; counts = 3;</code>
+         */
+        int getCountsCount();
+        /**
+         *
+         *
+         * <pre>
+         * custom counts
+         * </pre>
+         *
+         * <code>map&lt;string, uint64&gt; counts = 3;</code>
+         */
+        boolean containsCounts(java.lang.String key);
+        /** Use {@link #getCountsMap()} instead. */
+        @java.lang.Deprecated
+        java.util.Map<java.lang.String, java.lang.Long> getCounts();
+        /**
+         *
+         *
+         * <pre>
+         * custom counts
+         * </pre>
+         *
+         * <code>map&lt;string, uint64&gt; counts = 3;</code>
+         */
+        java.util.Map<java.lang.String, java.lang.Long> getCountsMap();
+        /**
+         *
+         *
+         * <pre>
+         * custom counts
+         * </pre>
+         *
+         * <code>map&lt;string, uint64&gt; counts = 3;</code>
+         */
+        long getCountsOrDefault(java.lang.String key, long defaultValue);
+        /**
+         *
+         *
+         * <pre>
+         * custom counts
+         * </pre>
+         *
+         * <code>map&lt;string, uint64&gt; counts = 3;</code>
+         */
+        long getCountsOrThrow(java.lang.String key);
+
+        /**
+         *
+         *
+         * <pre>
+         * number of active queues in the frontier
+         * </pre>
+         *
+         * <code>uint64 numberOfQueues = 4;</code>
+         *
+         * @return The numberOfQueues.
+         */
+        long getNumberOfQueues();
+    }
     /**
-     * <pre>
-     * number of active URLs in queues
-     * </pre>
      *
-     * <code>uint64 size = 1;</code>
-     * @return The size.
-     */
-    long getSize();
-
-    /**
-     * <pre>
-     * number of URLs currently in flight
-     * </pre>
      *
-     * <code>uint32 inProcess = 2;</code>
-     * @return The inProcess.
-     */
-    int getInProcess();
-
-    /**
      * <pre>
-     * custom counts 
-     * </pre>
-     *
-     * <code>map&lt;string, uint64&gt; counts = 3;</code>
-     */
-    int getCountsCount();
-    /**
-     * <pre>
-     * custom counts 
-     * </pre>
-     *
-     * <code>map&lt;string, uint64&gt; counts = 3;</code>
-     */
-    boolean containsCounts(
-        java.lang.String key);
-    /**
-     * Use {@link #getCountsMap()} instead.
-     */
-    @java.lang.Deprecated
-    java.util.Map<java.lang.String, java.lang.Long>
-    getCounts();
-    /**
-     * <pre>
-     * custom counts 
-     * </pre>
-     *
-     * <code>map&lt;string, uint64&gt; counts = 3;</code>
-     */
-    java.util.Map<java.lang.String, java.lang.Long>
-    getCountsMap();
-    /**
-     * <pre>
-     * custom counts 
-     * </pre>
-     *
-     * <code>map&lt;string, uint64&gt; counts = 3;</code>
-     */
-
-    long getCountsOrDefault(
-        java.lang.String key,
-        long defaultValue);
-    /**
-     * <pre>
-     * custom counts 
-     * </pre>
-     *
-     * <code>map&lt;string, uint64&gt; counts = 3;</code>
-     */
-
-    long getCountsOrThrow(
-        java.lang.String key);
-
-    /**
-     * <pre>
-     * number of active queues in the frontier
-     * </pre>
-     *
-     * <code>uint64 numberOfQueues = 4;</code>
-     * @return The numberOfQueues.
-     */
-    long getNumberOfQueues();
-  }
-  /**
-   * <pre>
-   ** 
-   * Message returned by the GetStats method
-   * </pre>
-   *
-   * Protobuf type {@code urlfrontier.Stats}
-   */
-  public static final class Stats extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.Stats)
-      StatsOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use Stats.newBuilder() to construct.
-    private Stats(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Stats() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new Stats();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Stats(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              size_ = input.readUInt64();
-              break;
-            }
-            case 16: {
-
-              inProcess_ = input.readUInt32();
-              break;
-            }
-            case 26: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                counts_ = com.google.protobuf.MapField.newMapField(
-                    CountsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000001;
-              }
-              com.google.protobuf.MapEntry<java.lang.String, java.lang.Long>
-              counts__ = input.readMessage(
-                  CountsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              counts_.getMutableMap().put(
-                  counts__.getKey(), counts__.getValue());
-              break;
-            }
-            case 32: {
-
-              numberOfQueues_ = input.readUInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Stats_descriptor;
-    }
-
-    @SuppressWarnings({"rawtypes"})
-    @java.lang.Override
-    protected com.google.protobuf.MapField internalGetMapField(
-        int number) {
-      switch (number) {
-        case 3:
-          return internalGetCounts();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Stats_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.Stats.class, crawlercommons.urlfrontier.Urlfrontier.Stats.Builder.class);
-    }
-
-    public static final int SIZE_FIELD_NUMBER = 1;
-    private long size_;
-    /**
-     * <pre>
-     * number of active URLs in queues
-     * </pre>
-     *
-     * <code>uint64 size = 1;</code>
-     * @return The size.
-     */
-    @java.lang.Override
-    public long getSize() {
-      return size_;
-    }
-
-    public static final int INPROCESS_FIELD_NUMBER = 2;
-    private int inProcess_;
-    /**
-     * <pre>
-     * number of URLs currently in flight
-     * </pre>
-     *
-     * <code>uint32 inProcess = 2;</code>
-     * @return The inProcess.
-     */
-    @java.lang.Override
-    public int getInProcess() {
-      return inProcess_;
-    }
-
-    public static final int COUNTS_FIELD_NUMBER = 3;
-    private static final class CountsDefaultEntryHolder {
-      static final com.google.protobuf.MapEntry<
-          java.lang.String, java.lang.Long> defaultEntry =
-              com.google.protobuf.MapEntry
-              .<java.lang.String, java.lang.Long>newDefaultInstance(
-                  crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Stats_CountsEntry_descriptor, 
-                  com.google.protobuf.WireFormat.FieldType.STRING,
-                  "",
-                  com.google.protobuf.WireFormat.FieldType.UINT64,
-                  0L);
-    }
-    private com.google.protobuf.MapField<
-        java.lang.String, java.lang.Long> counts_;
-    private com.google.protobuf.MapField<java.lang.String, java.lang.Long>
-    internalGetCounts() {
-      if (counts_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            CountsDefaultEntryHolder.defaultEntry);
-      }
-      return counts_;
-    }
-
-    public int getCountsCount() {
-      return internalGetCounts().getMap().size();
-    }
-    /**
-     * <pre>
-     * custom counts 
-     * </pre>
-     *
-     * <code>map&lt;string, uint64&gt; counts = 3;</code>
-     */
-
-    @java.lang.Override
-    public boolean containsCounts(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      return internalGetCounts().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getCountsMap()} instead.
-     */
-    @java.lang.Override
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, java.lang.Long> getCounts() {
-      return getCountsMap();
-    }
-    /**
-     * <pre>
-     * custom counts 
-     * </pre>
-     *
-     * <code>map&lt;string, uint64&gt; counts = 3;</code>
-     */
-    @java.lang.Override
-
-    public java.util.Map<java.lang.String, java.lang.Long> getCountsMap() {
-      return internalGetCounts().getMap();
-    }
-    /**
-     * <pre>
-     * custom counts 
-     * </pre>
-     *
-     * <code>map&lt;string, uint64&gt; counts = 3;</code>
-     */
-    @java.lang.Override
-
-    public long getCountsOrDefault(
-        java.lang.String key,
-        long defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, java.lang.Long> map =
-          internalGetCounts().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <pre>
-     * custom counts 
-     * </pre>
-     *
-     * <code>map&lt;string, uint64&gt; counts = 3;</code>
-     */
-    @java.lang.Override
-
-    public long getCountsOrThrow(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, java.lang.Long> map =
-          internalGetCounts().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
-    }
-
-    public static final int NUMBEROFQUEUES_FIELD_NUMBER = 4;
-    private long numberOfQueues_;
-    /**
-     * <pre>
-     * number of active queues in the frontier
-     * </pre>
-     *
-     * <code>uint64 numberOfQueues = 4;</code>
-     * @return The numberOfQueues.
-     */
-    @java.lang.Override
-    public long getNumberOfQueues() {
-      return numberOfQueues_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (size_ != 0L) {
-        output.writeUInt64(1, size_);
-      }
-      if (inProcess_ != 0) {
-        output.writeUInt32(2, inProcess_);
-      }
-      com.google.protobuf.GeneratedMessageV3
-        .serializeStringMapTo(
-          output,
-          internalGetCounts(),
-          CountsDefaultEntryHolder.defaultEntry,
-          3);
-      if (numberOfQueues_ != 0L) {
-        output.writeUInt64(4, numberOfQueues_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (size_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(1, size_);
-      }
-      if (inProcess_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(2, inProcess_);
-      }
-      for (java.util.Map.Entry<java.lang.String, java.lang.Long> entry
-           : internalGetCounts().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.String, java.lang.Long>
-        counts__ = CountsDefaultEntryHolder.defaultEntry.newBuilderForType()
-            .setKey(entry.getKey())
-            .setValue(entry.getValue())
-            .build();
-        size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(3, counts__);
-      }
-      if (numberOfQueues_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(4, numberOfQueues_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Stats)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.Stats other = (crawlercommons.urlfrontier.Urlfrontier.Stats) obj;
-
-      if (getSize()
-          != other.getSize()) return false;
-      if (getInProcess()
-          != other.getInProcess()) return false;
-      if (!internalGetCounts().equals(
-          other.internalGetCounts())) return false;
-      if (getNumberOfQueues()
-          != other.getNumberOfQueues()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + SIZE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getSize());
-      hash = (37 * hash) + INPROCESS_FIELD_NUMBER;
-      hash = (53 * hash) + getInProcess();
-      if (!internalGetCounts().getMap().isEmpty()) {
-        hash = (37 * hash) + COUNTS_FIELD_NUMBER;
-        hash = (53 * hash) + internalGetCounts().hashCode();
-      }
-      hash = (37 * hash) + NUMBEROFQUEUES_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getNumberOfQueues());
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.Stats prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     ** 
+     * *
      * Message returned by the GetStats method
      * </pre>
      *
      * Protobuf type {@code urlfrontier.Stats}
      */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.Stats)
-        crawlercommons.urlfrontier.Urlfrontier.StatsOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Stats_descriptor;
-      }
-
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMapField(
-          int number) {
-        switch (number) {
-          case 3:
-            return internalGetCounts();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
+    public static final class Stats extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.Stats)
+            StatsOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use Stats.newBuilder() to construct.
+        private Stats(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
         }
-      }
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMutableMapField(
-          int number) {
-        switch (number) {
-          case 3:
-            return internalGetMutableCounts();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
+
+        private Stats() {}
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new Stats();
         }
-      }
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Stats_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.Stats.class, crawlercommons.urlfrontier.Urlfrontier.Stats.Builder.class);
-      }
 
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.Stats.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
         }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        size_ = 0L;
 
-        inProcess_ = 0;
-
-        internalGetMutableCounts().clear();
-        numberOfQueues_ = 0L;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Stats_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Stats getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.Stats.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Stats build() {
-        crawlercommons.urlfrontier.Urlfrontier.Stats result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
+        private Stats(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            int mutable_bitField0_ = 0;
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 8:
+                            {
+                                size_ = input.readUInt64();
+                                break;
+                            }
+                        case 16:
+                            {
+                                inProcess_ = input.readUInt32();
+                                break;
+                            }
+                        case 26:
+                            {
+                                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                                    counts_ =
+                                            com.google.protobuf.MapField.newMapField(
+                                                    CountsDefaultEntryHolder.defaultEntry);
+                                    mutable_bitField0_ |= 0x00000001;
+                                }
+                                com.google.protobuf.MapEntry<java.lang.String, java.lang.Long>
+                                        counts__ =
+                                                input.readMessage(
+                                                        CountsDefaultEntryHolder.defaultEntry
+                                                                .getParserForType(),
+                                                        extensionRegistry);
+                                counts_.getMutableMap().put(counts__.getKey(), counts__.getValue());
+                                break;
+                            }
+                        case 32:
+                            {
+                                numberOfQueues_ = input.readUInt64();
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
         }
-        return result;
-      }
 
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Stats buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.Stats result = new crawlercommons.urlfrontier.Urlfrontier.Stats(this);
-        int from_bitField0_ = bitField0_;
-        result.size_ = size_;
-        result.inProcess_ = inProcess_;
-        result.counts_ = internalGetCounts();
-        result.counts_.makeImmutable();
-        result.numberOfQueues_ = numberOfQueues_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Stats) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Stats)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_Stats_descriptor;
         }
-      }
 
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Stats other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.Stats.getDefaultInstance()) return this;
-        if (other.getSize() != 0L) {
-          setSize(other.getSize());
+        @SuppressWarnings({"rawtypes"})
+        @java.lang.Override
+        protected com.google.protobuf.MapField internalGetMapField(int number) {
+            switch (number) {
+                case 3:
+                    return internalGetCounts();
+                default:
+                    throw new RuntimeException("Invalid map field number: " + number);
+            }
         }
-        if (other.getInProcess() != 0) {
-          setInProcess(other.getInProcess());
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_Stats_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.Stats.class,
+                            crawlercommons.urlfrontier.Urlfrontier.Stats.Builder.class);
         }
-        internalGetMutableCounts().mergeFrom(
-            other.internalGetCounts());
-        if (other.getNumberOfQueues() != 0L) {
-          setNumberOfQueues(other.getNumberOfQueues());
+
+        public static final int SIZE_FIELD_NUMBER = 1;
+        private long size_;
+        /**
+         *
+         *
+         * <pre>
+         * number of active URLs in queues
+         * </pre>
+         *
+         * <code>uint64 size = 1;</code>
+         *
+         * @return The size.
+         */
+        @java.lang.Override
+        public long getSize() {
+            return size_;
         }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
 
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.Stats parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.Stats) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+        public static final int INPROCESS_FIELD_NUMBER = 2;
+        private int inProcess_;
+        /**
+         *
+         *
+         * <pre>
+         * number of URLs currently in flight
+         * </pre>
+         *
+         * <code>uint32 inProcess = 2;</code>
+         *
+         * @return The inProcess.
+         */
+        @java.lang.Override
+        public int getInProcess() {
+            return inProcess_;
         }
-        return this;
-      }
-      private int bitField0_;
 
-      private long size_ ;
-      /**
-       * <pre>
-       * number of active URLs in queues
-       * </pre>
-       *
-       * <code>uint64 size = 1;</code>
-       * @return The size.
-       */
-      @java.lang.Override
-      public long getSize() {
-        return size_;
-      }
-      /**
-       * <pre>
-       * number of active URLs in queues
-       * </pre>
-       *
-       * <code>uint64 size = 1;</code>
-       * @param value The size to set.
-       * @return This builder for chaining.
-       */
-      public Builder setSize(long value) {
-        
-        size_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * number of active URLs in queues
-       * </pre>
-       *
-       * <code>uint64 size = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearSize() {
-        
-        size_ = 0L;
-        onChanged();
-        return this;
-      }
+        public static final int COUNTS_FIELD_NUMBER = 3;
 
-      private int inProcess_ ;
-      /**
-       * <pre>
-       * number of URLs currently in flight
-       * </pre>
-       *
-       * <code>uint32 inProcess = 2;</code>
-       * @return The inProcess.
-       */
-      @java.lang.Override
-      public int getInProcess() {
-        return inProcess_;
-      }
-      /**
-       * <pre>
-       * number of URLs currently in flight
-       * </pre>
-       *
-       * <code>uint32 inProcess = 2;</code>
-       * @param value The inProcess to set.
-       * @return This builder for chaining.
-       */
-      public Builder setInProcess(int value) {
-        
-        inProcess_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * number of URLs currently in flight
-       * </pre>
-       *
-       * <code>uint32 inProcess = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearInProcess() {
-        
-        inProcess_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.MapField<
-          java.lang.String, java.lang.Long> counts_;
-      private com.google.protobuf.MapField<java.lang.String, java.lang.Long>
-      internalGetCounts() {
-        if (counts_ == null) {
-          return com.google.protobuf.MapField.emptyMapField(
-              CountsDefaultEntryHolder.defaultEntry);
+        private static final class CountsDefaultEntryHolder {
+            static final com.google.protobuf.MapEntry<java.lang.String, java.lang.Long>
+                    defaultEntry =
+                            com.google.protobuf.MapEntry
+                                    .<java.lang.String, java.lang.Long>newDefaultInstance(
+                                            crawlercommons.urlfrontier.Urlfrontier
+                                                    .internal_static_urlfrontier_Stats_CountsEntry_descriptor,
+                                            com.google.protobuf.WireFormat.FieldType.STRING,
+                                            "",
+                                            com.google.protobuf.WireFormat.FieldType.UINT64,
+                                            0L);
         }
-        return counts_;
-      }
-      private com.google.protobuf.MapField<java.lang.String, java.lang.Long>
-      internalGetMutableCounts() {
-        onChanged();;
-        if (counts_ == null) {
-          counts_ = com.google.protobuf.MapField.newMapField(
-              CountsDefaultEntryHolder.defaultEntry);
+
+        private com.google.protobuf.MapField<java.lang.String, java.lang.Long> counts_;
+
+        private com.google.protobuf.MapField<java.lang.String, java.lang.Long> internalGetCounts() {
+            if (counts_ == null) {
+                return com.google.protobuf.MapField.emptyMapField(
+                        CountsDefaultEntryHolder.defaultEntry);
+            }
+            return counts_;
         }
-        if (!counts_.isMutable()) {
-          counts_ = counts_.copy();
+
+        public int getCountsCount() {
+            return internalGetCounts().getMap().size();
         }
-        return counts_;
-      }
-
-      public int getCountsCount() {
-        return internalGetCounts().getMap().size();
-      }
-      /**
-       * <pre>
-       * custom counts 
-       * </pre>
-       *
-       * <code>map&lt;string, uint64&gt; counts = 3;</code>
-       */
-
-      @java.lang.Override
-      public boolean containsCounts(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        return internalGetCounts().getMap().containsKey(key);
-      }
-      /**
-       * Use {@link #getCountsMap()} instead.
-       */
-      @java.lang.Override
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.String, java.lang.Long> getCounts() {
-        return getCountsMap();
-      }
-      /**
-       * <pre>
-       * custom counts 
-       * </pre>
-       *
-       * <code>map&lt;string, uint64&gt; counts = 3;</code>
-       */
-      @java.lang.Override
-
-      public java.util.Map<java.lang.String, java.lang.Long> getCountsMap() {
-        return internalGetCounts().getMap();
-      }
-      /**
-       * <pre>
-       * custom counts 
-       * </pre>
-       *
-       * <code>map&lt;string, uint64&gt; counts = 3;</code>
-       */
-      @java.lang.Override
-
-      public long getCountsOrDefault(
-          java.lang.String key,
-          long defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, java.lang.Long> map =
-            internalGetCounts().getMap();
-        return map.containsKey(key) ? map.get(key) : defaultValue;
-      }
-      /**
-       * <pre>
-       * custom counts 
-       * </pre>
-       *
-       * <code>map&lt;string, uint64&gt; counts = 3;</code>
-       */
-      @java.lang.Override
-
-      public long getCountsOrThrow(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, java.lang.Long> map =
-            internalGetCounts().getMap();
-        if (!map.containsKey(key)) {
-          throw new java.lang.IllegalArgumentException();
+        /**
+         *
+         *
+         * <pre>
+         * custom counts
+         * </pre>
+         *
+         * <code>map&lt;string, uint64&gt; counts = 3;</code>
+         */
+        @java.lang.Override
+        public boolean containsCounts(java.lang.String key) {
+            if (key == null) {
+                throw new java.lang.NullPointerException();
+            }
+            return internalGetCounts().getMap().containsKey(key);
         }
-        return map.get(key);
-      }
+        /** Use {@link #getCountsMap()} instead. */
+        @java.lang.Override
+        @java.lang.Deprecated
+        public java.util.Map<java.lang.String, java.lang.Long> getCounts() {
+            return getCountsMap();
+        }
+        /**
+         *
+         *
+         * <pre>
+         * custom counts
+         * </pre>
+         *
+         * <code>map&lt;string, uint64&gt; counts = 3;</code>
+         */
+        @java.lang.Override
+        public java.util.Map<java.lang.String, java.lang.Long> getCountsMap() {
+            return internalGetCounts().getMap();
+        }
+        /**
+         *
+         *
+         * <pre>
+         * custom counts
+         * </pre>
+         *
+         * <code>map&lt;string, uint64&gt; counts = 3;</code>
+         */
+        @java.lang.Override
+        public long getCountsOrDefault(java.lang.String key, long defaultValue) {
+            if (key == null) {
+                throw new java.lang.NullPointerException();
+            }
+            java.util.Map<java.lang.String, java.lang.Long> map = internalGetCounts().getMap();
+            return map.containsKey(key) ? map.get(key) : defaultValue;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * custom counts
+         * </pre>
+         *
+         * <code>map&lt;string, uint64&gt; counts = 3;</code>
+         */
+        @java.lang.Override
+        public long getCountsOrThrow(java.lang.String key) {
+            if (key == null) {
+                throw new java.lang.NullPointerException();
+            }
+            java.util.Map<java.lang.String, java.lang.Long> map = internalGetCounts().getMap();
+            if (!map.containsKey(key)) {
+                throw new java.lang.IllegalArgumentException();
+            }
+            return map.get(key);
+        }
 
-      public Builder clearCounts() {
-        internalGetMutableCounts().getMutableMap()
-            .clear();
-        return this;
-      }
-      /**
-       * <pre>
-       * custom counts 
-       * </pre>
-       *
-       * <code>map&lt;string, uint64&gt; counts = 3;</code>
-       */
+        public static final int NUMBEROFQUEUES_FIELD_NUMBER = 4;
+        private long numberOfQueues_;
+        /**
+         *
+         *
+         * <pre>
+         * number of active queues in the frontier
+         * </pre>
+         *
+         * <code>uint64 numberOfQueues = 4;</code>
+         *
+         * @return The numberOfQueues.
+         */
+        @java.lang.Override
+        public long getNumberOfQueues() {
+            return numberOfQueues_;
+        }
 
-      public Builder removeCounts(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableCounts().getMutableMap()
-            .remove(key);
-        return this;
-      }
-      /**
-       * Use alternate mutation accessors instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.String, java.lang.Long>
-      getMutableCounts() {
-        return internalGetMutableCounts().getMutableMap();
-      }
-      /**
-       * <pre>
-       * custom counts 
-       * </pre>
-       *
-       * <code>map&lt;string, uint64&gt; counts = 3;</code>
-       */
-      public Builder putCounts(
-          java.lang.String key,
-          long value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        
-        internalGetMutableCounts().getMutableMap()
-            .put(key, value);
-        return this;
-      }
-      /**
-       * <pre>
-       * custom counts 
-       * </pre>
-       *
-       * <code>map&lt;string, uint64&gt; counts = 3;</code>
-       */
+        private byte memoizedIsInitialized = -1;
 
-      public Builder putAllCounts(
-          java.util.Map<java.lang.String, java.lang.Long> values) {
-        internalGetMutableCounts().getMutableMap()
-            .putAll(values);
-        return this;
-      }
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
 
-      private long numberOfQueues_ ;
-      /**
-       * <pre>
-       * number of active queues in the frontier
-       * </pre>
-       *
-       * <code>uint64 numberOfQueues = 4;</code>
-       * @return The numberOfQueues.
-       */
-      @java.lang.Override
-      public long getNumberOfQueues() {
-        return numberOfQueues_;
-      }
-      /**
-       * <pre>
-       * number of active queues in the frontier
-       * </pre>
-       *
-       * <code>uint64 numberOfQueues = 4;</code>
-       * @param value The numberOfQueues to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNumberOfQueues(long value) {
-        
-        numberOfQueues_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * number of active queues in the frontier
-       * </pre>
-       *
-       * <code>uint64 numberOfQueues = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearNumberOfQueues() {
-        
-        numberOfQueues_ = 0L;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
+            memoizedIsInitialized = 1;
+            return true;
+        }
 
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (size_ != 0L) {
+                output.writeUInt64(1, size_);
+            }
+            if (inProcess_ != 0) {
+                output.writeUInt32(2, inProcess_);
+            }
+            com.google.protobuf.GeneratedMessageV3.serializeStringMapTo(
+                    output, internalGetCounts(), CountsDefaultEntryHolder.defaultEntry, 3);
+            if (numberOfQueues_ != 0L) {
+                output.writeUInt64(4, numberOfQueues_);
+            }
+            unknownFields.writeTo(output);
+        }
 
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
 
-      // @@protoc_insertion_point(builder_scope:urlfrontier.Stats)
+            size = 0;
+            if (size_ != 0L) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt64Size(1, size_);
+            }
+            if (inProcess_ != 0) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt32Size(2, inProcess_);
+            }
+            for (java.util.Map.Entry<java.lang.String, java.lang.Long> entry :
+                    internalGetCounts().getMap().entrySet()) {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.Long> counts__ =
+                        CountsDefaultEntryHolder.defaultEntry
+                                .newBuilderForType()
+                                .setKey(entry.getKey())
+                                .setValue(entry.getValue())
+                                .build();
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(3, counts__);
+            }
+            if (numberOfQueues_ != 0L) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt64Size(4, numberOfQueues_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Stats)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.Stats other =
+                    (crawlercommons.urlfrontier.Urlfrontier.Stats) obj;
+
+            if (getSize() != other.getSize()) return false;
+            if (getInProcess() != other.getInProcess()) return false;
+            if (!internalGetCounts().equals(other.internalGetCounts())) return false;
+            if (getNumberOfQueues() != other.getNumberOfQueues()) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + SIZE_FIELD_NUMBER;
+            hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getSize());
+            hash = (37 * hash) + INPROCESS_FIELD_NUMBER;
+            hash = (53 * hash) + getInProcess();
+            if (!internalGetCounts().getMap().isEmpty()) {
+                hash = (37 * hash) + COUNTS_FIELD_NUMBER;
+                hash = (53 * hash) + internalGetCounts().hashCode();
+            }
+            hash = (37 * hash) + NUMBEROFQUEUES_FIELD_NUMBER;
+            hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getNumberOfQueues());
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.Stats prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Message returned by the GetStats method
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.Stats}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.Stats)
+                crawlercommons.urlfrontier.Urlfrontier.StatsOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Stats_descriptor;
+            }
+
+            @SuppressWarnings({"rawtypes"})
+            protected com.google.protobuf.MapField internalGetMapField(int number) {
+                switch (number) {
+                    case 3:
+                        return internalGetCounts();
+                    default:
+                        throw new RuntimeException("Invalid map field number: " + number);
+                }
+            }
+
+            @SuppressWarnings({"rawtypes"})
+            protected com.google.protobuf.MapField internalGetMutableMapField(int number) {
+                switch (number) {
+                    case 3:
+                        return internalGetMutableCounts();
+                    default:
+                        throw new RuntimeException("Invalid map field number: " + number);
+                }
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Stats_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.Stats.class,
+                                crawlercommons.urlfrontier.Urlfrontier.Stats.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.Stats.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                size_ = 0L;
+
+                inProcess_ = 0;
+
+                internalGetMutableCounts().clear();
+                numberOfQueues_ = 0L;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Stats_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Stats getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.Stats.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Stats build() {
+                crawlercommons.urlfrontier.Urlfrontier.Stats result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Stats buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.Stats result =
+                        new crawlercommons.urlfrontier.Urlfrontier.Stats(this);
+                int from_bitField0_ = bitField0_;
+                result.size_ = size_;
+                result.inProcess_ = inProcess_;
+                result.counts_ = internalGetCounts();
+                result.counts_.makeImmutable();
+                result.numberOfQueues_ = numberOfQueues_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Stats) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Stats) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Stats other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.Stats.getDefaultInstance())
+                    return this;
+                if (other.getSize() != 0L) {
+                    setSize(other.getSize());
+                }
+                if (other.getInProcess() != 0) {
+                    setInProcess(other.getInProcess());
+                }
+                internalGetMutableCounts().mergeFrom(other.internalGetCounts());
+                if (other.getNumberOfQueues() != 0L) {
+                    setNumberOfQueues(other.getNumberOfQueues());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.Stats parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.Stats) e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private int bitField0_;
+
+            private long size_;
+            /**
+             *
+             *
+             * <pre>
+             * number of active URLs in queues
+             * </pre>
+             *
+             * <code>uint64 size = 1;</code>
+             *
+             * @return The size.
+             */
+            @java.lang.Override
+            public long getSize() {
+                return size_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * number of active URLs in queues
+             * </pre>
+             *
+             * <code>uint64 size = 1;</code>
+             *
+             * @param value The size to set.
+             * @return This builder for chaining.
+             */
+            public Builder setSize(long value) {
+
+                size_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * number of active URLs in queues
+             * </pre>
+             *
+             * <code>uint64 size = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearSize() {
+
+                size_ = 0L;
+                onChanged();
+                return this;
+            }
+
+            private int inProcess_;
+            /**
+             *
+             *
+             * <pre>
+             * number of URLs currently in flight
+             * </pre>
+             *
+             * <code>uint32 inProcess = 2;</code>
+             *
+             * @return The inProcess.
+             */
+            @java.lang.Override
+            public int getInProcess() {
+                return inProcess_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * number of URLs currently in flight
+             * </pre>
+             *
+             * <code>uint32 inProcess = 2;</code>
+             *
+             * @param value The inProcess to set.
+             * @return This builder for chaining.
+             */
+            public Builder setInProcess(int value) {
+
+                inProcess_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * number of URLs currently in flight
+             * </pre>
+             *
+             * <code>uint32 inProcess = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearInProcess() {
+
+                inProcess_ = 0;
+                onChanged();
+                return this;
+            }
+
+            private com.google.protobuf.MapField<java.lang.String, java.lang.Long> counts_;
+
+            private com.google.protobuf.MapField<java.lang.String, java.lang.Long>
+                    internalGetCounts() {
+                if (counts_ == null) {
+                    return com.google.protobuf.MapField.emptyMapField(
+                            CountsDefaultEntryHolder.defaultEntry);
+                }
+                return counts_;
+            }
+
+            private com.google.protobuf.MapField<java.lang.String, java.lang.Long>
+                    internalGetMutableCounts() {
+                onChanged();
+                ;
+                if (counts_ == null) {
+                    counts_ =
+                            com.google.protobuf.MapField.newMapField(
+                                    CountsDefaultEntryHolder.defaultEntry);
+                }
+                if (!counts_.isMutable()) {
+                    counts_ = counts_.copy();
+                }
+                return counts_;
+            }
+
+            public int getCountsCount() {
+                return internalGetCounts().getMap().size();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * custom counts
+             * </pre>
+             *
+             * <code>map&lt;string, uint64&gt; counts = 3;</code>
+             */
+            @java.lang.Override
+            public boolean containsCounts(java.lang.String key) {
+                if (key == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                return internalGetCounts().getMap().containsKey(key);
+            }
+            /** Use {@link #getCountsMap()} instead. */
+            @java.lang.Override
+            @java.lang.Deprecated
+            public java.util.Map<java.lang.String, java.lang.Long> getCounts() {
+                return getCountsMap();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * custom counts
+             * </pre>
+             *
+             * <code>map&lt;string, uint64&gt; counts = 3;</code>
+             */
+            @java.lang.Override
+            public java.util.Map<java.lang.String, java.lang.Long> getCountsMap() {
+                return internalGetCounts().getMap();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * custom counts
+             * </pre>
+             *
+             * <code>map&lt;string, uint64&gt; counts = 3;</code>
+             */
+            @java.lang.Override
+            public long getCountsOrDefault(java.lang.String key, long defaultValue) {
+                if (key == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                java.util.Map<java.lang.String, java.lang.Long> map = internalGetCounts().getMap();
+                return map.containsKey(key) ? map.get(key) : defaultValue;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * custom counts
+             * </pre>
+             *
+             * <code>map&lt;string, uint64&gt; counts = 3;</code>
+             */
+            @java.lang.Override
+            public long getCountsOrThrow(java.lang.String key) {
+                if (key == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                java.util.Map<java.lang.String, java.lang.Long> map = internalGetCounts().getMap();
+                if (!map.containsKey(key)) {
+                    throw new java.lang.IllegalArgumentException();
+                }
+                return map.get(key);
+            }
+
+            public Builder clearCounts() {
+                internalGetMutableCounts().getMutableMap().clear();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * custom counts
+             * </pre>
+             *
+             * <code>map&lt;string, uint64&gt; counts = 3;</code>
+             */
+            public Builder removeCounts(java.lang.String key) {
+                if (key == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                internalGetMutableCounts().getMutableMap().remove(key);
+                return this;
+            }
+            /** Use alternate mutation accessors instead. */
+            @java.lang.Deprecated
+            public java.util.Map<java.lang.String, java.lang.Long> getMutableCounts() {
+                return internalGetMutableCounts().getMutableMap();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * custom counts
+             * </pre>
+             *
+             * <code>map&lt;string, uint64&gt; counts = 3;</code>
+             */
+            public Builder putCounts(java.lang.String key, long value) {
+                if (key == null) {
+                    throw new java.lang.NullPointerException();
+                }
+
+                internalGetMutableCounts().getMutableMap().put(key, value);
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * custom counts
+             * </pre>
+             *
+             * <code>map&lt;string, uint64&gt; counts = 3;</code>
+             */
+            public Builder putAllCounts(java.util.Map<java.lang.String, java.lang.Long> values) {
+                internalGetMutableCounts().getMutableMap().putAll(values);
+                return this;
+            }
+
+            private long numberOfQueues_;
+            /**
+             *
+             *
+             * <pre>
+             * number of active queues in the frontier
+             * </pre>
+             *
+             * <code>uint64 numberOfQueues = 4;</code>
+             *
+             * @return The numberOfQueues.
+             */
+            @java.lang.Override
+            public long getNumberOfQueues() {
+                return numberOfQueues_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * number of active queues in the frontier
+             * </pre>
+             *
+             * <code>uint64 numberOfQueues = 4;</code>
+             *
+             * @param value The numberOfQueues to set.
+             * @return This builder for chaining.
+             */
+            public Builder setNumberOfQueues(long value) {
+
+                numberOfQueues_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * number of active queues in the frontier
+             * </pre>
+             *
+             * <code>uint64 numberOfQueues = 4;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearNumberOfQueues() {
+
+                numberOfQueues_ = 0L;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.Stats)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.Stats)
+        private static final crawlercommons.urlfrontier.Urlfrontier.Stats DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Stats();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Stats getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<Stats> PARSER =
+                new com.google.protobuf.AbstractParser<Stats>() {
+                    @java.lang.Override
+                    public Stats parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new Stats(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<Stats> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<Stats> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.Stats getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    // @@protoc_insertion_point(class_scope:urlfrontier.Stats)
-    private static final crawlercommons.urlfrontier.Urlfrontier.Stats DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Stats();
+    public interface PaginationOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.Pagination)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         *
+         *
+         * <pre>
+         * position of the first result in the list; defaults to 0
+         * </pre>
+         *
+         * <code>uint32 start = 1;</code>
+         *
+         * @return The start.
+         */
+        int getStart();
+
+        /**
+         *
+         *
+         * <pre>
+         * max number of values; defaults to 100
+         * </pre>
+         *
+         * <code>uint32 size = 2;</code>
+         *
+         * @return The size.
+         */
+        int getSize();
+
+        /**
+         *
+         *
+         * <pre>
+         * include inactive queues; defaults to false
+         * </pre>
+         *
+         * <code>bool include_inactive = 3;</code>
+         *
+         * @return The includeInactive.
+         */
+        boolean getIncludeInactive();
+    }
+    /** Protobuf type {@code urlfrontier.Pagination} */
+    public static final class Pagination extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.Pagination)
+            PaginationOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use Pagination.newBuilder() to construct.
+        private Pagination(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private Pagination() {}
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new Pagination();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private Pagination(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 8:
+                            {
+                                start_ = input.readUInt32();
+                                break;
+                            }
+                        case 16:
+                            {
+                                size_ = input.readUInt32();
+                                break;
+                            }
+                        case 24:
+                            {
+                                includeInactive_ = input.readBool();
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_Pagination_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_Pagination_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.Pagination.class,
+                            crawlercommons.urlfrontier.Urlfrontier.Pagination.Builder.class);
+        }
+
+        public static final int START_FIELD_NUMBER = 1;
+        private int start_;
+        /**
+         *
+         *
+         * <pre>
+         * position of the first result in the list; defaults to 0
+         * </pre>
+         *
+         * <code>uint32 start = 1;</code>
+         *
+         * @return The start.
+         */
+        @java.lang.Override
+        public int getStart() {
+            return start_;
+        }
+
+        public static final int SIZE_FIELD_NUMBER = 2;
+        private int size_;
+        /**
+         *
+         *
+         * <pre>
+         * max number of values; defaults to 100
+         * </pre>
+         *
+         * <code>uint32 size = 2;</code>
+         *
+         * @return The size.
+         */
+        @java.lang.Override
+        public int getSize() {
+            return size_;
+        }
+
+        public static final int INCLUDE_INACTIVE_FIELD_NUMBER = 3;
+        private boolean includeInactive_;
+        /**
+         *
+         *
+         * <pre>
+         * include inactive queues; defaults to false
+         * </pre>
+         *
+         * <code>bool include_inactive = 3;</code>
+         *
+         * @return The includeInactive.
+         */
+        @java.lang.Override
+        public boolean getIncludeInactive() {
+            return includeInactive_;
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (start_ != 0) {
+                output.writeUInt32(1, start_);
+            }
+            if (size_ != 0) {
+                output.writeUInt32(2, size_);
+            }
+            if (includeInactive_ != false) {
+                output.writeBool(3, includeInactive_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (start_ != 0) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt32Size(1, start_);
+            }
+            if (size_ != 0) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt32Size(2, size_);
+            }
+            if (includeInactive_ != false) {
+                size += com.google.protobuf.CodedOutputStream.computeBoolSize(3, includeInactive_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Pagination)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.Pagination other =
+                    (crawlercommons.urlfrontier.Urlfrontier.Pagination) obj;
+
+            if (getStart() != other.getStart()) return false;
+            if (getSize() != other.getSize()) return false;
+            if (getIncludeInactive() != other.getIncludeInactive()) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + START_FIELD_NUMBER;
+            hash = (53 * hash) + getStart();
+            hash = (37 * hash) + SIZE_FIELD_NUMBER;
+            hash = (53 * hash) + getSize();
+            hash = (37 * hash) + INCLUDE_INACTIVE_FIELD_NUMBER;
+            hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(getIncludeInactive());
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.Pagination prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /** Protobuf type {@code urlfrontier.Pagination} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.Pagination)
+                crawlercommons.urlfrontier.Urlfrontier.PaginationOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Pagination_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Pagination_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.Pagination.class,
+                                crawlercommons.urlfrontier.Urlfrontier.Pagination.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.Pagination.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                start_ = 0;
+
+                size_ = 0;
+
+                includeInactive_ = false;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Pagination_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Pagination getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.Pagination.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Pagination build() {
+                crawlercommons.urlfrontier.Urlfrontier.Pagination result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Pagination buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.Pagination result =
+                        new crawlercommons.urlfrontier.Urlfrontier.Pagination(this);
+                result.start_ = start_;
+                result.size_ = size_;
+                result.includeInactive_ = includeInactive_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Pagination) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Pagination) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Pagination other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.Pagination.getDefaultInstance())
+                    return this;
+                if (other.getStart() != 0) {
+                    setStart(other.getStart());
+                }
+                if (other.getSize() != 0) {
+                    setSize(other.getSize());
+                }
+                if (other.getIncludeInactive() != false) {
+                    setIncludeInactive(other.getIncludeInactive());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.Pagination parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.Pagination)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private int start_;
+            /**
+             *
+             *
+             * <pre>
+             * position of the first result in the list; defaults to 0
+             * </pre>
+             *
+             * <code>uint32 start = 1;</code>
+             *
+             * @return The start.
+             */
+            @java.lang.Override
+            public int getStart() {
+                return start_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * position of the first result in the list; defaults to 0
+             * </pre>
+             *
+             * <code>uint32 start = 1;</code>
+             *
+             * @param value The start to set.
+             * @return This builder for chaining.
+             */
+            public Builder setStart(int value) {
+
+                start_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * position of the first result in the list; defaults to 0
+             * </pre>
+             *
+             * <code>uint32 start = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearStart() {
+
+                start_ = 0;
+                onChanged();
+                return this;
+            }
+
+            private int size_;
+            /**
+             *
+             *
+             * <pre>
+             * max number of values; defaults to 100
+             * </pre>
+             *
+             * <code>uint32 size = 2;</code>
+             *
+             * @return The size.
+             */
+            @java.lang.Override
+            public int getSize() {
+                return size_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * max number of values; defaults to 100
+             * </pre>
+             *
+             * <code>uint32 size = 2;</code>
+             *
+             * @param value The size to set.
+             * @return This builder for chaining.
+             */
+            public Builder setSize(int value) {
+
+                size_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * max number of values; defaults to 100
+             * </pre>
+             *
+             * <code>uint32 size = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearSize() {
+
+                size_ = 0;
+                onChanged();
+                return this;
+            }
+
+            private boolean includeInactive_;
+            /**
+             *
+             *
+             * <pre>
+             * include inactive queues; defaults to false
+             * </pre>
+             *
+             * <code>bool include_inactive = 3;</code>
+             *
+             * @return The includeInactive.
+             */
+            @java.lang.Override
+            public boolean getIncludeInactive() {
+                return includeInactive_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * include inactive queues; defaults to false
+             * </pre>
+             *
+             * <code>bool include_inactive = 3;</code>
+             *
+             * @param value The includeInactive to set.
+             * @return This builder for chaining.
+             */
+            public Builder setIncludeInactive(boolean value) {
+
+                includeInactive_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * include inactive queues; defaults to false
+             * </pre>
+             *
+             * <code>bool include_inactive = 3;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearIncludeInactive() {
+
+                includeInactive_ = false;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.Pagination)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.Pagination)
+        private static final crawlercommons.urlfrontier.Urlfrontier.Pagination DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Pagination();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Pagination getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<Pagination> PARSER =
+                new com.google.protobuf.AbstractParser<Pagination>() {
+                    @java.lang.Override
+                    public Pagination parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new Pagination(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<Pagination> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<Pagination> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.Pagination getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    public static crawlercommons.urlfrontier.Urlfrontier.Stats getDefaultInstance() {
-      return DEFAULT_INSTANCE;
+    public interface EmptyOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.Empty)
+            com.google.protobuf.MessageOrBuilder {}
+    /** Protobuf type {@code urlfrontier.Empty} */
+    public static final class Empty extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.Empty)
+            EmptyOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use Empty.newBuilder() to construct.
+        private Empty(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private Empty() {}
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new Empty();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private Empty(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_Empty_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_Empty_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+                            crawlercommons.urlfrontier.Urlfrontier.Empty.Builder.class);
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Empty)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.Empty other =
+                    (crawlercommons.urlfrontier.Urlfrontier.Empty) obj;
+
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.Empty prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /** Protobuf type {@code urlfrontier.Empty} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.Empty)
+                crawlercommons.urlfrontier.Urlfrontier.EmptyOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Empty_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Empty_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+                                crawlercommons.urlfrontier.Urlfrontier.Empty.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.Empty.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Empty_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Empty getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Empty build() {
+                crawlercommons.urlfrontier.Urlfrontier.Empty result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Empty buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.Empty result =
+                        new crawlercommons.urlfrontier.Urlfrontier.Empty(this);
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Empty) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Empty) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Empty other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance())
+                    return this;
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.Empty parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.Empty) e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.Empty)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.Empty)
+        private static final crawlercommons.urlfrontier.Urlfrontier.Empty DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Empty();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Empty getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<Empty> PARSER =
+                new com.google.protobuf.AbstractParser<Empty>() {
+                    @java.lang.Override
+                    public Empty parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new Empty(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<Empty> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<Empty> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.Empty getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    private static final com.google.protobuf.Parser<Stats>
-        PARSER = new com.google.protobuf.AbstractParser<Stats>() {
-      @java.lang.Override
-      public Stats parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Stats(input, extensionRegistry);
-      }
-    };
+    public interface BooleanOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.Boolean)
+            com.google.protobuf.MessageOrBuilder {
 
-    public static com.google.protobuf.Parser<Stats> parser() {
-      return PARSER;
+        /**
+         * <code>bool state = 1;</code>
+         *
+         * @return The state.
+         */
+        boolean getState();
+    }
+    /** Protobuf type {@code urlfrontier.Boolean} */
+    public static final class Boolean extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.Boolean)
+            BooleanOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use Boolean.newBuilder() to construct.
+        private Boolean(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private Boolean() {}
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new Boolean();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private Boolean(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 8:
+                            {
+                                state_ = input.readBool();
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_Boolean_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_Boolean_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.Boolean.class,
+                            crawlercommons.urlfrontier.Urlfrontier.Boolean.Builder.class);
+        }
+
+        public static final int STATE_FIELD_NUMBER = 1;
+        private boolean state_;
+        /**
+         * <code>bool state = 1;</code>
+         *
+         * @return The state.
+         */
+        @java.lang.Override
+        public boolean getState() {
+            return state_;
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (state_ != false) {
+                output.writeBool(1, state_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (state_ != false) {
+                size += com.google.protobuf.CodedOutputStream.computeBoolSize(1, state_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Boolean)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.Boolean other =
+                    (crawlercommons.urlfrontier.Urlfrontier.Boolean) obj;
+
+            if (getState() != other.getState()) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + STATE_FIELD_NUMBER;
+            hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(getState());
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.Boolean prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /** Protobuf type {@code urlfrontier.Boolean} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.Boolean)
+                crawlercommons.urlfrontier.Urlfrontier.BooleanOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Boolean_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Boolean_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.Boolean.class,
+                                crawlercommons.urlfrontier.Urlfrontier.Boolean.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.Boolean.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                state_ = false;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Boolean_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Boolean getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.Boolean.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Boolean build() {
+                crawlercommons.urlfrontier.Urlfrontier.Boolean result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Boolean buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.Boolean result =
+                        new crawlercommons.urlfrontier.Urlfrontier.Boolean(this);
+                result.state_ = state_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Boolean) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Boolean) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Boolean other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.Boolean.getDefaultInstance())
+                    return this;
+                if (other.getState() != false) {
+                    setState(other.getState());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.Boolean parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.Boolean)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private boolean state_;
+            /**
+             * <code>bool state = 1;</code>
+             *
+             * @return The state.
+             */
+            @java.lang.Override
+            public boolean getState() {
+                return state_;
+            }
+            /**
+             * <code>bool state = 1;</code>
+             *
+             * @param value The state to set.
+             * @return This builder for chaining.
+             */
+            public Builder setState(boolean value) {
+
+                state_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>bool state = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearState() {
+
+                state_ = false;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.Boolean)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.Boolean)
+        private static final crawlercommons.urlfrontier.Urlfrontier.Boolean DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Boolean();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Boolean getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<Boolean> PARSER =
+                new com.google.protobuf.AbstractParser<Boolean>() {
+                    @java.lang.Override
+                    public Boolean parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new Boolean(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<Boolean> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<Boolean> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.Boolean getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    @java.lang.Override
-    public com.google.protobuf.Parser<Stats> getParserForType() {
-      return PARSER;
+    public interface StringOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.String)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         * <code>string value = 1;</code>
+         *
+         * @return The value.
+         */
+        java.lang.String getValue();
+        /**
+         * <code>string value = 1;</code>
+         *
+         * @return The bytes for value.
+         */
+        com.google.protobuf.ByteString getValueBytes();
+    }
+    /** Protobuf type {@code urlfrontier.String} */
+    public static final class String extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.String)
+            StringOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use String.newBuilder() to construct.
+        private String(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private String() {
+            value_ = "";
+        }
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new String();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private String(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                java.lang.String s = input.readStringRequireUtf8();
+
+                                value_ = s;
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_String_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_String_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.String.class,
+                            crawlercommons.urlfrontier.Urlfrontier.String.Builder.class);
+        }
+
+        public static final int VALUE_FIELD_NUMBER = 1;
+        private volatile java.lang.Object value_;
+        /**
+         * <code>string value = 1;</code>
+         *
+         * @return The value.
+         */
+        @java.lang.Override
+        public java.lang.String getValue() {
+            java.lang.Object ref = value_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                value_ = s;
+                return s;
+            }
+        }
+        /**
+         * <code>string value = 1;</code>
+         *
+         * @return The bytes for value.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getValueBytes() {
+            java.lang.Object ref = value_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                value_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (!getValueBytes().isEmpty()) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, value_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (!getValueBytes().isEmpty()) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, value_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.String)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.String other =
+                    (crawlercommons.urlfrontier.Urlfrontier.String) obj;
+
+            if (!getValue().equals(other.getValue())) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + VALUE_FIELD_NUMBER;
+            hash = (53 * hash) + getValue().hashCode();
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.String prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /** Protobuf type {@code urlfrontier.String} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.String)
+                crawlercommons.urlfrontier.Urlfrontier.StringOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_String_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_String_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.String.class,
+                                crawlercommons.urlfrontier.Urlfrontier.String.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                value_ = "";
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_String_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.String getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.String build() {
+                crawlercommons.urlfrontier.Urlfrontier.String result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.String buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.String result =
+                        new crawlercommons.urlfrontier.Urlfrontier.String(this);
+                result.value_ = value_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.String) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.String) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.String other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance())
+                    return this;
+                if (!other.getValue().isEmpty()) {
+                    value_ = other.value_;
+                    onChanged();
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.String parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.String)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private java.lang.Object value_ = "";
+            /**
+             * <code>string value = 1;</code>
+             *
+             * @return The value.
+             */
+            public java.lang.String getValue() {
+                java.lang.Object ref = value_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    value_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+            /**
+             * <code>string value = 1;</code>
+             *
+             * @return The bytes for value.
+             */
+            public com.google.protobuf.ByteString getValueBytes() {
+                java.lang.Object ref = value_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    value_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+            /**
+             * <code>string value = 1;</code>
+             *
+             * @param value The value to set.
+             * @return This builder for chaining.
+             */
+            public Builder setValue(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                value_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>string value = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearValue() {
+
+                value_ = getDefaultInstance().getValue();
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>string value = 1;</code>
+             *
+             * @param value The bytes for value to set.
+             * @return This builder for chaining.
+             */
+            public Builder setValueBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+
+                value_ = value;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.String)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.String)
+        private static final crawlercommons.urlfrontier.Urlfrontier.String DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.String();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.String getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<String> PARSER =
+                new com.google.protobuf.AbstractParser<String>() {
+                    @java.lang.Override
+                    public String parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new String(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<String> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<String> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.String getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.Stats getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
+    public interface IntegerOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.Integer)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         * <code>uint64 value = 1;</code>
+         *
+         * @return The value.
+         */
+        long getValue();
+    }
+    /** Protobuf type {@code urlfrontier.Integer} */
+    public static final class Integer extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.Integer)
+            IntegerOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use Integer.newBuilder() to construct.
+        private Integer(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private Integer() {}
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new Integer();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private Integer(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 8:
+                            {
+                                value_ = input.readUInt64();
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_Integer_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_Integer_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.Integer.class,
+                            crawlercommons.urlfrontier.Urlfrontier.Integer.Builder.class);
+        }
+
+        public static final int VALUE_FIELD_NUMBER = 1;
+        private long value_;
+        /**
+         * <code>uint64 value = 1;</code>
+         *
+         * @return The value.
+         */
+        @java.lang.Override
+        public long getValue() {
+            return value_;
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (value_ != 0L) {
+                output.writeUInt64(1, value_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (value_ != 0L) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt64Size(1, value_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Integer)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.Integer other =
+                    (crawlercommons.urlfrontier.Urlfrontier.Integer) obj;
+
+            if (getValue() != other.getValue()) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + VALUE_FIELD_NUMBER;
+            hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getValue());
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.Integer prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /** Protobuf type {@code urlfrontier.Integer} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.Integer)
+                crawlercommons.urlfrontier.Urlfrontier.IntegerOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Integer_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Integer_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.Integer.class,
+                                crawlercommons.urlfrontier.Urlfrontier.Integer.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                value_ = 0L;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_Integer_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Integer getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.Integer.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Integer build() {
+                crawlercommons.urlfrontier.Urlfrontier.Integer result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.Integer buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.Integer result =
+                        new crawlercommons.urlfrontier.Urlfrontier.Integer(this);
+                result.value_ = value_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Integer) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Integer) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Integer other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.Integer.getDefaultInstance())
+                    return this;
+                if (other.getValue() != 0L) {
+                    setValue(other.getValue());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.Integer parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.Integer)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private long value_;
+            /**
+             * <code>uint64 value = 1;</code>
+             *
+             * @return The value.
+             */
+            @java.lang.Override
+            public long getValue() {
+                return value_;
+            }
+            /**
+             * <code>uint64 value = 1;</code>
+             *
+             * @param value The value to set.
+             * @return This builder for chaining.
+             */
+            public Builder setValue(long value) {
+
+                value_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>uint64 value = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearValue() {
+
+                value_ = 0L;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.Integer)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.Integer)
+        private static final crawlercommons.urlfrontier.Urlfrontier.Integer DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Integer();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.Integer getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<Integer> PARSER =
+                new com.google.protobuf.AbstractParser<Integer>() {
+                    @java.lang.Override
+                    public Integer parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new Integer(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<Integer> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<Integer> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.Integer getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-  }
+    public interface QueueListOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.QueueList)
+            com.google.protobuf.MessageOrBuilder {
 
-  public interface PaginationOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.Pagination)
-      com.google.protobuf.MessageOrBuilder {
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @return A list containing the values.
+         */
+        java.util.List<java.lang.String> getValuesList();
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @return The count of values.
+         */
+        int getValuesCount();
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @param index The index of the element to return.
+         * @return The values at the given index.
+         */
+        java.lang.String getValues(int index);
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @param index The index of the value to return.
+         * @return The bytes of the values at the given index.
+         */
+        com.google.protobuf.ByteString getValuesBytes(int index);
 
+        /**
+         *
+         *
+         * <pre>
+         * total number of queues
+         * </pre>
+         *
+         * <code>uint64 total = 2;</code>
+         *
+         * @return The total.
+         */
+        long getTotal();
+
+        /**
+         *
+         *
+         * <pre>
+         * position of the first result in the list
+         * </pre>
+         *
+         * <code>uint32 start = 3;</code>
+         *
+         * @return The start.
+         */
+        int getStart();
+
+        /**
+         *
+         *
+         * <pre>
+         * number of values returned
+         * </pre>
+         *
+         * <code>uint32 size = 4;</code>
+         *
+         * @return The size.
+         */
+        int getSize();
+    }
     /**
-     * <pre>
-     * position of the first result in the list; defaults to 0
-     * </pre>
      *
-     * <code>uint32 start = 1;</code>
-     * @return The start.
-     */
-    int getStart();
-
-    /**
-     * <pre>
-     * max number of values; defaults to 100
-     * </pre>
      *
-     * <code>uint32 size = 2;</code>
-     * @return The size.
-     */
-    int getSize();
-
-    /**
      * <pre>
-     * include inactive queues; defaults to false
-     * </pre>
-     *
-     * <code>bool include_inactive = 3;</code>
-     * @return The includeInactive.
-     */
-    boolean getIncludeInactive();
-  }
-  /**
-   * Protobuf type {@code urlfrontier.Pagination}
-   */
-  public static final class Pagination extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.Pagination)
-      PaginationOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use Pagination.newBuilder() to construct.
-    private Pagination(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Pagination() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new Pagination();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Pagination(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              start_ = input.readUInt32();
-              break;
-            }
-            case 16: {
-
-              size_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-
-              includeInactive_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Pagination_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Pagination_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.Pagination.class, crawlercommons.urlfrontier.Urlfrontier.Pagination.Builder.class);
-    }
-
-    public static final int START_FIELD_NUMBER = 1;
-    private int start_;
-    /**
-     * <pre>
-     * position of the first result in the list; defaults to 0
-     * </pre>
-     *
-     * <code>uint32 start = 1;</code>
-     * @return The start.
-     */
-    @java.lang.Override
-    public int getStart() {
-      return start_;
-    }
-
-    public static final int SIZE_FIELD_NUMBER = 2;
-    private int size_;
-    /**
-     * <pre>
-     * max number of values; defaults to 100
-     * </pre>
-     *
-     * <code>uint32 size = 2;</code>
-     * @return The size.
-     */
-    @java.lang.Override
-    public int getSize() {
-      return size_;
-    }
-
-    public static final int INCLUDE_INACTIVE_FIELD_NUMBER = 3;
-    private boolean includeInactive_;
-    /**
-     * <pre>
-     * include inactive queues; defaults to false
-     * </pre>
-     *
-     * <code>bool include_inactive = 3;</code>
-     * @return The includeInactive.
-     */
-    @java.lang.Override
-    public boolean getIncludeInactive() {
-      return includeInactive_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (start_ != 0) {
-        output.writeUInt32(1, start_);
-      }
-      if (size_ != 0) {
-        output.writeUInt32(2, size_);
-      }
-      if (includeInactive_ != false) {
-        output.writeBool(3, includeInactive_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (start_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(1, start_);
-      }
-      if (size_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(2, size_);
-      }
-      if (includeInactive_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(3, includeInactive_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Pagination)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.Pagination other = (crawlercommons.urlfrontier.Urlfrontier.Pagination) obj;
-
-      if (getStart()
-          != other.getStart()) return false;
-      if (getSize()
-          != other.getSize()) return false;
-      if (getIncludeInactive()
-          != other.getIncludeInactive()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + START_FIELD_NUMBER;
-      hash = (53 * hash) + getStart();
-      hash = (37 * hash) + SIZE_FIELD_NUMBER;
-      hash = (53 * hash) + getSize();
-      hash = (37 * hash) + INCLUDE_INACTIVE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getIncludeInactive());
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.Pagination prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code urlfrontier.Pagination}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.Pagination)
-        crawlercommons.urlfrontier.Urlfrontier.PaginationOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Pagination_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Pagination_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.Pagination.class, crawlercommons.urlfrontier.Urlfrontier.Pagination.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.Pagination.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        start_ = 0;
-
-        size_ = 0;
-
-        includeInactive_ = false;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Pagination_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Pagination getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.Pagination.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Pagination build() {
-        crawlercommons.urlfrontier.Urlfrontier.Pagination result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Pagination buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.Pagination result = new crawlercommons.urlfrontier.Urlfrontier.Pagination(this);
-        result.start_ = start_;
-        result.size_ = size_;
-        result.includeInactive_ = includeInactive_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Pagination) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Pagination)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Pagination other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.Pagination.getDefaultInstance()) return this;
-        if (other.getStart() != 0) {
-          setStart(other.getStart());
-        }
-        if (other.getSize() != 0) {
-          setSize(other.getSize());
-        }
-        if (other.getIncludeInactive() != false) {
-          setIncludeInactive(other.getIncludeInactive());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.Pagination parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.Pagination) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private int start_ ;
-      /**
-       * <pre>
-       * position of the first result in the list; defaults to 0
-       * </pre>
-       *
-       * <code>uint32 start = 1;</code>
-       * @return The start.
-       */
-      @java.lang.Override
-      public int getStart() {
-        return start_;
-      }
-      /**
-       * <pre>
-       * position of the first result in the list; defaults to 0
-       * </pre>
-       *
-       * <code>uint32 start = 1;</code>
-       * @param value The start to set.
-       * @return This builder for chaining.
-       */
-      public Builder setStart(int value) {
-        
-        start_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * position of the first result in the list; defaults to 0
-       * </pre>
-       *
-       * <code>uint32 start = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearStart() {
-        
-        start_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int size_ ;
-      /**
-       * <pre>
-       * max number of values; defaults to 100
-       * </pre>
-       *
-       * <code>uint32 size = 2;</code>
-       * @return The size.
-       */
-      @java.lang.Override
-      public int getSize() {
-        return size_;
-      }
-      /**
-       * <pre>
-       * max number of values; defaults to 100
-       * </pre>
-       *
-       * <code>uint32 size = 2;</code>
-       * @param value The size to set.
-       * @return This builder for chaining.
-       */
-      public Builder setSize(int value) {
-        
-        size_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * max number of values; defaults to 100
-       * </pre>
-       *
-       * <code>uint32 size = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearSize() {
-        
-        size_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private boolean includeInactive_ ;
-      /**
-       * <pre>
-       * include inactive queues; defaults to false
-       * </pre>
-       *
-       * <code>bool include_inactive = 3;</code>
-       * @return The includeInactive.
-       */
-      @java.lang.Override
-      public boolean getIncludeInactive() {
-        return includeInactive_;
-      }
-      /**
-       * <pre>
-       * include inactive queues; defaults to false
-       * </pre>
-       *
-       * <code>bool include_inactive = 3;</code>
-       * @param value The includeInactive to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIncludeInactive(boolean value) {
-        
-        includeInactive_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * include inactive queues; defaults to false
-       * </pre>
-       *
-       * <code>bool include_inactive = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearIncludeInactive() {
-        
-        includeInactive_ = false;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.Pagination)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.Pagination)
-    private static final crawlercommons.urlfrontier.Urlfrontier.Pagination DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Pagination();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Pagination getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Pagination>
-        PARSER = new com.google.protobuf.AbstractParser<Pagination>() {
-      @java.lang.Override
-      public Pagination parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Pagination(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<Pagination> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Pagination> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.Pagination getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface EmptyOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.Empty)
-      com.google.protobuf.MessageOrBuilder {
-  }
-  /**
-   * Protobuf type {@code urlfrontier.Empty}
-   */
-  public static final class Empty extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.Empty)
-      EmptyOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use Empty.newBuilder() to construct.
-    private Empty(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Empty() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new Empty();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Empty(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Empty_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Empty_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.Empty.class, crawlercommons.urlfrontier.Urlfrontier.Empty.Builder.class);
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Empty)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.Empty other = (crawlercommons.urlfrontier.Urlfrontier.Empty) obj;
-
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.Empty prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code urlfrontier.Empty}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.Empty)
-        crawlercommons.urlfrontier.Urlfrontier.EmptyOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Empty_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Empty_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.Empty.class, crawlercommons.urlfrontier.Urlfrontier.Empty.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.Empty.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Empty_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Empty getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Empty build() {
-        crawlercommons.urlfrontier.Urlfrontier.Empty result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Empty buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.Empty result = new crawlercommons.urlfrontier.Urlfrontier.Empty(this);
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Empty) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Empty)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Empty other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.Empty.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.Empty parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.Empty) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.Empty)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.Empty)
-    private static final crawlercommons.urlfrontier.Urlfrontier.Empty DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Empty();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Empty getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Empty>
-        PARSER = new com.google.protobuf.AbstractParser<Empty>() {
-      @java.lang.Override
-      public Empty parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Empty(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<Empty> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Empty> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.Empty getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface BooleanOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.Boolean)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>bool state = 1;</code>
-     * @return The state.
-     */
-    boolean getState();
-  }
-  /**
-   * Protobuf type {@code urlfrontier.Boolean}
-   */
-  public static final class Boolean extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.Boolean)
-      BooleanOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use Boolean.newBuilder() to construct.
-    private Boolean(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Boolean() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new Boolean();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Boolean(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              state_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Boolean_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Boolean_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.Boolean.class, crawlercommons.urlfrontier.Urlfrontier.Boolean.Builder.class);
-    }
-
-    public static final int STATE_FIELD_NUMBER = 1;
-    private boolean state_;
-    /**
-     * <code>bool state = 1;</code>
-     * @return The state.
-     */
-    @java.lang.Override
-    public boolean getState() {
-      return state_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (state_ != false) {
-        output.writeBool(1, state_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (state_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1, state_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Boolean)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.Boolean other = (crawlercommons.urlfrontier.Urlfrontier.Boolean) obj;
-
-      if (getState()
-          != other.getState()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + STATE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getState());
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.Boolean prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code urlfrontier.Boolean}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.Boolean)
-        crawlercommons.urlfrontier.Urlfrontier.BooleanOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Boolean_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Boolean_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.Boolean.class, crawlercommons.urlfrontier.Urlfrontier.Boolean.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.Boolean.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        state_ = false;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Boolean_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Boolean getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.Boolean.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Boolean build() {
-        crawlercommons.urlfrontier.Urlfrontier.Boolean result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Boolean buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.Boolean result = new crawlercommons.urlfrontier.Urlfrontier.Boolean(this);
-        result.state_ = state_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Boolean) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Boolean)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Boolean other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.Boolean.getDefaultInstance()) return this;
-        if (other.getState() != false) {
-          setState(other.getState());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.Boolean parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.Boolean) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private boolean state_ ;
-      /**
-       * <code>bool state = 1;</code>
-       * @return The state.
-       */
-      @java.lang.Override
-      public boolean getState() {
-        return state_;
-      }
-      /**
-       * <code>bool state = 1;</code>
-       * @param value The state to set.
-       * @return This builder for chaining.
-       */
-      public Builder setState(boolean value) {
-        
-        state_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>bool state = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearState() {
-        
-        state_ = false;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.Boolean)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.Boolean)
-    private static final crawlercommons.urlfrontier.Urlfrontier.Boolean DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Boolean();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Boolean getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Boolean>
-        PARSER = new com.google.protobuf.AbstractParser<Boolean>() {
-      @java.lang.Override
-      public Boolean parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Boolean(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<Boolean> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Boolean> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.Boolean getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface StringOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.String)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>string value = 1;</code>
-     * @return The value.
-     */
-    java.lang.String getValue();
-    /**
-     * <code>string value = 1;</code>
-     * @return The bytes for value.
-     */
-    com.google.protobuf.ByteString
-        getValueBytes();
-  }
-  /**
-   * Protobuf type {@code urlfrontier.String}
-   */
-  public static final class String extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.String)
-      StringOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use String.newBuilder() to construct.
-    private String(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private String() {
-      value_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new String();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private String(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              value_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_String_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_String_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.String.class, crawlercommons.urlfrontier.Urlfrontier.String.Builder.class);
-    }
-
-    public static final int VALUE_FIELD_NUMBER = 1;
-    private volatile java.lang.Object value_;
-    /**
-     * <code>string value = 1;</code>
-     * @return The value.
-     */
-    @java.lang.Override
-    public java.lang.String getValue() {
-      java.lang.Object ref = value_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        value_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string value = 1;</code>
-     * @return The bytes for value.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getValueBytes() {
-      java.lang.Object ref = value_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        value_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!getValueBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, value_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!getValueBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, value_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.String)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.String other = (crawlercommons.urlfrontier.Urlfrontier.String) obj;
-
-      if (!getValue()
-          .equals(other.getValue())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + VALUE_FIELD_NUMBER;
-      hash = (53 * hash) + getValue().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.String parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.String prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code urlfrontier.String}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.String)
-        crawlercommons.urlfrontier.Urlfrontier.StringOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_String_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_String_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.String.class, crawlercommons.urlfrontier.Urlfrontier.String.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        value_ = "";
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_String_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.String getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.String build() {
-        crawlercommons.urlfrontier.Urlfrontier.String result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.String buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.String result = new crawlercommons.urlfrontier.Urlfrontier.String(this);
-        result.value_ = value_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.String) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.String)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.String other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance()) return this;
-        if (!other.getValue().isEmpty()) {
-          value_ = other.value_;
-          onChanged();
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.String parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.String) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private java.lang.Object value_ = "";
-      /**
-       * <code>string value = 1;</code>
-       * @return The value.
-       */
-      public java.lang.String getValue() {
-        java.lang.Object ref = value_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          value_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string value = 1;</code>
-       * @return The bytes for value.
-       */
-      public com.google.protobuf.ByteString
-          getValueBytes() {
-        java.lang.Object ref = value_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          value_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string value = 1;</code>
-       * @param value The value to set.
-       * @return This builder for chaining.
-       */
-      public Builder setValue(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        value_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string value = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearValue() {
-        
-        value_ = getDefaultInstance().getValue();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string value = 1;</code>
-       * @param value The bytes for value to set.
-       * @return This builder for chaining.
-       */
-      public Builder setValueBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        value_ = value;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.String)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.String)
-    private static final crawlercommons.urlfrontier.Urlfrontier.String DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.String();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.String getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<String>
-        PARSER = new com.google.protobuf.AbstractParser<String>() {
-      @java.lang.Override
-      public String parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new String(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<String> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<String> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.String getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface IntegerOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.Integer)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>uint64 value = 1;</code>
-     * @return The value.
-     */
-    long getValue();
-  }
-  /**
-   * Protobuf type {@code urlfrontier.Integer}
-   */
-  public static final class Integer extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.Integer)
-      IntegerOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use Integer.newBuilder() to construct.
-    private Integer(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Integer() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new Integer();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Integer(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              value_ = input.readUInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Integer_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Integer_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.Integer.class, crawlercommons.urlfrontier.Urlfrontier.Integer.Builder.class);
-    }
-
-    public static final int VALUE_FIELD_NUMBER = 1;
-    private long value_;
-    /**
-     * <code>uint64 value = 1;</code>
-     * @return The value.
-     */
-    @java.lang.Override
-    public long getValue() {
-      return value_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (value_ != 0L) {
-        output.writeUInt64(1, value_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (value_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(1, value_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.Integer)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.Integer other = (crawlercommons.urlfrontier.Urlfrontier.Integer) obj;
-
-      if (getValue()
-          != other.getValue()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + VALUE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getValue());
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.Integer prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code urlfrontier.Integer}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.Integer)
-        crawlercommons.urlfrontier.Urlfrontier.IntegerOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Integer_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Integer_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.Integer.class, crawlercommons.urlfrontier.Urlfrontier.Integer.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        value_ = 0L;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_Integer_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Integer getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.Integer.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Integer build() {
-        crawlercommons.urlfrontier.Urlfrontier.Integer result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.Integer buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.Integer result = new crawlercommons.urlfrontier.Urlfrontier.Integer(this);
-        result.value_ = value_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.Integer) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.Integer)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.Integer other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.Integer.getDefaultInstance()) return this;
-        if (other.getValue() != 0L) {
-          setValue(other.getValue());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.Integer parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.Integer) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private long value_ ;
-      /**
-       * <code>uint64 value = 1;</code>
-       * @return The value.
-       */
-      @java.lang.Override
-      public long getValue() {
-        return value_;
-      }
-      /**
-       * <code>uint64 value = 1;</code>
-       * @param value The value to set.
-       * @return This builder for chaining.
-       */
-      public Builder setValue(long value) {
-        
-        value_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>uint64 value = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearValue() {
-        
-        value_ = 0L;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.Integer)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.Integer)
-    private static final crawlercommons.urlfrontier.Urlfrontier.Integer DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.Integer();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.Integer getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Integer>
-        PARSER = new com.google.protobuf.AbstractParser<Integer>() {
-      @java.lang.Override
-      public Integer parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Integer(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<Integer> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Integer> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.Integer getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface QueueListOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.QueueList)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>repeated string values = 1;</code>
-     * @return A list containing the values.
-     */
-    java.util.List<java.lang.String>
-        getValuesList();
-    /**
-     * <code>repeated string values = 1;</code>
-     * @return The count of values.
-     */
-    int getValuesCount();
-    /**
-     * <code>repeated string values = 1;</code>
-     * @param index The index of the element to return.
-     * @return The values at the given index.
-     */
-    java.lang.String getValues(int index);
-    /**
-     * <code>repeated string values = 1;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the values at the given index.
-     */
-    com.google.protobuf.ByteString
-        getValuesBytes(int index);
-
-    /**
-     * <pre>
-     * total number of queues
-     * </pre>
-     *
-     * <code>uint64 total = 2;</code>
-     * @return The total.
-     */
-    long getTotal();
-
-    /**
-     * <pre>
-     * position of the first result in the list
-     * </pre>
-     *
-     * <code>uint32 start = 3;</code>
-     * @return The start.
-     */
-    int getStart();
-
-    /**
-     * <pre>
-     * number of values returned
-     * </pre>
-     *
-     * <code>uint32 size = 4;</code>
-     * @return The size.
-     */
-    int getSize();
-  }
-  /**
-   * <pre>
-   ** Returned by ListQueues *
-   * </pre>
-   *
-   * Protobuf type {@code urlfrontier.QueueList}
-   */
-  public static final class QueueList extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.QueueList)
-      QueueListOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use QueueList.newBuilder() to construct.
-    private QueueList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private QueueList() {
-      values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new QueueList();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private QueueList(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                values_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              values_.add(s);
-              break;
-            }
-            case 16: {
-
-              total_ = input.readUInt64();
-              break;
-            }
-            case 24: {
-
-              start_ = input.readUInt32();
-              break;
-            }
-            case 32: {
-
-              size_ = input.readUInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          values_ = values_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueList_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueList_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.QueueList.class, crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder.class);
-    }
-
-    public static final int VALUES_FIELD_NUMBER = 1;
-    private com.google.protobuf.LazyStringList values_;
-    /**
-     * <code>repeated string values = 1;</code>
-     * @return A list containing the values.
-     */
-    public com.google.protobuf.ProtocolStringList
-        getValuesList() {
-      return values_;
-    }
-    /**
-     * <code>repeated string values = 1;</code>
-     * @return The count of values.
-     */
-    public int getValuesCount() {
-      return values_.size();
-    }
-    /**
-     * <code>repeated string values = 1;</code>
-     * @param index The index of the element to return.
-     * @return The values at the given index.
-     */
-    public java.lang.String getValues(int index) {
-      return values_.get(index);
-    }
-    /**
-     * <code>repeated string values = 1;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the values at the given index.
-     */
-    public com.google.protobuf.ByteString
-        getValuesBytes(int index) {
-      return values_.getByteString(index);
-    }
-
-    public static final int TOTAL_FIELD_NUMBER = 2;
-    private long total_;
-    /**
-     * <pre>
-     * total number of queues
-     * </pre>
-     *
-     * <code>uint64 total = 2;</code>
-     * @return The total.
-     */
-    @java.lang.Override
-    public long getTotal() {
-      return total_;
-    }
-
-    public static final int START_FIELD_NUMBER = 3;
-    private int start_;
-    /**
-     * <pre>
-     * position of the first result in the list
-     * </pre>
-     *
-     * <code>uint32 start = 3;</code>
-     * @return The start.
-     */
-    @java.lang.Override
-    public int getStart() {
-      return start_;
-    }
-
-    public static final int SIZE_FIELD_NUMBER = 4;
-    private int size_;
-    /**
-     * <pre>
-     * number of values returned
-     * </pre>
-     *
-     * <code>uint32 size = 4;</code>
-     * @return The size.
-     */
-    @java.lang.Override
-    public int getSize() {
-      return size_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      for (int i = 0; i < values_.size(); i++) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, values_.getRaw(i));
-      }
-      if (total_ != 0L) {
-        output.writeUInt64(2, total_);
-      }
-      if (start_ != 0) {
-        output.writeUInt32(3, start_);
-      }
-      if (size_ != 0) {
-        output.writeUInt32(4, size_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      {
-        int dataSize = 0;
-        for (int i = 0; i < values_.size(); i++) {
-          dataSize += computeStringSizeNoTag(values_.getRaw(i));
-        }
-        size += dataSize;
-        size += 1 * getValuesList().size();
-      }
-      if (total_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(2, total_);
-      }
-      if (start_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(3, start_);
-      }
-      if (size_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(4, size_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.QueueList)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.QueueList other = (crawlercommons.urlfrontier.Urlfrontier.QueueList) obj;
-
-      if (!getValuesList()
-          .equals(other.getValuesList())) return false;
-      if (getTotal()
-          != other.getTotal()) return false;
-      if (getStart()
-          != other.getStart()) return false;
-      if (getSize()
-          != other.getSize()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (getValuesCount() > 0) {
-        hash = (37 * hash) + VALUES_FIELD_NUMBER;
-        hash = (53 * hash) + getValuesList().hashCode();
-      }
-      hash = (37 * hash) + TOTAL_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getTotal());
-      hash = (37 * hash) + START_FIELD_NUMBER;
-      hash = (53 * hash) + getStart();
-      hash = (37 * hash) + SIZE_FIELD_NUMBER;
-      hash = (53 * hash) + getSize();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.QueueList prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     ** Returned by ListQueues *
+     * * Returned by ListQueues *
      * </pre>
      *
      * Protobuf type {@code urlfrontier.QueueList}
      */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.QueueList)
-        crawlercommons.urlfrontier.Urlfrontier.QueueListOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueList_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueList_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.QueueList.class, crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.QueueList.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+    public static final class QueueList extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.QueueList)
+            QueueListOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use QueueList.newBuilder() to construct.
+        private QueueList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
         }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        total_ = 0L;
 
-        start_ = 0;
-
-        size_ = 0;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueList_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.QueueList getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.QueueList.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.QueueList build() {
-        crawlercommons.urlfrontier.Urlfrontier.QueueList result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
+        private QueueList() {
+            values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         }
-        return result;
-      }
 
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.QueueList buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.QueueList result = new crawlercommons.urlfrontier.Urlfrontier.QueueList(this);
-        int from_bitField0_ = bitField0_;
-        if (((bitField0_ & 0x00000001) != 0)) {
-          values_ = values_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000001);
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new QueueList();
         }
-        result.values_ = values_;
-        result.total_ = total_;
-        result.start_ = start_;
-        result.size_ = size_;
-        onBuilt();
-        return result;
-      }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.QueueList) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.QueueList)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
         }
-      }
 
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.QueueList other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.QueueList.getDefaultInstance()) return this;
-        if (!other.values_.isEmpty()) {
-          if (values_.isEmpty()) {
-            values_ = other.values_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-          } else {
-            ensureValuesIsMutable();
-            values_.addAll(other.values_);
-          }
-          onChanged();
-        }
-        if (other.getTotal() != 0L) {
-          setTotal(other.getTotal());
-        }
-        if (other.getStart() != 0) {
-          setStart(other.getStart());
-        }
-        if (other.getSize() != 0) {
-          setSize(other.getSize());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.QueueList parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.QueueList) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      private com.google.protobuf.LazyStringList values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      private void ensureValuesIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
-          values_ = new com.google.protobuf.LazyStringArrayList(values_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @return A list containing the values.
-       */
-      public com.google.protobuf.ProtocolStringList
-          getValuesList() {
-        return values_.getUnmodifiableView();
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @return The count of values.
-       */
-      public int getValuesCount() {
-        return values_.size();
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param index The index of the element to return.
-       * @return The values at the given index.
-       */
-      public java.lang.String getValues(int index) {
-        return values_.get(index);
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param index The index of the value to return.
-       * @return The bytes of the values at the given index.
-       */
-      public com.google.protobuf.ByteString
-          getValuesBytes(int index) {
-        return values_.getByteString(index);
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param index The index to set the value at.
-       * @param value The values to set.
-       * @return This builder for chaining.
-       */
-      public Builder setValues(
-          int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureValuesIsMutable();
-        values_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param value The values to add.
-       * @return This builder for chaining.
-       */
-      public Builder addValues(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureValuesIsMutable();
-        values_.add(value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param values The values to add.
-       * @return This builder for chaining.
-       */
-      public Builder addAllValues(
-          java.lang.Iterable<java.lang.String> values) {
-        ensureValuesIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, values_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearValues() {
-        values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param value The bytes of the values to add.
-       * @return This builder for chaining.
-       */
-      public Builder addValuesBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        ensureValuesIsMutable();
-        values_.add(value);
-        onChanged();
-        return this;
-      }
-
-      private long total_ ;
-      /**
-       * <pre>
-       * total number of queues
-       * </pre>
-       *
-       * <code>uint64 total = 2;</code>
-       * @return The total.
-       */
-      @java.lang.Override
-      public long getTotal() {
-        return total_;
-      }
-      /**
-       * <pre>
-       * total number of queues
-       * </pre>
-       *
-       * <code>uint64 total = 2;</code>
-       * @param value The total to set.
-       * @return This builder for chaining.
-       */
-      public Builder setTotal(long value) {
-        
-        total_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * total number of queues
-       * </pre>
-       *
-       * <code>uint64 total = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearTotal() {
-        
-        total_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private int start_ ;
-      /**
-       * <pre>
-       * position of the first result in the list
-       * </pre>
-       *
-       * <code>uint32 start = 3;</code>
-       * @return The start.
-       */
-      @java.lang.Override
-      public int getStart() {
-        return start_;
-      }
-      /**
-       * <pre>
-       * position of the first result in the list
-       * </pre>
-       *
-       * <code>uint32 start = 3;</code>
-       * @param value The start to set.
-       * @return This builder for chaining.
-       */
-      public Builder setStart(int value) {
-        
-        start_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * position of the first result in the list
-       * </pre>
-       *
-       * <code>uint32 start = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearStart() {
-        
-        start_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int size_ ;
-      /**
-       * <pre>
-       * number of values returned
-       * </pre>
-       *
-       * <code>uint32 size = 4;</code>
-       * @return The size.
-       */
-      @java.lang.Override
-      public int getSize() {
-        return size_;
-      }
-      /**
-       * <pre>
-       * number of values returned
-       * </pre>
-       *
-       * <code>uint32 size = 4;</code>
-       * @param value The size to set.
-       * @return This builder for chaining.
-       */
-      public Builder setSize(int value) {
-        
-        size_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * number of values returned
-       * </pre>
-       *
-       * <code>uint32 size = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearSize() {
-        
-        size_ = 0;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.QueueList)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.QueueList)
-    private static final crawlercommons.urlfrontier.Urlfrontier.QueueList DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.QueueList();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueList getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<QueueList>
-        PARSER = new com.google.protobuf.AbstractParser<QueueList>() {
-      @java.lang.Override
-      public QueueList parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new QueueList(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<QueueList> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<QueueList> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.QueueList getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface StringListOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.StringList)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>repeated string values = 1;</code>
-     * @return A list containing the values.
-     */
-    java.util.List<java.lang.String>
-        getValuesList();
-    /**
-     * <code>repeated string values = 1;</code>
-     * @return The count of values.
-     */
-    int getValuesCount();
-    /**
-     * <code>repeated string values = 1;</code>
-     * @param index The index of the element to return.
-     * @return The values at the given index.
-     */
-    java.lang.String getValues(int index);
-    /**
-     * <code>repeated string values = 1;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the values at the given index.
-     */
-    com.google.protobuf.ByteString
-        getValuesBytes(int index);
-  }
-  /**
-   * Protobuf type {@code urlfrontier.StringList}
-   */
-  public static final class StringList extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.StringList)
-      StringListOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use StringList.newBuilder() to construct.
-    private StringList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private StringList() {
-      values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new StringList();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private StringList(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                values_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              values_.add(s);
-              break;
+        private QueueList(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
             }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
+            int mutable_bitField0_ = 0;
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                java.lang.String s = input.readStringRequireUtf8();
+                                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                                    values_ = new com.google.protobuf.LazyStringArrayList();
+                                    mutable_bitField0_ |= 0x00000001;
+                                }
+                                values_.add(s);
+                                break;
+                            }
+                        case 16:
+                            {
+                                total_ = input.readUInt64();
+                                break;
+                            }
+                        case 24:
+                            {
+                                start_ = input.readUInt32();
+                                break;
+                            }
+                        case 32:
+                            {
+                                size_ = input.readUInt32();
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                if (((mutable_bitField0_ & 0x00000001) != 0)) {
+                    values_ = values_.getUnmodifiableView();
+                }
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
             }
-          }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          values_ = values_.getUnmodifiableView();
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_QueueList_descriptor;
         }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_StringList_descriptor;
-    }
 
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_StringList_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.StringList.class, crawlercommons.urlfrontier.Urlfrontier.StringList.Builder.class);
-    }
-
-    public static final int VALUES_FIELD_NUMBER = 1;
-    private com.google.protobuf.LazyStringList values_;
-    /**
-     * <code>repeated string values = 1;</code>
-     * @return A list containing the values.
-     */
-    public com.google.protobuf.ProtocolStringList
-        getValuesList() {
-      return values_;
-    }
-    /**
-     * <code>repeated string values = 1;</code>
-     * @return The count of values.
-     */
-    public int getValuesCount() {
-      return values_.size();
-    }
-    /**
-     * <code>repeated string values = 1;</code>
-     * @param index The index of the element to return.
-     * @return The values at the given index.
-     */
-    public java.lang.String getValues(int index) {
-      return values_.get(index);
-    }
-    /**
-     * <code>repeated string values = 1;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the values at the given index.
-     */
-    public com.google.protobuf.ByteString
-        getValuesBytes(int index) {
-      return values_.getByteString(index);
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      for (int i = 0; i < values_.size(); i++) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, values_.getRaw(i));
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      {
-        int dataSize = 0;
-        for (int i = 0; i < values_.size(); i++) {
-          dataSize += computeStringSizeNoTag(values_.getRaw(i));
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_QueueList_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.QueueList.class,
+                            crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder.class);
         }
-        size += dataSize;
-        size += 1 * getValuesList().size();
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
 
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.StringList)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.StringList other = (crawlercommons.urlfrontier.Urlfrontier.StringList) obj;
-
-      if (!getValuesList()
-          .equals(other.getValuesList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (getValuesCount() > 0) {
-        hash = (37 * hash) + VALUES_FIELD_NUMBER;
-        hash = (53 * hash) + getValuesList().hashCode();
-      }
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.StringList prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code urlfrontier.StringList}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.StringList)
-        crawlercommons.urlfrontier.Urlfrontier.StringListOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_StringList_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_StringList_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.StringList.class, crawlercommons.urlfrontier.Urlfrontier.StringList.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.StringList.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+        public static final int VALUES_FIELD_NUMBER = 1;
+        private com.google.protobuf.LazyStringList values_;
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @return A list containing the values.
+         */
+        public com.google.protobuf.ProtocolStringList getValuesList() {
+            return values_;
         }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_StringList_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.StringList getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.StringList.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.StringList build() {
-        crawlercommons.urlfrontier.Urlfrontier.StringList result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @return The count of values.
+         */
+        public int getValuesCount() {
+            return values_.size();
         }
-        return result;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.StringList buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.StringList result = new crawlercommons.urlfrontier.Urlfrontier.StringList(this);
-        int from_bitField0_ = bitField0_;
-        if (((bitField0_ & 0x00000001) != 0)) {
-          values_ = values_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000001);
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @param index The index of the element to return.
+         * @return The values at the given index.
+         */
+        public java.lang.String getValues(int index) {
+            return values_.get(index);
         }
-        result.values_ = values_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.StringList) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.StringList)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @param index The index of the value to return.
+         * @return The bytes of the values at the given index.
+         */
+        public com.google.protobuf.ByteString getValuesBytes(int index) {
+            return values_.getByteString(index);
         }
-      }
 
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.StringList other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.StringList.getDefaultInstance()) return this;
-        if (!other.values_.isEmpty()) {
-          if (values_.isEmpty()) {
-            values_ = other.values_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-          } else {
-            ensureValuesIsMutable();
-            values_.addAll(other.values_);
-          }
-          onChanged();
+        public static final int TOTAL_FIELD_NUMBER = 2;
+        private long total_;
+        /**
+         *
+         *
+         * <pre>
+         * total number of queues
+         * </pre>
+         *
+         * <code>uint64 total = 2;</code>
+         *
+         * @return The total.
+         */
+        @java.lang.Override
+        public long getTotal() {
+            return total_;
         }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
 
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.StringList parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.StringList) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
+        public static final int START_FIELD_NUMBER = 3;
+        private int start_;
+        /**
+         *
+         *
+         * <pre>
+         * position of the first result in the list
+         * </pre>
+         *
+         * <code>uint32 start = 3;</code>
+         *
+         * @return The start.
+         */
+        @java.lang.Override
+        public int getStart() {
+            return start_;
         }
-        return this;
-      }
-      private int bitField0_;
 
-      private com.google.protobuf.LazyStringList values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      private void ensureValuesIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
-          values_ = new com.google.protobuf.LazyStringArrayList(values_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @return A list containing the values.
-       */
-      public com.google.protobuf.ProtocolStringList
-          getValuesList() {
-        return values_.getUnmodifiableView();
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @return The count of values.
-       */
-      public int getValuesCount() {
-        return values_.size();
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param index The index of the element to return.
-       * @return The values at the given index.
-       */
-      public java.lang.String getValues(int index) {
-        return values_.get(index);
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param index The index of the value to return.
-       * @return The bytes of the values at the given index.
-       */
-      public com.google.protobuf.ByteString
-          getValuesBytes(int index) {
-        return values_.getByteString(index);
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param index The index to set the value at.
-       * @param value The values to set.
-       * @return This builder for chaining.
-       */
-      public Builder setValues(
-          int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureValuesIsMutable();
-        values_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param value The values to add.
-       * @return This builder for chaining.
-       */
-      public Builder addValues(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureValuesIsMutable();
-        values_.add(value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param values The values to add.
-       * @return This builder for chaining.
-       */
-      public Builder addAllValues(
-          java.lang.Iterable<java.lang.String> values) {
-        ensureValuesIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, values_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearValues() {
-        values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string values = 1;</code>
-       * @param value The bytes of the values to add.
-       * @return This builder for chaining.
-       */
-      public Builder addValuesBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        ensureValuesIsMutable();
-        values_.add(value);
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
+        public static final int SIZE_FIELD_NUMBER = 4;
+        private int size_;
+        /**
+         *
+         *
+         * <pre>
+         * number of values returned
+         * </pre>
+         *
+         * <code>uint32 size = 4;</code>
+         *
+         * @return The size.
+         */
+        @java.lang.Override
+        public int getSize() {
+            return size_;
+        }
 
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
+        private byte memoizedIsInitialized = -1;
 
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
 
-      // @@protoc_insertion_point(builder_scope:urlfrontier.StringList)
-    }
+            memoizedIsInitialized = 1;
+            return true;
+        }
 
-    // @@protoc_insertion_point(class_scope:urlfrontier.StringList)
-    private static final crawlercommons.urlfrontier.Urlfrontier.StringList DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.StringList();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.StringList getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<StringList>
-        PARSER = new com.google.protobuf.AbstractParser<StringList>() {
-      @java.lang.Override
-      public StringList parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new StringList(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<StringList> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<StringList> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.StringList getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface QueueDelayParamsOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.QueueDelayParams)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     ** ID for the queue - an empty value sets the default for all the queues *
-     * </pre>
-     *
-     * <code>string key = 1;</code>
-     * @return The key.
-     */
-    java.lang.String getKey();
-    /**
-     * <pre>
-     ** ID for the queue - an empty value sets the default for all the queues *
-     * </pre>
-     *
-     * <code>string key = 1;</code>
-     * @return The bytes for key.
-     */
-    com.google.protobuf.ByteString
-        getKeyBytes();
-
-    /**
-     * <pre>
-     *  delay in seconds before a queue can provide new URLs
-     * </pre>
-     *
-     * <code>uint32 delay_requestable = 2;</code>
-     * @return The delayRequestable.
-     */
-    int getDelayRequestable();
-  }
-  /**
-   * <pre>
-   ** Parameter message for SetDelay *
-   * </pre>
-   *
-   * Protobuf type {@code urlfrontier.QueueDelayParams}
-   */
-  public static final class QueueDelayParams extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.QueueDelayParams)
-      QueueDelayParamsOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use QueueDelayParams.newBuilder() to construct.
-    private QueueDelayParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private QueueDelayParams() {
-      key_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new QueueDelayParams();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private QueueDelayParams(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              key_ = s;
-              break;
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            for (int i = 0; i < values_.size(); i++) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, values_.getRaw(i));
             }
-            case 16: {
-
-              delayRequestable_ = input.readUInt32();
-              break;
+            if (total_ != 0L) {
+                output.writeUInt64(2, total_);
             }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
+            if (start_ != 0) {
+                output.writeUInt32(3, start_);
             }
-          }
+            if (size_ != 0) {
+                output.writeUInt32(4, size_);
+            }
+            unknownFields.writeTo(output);
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueDelayParams_descriptor;
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            {
+                int dataSize = 0;
+                for (int i = 0; i < values_.size(); i++) {
+                    dataSize += computeStringSizeNoTag(values_.getRaw(i));
+                }
+                size += dataSize;
+                size += 1 * getValuesList().size();
+            }
+            if (total_ != 0L) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt64Size(2, total_);
+            }
+            if (start_ != 0) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt32Size(3, start_);
+            }
+            if (size_ != 0) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt32Size(4, size_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.QueueList)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.QueueList other =
+                    (crawlercommons.urlfrontier.Urlfrontier.QueueList) obj;
+
+            if (!getValuesList().equals(other.getValuesList())) return false;
+            if (getTotal() != other.getTotal()) return false;
+            if (getStart() != other.getStart()) return false;
+            if (getSize() != other.getSize()) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            if (getValuesCount() > 0) {
+                hash = (37 * hash) + VALUES_FIELD_NUMBER;
+                hash = (53 * hash) + getValuesList().hashCode();
+            }
+            hash = (37 * hash) + TOTAL_FIELD_NUMBER;
+            hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getTotal());
+            hash = (37 * hash) + START_FIELD_NUMBER;
+            hash = (53 * hash) + getStart();
+            hash = (37 * hash) + SIZE_FIELD_NUMBER;
+            hash = (53 * hash) + getSize();
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.QueueList prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * Returned by ListQueues *
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.QueueList}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.QueueList)
+                crawlercommons.urlfrontier.Urlfrontier.QueueListOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_QueueList_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_QueueList_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.QueueList.class,
+                                crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.QueueList.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+                bitField0_ = (bitField0_ & ~0x00000001);
+                total_ = 0L;
+
+                start_ = 0;
+
+                size_ = 0;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_QueueList_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.QueueList getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.QueueList.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.QueueList build() {
+                crawlercommons.urlfrontier.Urlfrontier.QueueList result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.QueueList buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.QueueList result =
+                        new crawlercommons.urlfrontier.Urlfrontier.QueueList(this);
+                int from_bitField0_ = bitField0_;
+                if (((bitField0_ & 0x00000001) != 0)) {
+                    values_ = values_.getUnmodifiableView();
+                    bitField0_ = (bitField0_ & ~0x00000001);
+                }
+                result.values_ = values_;
+                result.total_ = total_;
+                result.start_ = start_;
+                result.size_ = size_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.QueueList) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.QueueList) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.QueueList other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.QueueList.getDefaultInstance())
+                    return this;
+                if (!other.values_.isEmpty()) {
+                    if (values_.isEmpty()) {
+                        values_ = other.values_;
+                        bitField0_ = (bitField0_ & ~0x00000001);
+                    } else {
+                        ensureValuesIsMutable();
+                        values_.addAll(other.values_);
+                    }
+                    onChanged();
+                }
+                if (other.getTotal() != 0L) {
+                    setTotal(other.getTotal());
+                }
+                if (other.getStart() != 0) {
+                    setStart(other.getStart());
+                }
+                if (other.getSize() != 0) {
+                    setSize(other.getSize());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.QueueList parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.QueueList)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private int bitField0_;
+
+            private com.google.protobuf.LazyStringList values_ =
+                    com.google.protobuf.LazyStringArrayList.EMPTY;
+
+            private void ensureValuesIsMutable() {
+                if (!((bitField0_ & 0x00000001) != 0)) {
+                    values_ = new com.google.protobuf.LazyStringArrayList(values_);
+                    bitField0_ |= 0x00000001;
+                }
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @return A list containing the values.
+             */
+            public com.google.protobuf.ProtocolStringList getValuesList() {
+                return values_.getUnmodifiableView();
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @return The count of values.
+             */
+            public int getValuesCount() {
+                return values_.size();
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param index The index of the element to return.
+             * @return The values at the given index.
+             */
+            public java.lang.String getValues(int index) {
+                return values_.get(index);
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param index The index of the value to return.
+             * @return The bytes of the values at the given index.
+             */
+            public com.google.protobuf.ByteString getValuesBytes(int index) {
+                return values_.getByteString(index);
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param index The index to set the value at.
+             * @param value The values to set.
+             * @return This builder for chaining.
+             */
+            public Builder setValues(int index, java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                ensureValuesIsMutable();
+                values_.set(index, value);
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param value The values to add.
+             * @return This builder for chaining.
+             */
+            public Builder addValues(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                ensureValuesIsMutable();
+                values_.add(value);
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param values The values to add.
+             * @return This builder for chaining.
+             */
+            public Builder addAllValues(java.lang.Iterable<java.lang.String> values) {
+                ensureValuesIsMutable();
+                com.google.protobuf.AbstractMessageLite.Builder.addAll(values, values_);
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearValues() {
+                values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+                bitField0_ = (bitField0_ & ~0x00000001);
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param value The bytes of the values to add.
+             * @return This builder for chaining.
+             */
+            public Builder addValuesBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+                ensureValuesIsMutable();
+                values_.add(value);
+                onChanged();
+                return this;
+            }
+
+            private long total_;
+            /**
+             *
+             *
+             * <pre>
+             * total number of queues
+             * </pre>
+             *
+             * <code>uint64 total = 2;</code>
+             *
+             * @return The total.
+             */
+            @java.lang.Override
+            public long getTotal() {
+                return total_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * total number of queues
+             * </pre>
+             *
+             * <code>uint64 total = 2;</code>
+             *
+             * @param value The total to set.
+             * @return This builder for chaining.
+             */
+            public Builder setTotal(long value) {
+
+                total_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * total number of queues
+             * </pre>
+             *
+             * <code>uint64 total = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearTotal() {
+
+                total_ = 0L;
+                onChanged();
+                return this;
+            }
+
+            private int start_;
+            /**
+             *
+             *
+             * <pre>
+             * position of the first result in the list
+             * </pre>
+             *
+             * <code>uint32 start = 3;</code>
+             *
+             * @return The start.
+             */
+            @java.lang.Override
+            public int getStart() {
+                return start_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * position of the first result in the list
+             * </pre>
+             *
+             * <code>uint32 start = 3;</code>
+             *
+             * @param value The start to set.
+             * @return This builder for chaining.
+             */
+            public Builder setStart(int value) {
+
+                start_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * position of the first result in the list
+             * </pre>
+             *
+             * <code>uint32 start = 3;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearStart() {
+
+                start_ = 0;
+                onChanged();
+                return this;
+            }
+
+            private int size_;
+            /**
+             *
+             *
+             * <pre>
+             * number of values returned
+             * </pre>
+             *
+             * <code>uint32 size = 4;</code>
+             *
+             * @return The size.
+             */
+            @java.lang.Override
+            public int getSize() {
+                return size_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * number of values returned
+             * </pre>
+             *
+             * <code>uint32 size = 4;</code>
+             *
+             * @param value The size to set.
+             * @return This builder for chaining.
+             */
+            public Builder setSize(int value) {
+
+                size_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * number of values returned
+             * </pre>
+             *
+             * <code>uint32 size = 4;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearSize() {
+
+                size_ = 0;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.QueueList)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.QueueList)
+        private static final crawlercommons.urlfrontier.Urlfrontier.QueueList DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.QueueList();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueList getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<QueueList> PARSER =
+                new com.google.protobuf.AbstractParser<QueueList>() {
+                    @java.lang.Override
+                    public QueueList parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new QueueList(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<QueueList> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<QueueList> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.QueueList getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.class, crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.Builder.class);
+    public interface StringListOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.StringList)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @return A list containing the values.
+         */
+        java.util.List<java.lang.String> getValuesList();
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @return The count of values.
+         */
+        int getValuesCount();
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @param index The index of the element to return.
+         * @return The values at the given index.
+         */
+        java.lang.String getValues(int index);
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @param index The index of the value to return.
+         * @return The bytes of the values at the given index.
+         */
+        com.google.protobuf.ByteString getValuesBytes(int index);
+    }
+    /** Protobuf type {@code urlfrontier.StringList} */
+    public static final class StringList extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.StringList)
+            StringListOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use StringList.newBuilder() to construct.
+        private StringList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private StringList() {
+            values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        }
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new StringList();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private StringList(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            int mutable_bitField0_ = 0;
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                java.lang.String s = input.readStringRequireUtf8();
+                                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                                    values_ = new com.google.protobuf.LazyStringArrayList();
+                                    mutable_bitField0_ |= 0x00000001;
+                                }
+                                values_.add(s);
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                if (((mutable_bitField0_ & 0x00000001) != 0)) {
+                    values_ = values_.getUnmodifiableView();
+                }
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_StringList_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_StringList_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.StringList.class,
+                            crawlercommons.urlfrontier.Urlfrontier.StringList.Builder.class);
+        }
+
+        public static final int VALUES_FIELD_NUMBER = 1;
+        private com.google.protobuf.LazyStringList values_;
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @return A list containing the values.
+         */
+        public com.google.protobuf.ProtocolStringList getValuesList() {
+            return values_;
+        }
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @return The count of values.
+         */
+        public int getValuesCount() {
+            return values_.size();
+        }
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @param index The index of the element to return.
+         * @return The values at the given index.
+         */
+        public java.lang.String getValues(int index) {
+            return values_.get(index);
+        }
+        /**
+         * <code>repeated string values = 1;</code>
+         *
+         * @param index The index of the value to return.
+         * @return The bytes of the values at the given index.
+         */
+        public com.google.protobuf.ByteString getValuesBytes(int index) {
+            return values_.getByteString(index);
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            for (int i = 0; i < values_.size(); i++) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, values_.getRaw(i));
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            {
+                int dataSize = 0;
+                for (int i = 0; i < values_.size(); i++) {
+                    dataSize += computeStringSizeNoTag(values_.getRaw(i));
+                }
+                size += dataSize;
+                size += 1 * getValuesList().size();
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.StringList)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.StringList other =
+                    (crawlercommons.urlfrontier.Urlfrontier.StringList) obj;
+
+            if (!getValuesList().equals(other.getValuesList())) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            if (getValuesCount() > 0) {
+                hash = (37 * hash) + VALUES_FIELD_NUMBER;
+                hash = (53 * hash) + getValuesList().hashCode();
+            }
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.StringList prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /** Protobuf type {@code urlfrontier.StringList} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.StringList)
+                crawlercommons.urlfrontier.Urlfrontier.StringListOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_StringList_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_StringList_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.StringList.class,
+                                crawlercommons.urlfrontier.Urlfrontier.StringList.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.StringList.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+                bitField0_ = (bitField0_ & ~0x00000001);
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_StringList_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.StringList getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.StringList.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.StringList build() {
+                crawlercommons.urlfrontier.Urlfrontier.StringList result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.StringList buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.StringList result =
+                        new crawlercommons.urlfrontier.Urlfrontier.StringList(this);
+                int from_bitField0_ = bitField0_;
+                if (((bitField0_ & 0x00000001) != 0)) {
+                    values_ = values_.getUnmodifiableView();
+                    bitField0_ = (bitField0_ & ~0x00000001);
+                }
+                result.values_ = values_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.StringList) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.StringList) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.StringList other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.StringList.getDefaultInstance())
+                    return this;
+                if (!other.values_.isEmpty()) {
+                    if (values_.isEmpty()) {
+                        values_ = other.values_;
+                        bitField0_ = (bitField0_ & ~0x00000001);
+                    } else {
+                        ensureValuesIsMutable();
+                        values_.addAll(other.values_);
+                    }
+                    onChanged();
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.StringList parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.StringList)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private int bitField0_;
+
+            private com.google.protobuf.LazyStringList values_ =
+                    com.google.protobuf.LazyStringArrayList.EMPTY;
+
+            private void ensureValuesIsMutable() {
+                if (!((bitField0_ & 0x00000001) != 0)) {
+                    values_ = new com.google.protobuf.LazyStringArrayList(values_);
+                    bitField0_ |= 0x00000001;
+                }
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @return A list containing the values.
+             */
+            public com.google.protobuf.ProtocolStringList getValuesList() {
+                return values_.getUnmodifiableView();
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @return The count of values.
+             */
+            public int getValuesCount() {
+                return values_.size();
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param index The index of the element to return.
+             * @return The values at the given index.
+             */
+            public java.lang.String getValues(int index) {
+                return values_.get(index);
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param index The index of the value to return.
+             * @return The bytes of the values at the given index.
+             */
+            public com.google.protobuf.ByteString getValuesBytes(int index) {
+                return values_.getByteString(index);
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param index The index to set the value at.
+             * @param value The values to set.
+             * @return This builder for chaining.
+             */
+            public Builder setValues(int index, java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                ensureValuesIsMutable();
+                values_.set(index, value);
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param value The values to add.
+             * @return This builder for chaining.
+             */
+            public Builder addValues(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                ensureValuesIsMutable();
+                values_.add(value);
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param values The values to add.
+             * @return This builder for chaining.
+             */
+            public Builder addAllValues(java.lang.Iterable<java.lang.String> values) {
+                ensureValuesIsMutable();
+                com.google.protobuf.AbstractMessageLite.Builder.addAll(values, values_);
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearValues() {
+                values_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+                bitField0_ = (bitField0_ & ~0x00000001);
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>repeated string values = 1;</code>
+             *
+             * @param value The bytes of the values to add.
+             * @return This builder for chaining.
+             */
+            public Builder addValuesBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+                ensureValuesIsMutable();
+                values_.add(value);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.StringList)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.StringList)
+        private static final crawlercommons.urlfrontier.Urlfrontier.StringList DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.StringList();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.StringList getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<StringList> PARSER =
+                new com.google.protobuf.AbstractParser<StringList>() {
+                    @java.lang.Override
+                    public StringList parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new StringList(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<StringList> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<StringList> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.StringList getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    public static final int KEY_FIELD_NUMBER = 1;
-    private volatile java.lang.Object key_;
+    public interface QueueDelayParamsOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.QueueDelayParams)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue - an empty value sets the default for all the queues *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The key.
+         */
+        java.lang.String getKey();
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue - an empty value sets the default for all the queues *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The bytes for key.
+         */
+        com.google.protobuf.ByteString getKeyBytes();
+
+        /**
+         *
+         *
+         * <pre>
+         *  delay in seconds before a queue can provide new URLs
+         * </pre>
+         *
+         * <code>uint32 delay_requestable = 2;</code>
+         *
+         * @return The delayRequestable.
+         */
+        int getDelayRequestable();
+    }
     /**
-     * <pre>
-     ** ID for the queue - an empty value sets the default for all the queues *
-     * </pre>
      *
-     * <code>string key = 1;</code>
-     * @return The key.
-     */
-    @java.lang.Override
-    public java.lang.String getKey() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        key_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     ** ID for the queue - an empty value sets the default for all the queues *
-     * </pre>
      *
-     * <code>string key = 1;</code>
-     * @return The bytes for key.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKeyBytes() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        key_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int DELAY_REQUESTABLE_FIELD_NUMBER = 2;
-    private int delayRequestable_;
-    /**
      * <pre>
-     *  delay in seconds before a queue can provide new URLs
-     * </pre>
-     *
-     * <code>uint32 delay_requestable = 2;</code>
-     * @return The delayRequestable.
-     */
-    @java.lang.Override
-    public int getDelayRequestable() {
-      return delayRequestable_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!getKeyBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
-      }
-      if (delayRequestable_ != 0) {
-        output.writeUInt32(2, delayRequestable_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!getKeyBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
-      }
-      if (delayRequestable_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(2, delayRequestable_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams other = (crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) obj;
-
-      if (!getKey()
-          .equals(other.getKey())) return false;
-      if (getDelayRequestable()
-          != other.getDelayRequestable()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + KEY_FIELD_NUMBER;
-      hash = (53 * hash) + getKey().hashCode();
-      hash = (37 * hash) + DELAY_REQUESTABLE_FIELD_NUMBER;
-      hash = (53 * hash) + getDelayRequestable();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     ** Parameter message for SetDelay *
+     * * Parameter message for SetDelay *
      * </pre>
      *
      * Protobuf type {@code urlfrontier.QueueDelayParams}
      */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.QueueDelayParams)
-        crawlercommons.urlfrontier.Urlfrontier.QueueDelayParamsOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueDelayParams_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.class, crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+    public static final class QueueDelayParams extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.QueueDelayParams)
+            QueueDelayParamsOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use QueueDelayParams.newBuilder() to construct.
+        private QueueDelayParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
         }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        key_ = "";
 
-        delayRequestable_ = 0;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_QueueDelayParams_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams build() {
-        crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
+        private QueueDelayParams() {
+            key_ = "";
         }
-        return result;
-      }
 
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams result = new crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams(this);
-        result.key_ = key_;
-        result.delayRequestable_ = delayRequestable_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new QueueDelayParams();
         }
-      }
 
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.getDefaultInstance()) return this;
-        if (!other.getKey().isEmpty()) {
-          key_ = other.key_;
-          onChanged();
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
         }
-        if (other.getDelayRequestable() != 0) {
-          setDelayRequestable(other.getDelayRequestable());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
 
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private java.lang.Object key_ = "";
-      /**
-       * <pre>
-       ** ID for the queue - an empty value sets the default for all the queues *
-       * </pre>
-       *
-       * <code>string key = 1;</code>
-       * @return The key.
-       */
-      public java.lang.String getKey() {
-        java.lang.Object ref = key_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          key_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       ** ID for the queue - an empty value sets the default for all the queues *
-       * </pre>
-       *
-       * <code>string key = 1;</code>
-       * @return The bytes for key.
-       */
-      public com.google.protobuf.ByteString
-          getKeyBytes() {
-        java.lang.Object ref = key_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          key_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       ** ID for the queue - an empty value sets the default for all the queues *
-       * </pre>
-       *
-       * <code>string key = 1;</code>
-       * @param value The key to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKey(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        key_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       ** ID for the queue - an empty value sets the default for all the queues *
-       * </pre>
-       *
-       * <code>string key = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKey() {
-        
-        key_ = getDefaultInstance().getKey();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       ** ID for the queue - an empty value sets the default for all the queues *
-       * </pre>
-       *
-       * <code>string key = 1;</code>
-       * @param value The bytes for key to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        key_ = value;
-        onChanged();
-        return this;
-      }
-
-      private int delayRequestable_ ;
-      /**
-       * <pre>
-       *  delay in seconds before a queue can provide new URLs
-       * </pre>
-       *
-       * <code>uint32 delay_requestable = 2;</code>
-       * @return The delayRequestable.
-       */
-      @java.lang.Override
-      public int getDelayRequestable() {
-        return delayRequestable_;
-      }
-      /**
-       * <pre>
-       *  delay in seconds before a queue can provide new URLs
-       * </pre>
-       *
-       * <code>uint32 delay_requestable = 2;</code>
-       * @param value The delayRequestable to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDelayRequestable(int value) {
-        
-        delayRequestable_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       *  delay in seconds before a queue can provide new URLs
-       * </pre>
-       *
-       * <code>uint32 delay_requestable = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearDelayRequestable() {
-        
-        delayRequestable_ = 0;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.QueueDelayParams)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.QueueDelayParams)
-    private static final crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<QueueDelayParams>
-        PARSER = new com.google.protobuf.AbstractParser<QueueDelayParams>() {
-      @java.lang.Override
-      public QueueDelayParams parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new QueueDelayParams(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<QueueDelayParams> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<QueueDelayParams> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface BlockQueueParamsOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.BlockQueueParams)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     ** ID for the queue *
-     * </pre>
-     *
-     * <code>string key = 1;</code>
-     * @return The key.
-     */
-    java.lang.String getKey();
-    /**
-     * <pre>
-     ** ID for the queue *
-     * </pre>
-     *
-     * <code>string key = 1;</code>
-     * @return The bytes for key.
-     */
-    com.google.protobuf.ByteString
-        getKeyBytes();
-
-    /**
-     * <pre>
-     ** Expressed in seconds of UTC time since Unix epoch
-     *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
-     * </pre>
-     *
-     * <code>uint64 time = 2;</code>
-     * @return The time.
-     */
-    long getTime();
-  }
-  /**
-   * <pre>
-   ** Parameter message for BlockQueueUntil *
-   * </pre>
-   *
-   * Protobuf type {@code urlfrontier.BlockQueueParams}
-   */
-  public static final class BlockQueueParams extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.BlockQueueParams)
-      BlockQueueParamsOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use BlockQueueParams.newBuilder() to construct.
-    private BlockQueueParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private BlockQueueParams() {
-      key_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new BlockQueueParams();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private BlockQueueParams(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              key_ = s;
-              break;
+        private QueueDelayParams(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
             }
-            case 16: {
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                java.lang.String s = input.readStringRequireUtf8();
 
-              time_ = input.readUInt64();
-              break;
+                                key_ = s;
+                                break;
+                            }
+                        case 16:
+                            {
+                                delayRequestable_ = input.readUInt32();
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
             }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_BlockQueueParams_descriptor;
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_QueueDelayParams_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.class,
+                            crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.Builder.class);
+        }
+
+        public static final int KEY_FIELD_NUMBER = 1;
+        private volatile java.lang.Object key_;
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue - an empty value sets the default for all the queues *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The key.
+         */
+        @java.lang.Override
+        public java.lang.String getKey() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                key_ = s;
+                return s;
+            }
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue - an empty value sets the default for all the queues *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The bytes for key.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getKeyBytes() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                key_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int DELAY_REQUESTABLE_FIELD_NUMBER = 2;
+        private int delayRequestable_;
+        /**
+         *
+         *
+         * <pre>
+         *  delay in seconds before a queue can provide new URLs
+         * </pre>
+         *
+         * <code>uint32 delay_requestable = 2;</code>
+         *
+         * @return The delayRequestable.
+         */
+        @java.lang.Override
+        public int getDelayRequestable() {
+            return delayRequestable_;
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (!getKeyBytes().isEmpty()) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
+            }
+            if (delayRequestable_ != 0) {
+                output.writeUInt32(2, delayRequestable_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (!getKeyBytes().isEmpty()) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
+            }
+            if (delayRequestable_ != 0) {
+                size +=
+                        com.google.protobuf.CodedOutputStream.computeUInt32Size(
+                                2, delayRequestable_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams other =
+                    (crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) obj;
+
+            if (!getKey().equals(other.getKey())) return false;
+            if (getDelayRequestable() != other.getDelayRequestable()) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + KEY_FIELD_NUMBER;
+            hash = (53 * hash) + getKey().hashCode();
+            hash = (37 * hash) + DELAY_REQUESTABLE_FIELD_NUMBER;
+            hash = (53 * hash) + getDelayRequestable();
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * Parameter message for SetDelay *
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.QueueDelayParams}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.QueueDelayParams)
+                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParamsOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_QueueDelayParams_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.class,
+                                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.Builder
+                                        .class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                key_ = "";
+
+                delayRequestable_ = 0;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_QueueDelayParams_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams
+                    getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams build() {
+                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams result =
+                        new crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams(this);
+                result.key_ = key_;
+                result.delayRequestable_ = delayRequestable_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) {
+                    return mergeFrom(
+                            (crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(
+                    crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams other) {
+                if (other
+                        == crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams
+                                .getDefaultInstance()) return this;
+                if (!other.getKey().isEmpty()) {
+                    key_ = other.key_;
+                    onChanged();
+                }
+                if (other.getDelayRequestable() != 0) {
+                    setDelayRequestable(other.getDelayRequestable());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private java.lang.Object key_ = "";
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue - an empty value sets the default for all the queues *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return The key.
+             */
+            public java.lang.String getKey() {
+                java.lang.Object ref = key_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    key_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue - an empty value sets the default for all the queues *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return The bytes for key.
+             */
+            public com.google.protobuf.ByteString getKeyBytes() {
+                java.lang.Object ref = key_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    key_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue - an empty value sets the default for all the queues *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @param value The key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKey(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue - an empty value sets the default for all the queues *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearKey() {
+
+                key_ = getDefaultInstance().getKey();
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue - an empty value sets the default for all the queues *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @param value The bytes for key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKeyBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+
+            private int delayRequestable_;
+            /**
+             *
+             *
+             * <pre>
+             *  delay in seconds before a queue can provide new URLs
+             * </pre>
+             *
+             * <code>uint32 delay_requestable = 2;</code>
+             *
+             * @return The delayRequestable.
+             */
+            @java.lang.Override
+            public int getDelayRequestable() {
+                return delayRequestable_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             *  delay in seconds before a queue can provide new URLs
+             * </pre>
+             *
+             * <code>uint32 delay_requestable = 2;</code>
+             *
+             * @param value The delayRequestable to set.
+             * @return This builder for chaining.
+             */
+            public Builder setDelayRequestable(int value) {
+
+                delayRequestable_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             *  delay in seconds before a queue can provide new URLs
+             * </pre>
+             *
+             * <code>uint32 delay_requestable = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearDelayRequestable() {
+
+                delayRequestable_ = 0;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.QueueDelayParams)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.QueueDelayParams)
+        private static final crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams
+                DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<QueueDelayParams> PARSER =
+                new com.google.protobuf.AbstractParser<QueueDelayParams>() {
+                    @java.lang.Override
+                    public QueueDelayParams parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new QueueDelayParams(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<QueueDelayParams> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<QueueDelayParams> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_BlockQueueParams_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.class, crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.Builder.class);
-    }
+    public interface BlockQueueParamsOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.BlockQueueParams)
+            com.google.protobuf.MessageOrBuilder {
 
-    public static final int KEY_FIELD_NUMBER = 1;
-    private volatile java.lang.Object key_;
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The key.
+         */
+        java.lang.String getKey();
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The bytes for key.
+         */
+        com.google.protobuf.ByteString getKeyBytes();
+
+        /**
+         *
+         *
+         * <pre>
+         * * Expressed in seconds of UTC time since Unix epoch
+         * 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+         * </pre>
+         *
+         * <code>uint64 time = 2;</code>
+         *
+         * @return The time.
+         */
+        long getTime();
+    }
     /**
-     * <pre>
-     ** ID for the queue *
-     * </pre>
      *
-     * <code>string key = 1;</code>
-     * @return The key.
-     */
-    @java.lang.Override
-    public java.lang.String getKey() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        key_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     ** ID for the queue *
-     * </pre>
      *
-     * <code>string key = 1;</code>
-     * @return The bytes for key.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKeyBytes() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        key_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int TIME_FIELD_NUMBER = 2;
-    private long time_;
-    /**
      * <pre>
-     ** Expressed in seconds of UTC time since Unix epoch
-     *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
-     * </pre>
-     *
-     * <code>uint64 time = 2;</code>
-     * @return The time.
-     */
-    @java.lang.Override
-    public long getTime() {
-      return time_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!getKeyBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
-      }
-      if (time_ != 0L) {
-        output.writeUInt64(2, time_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!getKeyBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
-      }
-      if (time_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(2, time_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams other = (crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams) obj;
-
-      if (!getKey()
-          .equals(other.getKey())) return false;
-      if (getTime()
-          != other.getTime()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + KEY_FIELD_NUMBER;
-      hash = (53 * hash) + getKey().hashCode();
-      hash = (37 * hash) + TIME_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getTime());
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     ** Parameter message for BlockQueueUntil *
+     * * Parameter message for BlockQueueUntil *
      * </pre>
      *
      * Protobuf type {@code urlfrontier.BlockQueueParams}
      */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.BlockQueueParams)
-        crawlercommons.urlfrontier.Urlfrontier.BlockQueueParamsOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_BlockQueueParams_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_BlockQueueParams_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.class, crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+    public static final class BlockQueueParams extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.BlockQueueParams)
+            BlockQueueParamsOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use BlockQueueParams.newBuilder() to construct.
+        private BlockQueueParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
         }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        key_ = "";
 
-        time_ = 0L;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_BlockQueueParams_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams build() {
-        crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
+        private BlockQueueParams() {
+            key_ = "";
         }
-        return result;
-      }
 
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams result = new crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams(this);
-        result.key_ = key_;
-        result.time_ = time_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new BlockQueueParams();
         }
-      }
 
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.getDefaultInstance()) return this;
-        if (!other.getKey().isEmpty()) {
-          key_ = other.key_;
-          onChanged();
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
         }
-        if (other.getTime() != 0L) {
-          setTime(other.getTime());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
 
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private java.lang.Object key_ = "";
-      /**
-       * <pre>
-       ** ID for the queue *
-       * </pre>
-       *
-       * <code>string key = 1;</code>
-       * @return The key.
-       */
-      public java.lang.String getKey() {
-        java.lang.Object ref = key_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          key_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       ** ID for the queue *
-       * </pre>
-       *
-       * <code>string key = 1;</code>
-       * @return The bytes for key.
-       */
-      public com.google.protobuf.ByteString
-          getKeyBytes() {
-        java.lang.Object ref = key_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          key_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       ** ID for the queue *
-       * </pre>
-       *
-       * <code>string key = 1;</code>
-       * @param value The key to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKey(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        key_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       ** ID for the queue *
-       * </pre>
-       *
-       * <code>string key = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKey() {
-        
-        key_ = getDefaultInstance().getKey();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       ** ID for the queue *
-       * </pre>
-       *
-       * <code>string key = 1;</code>
-       * @param value The bytes for key to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        key_ = value;
-        onChanged();
-        return this;
-      }
-
-      private long time_ ;
-      /**
-       * <pre>
-       ** Expressed in seconds of UTC time since Unix epoch
-       *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
-       * </pre>
-       *
-       * <code>uint64 time = 2;</code>
-       * @return The time.
-       */
-      @java.lang.Override
-      public long getTime() {
-        return time_;
-      }
-      /**
-       * <pre>
-       ** Expressed in seconds of UTC time since Unix epoch
-       *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
-       * </pre>
-       *
-       * <code>uint64 time = 2;</code>
-       * @param value The time to set.
-       * @return This builder for chaining.
-       */
-      public Builder setTime(long value) {
-        
-        time_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       ** Expressed in seconds of UTC time since Unix epoch
-       *1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
-       * </pre>
-       *
-       * <code>uint64 time = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearTime() {
-        
-        time_ = 0L;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.BlockQueueParams)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.BlockQueueParams)
-    private static final crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<BlockQueueParams>
-        PARSER = new com.google.protobuf.AbstractParser<BlockQueueParams>() {
-      @java.lang.Override
-      public BlockQueueParams parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new BlockQueueParams(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<BlockQueueParams> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<BlockQueueParams> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface GetParamsOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.GetParams)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * maximum number of URLs per queue, the default value of 0 means no limit
-     * </pre>
-     *
-     * <code>uint32 max_urls_per_queue = 1;</code>
-     * @return The maxUrlsPerQueue.
-     */
-    int getMaxUrlsPerQueue();
-
-    /**
-     * <pre>
-     * maximum number of queues to get URLs from, the default value of 0 means no limit
-     * </pre>
-     *
-     * <code>uint32 max_queues = 2;</code>
-     * @return The maxQueues.
-     */
-    int getMaxQueues();
-
-    /**
-     * <pre>
-     * queue id if restricting to a specific queue
-     * </pre>
-     *
-     * <code>string key = 3;</code>
-     * @return The key.
-     */
-    java.lang.String getKey();
-    /**
-     * <pre>
-     * queue id if restricting to a specific queue
-     * </pre>
-     *
-     * <code>string key = 3;</code>
-     * @return The bytes for key.
-     */
-    com.google.protobuf.ByteString
-        getKeyBytes();
-
-    /**
-     * <pre>
-     *  delay in seconds before a URL can be unlocked and sent again for fetching 
-     * </pre>
-     *
-     * <code>uint32 delay_requestable = 4;</code>
-     * @return The delayRequestable.
-     */
-    int getDelayRequestable();
-  }
-  /**
-   * <pre>
-   ** Parameter message for GetURLs *
-   * </pre>
-   *
-   * Protobuf type {@code urlfrontier.GetParams}
-   */
-  public static final class GetParams extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.GetParams)
-      GetParamsOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use GetParams.newBuilder() to construct.
-    private GetParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private GetParams() {
-      key_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new GetParams();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private GetParams(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              maxUrlsPerQueue_ = input.readUInt32();
-              break;
+        private BlockQueueParams(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
             }
-            case 16: {
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                java.lang.String s = input.readStringRequireUtf8();
 
-              maxQueues_ = input.readUInt32();
-              break;
+                                key_ = s;
+                                break;
+                            }
+                        case 16:
+                            {
+                                time_ = input.readUInt64();
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
             }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              key_ = s;
-              break;
-            }
-            case 32: {
-
-              delayRequestable_ = input.readUInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_GetParams_descriptor;
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_BlockQueueParams_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_BlockQueueParams_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.class,
+                            crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.Builder.class);
+        }
+
+        public static final int KEY_FIELD_NUMBER = 1;
+        private volatile java.lang.Object key_;
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The key.
+         */
+        @java.lang.Override
+        public java.lang.String getKey() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                key_ = s;
+                return s;
+            }
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The bytes for key.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getKeyBytes() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                key_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int TIME_FIELD_NUMBER = 2;
+        private long time_;
+        /**
+         *
+         *
+         * <pre>
+         * * Expressed in seconds of UTC time since Unix epoch
+         * 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+         * </pre>
+         *
+         * <code>uint64 time = 2;</code>
+         *
+         * @return The time.
+         */
+        @java.lang.Override
+        public long getTime() {
+            return time_;
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (!getKeyBytes().isEmpty()) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
+            }
+            if (time_ != 0L) {
+                output.writeUInt64(2, time_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (!getKeyBytes().isEmpty()) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
+            }
+            if (time_ != 0L) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt64Size(2, time_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams other =
+                    (crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams) obj;
+
+            if (!getKey().equals(other.getKey())) return false;
+            if (getTime() != other.getTime()) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + KEY_FIELD_NUMBER;
+            hash = (53 * hash) + getKey().hashCode();
+            hash = (37 * hash) + TIME_FIELD_NUMBER;
+            hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getTime());
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * Parameter message for BlockQueueUntil *
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.BlockQueueParams}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.BlockQueueParams)
+                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParamsOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_BlockQueueParams_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_BlockQueueParams_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.class,
+                                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.Builder
+                                        .class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                key_ = "";
+
+                time_ = 0L;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_BlockQueueParams_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams
+                    getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams build() {
+                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams result =
+                        new crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams(this);
+                result.key_ = key_;
+                result.time_ = time_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams) {
+                    return mergeFrom(
+                            (crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(
+                    crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams other) {
+                if (other
+                        == crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams
+                                .getDefaultInstance()) return this;
+                if (!other.getKey().isEmpty()) {
+                    key_ = other.key_;
+                    onChanged();
+                }
+                if (other.getTime() != 0L) {
+                    setTime(other.getTime());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private java.lang.Object key_ = "";
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return The key.
+             */
+            public java.lang.String getKey() {
+                java.lang.Object ref = key_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    key_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return The bytes for key.
+             */
+            public com.google.protobuf.ByteString getKeyBytes() {
+                java.lang.Object ref = key_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    key_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @param value The key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKey(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearKey() {
+
+                key_ = getDefaultInstance().getKey();
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @param value The bytes for key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKeyBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+
+            private long time_;
+            /**
+             *
+             *
+             * <pre>
+             * * Expressed in seconds of UTC time since Unix epoch
+             * 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+             * </pre>
+             *
+             * <code>uint64 time = 2;</code>
+             *
+             * @return The time.
+             */
+            @java.lang.Override
+            public long getTime() {
+                return time_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * Expressed in seconds of UTC time since Unix epoch
+             * 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+             * </pre>
+             *
+             * <code>uint64 time = 2;</code>
+             *
+             * @param value The time to set.
+             * @return This builder for chaining.
+             */
+            public Builder setTime(long value) {
+
+                time_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * Expressed in seconds of UTC time since Unix epoch
+             * 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
+             * </pre>
+             *
+             * <code>uint64 time = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearTime() {
+
+                time_ = 0L;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.BlockQueueParams)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.BlockQueueParams)
+        private static final crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams
+                DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<BlockQueueParams> PARSER =
+                new com.google.protobuf.AbstractParser<BlockQueueParams>() {
+                    @java.lang.Override
+                    public BlockQueueParams parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new BlockQueueParams(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<BlockQueueParams> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<BlockQueueParams> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_GetParams_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.GetParams.class, crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder.class);
-    }
+    public interface GetParamsOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.GetParams)
+            com.google.protobuf.MessageOrBuilder {
 
-    public static final int MAX_URLS_PER_QUEUE_FIELD_NUMBER = 1;
-    private int maxUrlsPerQueue_;
+        /**
+         *
+         *
+         * <pre>
+         * maximum number of URLs per queue, the default value of 0 means no limit
+         * </pre>
+         *
+         * <code>uint32 max_urls_per_queue = 1;</code>
+         *
+         * @return The maxUrlsPerQueue.
+         */
+        int getMaxUrlsPerQueue();
+
+        /**
+         *
+         *
+         * <pre>
+         * maximum number of queues to get URLs from, the default value of 0 means no limit
+         * </pre>
+         *
+         * <code>uint32 max_queues = 2;</code>
+         *
+         * @return The maxQueues.
+         */
+        int getMaxQueues();
+
+        /**
+         *
+         *
+         * <pre>
+         * queue id if restricting to a specific queue
+         * </pre>
+         *
+         * <code>string key = 3;</code>
+         *
+         * @return The key.
+         */
+        java.lang.String getKey();
+        /**
+         *
+         *
+         * <pre>
+         * queue id if restricting to a specific queue
+         * </pre>
+         *
+         * <code>string key = 3;</code>
+         *
+         * @return The bytes for key.
+         */
+        com.google.protobuf.ByteString getKeyBytes();
+
+        /**
+         *
+         *
+         * <pre>
+         *  delay in seconds before a URL can be unlocked and sent again for fetching
+         * </pre>
+         *
+         * <code>uint32 delay_requestable = 4;</code>
+         *
+         * @return The delayRequestable.
+         */
+        int getDelayRequestable();
+    }
     /**
-     * <pre>
-     * maximum number of URLs per queue, the default value of 0 means no limit
-     * </pre>
      *
-     * <code>uint32 max_urls_per_queue = 1;</code>
-     * @return The maxUrlsPerQueue.
-     */
-    @java.lang.Override
-    public int getMaxUrlsPerQueue() {
-      return maxUrlsPerQueue_;
-    }
-
-    public static final int MAX_QUEUES_FIELD_NUMBER = 2;
-    private int maxQueues_;
-    /**
-     * <pre>
-     * maximum number of queues to get URLs from, the default value of 0 means no limit
-     * </pre>
      *
-     * <code>uint32 max_queues = 2;</code>
-     * @return The maxQueues.
-     */
-    @java.lang.Override
-    public int getMaxQueues() {
-      return maxQueues_;
-    }
-
-    public static final int KEY_FIELD_NUMBER = 3;
-    private volatile java.lang.Object key_;
-    /**
      * <pre>
-     * queue id if restricting to a specific queue
-     * </pre>
-     *
-     * <code>string key = 3;</code>
-     * @return The key.
-     */
-    @java.lang.Override
-    public java.lang.String getKey() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        key_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * queue id if restricting to a specific queue
-     * </pre>
-     *
-     * <code>string key = 3;</code>
-     * @return The bytes for key.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKeyBytes() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        key_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int DELAY_REQUESTABLE_FIELD_NUMBER = 4;
-    private int delayRequestable_;
-    /**
-     * <pre>
-     *  delay in seconds before a URL can be unlocked and sent again for fetching 
-     * </pre>
-     *
-     * <code>uint32 delay_requestable = 4;</code>
-     * @return The delayRequestable.
-     */
-    @java.lang.Override
-    public int getDelayRequestable() {
-      return delayRequestable_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (maxUrlsPerQueue_ != 0) {
-        output.writeUInt32(1, maxUrlsPerQueue_);
-      }
-      if (maxQueues_ != 0) {
-        output.writeUInt32(2, maxQueues_);
-      }
-      if (!getKeyBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, key_);
-      }
-      if (delayRequestable_ != 0) {
-        output.writeUInt32(4, delayRequestable_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (maxUrlsPerQueue_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(1, maxUrlsPerQueue_);
-      }
-      if (maxQueues_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(2, maxQueues_);
-      }
-      if (!getKeyBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, key_);
-      }
-      if (delayRequestable_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(4, delayRequestable_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.GetParams)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.GetParams other = (crawlercommons.urlfrontier.Urlfrontier.GetParams) obj;
-
-      if (getMaxUrlsPerQueue()
-          != other.getMaxUrlsPerQueue()) return false;
-      if (getMaxQueues()
-          != other.getMaxQueues()) return false;
-      if (!getKey()
-          .equals(other.getKey())) return false;
-      if (getDelayRequestable()
-          != other.getDelayRequestable()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + MAX_URLS_PER_QUEUE_FIELD_NUMBER;
-      hash = (53 * hash) + getMaxUrlsPerQueue();
-      hash = (37 * hash) + MAX_QUEUES_FIELD_NUMBER;
-      hash = (53 * hash) + getMaxQueues();
-      hash = (37 * hash) + KEY_FIELD_NUMBER;
-      hash = (53 * hash) + getKey().hashCode();
-      hash = (37 * hash) + DELAY_REQUESTABLE_FIELD_NUMBER;
-      hash = (53 * hash) + getDelayRequestable();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.GetParams prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     ** Parameter message for GetURLs *
+     * * Parameter message for GetURLs *
      * </pre>
      *
      * Protobuf type {@code urlfrontier.GetParams}
      */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.GetParams)
-        crawlercommons.urlfrontier.Urlfrontier.GetParamsOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_GetParams_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_GetParams_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.GetParams.class, crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.GetParams.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+    public static final class GetParams extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.GetParams)
+            GetParamsOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use GetParams.newBuilder() to construct.
+        private GetParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
         }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        maxUrlsPerQueue_ = 0;
 
-        maxQueues_ = 0;
-
-        key_ = "";
-
-        delayRequestable_ = 0;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_GetParams_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.GetParams getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.GetParams.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.GetParams build() {
-        crawlercommons.urlfrontier.Urlfrontier.GetParams result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
+        private GetParams() {
+            key_ = "";
         }
-        return result;
-      }
 
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.GetParams buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.GetParams result = new crawlercommons.urlfrontier.Urlfrontier.GetParams(this);
-        result.maxUrlsPerQueue_ = maxUrlsPerQueue_;
-        result.maxQueues_ = maxQueues_;
-        result.key_ = key_;
-        result.delayRequestable_ = delayRequestable_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.GetParams) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.GetParams)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new GetParams();
         }
-      }
 
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.GetParams other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.GetParams.getDefaultInstance()) return this;
-        if (other.getMaxUrlsPerQueue() != 0) {
-          setMaxUrlsPerQueue(other.getMaxUrlsPerQueue());
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
         }
-        if (other.getMaxQueues() != 0) {
-          setMaxQueues(other.getMaxQueues());
-        }
-        if (!other.getKey().isEmpty()) {
-          key_ = other.key_;
-          onChanged();
-        }
-        if (other.getDelayRequestable() != 0) {
-          setDelayRequestable(other.getDelayRequestable());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
 
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.GetParams parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.GetParams) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private int maxUrlsPerQueue_ ;
-      /**
-       * <pre>
-       * maximum number of URLs per queue, the default value of 0 means no limit
-       * </pre>
-       *
-       * <code>uint32 max_urls_per_queue = 1;</code>
-       * @return The maxUrlsPerQueue.
-       */
-      @java.lang.Override
-      public int getMaxUrlsPerQueue() {
-        return maxUrlsPerQueue_;
-      }
-      /**
-       * <pre>
-       * maximum number of URLs per queue, the default value of 0 means no limit
-       * </pre>
-       *
-       * <code>uint32 max_urls_per_queue = 1;</code>
-       * @param value The maxUrlsPerQueue to set.
-       * @return This builder for chaining.
-       */
-      public Builder setMaxUrlsPerQueue(int value) {
-        
-        maxUrlsPerQueue_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * maximum number of URLs per queue, the default value of 0 means no limit
-       * </pre>
-       *
-       * <code>uint32 max_urls_per_queue = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearMaxUrlsPerQueue() {
-        
-        maxUrlsPerQueue_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int maxQueues_ ;
-      /**
-       * <pre>
-       * maximum number of queues to get URLs from, the default value of 0 means no limit
-       * </pre>
-       *
-       * <code>uint32 max_queues = 2;</code>
-       * @return The maxQueues.
-       */
-      @java.lang.Override
-      public int getMaxQueues() {
-        return maxQueues_;
-      }
-      /**
-       * <pre>
-       * maximum number of queues to get URLs from, the default value of 0 means no limit
-       * </pre>
-       *
-       * <code>uint32 max_queues = 2;</code>
-       * @param value The maxQueues to set.
-       * @return This builder for chaining.
-       */
-      public Builder setMaxQueues(int value) {
-        
-        maxQueues_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * maximum number of queues to get URLs from, the default value of 0 means no limit
-       * </pre>
-       *
-       * <code>uint32 max_queues = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearMaxQueues() {
-        
-        maxQueues_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object key_ = "";
-      /**
-       * <pre>
-       * queue id if restricting to a specific queue
-       * </pre>
-       *
-       * <code>string key = 3;</code>
-       * @return The key.
-       */
-      public java.lang.String getKey() {
-        java.lang.Object ref = key_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          key_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * queue id if restricting to a specific queue
-       * </pre>
-       *
-       * <code>string key = 3;</code>
-       * @return The bytes for key.
-       */
-      public com.google.protobuf.ByteString
-          getKeyBytes() {
-        java.lang.Object ref = key_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          key_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * queue id if restricting to a specific queue
-       * </pre>
-       *
-       * <code>string key = 3;</code>
-       * @param value The key to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKey(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        key_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * queue id if restricting to a specific queue
-       * </pre>
-       *
-       * <code>string key = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKey() {
-        
-        key_ = getDefaultInstance().getKey();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * queue id if restricting to a specific queue
-       * </pre>
-       *
-       * <code>string key = 3;</code>
-       * @param value The bytes for key to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        key_ = value;
-        onChanged();
-        return this;
-      }
-
-      private int delayRequestable_ ;
-      /**
-       * <pre>
-       *  delay in seconds before a URL can be unlocked and sent again for fetching 
-       * </pre>
-       *
-       * <code>uint32 delay_requestable = 4;</code>
-       * @return The delayRequestable.
-       */
-      @java.lang.Override
-      public int getDelayRequestable() {
-        return delayRequestable_;
-      }
-      /**
-       * <pre>
-       *  delay in seconds before a URL can be unlocked and sent again for fetching 
-       * </pre>
-       *
-       * <code>uint32 delay_requestable = 4;</code>
-       * @param value The delayRequestable to set.
-       * @return This builder for chaining.
-       */
-      public Builder setDelayRequestable(int value) {
-        
-        delayRequestable_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       *  delay in seconds before a URL can be unlocked and sent again for fetching 
-       * </pre>
-       *
-       * <code>uint32 delay_requestable = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearDelayRequestable() {
-        
-        delayRequestable_ = 0;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.GetParams)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.GetParams)
-    private static final crawlercommons.urlfrontier.Urlfrontier.GetParams DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.GetParams();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.GetParams getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<GetParams>
-        PARSER = new com.google.protobuf.AbstractParser<GetParams>() {
-      @java.lang.Override
-      public GetParams parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GetParams(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<GetParams> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<GetParams> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.GetParams getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface URLItemOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.URLItem)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-     * @return Whether the discovered field is set.
-     */
-    boolean hasDiscovered();
-    /**
-     * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-     * @return The discovered.
-     */
-    crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem getDiscovered();
-    /**
-     * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-     */
-    crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder getDiscoveredOrBuilder();
-
-    /**
-     * <code>.urlfrontier.KnownURLItem known = 2;</code>
-     * @return Whether the known field is set.
-     */
-    boolean hasKnown();
-    /**
-     * <code>.urlfrontier.KnownURLItem known = 2;</code>
-     * @return The known.
-     */
-    crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getKnown();
-    /**
-     * <code>.urlfrontier.KnownURLItem known = 2;</code>
-     */
-    crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder getKnownOrBuilder();
-
-    public crawlercommons.urlfrontier.Urlfrontier.URLItem.ItemCase getItemCase();
-  }
-  /**
-   * <pre>
-   ** Wrapper for a KnownURLItem or DiscoveredURLItem *
-   * </pre>
-   *
-   * Protobuf type {@code urlfrontier.URLItem}
-   */
-  public static final class URLItem extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.URLItem)
-      URLItemOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use URLItem.newBuilder() to construct.
-    private URLItem(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private URLItem() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new URLItem();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private URLItem(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder subBuilder = null;
-              if (itemCase_ == 1) {
-                subBuilder = ((crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_).toBuilder();
-              }
-              item_ =
-                  input.readMessage(crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_);
-                item_ = subBuilder.buildPartial();
-              }
-              itemCase_ = 1;
-              break;
+        private GetParams(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
             }
-            case 18: {
-              crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder subBuilder = null;
-              if (itemCase_ == 2) {
-                subBuilder = ((crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_).toBuilder();
-              }
-              item_ =
-                  input.readMessage(crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_);
-                item_ = subBuilder.buildPartial();
-              }
-              itemCase_ = 2;
-              break;
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 8:
+                            {
+                                maxUrlsPerQueue_ = input.readUInt32();
+                                break;
+                            }
+                        case 16:
+                            {
+                                maxQueues_ = input.readUInt32();
+                                break;
+                            }
+                        case 26:
+                            {
+                                java.lang.String s = input.readStringRequireUtf8();
+
+                                key_ = s;
+                                break;
+                            }
+                        case 32:
+                            {
+                                delayRequestable_ = input.readUInt32();
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
             }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_GetParams_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_GetParams_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.GetParams.class,
+                            crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder.class);
+        }
+
+        public static final int MAX_URLS_PER_QUEUE_FIELD_NUMBER = 1;
+        private int maxUrlsPerQueue_;
+        /**
+         *
+         *
+         * <pre>
+         * maximum number of URLs per queue, the default value of 0 means no limit
+         * </pre>
+         *
+         * <code>uint32 max_urls_per_queue = 1;</code>
+         *
+         * @return The maxUrlsPerQueue.
+         */
+        @java.lang.Override
+        public int getMaxUrlsPerQueue() {
+            return maxUrlsPerQueue_;
+        }
+
+        public static final int MAX_QUEUES_FIELD_NUMBER = 2;
+        private int maxQueues_;
+        /**
+         *
+         *
+         * <pre>
+         * maximum number of queues to get URLs from, the default value of 0 means no limit
+         * </pre>
+         *
+         * <code>uint32 max_queues = 2;</code>
+         *
+         * @return The maxQueues.
+         */
+        @java.lang.Override
+        public int getMaxQueues() {
+            return maxQueues_;
+        }
+
+        public static final int KEY_FIELD_NUMBER = 3;
+        private volatile java.lang.Object key_;
+        /**
+         *
+         *
+         * <pre>
+         * queue id if restricting to a specific queue
+         * </pre>
+         *
+         * <code>string key = 3;</code>
+         *
+         * @return The key.
+         */
+        @java.lang.Override
+        public java.lang.String getKey() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                key_ = s;
+                return s;
             }
-          }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLItem_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLItem_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.URLItem.class, crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder.class);
-    }
-
-    private int itemCase_ = 0;
-    private java.lang.Object item_;
-    public enum ItemCase
-        implements com.google.protobuf.Internal.EnumLite,
-            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
-      DISCOVERED(1),
-      KNOWN(2),
-      ITEM_NOT_SET(0);
-      private final int value;
-      private ItemCase(int value) {
-        this.value = value;
-      }
-      /**
-       * @param value The number of the enum to look for.
-       * @return The enum associated with the given number.
-       * @deprecated Use {@link #forNumber(int)} instead.
-       */
-      @java.lang.Deprecated
-      public static ItemCase valueOf(int value) {
-        return forNumber(value);
-      }
-
-      public static ItemCase forNumber(int value) {
-        switch (value) {
-          case 1: return DISCOVERED;
-          case 2: return KNOWN;
-          case 0: return ITEM_NOT_SET;
-          default: return null;
+        /**
+         *
+         *
+         * <pre>
+         * queue id if restricting to a specific queue
+         * </pre>
+         *
+         * <code>string key = 3;</code>
+         *
+         * @return The bytes for key.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getKeyBytes() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                key_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
         }
-      }
-      public int getNumber() {
-        return this.value;
-      }
-    };
 
-    public ItemCase
-    getItemCase() {
-      return ItemCase.forNumber(
-          itemCase_);
+        public static final int DELAY_REQUESTABLE_FIELD_NUMBER = 4;
+        private int delayRequestable_;
+        /**
+         *
+         *
+         * <pre>
+         *  delay in seconds before a URL can be unlocked and sent again for fetching
+         * </pre>
+         *
+         * <code>uint32 delay_requestable = 4;</code>
+         *
+         * @return The delayRequestable.
+         */
+        @java.lang.Override
+        public int getDelayRequestable() {
+            return delayRequestable_;
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (maxUrlsPerQueue_ != 0) {
+                output.writeUInt32(1, maxUrlsPerQueue_);
+            }
+            if (maxQueues_ != 0) {
+                output.writeUInt32(2, maxQueues_);
+            }
+            if (!getKeyBytes().isEmpty()) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 3, key_);
+            }
+            if (delayRequestable_ != 0) {
+                output.writeUInt32(4, delayRequestable_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (maxUrlsPerQueue_ != 0) {
+                size +=
+                        com.google.protobuf.CodedOutputStream.computeUInt32Size(
+                                1, maxUrlsPerQueue_);
+            }
+            if (maxQueues_ != 0) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt32Size(2, maxQueues_);
+            }
+            if (!getKeyBytes().isEmpty()) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, key_);
+            }
+            if (delayRequestable_ != 0) {
+                size +=
+                        com.google.protobuf.CodedOutputStream.computeUInt32Size(
+                                4, delayRequestable_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.GetParams)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.GetParams other =
+                    (crawlercommons.urlfrontier.Urlfrontier.GetParams) obj;
+
+            if (getMaxUrlsPerQueue() != other.getMaxUrlsPerQueue()) return false;
+            if (getMaxQueues() != other.getMaxQueues()) return false;
+            if (!getKey().equals(other.getKey())) return false;
+            if (getDelayRequestable() != other.getDelayRequestable()) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + MAX_URLS_PER_QUEUE_FIELD_NUMBER;
+            hash = (53 * hash) + getMaxUrlsPerQueue();
+            hash = (37 * hash) + MAX_QUEUES_FIELD_NUMBER;
+            hash = (53 * hash) + getMaxQueues();
+            hash = (37 * hash) + KEY_FIELD_NUMBER;
+            hash = (53 * hash) + getKey().hashCode();
+            hash = (37 * hash) + DELAY_REQUESTABLE_FIELD_NUMBER;
+            hash = (53 * hash) + getDelayRequestable();
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.GetParams prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * Parameter message for GetURLs *
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.GetParams}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.GetParams)
+                crawlercommons.urlfrontier.Urlfrontier.GetParamsOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_GetParams_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_GetParams_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.GetParams.class,
+                                crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.GetParams.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                maxUrlsPerQueue_ = 0;
+
+                maxQueues_ = 0;
+
+                key_ = "";
+
+                delayRequestable_ = 0;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_GetParams_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.GetParams getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.GetParams.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.GetParams build() {
+                crawlercommons.urlfrontier.Urlfrontier.GetParams result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.GetParams buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.GetParams result =
+                        new crawlercommons.urlfrontier.Urlfrontier.GetParams(this);
+                result.maxUrlsPerQueue_ = maxUrlsPerQueue_;
+                result.maxQueues_ = maxQueues_;
+                result.key_ = key_;
+                result.delayRequestable_ = delayRequestable_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.GetParams) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.GetParams) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.GetParams other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.GetParams.getDefaultInstance())
+                    return this;
+                if (other.getMaxUrlsPerQueue() != 0) {
+                    setMaxUrlsPerQueue(other.getMaxUrlsPerQueue());
+                }
+                if (other.getMaxQueues() != 0) {
+                    setMaxQueues(other.getMaxQueues());
+                }
+                if (!other.getKey().isEmpty()) {
+                    key_ = other.key_;
+                    onChanged();
+                }
+                if (other.getDelayRequestable() != 0) {
+                    setDelayRequestable(other.getDelayRequestable());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.GetParams parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.GetParams)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private int maxUrlsPerQueue_;
+            /**
+             *
+             *
+             * <pre>
+             * maximum number of URLs per queue, the default value of 0 means no limit
+             * </pre>
+             *
+             * <code>uint32 max_urls_per_queue = 1;</code>
+             *
+             * @return The maxUrlsPerQueue.
+             */
+            @java.lang.Override
+            public int getMaxUrlsPerQueue() {
+                return maxUrlsPerQueue_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * maximum number of URLs per queue, the default value of 0 means no limit
+             * </pre>
+             *
+             * <code>uint32 max_urls_per_queue = 1;</code>
+             *
+             * @param value The maxUrlsPerQueue to set.
+             * @return This builder for chaining.
+             */
+            public Builder setMaxUrlsPerQueue(int value) {
+
+                maxUrlsPerQueue_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * maximum number of URLs per queue, the default value of 0 means no limit
+             * </pre>
+             *
+             * <code>uint32 max_urls_per_queue = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearMaxUrlsPerQueue() {
+
+                maxUrlsPerQueue_ = 0;
+                onChanged();
+                return this;
+            }
+
+            private int maxQueues_;
+            /**
+             *
+             *
+             * <pre>
+             * maximum number of queues to get URLs from, the default value of 0 means no limit
+             * </pre>
+             *
+             * <code>uint32 max_queues = 2;</code>
+             *
+             * @return The maxQueues.
+             */
+            @java.lang.Override
+            public int getMaxQueues() {
+                return maxQueues_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * maximum number of queues to get URLs from, the default value of 0 means no limit
+             * </pre>
+             *
+             * <code>uint32 max_queues = 2;</code>
+             *
+             * @param value The maxQueues to set.
+             * @return This builder for chaining.
+             */
+            public Builder setMaxQueues(int value) {
+
+                maxQueues_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * maximum number of queues to get URLs from, the default value of 0 means no limit
+             * </pre>
+             *
+             * <code>uint32 max_queues = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearMaxQueues() {
+
+                maxQueues_ = 0;
+                onChanged();
+                return this;
+            }
+
+            private java.lang.Object key_ = "";
+            /**
+             *
+             *
+             * <pre>
+             * queue id if restricting to a specific queue
+             * </pre>
+             *
+             * <code>string key = 3;</code>
+             *
+             * @return The key.
+             */
+            public java.lang.String getKey() {
+                java.lang.Object ref = key_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    key_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * queue id if restricting to a specific queue
+             * </pre>
+             *
+             * <code>string key = 3;</code>
+             *
+             * @return The bytes for key.
+             */
+            public com.google.protobuf.ByteString getKeyBytes() {
+                java.lang.Object ref = key_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    key_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * queue id if restricting to a specific queue
+             * </pre>
+             *
+             * <code>string key = 3;</code>
+             *
+             * @param value The key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKey(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * queue id if restricting to a specific queue
+             * </pre>
+             *
+             * <code>string key = 3;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearKey() {
+
+                key_ = getDefaultInstance().getKey();
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * queue id if restricting to a specific queue
+             * </pre>
+             *
+             * <code>string key = 3;</code>
+             *
+             * @param value The bytes for key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKeyBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+
+            private int delayRequestable_;
+            /**
+             *
+             *
+             * <pre>
+             *  delay in seconds before a URL can be unlocked and sent again for fetching
+             * </pre>
+             *
+             * <code>uint32 delay_requestable = 4;</code>
+             *
+             * @return The delayRequestable.
+             */
+            @java.lang.Override
+            public int getDelayRequestable() {
+                return delayRequestable_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             *  delay in seconds before a URL can be unlocked and sent again for fetching
+             * </pre>
+             *
+             * <code>uint32 delay_requestable = 4;</code>
+             *
+             * @param value The delayRequestable to set.
+             * @return This builder for chaining.
+             */
+            public Builder setDelayRequestable(int value) {
+
+                delayRequestable_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             *  delay in seconds before a URL can be unlocked and sent again for fetching
+             * </pre>
+             *
+             * <code>uint32 delay_requestable = 4;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearDelayRequestable() {
+
+                delayRequestable_ = 0;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.GetParams)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.GetParams)
+        private static final crawlercommons.urlfrontier.Urlfrontier.GetParams DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.GetParams();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.GetParams getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<GetParams> PARSER =
+                new com.google.protobuf.AbstractParser<GetParams>() {
+                    @java.lang.Override
+                    public GetParams parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new GetParams(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<GetParams> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<GetParams> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.GetParams getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    public static final int DISCOVERED_FIELD_NUMBER = 1;
+    public interface URLItemOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.URLItem)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
+         *
+         * @return Whether the discovered field is set.
+         */
+        boolean hasDiscovered();
+        /**
+         * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
+         *
+         * @return The discovered.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem getDiscovered();
+        /** <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code> */
+        crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder getDiscoveredOrBuilder();
+
+        /**
+         * <code>.urlfrontier.KnownURLItem known = 2;</code>
+         *
+         * @return Whether the known field is set.
+         */
+        boolean hasKnown();
+        /**
+         * <code>.urlfrontier.KnownURLItem known = 2;</code>
+         *
+         * @return The known.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getKnown();
+        /** <code>.urlfrontier.KnownURLItem known = 2;</code> */
+        crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder getKnownOrBuilder();
+
+        public crawlercommons.urlfrontier.Urlfrontier.URLItem.ItemCase getItemCase();
+    }
     /**
-     * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-     * @return Whether the discovered field is set.
-     */
-    @java.lang.Override
-    public boolean hasDiscovered() {
-      return itemCase_ == 1;
-    }
-    /**
-     * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-     * @return The discovered.
-     */
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem getDiscovered() {
-      if (itemCase_ == 1) {
-         return (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_;
-      }
-      return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance();
-    }
-    /**
-     * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-     */
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder getDiscoveredOrBuilder() {
-      if (itemCase_ == 1) {
-         return (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_;
-      }
-      return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance();
-    }
-
-    public static final int KNOWN_FIELD_NUMBER = 2;
-    /**
-     * <code>.urlfrontier.KnownURLItem known = 2;</code>
-     * @return Whether the known field is set.
-     */
-    @java.lang.Override
-    public boolean hasKnown() {
-      return itemCase_ == 2;
-    }
-    /**
-     * <code>.urlfrontier.KnownURLItem known = 2;</code>
-     * @return The known.
-     */
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getKnown() {
-      if (itemCase_ == 2) {
-         return (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_;
-      }
-      return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
-    }
-    /**
-     * <code>.urlfrontier.KnownURLItem known = 2;</code>
-     */
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder getKnownOrBuilder() {
-      if (itemCase_ == 2) {
-         return (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_;
-      }
-      return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (itemCase_ == 1) {
-        output.writeMessage(1, (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_);
-      }
-      if (itemCase_ == 2) {
-        output.writeMessage(2, (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (itemCase_ == 1) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_);
-      }
-      if (itemCase_ == 2) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.URLItem)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.URLItem other = (crawlercommons.urlfrontier.Urlfrontier.URLItem) obj;
-
-      if (!getItemCase().equals(other.getItemCase())) return false;
-      switch (itemCase_) {
-        case 1:
-          if (!getDiscovered()
-              .equals(other.getDiscovered())) return false;
-          break;
-        case 2:
-          if (!getKnown()
-              .equals(other.getKnown())) return false;
-          break;
-        case 0:
-        default:
-      }
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      switch (itemCase_) {
-        case 1:
-          hash = (37 * hash) + DISCOVERED_FIELD_NUMBER;
-          hash = (53 * hash) + getDiscovered().hashCode();
-          break;
-        case 2:
-          hash = (37 * hash) + KNOWN_FIELD_NUMBER;
-          hash = (53 * hash) + getKnown().hashCode();
-          break;
-        case 0:
-        default:
-      }
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.URLItem prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
+     *
+     *
      * <pre>
-     ** Wrapper for a KnownURLItem or DiscoveredURLItem *
+     * * Wrapper for a KnownURLItem or DiscoveredURLItem *
      * </pre>
      *
      * Protobuf type {@code urlfrontier.URLItem}
      */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.URLItem)
-        crawlercommons.urlfrontier.Urlfrontier.URLItemOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLItem_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLItem_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.URLItem.class, crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.URLItem.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+    public static final class URLItem extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.URLItem)
+            URLItemOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use URLItem.newBuilder() to construct.
+        private URLItem(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
         }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        itemCase_ = 0;
-        item_ = null;
-        return this;
-      }
 
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLItem_descriptor;
-      }
+        private URLItem() {}
 
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.URLItem getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.URLItem.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.URLItem build() {
-        crawlercommons.urlfrontier.Urlfrontier.URLItem result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new URLItem();
         }
-        return result;
-      }
 
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.URLItem buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.URLItem result = new crawlercommons.urlfrontier.Urlfrontier.URLItem(this);
-        if (itemCase_ == 1) {
-          if (discoveredBuilder_ == null) {
-            result.item_ = item_;
-          } else {
-            result.item_ = discoveredBuilder_.build();
-          }
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
         }
-        if (itemCase_ == 2) {
-          if (knownBuilder_ == null) {
-            result.item_ = item_;
-          } else {
-            result.item_ = knownBuilder_.build();
-          }
-        }
-        result.itemCase_ = itemCase_;
-        onBuilt();
-        return result;
-      }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.URLItem) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.URLItem)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.URLItem other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.URLItem.getDefaultInstance()) return this;
-        switch (other.getItemCase()) {
-          case DISCOVERED: {
-            mergeDiscovered(other.getDiscovered());
-            break;
-          }
-          case KNOWN: {
-            mergeKnown(other.getKnown());
-            break;
-          }
-          case ITEM_NOT_SET: {
-            break;
-          }
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.URLItem parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.URLItem) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int itemCase_ = 0;
-      private java.lang.Object item_;
-      public ItemCase
-          getItemCase() {
-        return ItemCase.forNumber(
-            itemCase_);
-      }
-
-      public Builder clearItem() {
-        itemCase_ = 0;
-        item_ = null;
-        onChanged();
-        return this;
-      }
-
-
-      private com.google.protobuf.SingleFieldBuilderV3<
-          crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem, crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder, crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder> discoveredBuilder_;
-      /**
-       * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-       * @return Whether the discovered field is set.
-       */
-      @java.lang.Override
-      public boolean hasDiscovered() {
-        return itemCase_ == 1;
-      }
-      /**
-       * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-       * @return The discovered.
-       */
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem getDiscovered() {
-        if (discoveredBuilder_ == null) {
-          if (itemCase_ == 1) {
-            return (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_;
-          }
-          return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance();
-        } else {
-          if (itemCase_ == 1) {
-            return discoveredBuilder_.getMessage();
-          }
-          return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance();
-        }
-      }
-      /**
-       * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-       */
-      public Builder setDiscovered(crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem value) {
-        if (discoveredBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          item_ = value;
-          onChanged();
-        } else {
-          discoveredBuilder_.setMessage(value);
-        }
-        itemCase_ = 1;
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-       */
-      public Builder setDiscovered(
-          crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder builderForValue) {
-        if (discoveredBuilder_ == null) {
-          item_ = builderForValue.build();
-          onChanged();
-        } else {
-          discoveredBuilder_.setMessage(builderForValue.build());
-        }
-        itemCase_ = 1;
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-       */
-      public Builder mergeDiscovered(crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem value) {
-        if (discoveredBuilder_ == null) {
-          if (itemCase_ == 1 &&
-              item_ != crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance()) {
-            item_ = crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.newBuilder((crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_)
-                .mergeFrom(value).buildPartial();
-          } else {
-            item_ = value;
-          }
-          onChanged();
-        } else {
-          if (itemCase_ == 1) {
-            discoveredBuilder_.mergeFrom(value);
-          }
-          discoveredBuilder_.setMessage(value);
-        }
-        itemCase_ = 1;
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-       */
-      public Builder clearDiscovered() {
-        if (discoveredBuilder_ == null) {
-          if (itemCase_ == 1) {
-            itemCase_ = 0;
-            item_ = null;
-            onChanged();
-          }
-        } else {
-          if (itemCase_ == 1) {
-            itemCase_ = 0;
-            item_ = null;
-          }
-          discoveredBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-       */
-      public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder getDiscoveredBuilder() {
-        return getDiscoveredFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-       */
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder getDiscoveredOrBuilder() {
-        if ((itemCase_ == 1) && (discoveredBuilder_ != null)) {
-          return discoveredBuilder_.getMessageOrBuilder();
-        } else {
-          if (itemCase_ == 1) {
-            return (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_;
-          }
-          return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance();
-        }
-      }
-      /**
-       * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem, crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder, crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder> 
-          getDiscoveredFieldBuilder() {
-        if (discoveredBuilder_ == null) {
-          if (!(itemCase_ == 1)) {
-            item_ = crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance();
-          }
-          discoveredBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem, crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder, crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder>(
-                  (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_,
-                  getParentForChildren(),
-                  isClean());
-          item_ = null;
-        }
-        itemCase_ = 1;
-        onChanged();;
-        return discoveredBuilder_;
-      }
-
-      private com.google.protobuf.SingleFieldBuilderV3<
-          crawlercommons.urlfrontier.Urlfrontier.KnownURLItem, crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder, crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder> knownBuilder_;
-      /**
-       * <code>.urlfrontier.KnownURLItem known = 2;</code>
-       * @return Whether the known field is set.
-       */
-      @java.lang.Override
-      public boolean hasKnown() {
-        return itemCase_ == 2;
-      }
-      /**
-       * <code>.urlfrontier.KnownURLItem known = 2;</code>
-       * @return The known.
-       */
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getKnown() {
-        if (knownBuilder_ == null) {
-          if (itemCase_ == 2) {
-            return (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_;
-          }
-          return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
-        } else {
-          if (itemCase_ == 2) {
-            return knownBuilder_.getMessage();
-          }
-          return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
-        }
-      }
-      /**
-       * <code>.urlfrontier.KnownURLItem known = 2;</code>
-       */
-      public Builder setKnown(crawlercommons.urlfrontier.Urlfrontier.KnownURLItem value) {
-        if (knownBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          item_ = value;
-          onChanged();
-        } else {
-          knownBuilder_.setMessage(value);
-        }
-        itemCase_ = 2;
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.KnownURLItem known = 2;</code>
-       */
-      public Builder setKnown(
-          crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder builderForValue) {
-        if (knownBuilder_ == null) {
-          item_ = builderForValue.build();
-          onChanged();
-        } else {
-          knownBuilder_.setMessage(builderForValue.build());
-        }
-        itemCase_ = 2;
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.KnownURLItem known = 2;</code>
-       */
-      public Builder mergeKnown(crawlercommons.urlfrontier.Urlfrontier.KnownURLItem value) {
-        if (knownBuilder_ == null) {
-          if (itemCase_ == 2 &&
-              item_ != crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance()) {
-            item_ = crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.newBuilder((crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_)
-                .mergeFrom(value).buildPartial();
-          } else {
-            item_ = value;
-          }
-          onChanged();
-        } else {
-          if (itemCase_ == 2) {
-            knownBuilder_.mergeFrom(value);
-          }
-          knownBuilder_.setMessage(value);
-        }
-        itemCase_ = 2;
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.KnownURLItem known = 2;</code>
-       */
-      public Builder clearKnown() {
-        if (knownBuilder_ == null) {
-          if (itemCase_ == 2) {
-            itemCase_ = 0;
-            item_ = null;
-            onChanged();
-          }
-        } else {
-          if (itemCase_ == 2) {
-            itemCase_ = 0;
-            item_ = null;
-          }
-          knownBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.KnownURLItem known = 2;</code>
-       */
-      public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder getKnownBuilder() {
-        return getKnownFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>.urlfrontier.KnownURLItem known = 2;</code>
-       */
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder getKnownOrBuilder() {
-        if ((itemCase_ == 2) && (knownBuilder_ != null)) {
-          return knownBuilder_.getMessageOrBuilder();
-        } else {
-          if (itemCase_ == 2) {
-            return (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_;
-          }
-          return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
-        }
-      }
-      /**
-       * <code>.urlfrontier.KnownURLItem known = 2;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          crawlercommons.urlfrontier.Urlfrontier.KnownURLItem, crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder, crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder> 
-          getKnownFieldBuilder() {
-        if (knownBuilder_ == null) {
-          if (!(itemCase_ == 2)) {
-            item_ = crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
-          }
-          knownBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              crawlercommons.urlfrontier.Urlfrontier.KnownURLItem, crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder, crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder>(
-                  (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_,
-                  getParentForChildren(),
-                  isClean());
-          item_ = null;
-        }
-        itemCase_ = 2;
-        onChanged();;
-        return knownBuilder_;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.URLItem)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.URLItem)
-    private static final crawlercommons.urlfrontier.Urlfrontier.URLItem DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.URLItem();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.URLItem getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<URLItem>
-        PARSER = new com.google.protobuf.AbstractParser<URLItem>() {
-      @java.lang.Override
-      public URLItem parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new URLItem(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<URLItem> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<URLItem> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.URLItem getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface URLInfoOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.URLInfo)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     ** URL *
-     * </pre>
-     *
-     * <code>string url = 1;</code>
-     * @return The url.
-     */
-    java.lang.String getUrl();
-    /**
-     * <pre>
-     ** URL *
-     * </pre>
-     *
-     * <code>string url = 1;</code>
-     * @return The bytes for url.
-     */
-    com.google.protobuf.ByteString
-        getUrlBytes();
-
-    /**
-     * <pre>
-     ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
-     *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
-     * </pre>
-     *
-     * <code>string key = 2;</code>
-     * @return The key.
-     */
-    java.lang.String getKey();
-    /**
-     * <pre>
-     ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
-     *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
-     * </pre>
-     *
-     * <code>string key = 2;</code>
-     * @return The bytes for key.
-     */
-    com.google.protobuf.ByteString
-        getKeyBytes();
-
-    /**
-     * <pre>
-     ** 
-     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-     * </pre>
-     *
-     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-     */
-    int getMetadataCount();
-    /**
-     * <pre>
-     ** 
-     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-     * </pre>
-     *
-     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-     */
-    boolean containsMetadata(
-        java.lang.String key);
-    /**
-     * Use {@link #getMetadataMap()} instead.
-     */
-    @java.lang.Deprecated
-    java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
-    getMetadata();
-    /**
-     * <pre>
-     ** 
-     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-     * </pre>
-     *
-     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-     */
-    java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
-    getMetadataMap();
-    /**
-     * <pre>
-     ** 
-     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-     * </pre>
-     *
-     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-     */
-
-    crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrDefault(
-        java.lang.String key,
-        crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
-    /**
-     * <pre>
-     ** 
-     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-     * </pre>
-     *
-     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-     */
-
-    crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrThrow(
-        java.lang.String key);
-  }
-  /**
-   * Protobuf type {@code urlfrontier.URLInfo}
-   */
-  public static final class URLInfo extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.URLInfo)
-      URLInfoOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use URLInfo.newBuilder() to construct.
-    private URLInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private URLInfo() {
-      url_ = "";
-      key_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new URLInfo();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private URLInfo(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              url_ = s;
-              break;
+        private URLItem(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
             }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              key_ = s;
-              break;
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder
+                                        subBuilder = null;
+                                if (itemCase_ == 1) {
+                                    subBuilder =
+                                            ((crawlercommons.urlfrontier.Urlfrontier
+                                                                    .DiscoveredURLItem)
+                                                            item_)
+                                                    .toBuilder();
+                                }
+                                item_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier
+                                                        .DiscoveredURLItem.parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(
+                                            (crawlercommons.urlfrontier.Urlfrontier
+                                                            .DiscoveredURLItem)
+                                                    item_);
+                                    item_ = subBuilder.buildPartial();
+                                }
+                                itemCase_ = 1;
+                                break;
+                            }
+                        case 18:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder
+                                        subBuilder = null;
+                                if (itemCase_ == 2) {
+                                    subBuilder =
+                                            ((crawlercommons.urlfrontier.Urlfrontier.KnownURLItem)
+                                                            item_)
+                                                    .toBuilder();
+                                }
+                                item_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(
+                                            (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem)
+                                                    item_);
+                                    item_ = subBuilder.buildPartial();
+                                }
+                                itemCase_ = 2;
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
             }
-            case 26: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                metadata_ = com.google.protobuf.MapField.newMapField(
-                    MetadataDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000001;
-              }
-              com.google.protobuf.MapEntry<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
-              metadata__ = input.readMessage(
-                  MetadataDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              metadata_.getMutableMap().put(
-                  metadata__.getKey(), metadata__.getValue());
-              break;
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_URLItem_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_URLItem_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.URLItem.class,
+                            crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder.class);
+        }
+
+        private int itemCase_ = 0;
+        private java.lang.Object item_;
+
+        public enum ItemCase
+                implements
+                        com.google.protobuf.Internal.EnumLite,
+                        com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+            DISCOVERED(1),
+            KNOWN(2),
+            ITEM_NOT_SET(0);
+            private final int value;
+
+            private ItemCase(int value) {
+                this.value = value;
             }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
+            /**
+             * @param value The number of the enum to look for.
+             * @return The enum associated with the given number.
+             * @deprecated Use {@link #forNumber(int)} instead.
+             */
+            @java.lang.Deprecated
+            public static ItemCase valueOf(int value) {
+                return forNumber(value);
             }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLInfo_descriptor;
-    }
 
-    @SuppressWarnings({"rawtypes"})
-    @java.lang.Override
-    protected com.google.protobuf.MapField internalGetMapField(
-        int number) {
-      switch (number) {
-        case 3:
-          return internalGetMetadata();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLInfo_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.URLInfo.class, crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder.class);
-    }
-
-    public static final int URL_FIELD_NUMBER = 1;
-    private volatile java.lang.Object url_;
-    /**
-     * <pre>
-     ** URL *
-     * </pre>
-     *
-     * <code>string url = 1;</code>
-     * @return The url.
-     */
-    @java.lang.Override
-    public java.lang.String getUrl() {
-      java.lang.Object ref = url_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        url_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     ** URL *
-     * </pre>
-     *
-     * <code>string url = 1;</code>
-     * @return The bytes for url.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getUrlBytes() {
-      java.lang.Object ref = url_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        url_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int KEY_FIELD_NUMBER = 2;
-    private volatile java.lang.Object key_;
-    /**
-     * <pre>
-     ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
-     *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
-     * </pre>
-     *
-     * <code>string key = 2;</code>
-     * @return The key.
-     */
-    @java.lang.Override
-    public java.lang.String getKey() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        key_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
-     *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
-     * </pre>
-     *
-     * <code>string key = 2;</code>
-     * @return The bytes for key.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKeyBytes() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        key_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int METADATA_FIELD_NUMBER = 3;
-    private static final class MetadataDefaultEntryHolder {
-      static final com.google.protobuf.MapEntry<
-          java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> defaultEntry =
-              com.google.protobuf.MapEntry
-              .<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>newDefaultInstance(
-                  crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLInfo_MetadataEntry_descriptor, 
-                  com.google.protobuf.WireFormat.FieldType.STRING,
-                  "",
-                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                  crawlercommons.urlfrontier.Urlfrontier.StringList.getDefaultInstance());
-    }
-    private com.google.protobuf.MapField<
-        java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> metadata_;
-    private com.google.protobuf.MapField<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
-    internalGetMetadata() {
-      if (metadata_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            MetadataDefaultEntryHolder.defaultEntry);
-      }
-      return metadata_;
-    }
-
-    public int getMetadataCount() {
-      return internalGetMetadata().getMap().size();
-    }
-    /**
-     * <pre>
-     ** 
-     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-     * </pre>
-     *
-     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-     */
-
-    @java.lang.Override
-    public boolean containsMetadata(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      return internalGetMetadata().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getMetadataMap()} instead.
-     */
-    @java.lang.Override
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> getMetadata() {
-      return getMetadataMap();
-    }
-    /**
-     * <pre>
-     ** 
-     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-     * </pre>
-     *
-     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-     */
-    @java.lang.Override
-
-    public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> getMetadataMap() {
-      return internalGetMetadata().getMap();
-    }
-    /**
-     * <pre>
-     ** 
-     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-     * </pre>
-     *
-     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-     */
-    @java.lang.Override
-
-    public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrDefault(
-        java.lang.String key,
-        crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> map =
-          internalGetMetadata().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <pre>
-     ** 
-     *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-     * </pre>
-     *
-     * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-     */
-    @java.lang.Override
-
-    public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrThrow(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> map =
-          internalGetMetadata().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!getUrlBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, url_);
-      }
-      if (!getKeyBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, key_);
-      }
-      com.google.protobuf.GeneratedMessageV3
-        .serializeStringMapTo(
-          output,
-          internalGetMetadata(),
-          MetadataDefaultEntryHolder.defaultEntry,
-          3);
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!getUrlBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, url_);
-      }
-      if (!getKeyBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, key_);
-      }
-      for (java.util.Map.Entry<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> entry
-           : internalGetMetadata().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
-        metadata__ = MetadataDefaultEntryHolder.defaultEntry.newBuilderForType()
-            .setKey(entry.getKey())
-            .setValue(entry.getValue())
-            .build();
-        size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(3, metadata__);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.URLInfo)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.URLInfo other = (crawlercommons.urlfrontier.Urlfrontier.URLInfo) obj;
-
-      if (!getUrl()
-          .equals(other.getUrl())) return false;
-      if (!getKey()
-          .equals(other.getKey())) return false;
-      if (!internalGetMetadata().equals(
-          other.internalGetMetadata())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + URL_FIELD_NUMBER;
-      hash = (53 * hash) + getUrl().hashCode();
-      hash = (37 * hash) + KEY_FIELD_NUMBER;
-      hash = (53 * hash) + getKey().hashCode();
-      if (!internalGetMetadata().getMap().isEmpty()) {
-        hash = (37 * hash) + METADATA_FIELD_NUMBER;
-        hash = (53 * hash) + internalGetMetadata().hashCode();
-      }
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.URLInfo prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code urlfrontier.URLInfo}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.URLInfo)
-        crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLInfo_descriptor;
-      }
-
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMapField(
-          int number) {
-        switch (number) {
-          case 3:
-            return internalGetMetadata();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
-        }
-      }
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMutableMapField(
-          int number) {
-        switch (number) {
-          case 3:
-            return internalGetMutableMetadata();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
-        }
-      }
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLInfo_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.URLInfo.class, crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.URLInfo.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        url_ = "";
-
-        key_ = "";
-
-        internalGetMutableMetadata().clear();
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_URLInfo_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.URLInfo getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.URLInfo build() {
-        crawlercommons.urlfrontier.Urlfrontier.URLInfo result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.URLInfo buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.URLInfo result = new crawlercommons.urlfrontier.Urlfrontier.URLInfo(this);
-        int from_bitField0_ = bitField0_;
-        result.url_ = url_;
-        result.key_ = key_;
-        result.metadata_ = internalGetMetadata();
-        result.metadata_.makeImmutable();
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.URLInfo) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.URLInfo)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.URLInfo other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance()) return this;
-        if (!other.getUrl().isEmpty()) {
-          url_ = other.url_;
-          onChanged();
-        }
-        if (!other.getKey().isEmpty()) {
-          key_ = other.key_;
-          onChanged();
-        }
-        internalGetMutableMetadata().mergeFrom(
-            other.internalGetMetadata());
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.URLInfo parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.URLInfo) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      private java.lang.Object url_ = "";
-      /**
-       * <pre>
-       ** URL *
-       * </pre>
-       *
-       * <code>string url = 1;</code>
-       * @return The url.
-       */
-      public java.lang.String getUrl() {
-        java.lang.Object ref = url_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          url_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       ** URL *
-       * </pre>
-       *
-       * <code>string url = 1;</code>
-       * @return The bytes for url.
-       */
-      public com.google.protobuf.ByteString
-          getUrlBytes() {
-        java.lang.Object ref = url_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          url_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       ** URL *
-       * </pre>
-       *
-       * <code>string url = 1;</code>
-       * @param value The url to set.
-       * @return This builder for chaining.
-       */
-      public Builder setUrl(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        url_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       ** URL *
-       * </pre>
-       *
-       * <code>string url = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearUrl() {
-        
-        url_ = getDefaultInstance().getUrl();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       ** URL *
-       * </pre>
-       *
-       * <code>string url = 1;</code>
-       * @param value The bytes for url to set.
-       * @return This builder for chaining.
-       */
-      public Builder setUrlBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        url_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object key_ = "";
-      /**
-       * <pre>
-       ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
-       *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
-       * </pre>
-       *
-       * <code>string key = 2;</code>
-       * @return The key.
-       */
-      public java.lang.String getKey() {
-        java.lang.Object ref = key_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          key_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
-       *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
-       * </pre>
-       *
-       * <code>string key = 2;</code>
-       * @return The bytes for key.
-       */
-      public com.google.protobuf.ByteString
-          getKeyBytes() {
-        java.lang.Object ref = key_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          key_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
-       *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
-       * </pre>
-       *
-       * <code>string key = 2;</code>
-       * @param value The key to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKey(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        key_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
-       *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
-       * </pre>
-       *
-       * <code>string key = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKey() {
-        
-        key_ = getDefaultInstance().getKey();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       ** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
-       *domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
-       * </pre>
-       *
-       * <code>string key = 2;</code>
-       * @param value The bytes for key to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        key_ = value;
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.MapField<
-          java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> metadata_;
-      private com.google.protobuf.MapField<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
-      internalGetMetadata() {
-        if (metadata_ == null) {
-          return com.google.protobuf.MapField.emptyMapField(
-              MetadataDefaultEntryHolder.defaultEntry);
-        }
-        return metadata_;
-      }
-      private com.google.protobuf.MapField<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
-      internalGetMutableMetadata() {
-        onChanged();;
-        if (metadata_ == null) {
-          metadata_ = com.google.protobuf.MapField.newMapField(
-              MetadataDefaultEntryHolder.defaultEntry);
-        }
-        if (!metadata_.isMutable()) {
-          metadata_ = metadata_.copy();
-        }
-        return metadata_;
-      }
-
-      public int getMetadataCount() {
-        return internalGetMetadata().getMap().size();
-      }
-      /**
-       * <pre>
-       ** 
-       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-       * </pre>
-       *
-       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-       */
-
-      @java.lang.Override
-      public boolean containsMetadata(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        return internalGetMetadata().getMap().containsKey(key);
-      }
-      /**
-       * Use {@link #getMetadataMap()} instead.
-       */
-      @java.lang.Override
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> getMetadata() {
-        return getMetadataMap();
-      }
-      /**
-       * <pre>
-       ** 
-       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-       * </pre>
-       *
-       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-       */
-      @java.lang.Override
-
-      public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> getMetadataMap() {
-        return internalGetMetadata().getMap();
-      }
-      /**
-       * <pre>
-       ** 
-       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-       * </pre>
-       *
-       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-       */
-      @java.lang.Override
-
-      public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrDefault(
-          java.lang.String key,
-          crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> map =
-            internalGetMetadata().getMap();
-        return map.containsKey(key) ? map.get(key) : defaultValue;
-      }
-      /**
-       * <pre>
-       ** 
-       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-       * </pre>
-       *
-       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-       */
-      @java.lang.Override
-
-      public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrThrow(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> map =
-            internalGetMetadata().getMap();
-        if (!map.containsKey(key)) {
-          throw new java.lang.IllegalArgumentException();
-        }
-        return map.get(key);
-      }
-
-      public Builder clearMetadata() {
-        internalGetMutableMetadata().getMutableMap()
-            .clear();
-        return this;
-      }
-      /**
-       * <pre>
-       ** 
-       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-       * </pre>
-       *
-       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-       */
-
-      public Builder removeMetadata(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableMetadata().getMutableMap()
-            .remove(key);
-        return this;
-      }
-      /**
-       * Use alternate mutation accessors instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
-      getMutableMetadata() {
-        return internalGetMutableMetadata().getMutableMap();
-      }
-      /**
-       * <pre>
-       ** 
-       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-       * </pre>
-       *
-       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-       */
-      public Builder putMetadata(
-          java.lang.String key,
-          crawlercommons.urlfrontier.Urlfrontier.StringList value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableMetadata().getMutableMap()
-            .put(key, value);
-        return this;
-      }
-      /**
-       * <pre>
-       ** 
-       *Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-       * </pre>
-       *
-       * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
-       */
-
-      public Builder putAllMetadata(
-          java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> values) {
-        internalGetMutableMetadata().getMutableMap()
-            .putAll(values);
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.URLInfo)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.URLInfo)
-    private static final crawlercommons.urlfrontier.Urlfrontier.URLInfo DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.URLInfo();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.URLInfo getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<URLInfo>
-        PARSER = new com.google.protobuf.AbstractParser<URLInfo>() {
-      @java.lang.Override
-      public URLInfo parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new URLInfo(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<URLInfo> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<URLInfo> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.URLInfo getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface KnownURLItemOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.KnownURLItem)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     * @return Whether the info field is set.
-     */
-    boolean hasInfo();
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     * @return The info.
-     */
-    crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo();
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     */
-    crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder();
-
-    /**
-     * <pre>
-     ** Expressed in seconds of UTC time since Unix epoch
-     *1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
-     *that a URL should not be refetched.
-     * </pre>
-     *
-     * <code>uint64 refetchable_from_date = 2;</code>
-     * @return The refetchableFromDate.
-     */
-    long getRefetchableFromDate();
-  }
-  /**
-   * <pre>
-   **
-   *URL which was already known in the frontier, was returned by GetURLs() and processed by the crawler. Used for updating the information 
-   *about it in the frontier. If the date is not set, the URL will be considered done and won't be resubmitted for fetching, otherwise
-   *it will be elligible for fetching after the delay has elapsed.
-   * </pre>
-   *
-   * Protobuf type {@code urlfrontier.KnownURLItem}
-   */
-  public static final class KnownURLItem extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.KnownURLItem)
-      KnownURLItemOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use KnownURLItem.newBuilder() to construct.
-    private KnownURLItem(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private KnownURLItem() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new KnownURLItem();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private KnownURLItem(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder subBuilder = null;
-              if (info_ != null) {
-                subBuilder = info_.toBuilder();
-              }
-              info_ = input.readMessage(crawlercommons.urlfrontier.Urlfrontier.URLInfo.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(info_);
-                info_ = subBuilder.buildPartial();
-              }
-
-              break;
+            public static ItemCase forNumber(int value) {
+                switch (value) {
+                    case 1:
+                        return DISCOVERED;
+                    case 2:
+                        return KNOWN;
+                    case 0:
+                        return ITEM_NOT_SET;
+                    default:
+                        return null;
+                }
             }
-            case 16: {
 
-              refetchableFromDate_ = input.readUInt64();
-              break;
+            public int getNumber() {
+                return this.value;
             }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
+        };
+
+        public ItemCase getItemCase() {
+            return ItemCase.forNumber(itemCase_);
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_KnownURLItem_descriptor;
+
+        public static final int DISCOVERED_FIELD_NUMBER = 1;
+        /**
+         * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
+         *
+         * @return Whether the discovered field is set.
+         */
+        @java.lang.Override
+        public boolean hasDiscovered() {
+            return itemCase_ == 1;
+        }
+        /**
+         * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
+         *
+         * @return The discovered.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem getDiscovered() {
+            if (itemCase_ == 1) {
+                return (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance();
+        }
+        /** <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code> */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder
+                getDiscoveredOrBuilder() {
+            if (itemCase_ == 1) {
+                return (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance();
+        }
+
+        public static final int KNOWN_FIELD_NUMBER = 2;
+        /**
+         * <code>.urlfrontier.KnownURLItem known = 2;</code>
+         *
+         * @return Whether the known field is set.
+         */
+        @java.lang.Override
+        public boolean hasKnown() {
+            return itemCase_ == 2;
+        }
+        /**
+         * <code>.urlfrontier.KnownURLItem known = 2;</code>
+         *
+         * @return The known.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getKnown() {
+            if (itemCase_ == 2) {
+                return (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
+        }
+        /** <code>.urlfrontier.KnownURLItem known = 2;</code> */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder getKnownOrBuilder() {
+            if (itemCase_ == 2) {
+                return (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (itemCase_ == 1) {
+                output.writeMessage(
+                        1, (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_);
+            }
+            if (itemCase_ == 2) {
+                output.writeMessage(2, (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (itemCase_ == 1) {
+                size +=
+                        com.google.protobuf.CodedOutputStream.computeMessageSize(
+                                1,
+                                (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_);
+            }
+            if (itemCase_ == 2) {
+                size +=
+                        com.google.protobuf.CodedOutputStream.computeMessageSize(
+                                2, (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.URLItem)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.URLItem other =
+                    (crawlercommons.urlfrontier.Urlfrontier.URLItem) obj;
+
+            if (!getItemCase().equals(other.getItemCase())) return false;
+            switch (itemCase_) {
+                case 1:
+                    if (!getDiscovered().equals(other.getDiscovered())) return false;
+                    break;
+                case 2:
+                    if (!getKnown().equals(other.getKnown())) return false;
+                    break;
+                case 0:
+                default:
+            }
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            switch (itemCase_) {
+                case 1:
+                    hash = (37 * hash) + DISCOVERED_FIELD_NUMBER;
+                    hash = (53 * hash) + getDiscovered().hashCode();
+                    break;
+                case 2:
+                    hash = (37 * hash) + KNOWN_FIELD_NUMBER;
+                    hash = (53 * hash) + getKnown().hashCode();
+                    break;
+                case 0:
+                default:
+            }
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.URLItem prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * Wrapper for a KnownURLItem or DiscoveredURLItem *
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.URLItem}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.URLItem)
+                crawlercommons.urlfrontier.Urlfrontier.URLItemOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_URLItem_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_URLItem_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.URLItem.class,
+                                crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.URLItem.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                itemCase_ = 0;
+                item_ = null;
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_URLItem_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.URLItem getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.URLItem.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.URLItem build() {
+                crawlercommons.urlfrontier.Urlfrontier.URLItem result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.URLItem buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.URLItem result =
+                        new crawlercommons.urlfrontier.Urlfrontier.URLItem(this);
+                if (itemCase_ == 1) {
+                    if (discoveredBuilder_ == null) {
+                        result.item_ = item_;
+                    } else {
+                        result.item_ = discoveredBuilder_.build();
+                    }
+                }
+                if (itemCase_ == 2) {
+                    if (knownBuilder_ == null) {
+                        result.item_ = item_;
+                    } else {
+                        result.item_ = knownBuilder_.build();
+                    }
+                }
+                result.itemCase_ = itemCase_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.URLItem) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.URLItem) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.URLItem other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.URLItem.getDefaultInstance())
+                    return this;
+                switch (other.getItemCase()) {
+                    case DISCOVERED:
+                        {
+                            mergeDiscovered(other.getDiscovered());
+                            break;
+                        }
+                    case KNOWN:
+                        {
+                            mergeKnown(other.getKnown());
+                            break;
+                        }
+                    case ITEM_NOT_SET:
+                        {
+                            break;
+                        }
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.URLItem parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.URLItem)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private int itemCase_ = 0;
+            private java.lang.Object item_;
+
+            public ItemCase getItemCase() {
+                return ItemCase.forNumber(itemCase_);
+            }
+
+            public Builder clearItem() {
+                itemCase_ = 0;
+                item_ = null;
+                onChanged();
+                return this;
+            }
+
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem,
+                            crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder>
+                    discoveredBuilder_;
+            /**
+             * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
+             *
+             * @return Whether the discovered field is set.
+             */
+            @java.lang.Override
+            public boolean hasDiscovered() {
+                return itemCase_ == 1;
+            }
+            /**
+             * <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code>
+             *
+             * @return The discovered.
+             */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem getDiscovered() {
+                if (discoveredBuilder_ == null) {
+                    if (itemCase_ == 1) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                            .getDefaultInstance();
+                } else {
+                    if (itemCase_ == 1) {
+                        return discoveredBuilder_.getMessage();
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                            .getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code> */
+            public Builder setDiscovered(
+                    crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem value) {
+                if (discoveredBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    item_ = value;
+                    onChanged();
+                } else {
+                    discoveredBuilder_.setMessage(value);
+                }
+                itemCase_ = 1;
+                return this;
+            }
+            /** <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code> */
+            public Builder setDiscovered(
+                    crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder
+                            builderForValue) {
+                if (discoveredBuilder_ == null) {
+                    item_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    discoveredBuilder_.setMessage(builderForValue.build());
+                }
+                itemCase_ = 1;
+                return this;
+            }
+            /** <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code> */
+            public Builder mergeDiscovered(
+                    crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem value) {
+                if (discoveredBuilder_ == null) {
+                    if (itemCase_ == 1
+                            && item_
+                                    != crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                                            .getDefaultInstance()) {
+                        item_ =
+                                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.newBuilder(
+                                                (crawlercommons.urlfrontier.Urlfrontier
+                                                                .DiscoveredURLItem)
+                                                        item_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        item_ = value;
+                    }
+                    onChanged();
+                } else {
+                    if (itemCase_ == 1) {
+                        discoveredBuilder_.mergeFrom(value);
+                    }
+                    discoveredBuilder_.setMessage(value);
+                }
+                itemCase_ = 1;
+                return this;
+            }
+            /** <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code> */
+            public Builder clearDiscovered() {
+                if (discoveredBuilder_ == null) {
+                    if (itemCase_ == 1) {
+                        itemCase_ = 0;
+                        item_ = null;
+                        onChanged();
+                    }
+                } else {
+                    if (itemCase_ == 1) {
+                        itemCase_ = 0;
+                        item_ = null;
+                    }
+                    discoveredBuilder_.clear();
+                }
+                return this;
+            }
+            /** <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code> */
+            public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder
+                    getDiscoveredBuilder() {
+                return getDiscoveredFieldBuilder().getBuilder();
+            }
+            /** <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code> */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder
+                    getDiscoveredOrBuilder() {
+                if ((itemCase_ == 1) && (discoveredBuilder_ != null)) {
+                    return discoveredBuilder_.getMessageOrBuilder();
+                } else {
+                    if (itemCase_ == 1) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                            .getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.DiscoveredURLItem discovered = 1;</code> */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem,
+                            crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder>
+                    getDiscoveredFieldBuilder() {
+                if (discoveredBuilder_ == null) {
+                    if (!(itemCase_ == 1)) {
+                        item_ =
+                                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                                        .getDefaultInstance();
+                    }
+                    discoveredBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem,
+                                    crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                                            .Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier
+                                            .DiscoveredURLItemOrBuilder>(
+                                    (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem)
+                                            item_,
+                                    getParentForChildren(),
+                                    isClean());
+                    item_ = null;
+                }
+                itemCase_ = 1;
+                onChanged();
+                ;
+                return discoveredBuilder_;
+            }
+
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.KnownURLItem,
+                            crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder>
+                    knownBuilder_;
+            /**
+             * <code>.urlfrontier.KnownURLItem known = 2;</code>
+             *
+             * @return Whether the known field is set.
+             */
+            @java.lang.Override
+            public boolean hasKnown() {
+                return itemCase_ == 2;
+            }
+            /**
+             * <code>.urlfrontier.KnownURLItem known = 2;</code>
+             *
+             * @return The known.
+             */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getKnown() {
+                if (knownBuilder_ == null) {
+                    if (itemCase_ == 2) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
+                } else {
+                    if (itemCase_ == 2) {
+                        return knownBuilder_.getMessage();
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.KnownURLItem known = 2;</code> */
+            public Builder setKnown(crawlercommons.urlfrontier.Urlfrontier.KnownURLItem value) {
+                if (knownBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    item_ = value;
+                    onChanged();
+                } else {
+                    knownBuilder_.setMessage(value);
+                }
+                itemCase_ = 2;
+                return this;
+            }
+            /** <code>.urlfrontier.KnownURLItem known = 2;</code> */
+            public Builder setKnown(
+                    crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder builderForValue) {
+                if (knownBuilder_ == null) {
+                    item_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    knownBuilder_.setMessage(builderForValue.build());
+                }
+                itemCase_ = 2;
+                return this;
+            }
+            /** <code>.urlfrontier.KnownURLItem known = 2;</code> */
+            public Builder mergeKnown(crawlercommons.urlfrontier.Urlfrontier.KnownURLItem value) {
+                if (knownBuilder_ == null) {
+                    if (itemCase_ == 2
+                            && item_
+                                    != crawlercommons.urlfrontier.Urlfrontier.KnownURLItem
+                                            .getDefaultInstance()) {
+                        item_ =
+                                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.newBuilder(
+                                                (crawlercommons.urlfrontier.Urlfrontier
+                                                                .KnownURLItem)
+                                                        item_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        item_ = value;
+                    }
+                    onChanged();
+                } else {
+                    if (itemCase_ == 2) {
+                        knownBuilder_.mergeFrom(value);
+                    }
+                    knownBuilder_.setMessage(value);
+                }
+                itemCase_ = 2;
+                return this;
+            }
+            /** <code>.urlfrontier.KnownURLItem known = 2;</code> */
+            public Builder clearKnown() {
+                if (knownBuilder_ == null) {
+                    if (itemCase_ == 2) {
+                        itemCase_ = 0;
+                        item_ = null;
+                        onChanged();
+                    }
+                } else {
+                    if (itemCase_ == 2) {
+                        itemCase_ = 0;
+                        item_ = null;
+                    }
+                    knownBuilder_.clear();
+                }
+                return this;
+            }
+            /** <code>.urlfrontier.KnownURLItem known = 2;</code> */
+            public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder getKnownBuilder() {
+                return getKnownFieldBuilder().getBuilder();
+            }
+            /** <code>.urlfrontier.KnownURLItem known = 2;</code> */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder
+                    getKnownOrBuilder() {
+                if ((itemCase_ == 2) && (knownBuilder_ != null)) {
+                    return knownBuilder_.getMessageOrBuilder();
+                } else {
+                    if (itemCase_ == 2) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.KnownURLItem known = 2;</code> */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.KnownURLItem,
+                            crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder>
+                    getKnownFieldBuilder() {
+                if (knownBuilder_ == null) {
+                    if (!(itemCase_ == 2)) {
+                        item_ =
+                                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem
+                                        .getDefaultInstance();
+                    }
+                    knownBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.KnownURLItem,
+                                    crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder>(
+                                    (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) item_,
+                                    getParentForChildren(),
+                                    isClean());
+                    item_ = null;
+                }
+                itemCase_ = 2;
+                onChanged();
+                ;
+                return knownBuilder_;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.URLItem)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.URLItem)
+        private static final crawlercommons.urlfrontier.Urlfrontier.URLItem DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.URLItem();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLItem getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<URLItem> PARSER =
+                new com.google.protobuf.AbstractParser<URLItem>() {
+                    @java.lang.Override
+                    public URLItem parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new URLItem(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<URLItem> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<URLItem> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.URLItem getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_KnownURLItem_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.class, crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder.class);
+    public interface URLInfoOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.URLInfo)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         *
+         *
+         * <pre>
+         * * URL *
+         * </pre>
+         *
+         * <code>string url = 1;</code>
+         *
+         * @return The url.
+         */
+        java.lang.String getUrl();
+        /**
+         *
+         *
+         * <pre>
+         * * URL *
+         * </pre>
+         *
+         * <code>string url = 1;</code>
+         *
+         * @return The bytes for url.
+         */
+        com.google.protobuf.ByteString getUrlBytes();
+
+        /**
+         *
+         *
+         * <pre>
+         * * The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+         * domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+         * </pre>
+         *
+         * <code>string key = 2;</code>
+         *
+         * @return The key.
+         */
+        java.lang.String getKey();
+        /**
+         *
+         *
+         * <pre>
+         * * The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+         * domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+         * </pre>
+         *
+         * <code>string key = 2;</code>
+         *
+         * @return The bytes for key.
+         */
+        com.google.protobuf.ByteString getKeyBytes();
+
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+         * </pre>
+         *
+         * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+         */
+        int getMetadataCount();
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+         * </pre>
+         *
+         * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+         */
+        boolean containsMetadata(java.lang.String key);
+        /** Use {@link #getMetadataMap()} instead. */
+        @java.lang.Deprecated
+        java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                getMetadata();
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+         * </pre>
+         *
+         * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+         */
+        java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                getMetadataMap();
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+         * </pre>
+         *
+         * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+         */
+        crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrDefault(
+                java.lang.String key,
+                crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+         * </pre>
+         *
+         * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+         */
+        crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrThrow(java.lang.String key);
+    }
+    /** Protobuf type {@code urlfrontier.URLInfo} */
+    public static final class URLInfo extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.URLInfo)
+            URLInfoOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use URLInfo.newBuilder() to construct.
+        private URLInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private URLInfo() {
+            url_ = "";
+            key_ = "";
+        }
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new URLInfo();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private URLInfo(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            int mutable_bitField0_ = 0;
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                java.lang.String s = input.readStringRequireUtf8();
+
+                                url_ = s;
+                                break;
+                            }
+                        case 18:
+                            {
+                                java.lang.String s = input.readStringRequireUtf8();
+
+                                key_ = s;
+                                break;
+                            }
+                        case 26:
+                            {
+                                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                                    metadata_ =
+                                            com.google.protobuf.MapField.newMapField(
+                                                    MetadataDefaultEntryHolder.defaultEntry);
+                                    mutable_bitField0_ |= 0x00000001;
+                                }
+                                com.google.protobuf.MapEntry<
+                                                java.lang.String,
+                                                crawlercommons.urlfrontier.Urlfrontier.StringList>
+                                        metadata__ =
+                                                input.readMessage(
+                                                        MetadataDefaultEntryHolder.defaultEntry
+                                                                .getParserForType(),
+                                                        extensionRegistry);
+                                metadata_
+                                        .getMutableMap()
+                                        .put(metadata__.getKey(), metadata__.getValue());
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_URLInfo_descriptor;
+        }
+
+        @SuppressWarnings({"rawtypes"})
+        @java.lang.Override
+        protected com.google.protobuf.MapField internalGetMapField(int number) {
+            switch (number) {
+                case 3:
+                    return internalGetMetadata();
+                default:
+                    throw new RuntimeException("Invalid map field number: " + number);
+            }
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_URLInfo_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfo.class,
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder.class);
+        }
+
+        public static final int URL_FIELD_NUMBER = 1;
+        private volatile java.lang.Object url_;
+        /**
+         *
+         *
+         * <pre>
+         * * URL *
+         * </pre>
+         *
+         * <code>string url = 1;</code>
+         *
+         * @return The url.
+         */
+        @java.lang.Override
+        public java.lang.String getUrl() {
+            java.lang.Object ref = url_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                url_ = s;
+                return s;
+            }
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * URL *
+         * </pre>
+         *
+         * <code>string url = 1;</code>
+         *
+         * @return The bytes for url.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getUrlBytes() {
+            java.lang.Object ref = url_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                url_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int KEY_FIELD_NUMBER = 2;
+        private volatile java.lang.Object key_;
+        /**
+         *
+         *
+         * <pre>
+         * * The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+         * domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+         * </pre>
+         *
+         * <code>string key = 2;</code>
+         *
+         * @return The key.
+         */
+        @java.lang.Override
+        public java.lang.String getKey() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                key_ = s;
+                return s;
+            }
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+         * domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+         * </pre>
+         *
+         * <code>string key = 2;</code>
+         *
+         * @return The bytes for key.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getKeyBytes() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                key_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int METADATA_FIELD_NUMBER = 3;
+
+        private static final class MetadataDefaultEntryHolder {
+            static final com.google.protobuf.MapEntry<
+                            java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                    defaultEntry =
+                            com.google.protobuf.MapEntry
+                                    .<java.lang.String,
+                                            crawlercommons.urlfrontier.Urlfrontier.StringList>
+                                            newDefaultInstance(
+                                                    crawlercommons.urlfrontier.Urlfrontier
+                                                            .internal_static_urlfrontier_URLInfo_MetadataEntry_descriptor,
+                                                    com.google.protobuf.WireFormat.FieldType.STRING,
+                                                    "",
+                                                    com.google.protobuf.WireFormat.FieldType
+                                                            .MESSAGE,
+                                                    crawlercommons.urlfrontier.Urlfrontier
+                                                            .StringList.getDefaultInstance());
+        }
+
+        private com.google.protobuf.MapField<
+                        java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                metadata_;
+
+        private com.google.protobuf.MapField<
+                        java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                internalGetMetadata() {
+            if (metadata_ == null) {
+                return com.google.protobuf.MapField.emptyMapField(
+                        MetadataDefaultEntryHolder.defaultEntry);
+            }
+            return metadata_;
+        }
+
+        public int getMetadataCount() {
+            return internalGetMetadata().getMap().size();
+        }
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+         * </pre>
+         *
+         * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+         */
+        @java.lang.Override
+        public boolean containsMetadata(java.lang.String key) {
+            if (key == null) {
+                throw new java.lang.NullPointerException();
+            }
+            return internalGetMetadata().getMap().containsKey(key);
+        }
+        /** Use {@link #getMetadataMap()} instead. */
+        @java.lang.Override
+        @java.lang.Deprecated
+        public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                getMetadata() {
+            return getMetadataMap();
+        }
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+         * </pre>
+         *
+         * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+         */
+        @java.lang.Override
+        public java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                getMetadataMap() {
+            return internalGetMetadata().getMap();
+        }
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+         * </pre>
+         *
+         * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrDefault(
+                java.lang.String key,
+                crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue) {
+            if (key == null) {
+                throw new java.lang.NullPointerException();
+            }
+            java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> map =
+                    internalGetMetadata().getMap();
+            return map.containsKey(key) ? map.get(key) : defaultValue;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+         * </pre>
+         *
+         * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrThrow(
+                java.lang.String key) {
+            if (key == null) {
+                throw new java.lang.NullPointerException();
+            }
+            java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList> map =
+                    internalGetMetadata().getMap();
+            if (!map.containsKey(key)) {
+                throw new java.lang.IllegalArgumentException();
+            }
+            return map.get(key);
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (!getUrlBytes().isEmpty()) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, url_);
+            }
+            if (!getKeyBytes().isEmpty()) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 2, key_);
+            }
+            com.google.protobuf.GeneratedMessageV3.serializeStringMapTo(
+                    output, internalGetMetadata(), MetadataDefaultEntryHolder.defaultEntry, 3);
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (!getUrlBytes().isEmpty()) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, url_);
+            }
+            if (!getKeyBytes().isEmpty()) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, key_);
+            }
+            for (java.util.Map.Entry<
+                            java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                    entry : internalGetMetadata().getMap().entrySet()) {
+                com.google.protobuf.MapEntry<
+                                java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                        metadata__ =
+                                MetadataDefaultEntryHolder.defaultEntry
+                                        .newBuilderForType()
+                                        .setKey(entry.getKey())
+                                        .setValue(entry.getValue())
+                                        .build();
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(3, metadata__);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.URLInfo)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.URLInfo other =
+                    (crawlercommons.urlfrontier.Urlfrontier.URLInfo) obj;
+
+            if (!getUrl().equals(other.getUrl())) return false;
+            if (!getKey().equals(other.getKey())) return false;
+            if (!internalGetMetadata().equals(other.internalGetMetadata())) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + URL_FIELD_NUMBER;
+            hash = (53 * hash) + getUrl().hashCode();
+            hash = (37 * hash) + KEY_FIELD_NUMBER;
+            hash = (53 * hash) + getKey().hashCode();
+            if (!internalGetMetadata().getMap().isEmpty()) {
+                hash = (37 * hash) + METADATA_FIELD_NUMBER;
+                hash = (53 * hash) + internalGetMetadata().hashCode();
+            }
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.URLInfo prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /** Protobuf type {@code urlfrontier.URLInfo} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.URLInfo)
+                crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_URLInfo_descriptor;
+            }
+
+            @SuppressWarnings({"rawtypes"})
+            protected com.google.protobuf.MapField internalGetMapField(int number) {
+                switch (number) {
+                    case 3:
+                        return internalGetMetadata();
+                    default:
+                        throw new RuntimeException("Invalid map field number: " + number);
+                }
+            }
+
+            @SuppressWarnings({"rawtypes"})
+            protected com.google.protobuf.MapField internalGetMutableMapField(int number) {
+                switch (number) {
+                    case 3:
+                        return internalGetMutableMetadata();
+                    default:
+                        throw new RuntimeException("Invalid map field number: " + number);
+                }
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_URLInfo_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.URLInfo.class,
+                                crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.URLInfo.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                url_ = "";
+
+                key_ = "";
+
+                internalGetMutableMetadata().clear();
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_URLInfo_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.URLInfo getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.URLInfo build() {
+                crawlercommons.urlfrontier.Urlfrontier.URLInfo result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.URLInfo buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.URLInfo result =
+                        new crawlercommons.urlfrontier.Urlfrontier.URLInfo(this);
+                int from_bitField0_ = bitField0_;
+                result.url_ = url_;
+                result.key_ = key_;
+                result.metadata_ = internalGetMetadata();
+                result.metadata_.makeImmutable();
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.URLInfo) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.URLInfo) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.URLInfo other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance())
+                    return this;
+                if (!other.getUrl().isEmpty()) {
+                    url_ = other.url_;
+                    onChanged();
+                }
+                if (!other.getKey().isEmpty()) {
+                    key_ = other.key_;
+                    onChanged();
+                }
+                internalGetMutableMetadata().mergeFrom(other.internalGetMetadata());
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.URLInfo parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.URLInfo)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private int bitField0_;
+
+            private java.lang.Object url_ = "";
+            /**
+             *
+             *
+             * <pre>
+             * * URL *
+             * </pre>
+             *
+             * <code>string url = 1;</code>
+             *
+             * @return The url.
+             */
+            public java.lang.String getUrl() {
+                java.lang.Object ref = url_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    url_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * URL *
+             * </pre>
+             *
+             * <code>string url = 1;</code>
+             *
+             * @return The bytes for url.
+             */
+            public com.google.protobuf.ByteString getUrlBytes() {
+                java.lang.Object ref = url_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    url_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * URL *
+             * </pre>
+             *
+             * <code>string url = 1;</code>
+             *
+             * @param value The url to set.
+             * @return This builder for chaining.
+             */
+            public Builder setUrl(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                url_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * URL *
+             * </pre>
+             *
+             * <code>string url = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearUrl() {
+
+                url_ = getDefaultInstance().getUrl();
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * URL *
+             * </pre>
+             *
+             * <code>string url = 1;</code>
+             *
+             * @param value The bytes for url to set.
+             * @return This builder for chaining.
+             */
+            public Builder setUrlBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+
+                url_ = value;
+                onChanged();
+                return this;
+            }
+
+            private java.lang.Object key_ = "";
+            /**
+             *
+             *
+             * <pre>
+             * * The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+             * domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+             * </pre>
+             *
+             * <code>string key = 2;</code>
+             *
+             * @return The key.
+             */
+            public java.lang.String getKey() {
+                java.lang.Object ref = key_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    key_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+             * domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+             * </pre>
+             *
+             * <code>string key = 2;</code>
+             *
+             * @return The bytes for key.
+             */
+            public com.google.protobuf.ByteString getKeyBytes() {
+                java.lang.Object ref = key_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    key_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+             * domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+             * </pre>
+             *
+             * <code>string key = 2;</code>
+             *
+             * @param value The key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKey(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+             * domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+             * </pre>
+             *
+             * <code>string key = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearKey() {
+
+                key_ = getDefaultInstance().getKey();
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
+             * domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
+             * </pre>
+             *
+             * <code>string key = 2;</code>
+             *
+             * @param value The bytes for key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKeyBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+
+            private com.google.protobuf.MapField<
+                            java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                    metadata_;
+
+            private com.google.protobuf.MapField<
+                            java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                    internalGetMetadata() {
+                if (metadata_ == null) {
+                    return com.google.protobuf.MapField.emptyMapField(
+                            MetadataDefaultEntryHolder.defaultEntry);
+                }
+                return metadata_;
+            }
+
+            private com.google.protobuf.MapField<
+                            java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                    internalGetMutableMetadata() {
+                onChanged();
+                ;
+                if (metadata_ == null) {
+                    metadata_ =
+                            com.google.protobuf.MapField.newMapField(
+                                    MetadataDefaultEntryHolder.defaultEntry);
+                }
+                if (!metadata_.isMutable()) {
+                    metadata_ = metadata_.copy();
+                }
+                return metadata_;
+            }
+
+            public int getMetadataCount() {
+                return internalGetMetadata().getMap().size();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * *
+             * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+             * </pre>
+             *
+             * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+             */
+            @java.lang.Override
+            public boolean containsMetadata(java.lang.String key) {
+                if (key == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                return internalGetMetadata().getMap().containsKey(key);
+            }
+            /** Use {@link #getMetadataMap()} instead. */
+            @java.lang.Override
+            @java.lang.Deprecated
+            public java.util.Map<
+                            java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                    getMetadata() {
+                return getMetadataMap();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * *
+             * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+             * </pre>
+             *
+             * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+             */
+            @java.lang.Override
+            public java.util.Map<
+                            java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                    getMetadataMap() {
+                return internalGetMetadata().getMap();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * *
+             * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+             * </pre>
+             *
+             * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+             */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrDefault(
+                    java.lang.String key,
+                    crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue) {
+                if (key == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                        map = internalGetMetadata().getMap();
+                return map.containsKey(key) ? map.get(key) : defaultValue;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * *
+             * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+             * </pre>
+             *
+             * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+             */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrThrow(
+                    java.lang.String key) {
+                if (key == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                java.util.Map<java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                        map = internalGetMetadata().getMap();
+                if (!map.containsKey(key)) {
+                    throw new java.lang.IllegalArgumentException();
+                }
+                return map.get(key);
+            }
+
+            public Builder clearMetadata() {
+                internalGetMutableMetadata().getMutableMap().clear();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * *
+             * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+             * </pre>
+             *
+             * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+             */
+            public Builder removeMetadata(java.lang.String key) {
+                if (key == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                internalGetMutableMetadata().getMutableMap().remove(key);
+                return this;
+            }
+            /** Use alternate mutation accessors instead. */
+            @java.lang.Deprecated
+            public java.util.Map<
+                            java.lang.String, crawlercommons.urlfrontier.Urlfrontier.StringList>
+                    getMutableMetadata() {
+                return internalGetMutableMetadata().getMutableMap();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * *
+             * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+             * </pre>
+             *
+             * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+             */
+            public Builder putMetadata(
+                    java.lang.String key, crawlercommons.urlfrontier.Urlfrontier.StringList value) {
+                if (key == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                if (value == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                internalGetMutableMetadata().getMutableMap().put(key, value);
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * *
+             * Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
+             * </pre>
+             *
+             * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
+             */
+            public Builder putAllMetadata(
+                    java.util.Map<
+                                    java.lang.String,
+                                    crawlercommons.urlfrontier.Urlfrontier.StringList>
+                            values) {
+                internalGetMutableMetadata().getMutableMap().putAll(values);
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.URLInfo)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.URLInfo)
+        private static final crawlercommons.urlfrontier.Urlfrontier.URLInfo DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.URLInfo();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.URLInfo getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<URLInfo> PARSER =
+                new com.google.protobuf.AbstractParser<URLInfo>() {
+                    @java.lang.Override
+                    public URLInfo parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new URLInfo(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<URLInfo> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<URLInfo> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.URLInfo getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    public static final int INFO_FIELD_NUMBER = 1;
-    private crawlercommons.urlfrontier.Urlfrontier.URLInfo info_;
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     * @return Whether the info field is set.
-     */
-    @java.lang.Override
-    public boolean hasInfo() {
-      return info_ != null;
-    }
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     * @return The info.
-     */
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo() {
-      return info_ == null ? crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance() : info_;
-    }
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     */
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder() {
-      return getInfo();
-    }
+    public interface KnownURLItemOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.KnownURLItem)
+            com.google.protobuf.MessageOrBuilder {
 
-    public static final int REFETCHABLE_FROM_DATE_FIELD_NUMBER = 2;
-    private long refetchableFromDate_;
+        /**
+         * <code>.urlfrontier.URLInfo info = 1;</code>
+         *
+         * @return Whether the info field is set.
+         */
+        boolean hasInfo();
+        /**
+         * <code>.urlfrontier.URLInfo info = 1;</code>
+         *
+         * @return The info.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo();
+        /** <code>.urlfrontier.URLInfo info = 1;</code> */
+        crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder();
+
+        /**
+         *
+         *
+         * <pre>
+         * * Expressed in seconds of UTC time since Unix epoch
+         * 1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
+         * that a URL should not be refetched.
+         * </pre>
+         *
+         * <code>uint64 refetchable_from_date = 2;</code>
+         *
+         * @return The refetchableFromDate.
+         */
+        long getRefetchableFromDate();
+    }
     /**
-     * <pre>
-     ** Expressed in seconds of UTC time since Unix epoch
-     *1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
-     *that a URL should not be refetched.
-     * </pre>
      *
-     * <code>uint64 refetchable_from_date = 2;</code>
-     * @return The refetchableFromDate.
-     */
-    @java.lang.Override
-    public long getRefetchableFromDate() {
-      return refetchableFromDate_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (info_ != null) {
-        output.writeMessage(1, getInfo());
-      }
-      if (refetchableFromDate_ != 0L) {
-        output.writeUInt64(2, refetchableFromDate_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (info_ != null) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, getInfo());
-      }
-      if (refetchableFromDate_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(2, refetchableFromDate_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.KnownURLItem)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.KnownURLItem other = (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) obj;
-
-      if (hasInfo() != other.hasInfo()) return false;
-      if (hasInfo()) {
-        if (!getInfo()
-            .equals(other.getInfo())) return false;
-      }
-      if (getRefetchableFromDate()
-          != other.getRefetchableFromDate()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasInfo()) {
-        hash = (37 * hash) + INFO_FIELD_NUMBER;
-        hash = (53 * hash) + getInfo().hashCode();
-      }
-      hash = (37 * hash) + REFETCHABLE_FROM_DATE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getRefetchableFromDate());
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.KnownURLItem prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
+     *
      * <pre>
-     **
-     *URL which was already known in the frontier, was returned by GetURLs() and processed by the crawler. Used for updating the information 
-     *about it in the frontier. If the date is not set, the URL will be considered done and won't be resubmitted for fetching, otherwise
-     *it will be elligible for fetching after the delay has elapsed.
+     * *
+     * URL which was already known in the frontier, was returned by GetURLs() and processed by the crawler. Used for updating the information
+     * about it in the frontier. If the date is not set, the URL will be considered done and won't be resubmitted for fetching, otherwise
+     * it will be elligible for fetching after the delay has elapsed.
      * </pre>
      *
      * Protobuf type {@code urlfrontier.KnownURLItem}
      */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.KnownURLItem)
-        crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_KnownURLItem_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_KnownURLItem_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.class, crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        if (infoBuilder_ == null) {
-          info_ = null;
-        } else {
-          info_ = null;
-          infoBuilder_ = null;
-        }
-        refetchableFromDate_ = 0L;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_KnownURLItem_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem build() {
-        crawlercommons.urlfrontier.Urlfrontier.KnownURLItem result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.KnownURLItem result = new crawlercommons.urlfrontier.Urlfrontier.KnownURLItem(this);
-        if (infoBuilder_ == null) {
-          result.info_ = info_;
-        } else {
-          result.info_ = infoBuilder_.build();
-        }
-        result.refetchableFromDate_ = refetchableFromDate_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.KnownURLItem)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.KnownURLItem other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance()) return this;
-        if (other.hasInfo()) {
-          mergeInfo(other.getInfo());
-        }
-        if (other.getRefetchableFromDate() != 0L) {
-          setRefetchableFromDate(other.getRefetchableFromDate());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private crawlercommons.urlfrontier.Urlfrontier.URLInfo info_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          crawlercommons.urlfrontier.Urlfrontier.URLInfo, crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder, crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder> infoBuilder_;
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       * @return Whether the info field is set.
-       */
-      public boolean hasInfo() {
-        return infoBuilder_ != null || info_ != null;
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       * @return The info.
-       */
-      public crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo() {
-        if (infoBuilder_ == null) {
-          return info_ == null ? crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance() : info_;
-        } else {
-          return infoBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public Builder setInfo(crawlercommons.urlfrontier.Urlfrontier.URLInfo value) {
-        if (infoBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          info_ = value;
-          onChanged();
-        } else {
-          infoBuilder_.setMessage(value);
+    public static final class KnownURLItem extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.KnownURLItem)
+            KnownURLItemOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use KnownURLItem.newBuilder() to construct.
+        private KnownURLItem(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
         }
 
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public Builder setInfo(
-          crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder builderForValue) {
-        if (infoBuilder_ == null) {
-          info_ = builderForValue.build();
-          onChanged();
-        } else {
-          infoBuilder_.setMessage(builderForValue.build());
+        private KnownURLItem() {}
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new KnownURLItem();
         }
 
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public Builder mergeInfo(crawlercommons.urlfrontier.Urlfrontier.URLInfo value) {
-        if (infoBuilder_ == null) {
-          if (info_ != null) {
-            info_ =
-              crawlercommons.urlfrontier.Urlfrontier.URLInfo.newBuilder(info_).mergeFrom(value).buildPartial();
-          } else {
-            info_ = value;
-          }
-          onChanged();
-        } else {
-          infoBuilder_.mergeFrom(value);
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
         }
 
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public Builder clearInfo() {
-        if (infoBuilder_ == null) {
-          info_ = null;
-          onChanged();
-        } else {
-          info_ = null;
-          infoBuilder_ = null;
-        }
-
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder getInfoBuilder() {
-        
-        onChanged();
-        return getInfoFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder() {
-        if (infoBuilder_ != null) {
-          return infoBuilder_.getMessageOrBuilder();
-        } else {
-          return info_ == null ?
-              crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance() : info_;
-        }
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          crawlercommons.urlfrontier.Urlfrontier.URLInfo, crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder, crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder> 
-          getInfoFieldBuilder() {
-        if (infoBuilder_ == null) {
-          infoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              crawlercommons.urlfrontier.Urlfrontier.URLInfo, crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder, crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder>(
-                  getInfo(),
-                  getParentForChildren(),
-                  isClean());
-          info_ = null;
-        }
-        return infoBuilder_;
-      }
-
-      private long refetchableFromDate_ ;
-      /**
-       * <pre>
-       ** Expressed in seconds of UTC time since Unix epoch
-       *1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
-       *that a URL should not be refetched.
-       * </pre>
-       *
-       * <code>uint64 refetchable_from_date = 2;</code>
-       * @return The refetchableFromDate.
-       */
-      @java.lang.Override
-      public long getRefetchableFromDate() {
-        return refetchableFromDate_;
-      }
-      /**
-       * <pre>
-       ** Expressed in seconds of UTC time since Unix epoch
-       *1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
-       *that a URL should not be refetched.
-       * </pre>
-       *
-       * <code>uint64 refetchable_from_date = 2;</code>
-       * @param value The refetchableFromDate to set.
-       * @return This builder for chaining.
-       */
-      public Builder setRefetchableFromDate(long value) {
-        
-        refetchableFromDate_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       ** Expressed in seconds of UTC time since Unix epoch
-       *1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
-       *that a URL should not be refetched.
-       * </pre>
-       *
-       * <code>uint64 refetchable_from_date = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearRefetchableFromDate() {
-        
-        refetchableFromDate_ = 0L;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:urlfrontier.KnownURLItem)
-    }
-
-    // @@protoc_insertion_point(class_scope:urlfrontier.KnownURLItem)
-    private static final crawlercommons.urlfrontier.Urlfrontier.KnownURLItem DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.KnownURLItem();
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<KnownURLItem>
-        PARSER = new com.google.protobuf.AbstractParser<KnownURLItem>() {
-      @java.lang.Override
-      public KnownURLItem parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new KnownURLItem(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<KnownURLItem> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<KnownURLItem> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface DiscoveredURLItemOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:urlfrontier.DiscoveredURLItem)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     * @return Whether the info field is set.
-     */
-    boolean hasInfo();
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     * @return The info.
-     */
-    crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo();
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     */
-    crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder();
-  }
-  /**
-   * <pre>
-   **
-   *URL discovered during the crawl, might already be known in the URL Frontier or not.
-   * </pre>
-   *
-   * Protobuf type {@code urlfrontier.DiscoveredURLItem}
-   */
-  public static final class DiscoveredURLItem extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:urlfrontier.DiscoveredURLItem)
-      DiscoveredURLItemOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use DiscoveredURLItem.newBuilder() to construct.
-    private DiscoveredURLItem(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private DiscoveredURLItem() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new DiscoveredURLItem();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private DiscoveredURLItem(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder subBuilder = null;
-              if (info_ != null) {
-                subBuilder = info_.toBuilder();
-              }
-              info_ = input.readMessage(crawlercommons.urlfrontier.Urlfrontier.URLInfo.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(info_);
-                info_ = subBuilder.buildPartial();
-              }
-
-              break;
+        private KnownURLItem(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
             }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder subBuilder =
+                                        null;
+                                if (info_ != null) {
+                                    subBuilder = info_.toBuilder();
+                                }
+                                info_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.URLInfo
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(info_);
+                                    info_ = subBuilder.buildPartial();
+                                }
+
+                                break;
+                            }
+                        case 16:
+                            {
+                                refetchableFromDate_ = input.readUInt64();
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
             }
-          }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_DiscoveredURLItem_descriptor;
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_KnownURLItem_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_KnownURLItem_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.class,
+                            crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder.class);
+        }
+
+        public static final int INFO_FIELD_NUMBER = 1;
+        private crawlercommons.urlfrontier.Urlfrontier.URLInfo info_;
+        /**
+         * <code>.urlfrontier.URLInfo info = 1;</code>
+         *
+         * @return Whether the info field is set.
+         */
+        @java.lang.Override
+        public boolean hasInfo() {
+            return info_ != null;
+        }
+        /**
+         * <code>.urlfrontier.URLInfo info = 1;</code>
+         *
+         * @return The info.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo() {
+            return info_ == null
+                    ? crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance()
+                    : info_;
+        }
+        /** <code>.urlfrontier.URLInfo info = 1;</code> */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder() {
+            return getInfo();
+        }
+
+        public static final int REFETCHABLE_FROM_DATE_FIELD_NUMBER = 2;
+        private long refetchableFromDate_;
+        /**
+         *
+         *
+         * <pre>
+         * * Expressed in seconds of UTC time since Unix epoch
+         * 1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
+         * that a URL should not be refetched.
+         * </pre>
+         *
+         * <code>uint64 refetchable_from_date = 2;</code>
+         *
+         * @return The refetchableFromDate.
+         */
+        @java.lang.Override
+        public long getRefetchableFromDate() {
+            return refetchableFromDate_;
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (info_ != null) {
+                output.writeMessage(1, getInfo());
+            }
+            if (refetchableFromDate_ != 0L) {
+                output.writeUInt64(2, refetchableFromDate_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (info_ != null) {
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(1, getInfo());
+            }
+            if (refetchableFromDate_ != 0L) {
+                size +=
+                        com.google.protobuf.CodedOutputStream.computeUInt64Size(
+                                2, refetchableFromDate_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.KnownURLItem)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.KnownURLItem other =
+                    (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) obj;
+
+            if (hasInfo() != other.hasInfo()) return false;
+            if (hasInfo()) {
+                if (!getInfo().equals(other.getInfo())) return false;
+            }
+            if (getRefetchableFromDate() != other.getRefetchableFromDate()) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            if (hasInfo()) {
+                hash = (37 * hash) + INFO_FIELD_NUMBER;
+                hash = (53 * hash) + getInfo().hashCode();
+            }
+            hash = (37 * hash) + REFETCHABLE_FROM_DATE_FIELD_NUMBER;
+            hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getRefetchableFromDate());
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * URL which was already known in the frontier, was returned by GetURLs() and processed by the crawler. Used for updating the information
+         * about it in the frontier. If the date is not set, the URL will be considered done and won't be resubmitted for fetching, otherwise
+         * it will be elligible for fetching after the delay has elapsed.
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.KnownURLItem}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.KnownURLItem)
+                crawlercommons.urlfrontier.Urlfrontier.KnownURLItemOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_KnownURLItem_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_KnownURLItem_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.class,
+                                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                if (infoBuilder_ == null) {
+                    info_ = null;
+                } else {
+                    info_ = null;
+                    infoBuilder_ = null;
+                }
+                refetchableFromDate_ = 0L;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_KnownURLItem_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem build() {
+                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem result =
+                        new crawlercommons.urlfrontier.Urlfrontier.KnownURLItem(this);
+                if (infoBuilder_ == null) {
+                    result.info_ = info_;
+                } else {
+                    result.info_ = infoBuilder_.build();
+                }
+                result.refetchableFromDate_ = refetchableFromDate_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.KnownURLItem) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.KnownURLItem other) {
+                if (other
+                        == crawlercommons.urlfrontier.Urlfrontier.KnownURLItem.getDefaultInstance())
+                    return this;
+                if (other.hasInfo()) {
+                    mergeInfo(other.getInfo());
+                }
+                if (other.getRefetchableFromDate() != 0L) {
+                    setRefetchableFromDate(other.getRefetchableFromDate());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.KnownURLItem parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.KnownURLItem)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private crawlercommons.urlfrontier.Urlfrontier.URLInfo info_;
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfo,
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder>
+                    infoBuilder_;
+            /**
+             * <code>.urlfrontier.URLInfo info = 1;</code>
+             *
+             * @return Whether the info field is set.
+             */
+            public boolean hasInfo() {
+                return infoBuilder_ != null || info_ != null;
+            }
+            /**
+             * <code>.urlfrontier.URLInfo info = 1;</code>
+             *
+             * @return The info.
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo() {
+                if (infoBuilder_ == null) {
+                    return info_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance()
+                            : info_;
+                } else {
+                    return infoBuilder_.getMessage();
+                }
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public Builder setInfo(crawlercommons.urlfrontier.Urlfrontier.URLInfo value) {
+                if (infoBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    info_ = value;
+                    onChanged();
+                } else {
+                    infoBuilder_.setMessage(value);
+                }
+
+                return this;
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public Builder setInfo(
+                    crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder builderForValue) {
+                if (infoBuilder_ == null) {
+                    info_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    infoBuilder_.setMessage(builderForValue.build());
+                }
+
+                return this;
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public Builder mergeInfo(crawlercommons.urlfrontier.Urlfrontier.URLInfo value) {
+                if (infoBuilder_ == null) {
+                    if (info_ != null) {
+                        info_ =
+                                crawlercommons.urlfrontier.Urlfrontier.URLInfo.newBuilder(info_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        info_ = value;
+                    }
+                    onChanged();
+                } else {
+                    infoBuilder_.mergeFrom(value);
+                }
+
+                return this;
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public Builder clearInfo() {
+                if (infoBuilder_ == null) {
+                    info_ = null;
+                    onChanged();
+                } else {
+                    info_ = null;
+                    infoBuilder_ = null;
+                }
+
+                return this;
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder getInfoBuilder() {
+
+                onChanged();
+                return getInfoFieldBuilder().getBuilder();
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder() {
+                if (infoBuilder_ != null) {
+                    return infoBuilder_.getMessageOrBuilder();
+                } else {
+                    return info_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance()
+                            : info_;
+                }
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfo,
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder>
+                    getInfoFieldBuilder() {
+                if (infoBuilder_ == null) {
+                    infoBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.URLInfo,
+                                    crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder>(
+                                    getInfo(), getParentForChildren(), isClean());
+                    info_ = null;
+                }
+                return infoBuilder_;
+            }
+
+            private long refetchableFromDate_;
+            /**
+             *
+             *
+             * <pre>
+             * * Expressed in seconds of UTC time since Unix epoch
+             * 1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
+             * that a URL should not be refetched.
+             * </pre>
+             *
+             * <code>uint64 refetchable_from_date = 2;</code>
+             *
+             * @return The refetchableFromDate.
+             */
+            @java.lang.Override
+            public long getRefetchableFromDate() {
+                return refetchableFromDate_;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * Expressed in seconds of UTC time since Unix epoch
+             * 1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
+             * that a URL should not be refetched.
+             * </pre>
+             *
+             * <code>uint64 refetchable_from_date = 2;</code>
+             *
+             * @param value The refetchableFromDate to set.
+             * @return This builder for chaining.
+             */
+            public Builder setRefetchableFromDate(long value) {
+
+                refetchableFromDate_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * Expressed in seconds of UTC time since Unix epoch
+             * 1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
+             * that a URL should not be refetched.
+             * </pre>
+             *
+             * <code>uint64 refetchable_from_date = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearRefetchableFromDate() {
+
+                refetchableFromDate_ = 0L;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.KnownURLItem)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.KnownURLItem)
+        private static final crawlercommons.urlfrontier.Urlfrontier.KnownURLItem DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.KnownURLItem();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<KnownURLItem> PARSER =
+                new com.google.protobuf.AbstractParser<KnownURLItem>() {
+                    @java.lang.Override
+                    public KnownURLItem parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new KnownURLItem(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<KnownURLItem> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<KnownURLItem> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.KnownURLItem getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.class, crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder.class);
-    }
+    public interface DiscoveredURLItemOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.DiscoveredURLItem)
+            com.google.protobuf.MessageOrBuilder {
 
-    public static final int INFO_FIELD_NUMBER = 1;
-    private crawlercommons.urlfrontier.Urlfrontier.URLInfo info_;
+        /**
+         * <code>.urlfrontier.URLInfo info = 1;</code>
+         *
+         * @return Whether the info field is set.
+         */
+        boolean hasInfo();
+        /**
+         * <code>.urlfrontier.URLInfo info = 1;</code>
+         *
+         * @return The info.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo();
+        /** <code>.urlfrontier.URLInfo info = 1;</code> */
+        crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder();
+    }
     /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     * @return Whether the info field is set.
-     */
-    @java.lang.Override
-    public boolean hasInfo() {
-      return info_ != null;
-    }
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     * @return The info.
-     */
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo() {
-      return info_ == null ? crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance() : info_;
-    }
-    /**
-     * <code>.urlfrontier.URLInfo info = 1;</code>
-     */
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder() {
-      return getInfo();
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (info_ != null) {
-        output.writeMessage(1, getInfo());
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (info_ != null) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, getInfo());
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem)) {
-        return super.equals(obj);
-      }
-      crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem other = (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) obj;
-
-      if (hasInfo() != other.hasInfo()) return false;
-      if (hasInfo()) {
-        if (!getInfo()
-            .equals(other.getInfo())) return false;
-      }
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasInfo()) {
-        hash = (37 * hash) + INFO_FIELD_NUMBER;
-        hash = (53 * hash) + getInfo().hashCode();
-      }
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
+     *
+     *
      * <pre>
-     **
-     *URL discovered during the crawl, might already be known in the URL Frontier or not.
+     * *
+     * URL discovered during the crawl, might already be known in the URL Frontier or not.
      * </pre>
      *
      * Protobuf type {@code urlfrontier.DiscoveredURLItem}
      */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:urlfrontier.DiscoveredURLItem)
-        crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_DiscoveredURLItem_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.class, crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder.class);
-      }
-
-      // Construct using crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        if (infoBuilder_ == null) {
-          info_ = null;
-        } else {
-          info_ = null;
-          infoBuilder_ = null;
-        }
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.internal_static_urlfrontier_DiscoveredURLItem_descriptor;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem getDefaultInstanceForType() {
-        return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem build() {
-        crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem buildPartial() {
-        crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem result = new crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem(this);
-        if (infoBuilder_ == null) {
-          result.info_ = info_;
-        } else {
-          result.info_ = infoBuilder_.build();
-        }
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) {
-          return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem other) {
-        if (other == crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.getDefaultInstance()) return this;
-        if (other.hasInfo()) {
-          mergeInfo(other.getInfo());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private crawlercommons.urlfrontier.Urlfrontier.URLInfo info_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          crawlercommons.urlfrontier.Urlfrontier.URLInfo, crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder, crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder> infoBuilder_;
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       * @return Whether the info field is set.
-       */
-      public boolean hasInfo() {
-        return infoBuilder_ != null || info_ != null;
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       * @return The info.
-       */
-      public crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo() {
-        if (infoBuilder_ == null) {
-          return info_ == null ? crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance() : info_;
-        } else {
-          return infoBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public Builder setInfo(crawlercommons.urlfrontier.Urlfrontier.URLInfo value) {
-        if (infoBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          info_ = value;
-          onChanged();
-        } else {
-          infoBuilder_.setMessage(value);
+    public static final class DiscoveredURLItem extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.DiscoveredURLItem)
+            DiscoveredURLItemOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use DiscoveredURLItem.newBuilder() to construct.
+        private DiscoveredURLItem(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
         }
 
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public Builder setInfo(
-          crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder builderForValue) {
-        if (infoBuilder_ == null) {
-          info_ = builderForValue.build();
-          onChanged();
-        } else {
-          infoBuilder_.setMessage(builderForValue.build());
+        private DiscoveredURLItem() {}
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new DiscoveredURLItem();
         }
 
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public Builder mergeInfo(crawlercommons.urlfrontier.Urlfrontier.URLInfo value) {
-        if (infoBuilder_ == null) {
-          if (info_ != null) {
-            info_ =
-              crawlercommons.urlfrontier.Urlfrontier.URLInfo.newBuilder(info_).mergeFrom(value).buildPartial();
-          } else {
-            info_ = value;
-          }
-          onChanged();
-        } else {
-          infoBuilder_.mergeFrom(value);
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
         }
 
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public Builder clearInfo() {
-        if (infoBuilder_ == null) {
-          info_ = null;
-          onChanged();
-        } else {
-          info_ = null;
-          infoBuilder_ = null;
+        private DiscoveredURLItem(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder subBuilder =
+                                        null;
+                                if (info_ != null) {
+                                    subBuilder = info_.toBuilder();
+                                }
+                                info_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.URLInfo
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(info_);
+                                    info_ = subBuilder.buildPartial();
+                                }
+
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
         }
 
-        return this;
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder getInfoBuilder() {
-        
-        onChanged();
-        return getInfoFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      public crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder() {
-        if (infoBuilder_ != null) {
-          return infoBuilder_.getMessageOrBuilder();
-        } else {
-          return info_ == null ?
-              crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance() : info_;
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_DiscoveredURLItem_descriptor;
         }
-      }
-      /**
-       * <code>.urlfrontier.URLInfo info = 1;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          crawlercommons.urlfrontier.Urlfrontier.URLInfo, crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder, crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder> 
-          getInfoFieldBuilder() {
-        if (infoBuilder_ == null) {
-          infoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              crawlercommons.urlfrontier.Urlfrontier.URLInfo, crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder, crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder>(
-                  getInfo(),
-                  getParentForChildren(),
-                  isClean());
-          info_ = null;
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.class,
+                            crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder.class);
         }
-        return infoBuilder_;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
 
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
+        public static final int INFO_FIELD_NUMBER = 1;
+        private crawlercommons.urlfrontier.Urlfrontier.URLInfo info_;
+        /**
+         * <code>.urlfrontier.URLInfo info = 1;</code>
+         *
+         * @return Whether the info field is set.
+         */
+        @java.lang.Override
+        public boolean hasInfo() {
+            return info_ != null;
+        }
+        /**
+         * <code>.urlfrontier.URLInfo info = 1;</code>
+         *
+         * @return The info.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo() {
+            return info_ == null
+                    ? crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance()
+                    : info_;
+        }
+        /** <code>.urlfrontier.URLInfo info = 1;</code> */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder() {
+            return getInfo();
+        }
 
+        private byte memoizedIsInitialized = -1;
 
-      // @@protoc_insertion_point(builder_scope:urlfrontier.DiscoveredURLItem)
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (info_ != null) {
+                output.writeMessage(1, getInfo());
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (info_ != null) {
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(1, getInfo());
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem other =
+                    (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) obj;
+
+            if (hasInfo() != other.hasInfo()) return false;
+            if (hasInfo()) {
+                if (!getInfo().equals(other.getInfo())) return false;
+            }
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            if (hasInfo()) {
+                hash = (37 * hash) + INFO_FIELD_NUMBER;
+                hash = (53 * hash) + getInfo().hashCode();
+            }
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
+                byte[] data) throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * URL discovered during the crawl, might already be known in the URL Frontier or not.
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.DiscoveredURLItem}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.DiscoveredURLItem)
+                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItemOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_DiscoveredURLItem_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.class,
+                                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.Builder
+                                        .class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                if (infoBuilder_ == null) {
+                    info_ = null;
+                } else {
+                    info_ = null;
+                    infoBuilder_ = null;
+                }
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_DiscoveredURLItem_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                    getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                        .getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem build() {
+                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem result =
+                        new crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem(this);
+                if (infoBuilder_ == null) {
+                    result.info_ = info_;
+                } else {
+                    result.info_ = infoBuilder_.build();
+                }
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) {
+                    return mergeFrom(
+                            (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(
+                    crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem other) {
+                if (other
+                        == crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                                .getDefaultInstance()) return this;
+                if (other.hasInfo()) {
+                    mergeInfo(other.getInfo());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private crawlercommons.urlfrontier.Urlfrontier.URLInfo info_;
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfo,
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder>
+                    infoBuilder_;
+            /**
+             * <code>.urlfrontier.URLInfo info = 1;</code>
+             *
+             * @return Whether the info field is set.
+             */
+            public boolean hasInfo() {
+                return infoBuilder_ != null || info_ != null;
+            }
+            /**
+             * <code>.urlfrontier.URLInfo info = 1;</code>
+             *
+             * @return The info.
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.URLInfo getInfo() {
+                if (infoBuilder_ == null) {
+                    return info_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance()
+                            : info_;
+                } else {
+                    return infoBuilder_.getMessage();
+                }
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public Builder setInfo(crawlercommons.urlfrontier.Urlfrontier.URLInfo value) {
+                if (infoBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    info_ = value;
+                    onChanged();
+                } else {
+                    infoBuilder_.setMessage(value);
+                }
+
+                return this;
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public Builder setInfo(
+                    crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder builderForValue) {
+                if (infoBuilder_ == null) {
+                    info_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    infoBuilder_.setMessage(builderForValue.build());
+                }
+
+                return this;
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public Builder mergeInfo(crawlercommons.urlfrontier.Urlfrontier.URLInfo value) {
+                if (infoBuilder_ == null) {
+                    if (info_ != null) {
+                        info_ =
+                                crawlercommons.urlfrontier.Urlfrontier.URLInfo.newBuilder(info_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        info_ = value;
+                    }
+                    onChanged();
+                } else {
+                    infoBuilder_.mergeFrom(value);
+                }
+
+                return this;
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public Builder clearInfo() {
+                if (infoBuilder_ == null) {
+                    info_ = null;
+                    onChanged();
+                } else {
+                    info_ = null;
+                    infoBuilder_ = null;
+                }
+
+                return this;
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder getInfoBuilder() {
+
+                onChanged();
+                return getInfoFieldBuilder().getBuilder();
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            public crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder getInfoOrBuilder() {
+                if (infoBuilder_ != null) {
+                    return infoBuilder_.getMessageOrBuilder();
+                } else {
+                    return info_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.URLInfo.getDefaultInstance()
+                            : info_;
+                }
+            }
+            /** <code>.urlfrontier.URLInfo info = 1;</code> */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfo,
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder>
+                    getInfoFieldBuilder() {
+                if (infoBuilder_ == null) {
+                    infoBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.URLInfo,
+                                    crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.URLInfoOrBuilder>(
+                                    getInfo(), getParentForChildren(), isClean());
+                    info_ = null;
+                }
+                return infoBuilder_;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.DiscoveredURLItem)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.DiscoveredURLItem)
+        private static final crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<DiscoveredURLItem> PARSER =
+                new com.google.protobuf.AbstractParser<DiscoveredURLItem>() {
+                    @java.lang.Override
+                    public DiscoveredURLItem parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new DiscoveredURLItem(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<DiscoveredURLItem> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<DiscoveredURLItem> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem
+                getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
     }
 
-    // @@protoc_insertion_point(class_scope:urlfrontier.DiscoveredURLItem)
-    private static final crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem DEFAULT_INSTANCE;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_Stats_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_Stats_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_Stats_CountsEntry_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_Stats_CountsEntry_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_Pagination_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_Pagination_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_Empty_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_Empty_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_Boolean_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_Boolean_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_String_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_String_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_Integer_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_Integer_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_QueueList_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_QueueList_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_StringList_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_StringList_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_QueueDelayParams_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_BlockQueueParams_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_BlockQueueParams_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_GetParams_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_GetParams_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_URLItem_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_URLItem_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_URLInfo_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_URLInfo_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_URLInfo_MetadataEntry_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_URLInfo_MetadataEntry_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_KnownURLItem_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_KnownURLItem_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_DiscoveredURLItem_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable;
+
+    public static com.google.protobuf.Descriptors.FileDescriptor getDescriptor() {
+        return descriptor;
+    }
+
+    private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
+
     static {
-      DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem();
+        java.lang.String[] descriptorData = {
+            "\n\021urlfrontier.proto\022\013urlfrontier\"\237\001\n\005Sta"
+                    + "ts\022\014\n\004size\030\001 \001(\004\022\021\n\tinProcess\030\002 \001(\r\022.\n\006c"
+                    + "ounts\030\003 \003(\0132\036.urlfrontier.Stats.CountsEn"
+                    + "try\022\026\n\016numberOfQueues\030\004 \001(\004\032-\n\013CountsEnt"
+                    + "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\004:\0028\001\"C\n\nPa"
+                    + "gination\022\r\n\005start\030\001 \001(\r\022\014\n\004size\030\002 \001(\r\022\030\n"
+                    + "\020include_inactive\030\003 \001(\010\"\007\n\005Empty\"\030\n\007Bool"
+                    + "ean\022\r\n\005state\030\001 \001(\010\"\027\n\006String\022\r\n\005value\030\001 "
+                    + "\001(\t\"\030\n\007Integer\022\r\n\005value\030\001 \001(\004\"G\n\tQueueLi"
+                    + "st\022\016\n\006values\030\001 \003(\t\022\r\n\005total\030\002 \001(\004\022\r\n\005sta"
+                    + "rt\030\003 \001(\r\022\014\n\004size\030\004 \001(\r\"\034\n\nStringList\022\016\n\006"
+                    + "values\030\001 \003(\t\":\n\020QueueDelayParams\022\013\n\003key\030"
+                    + "\001 \001(\t\022\031\n\021delay_requestable\030\002 \001(\r\"-\n\020Bloc"
+                    + "kQueueParams\022\013\n\003key\030\001 \001(\t\022\014\n\004time\030\002 \001(\004\""
+                    + "c\n\tGetParams\022\032\n\022max_urls_per_queue\030\001 \001(\r"
+                    + "\022\022\n\nmax_queues\030\002 \001(\r\022\013\n\003key\030\003 \001(\t\022\031\n\021del"
+                    + "ay_requestable\030\004 \001(\r\"s\n\007URLItem\0224\n\ndisco"
+                    + "vered\030\001 \001(\0132\036.urlfrontier.DiscoveredURLI"
+                    + "temH\000\022*\n\005known\030\002 \001(\0132\031.urlfrontier.Known"
+                    + "URLItemH\000B\006\n\004item\"\243\001\n\007URLInfo\022\013\n\003url\030\001 \001"
+                    + "(\t\022\013\n\003key\030\002 \001(\t\0224\n\010metadata\030\003 \003(\0132\".urlf"
+                    + "rontier.URLInfo.MetadataEntry\032H\n\rMetadat"
+                    + "aEntry\022\013\n\003key\030\001 \001(\t\022&\n\005value\030\002 \001(\0132\027.url"
+                    + "frontier.StringList:\0028\001\"Q\n\014KnownURLItem\022"
+                    + "\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLInfo\022\035\n\025r"
+                    + "efetchable_from_date\030\002 \001(\004\"7\n\021Discovered"
+                    + "URLItem\022\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLI"
+                    + "nfo2\265\004\n\013URLFrontier\022?\n\nListQueues\022\027.urlf"
+                    + "rontier.Pagination\032\026.urlfrontier.QueueLi"
+                    + "st\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetParams\032"
+                    + "\024.urlfrontier.URLInfo\"\0000\001\022:\n\007PutURLs\022\024.u"
+                    + "rlfrontier.URLItem\032\023.urlfrontier.String\""
+                    + "\000(\0010\001\0225\n\010GetStats\022\023.urlfrontier.String\032\022"
+                    + ".urlfrontier.Stats\"\000\022:\n\013DeleteQueue\022\023.ur"
+                    + "lfrontier.String\032\024.urlfrontier.Integer\"\000"
+                    + "\022F\n\017BlockQueueUntil\022\035.urlfrontier.BlockQ"
+                    + "ueueParams\032\022.urlfrontier.Empty\"\000\0227\n\tSetA"
+                    + "ctive\022\024.urlfrontier.Boolean\032\022.urlfrontie"
+                    + "r.Empty\"\000\0227\n\tGetActive\022\022.urlfrontier.Emp"
+                    + "ty\032\024.urlfrontier.Boolean\"\000\022?\n\010SetDelay\022\035"
+                    + ".urlfrontier.QueueDelayParams\032\022.urlfront"
+                    + "ier.Empty\"\000B\034\n\032crawlercommons.urlfrontie"
+                    + "rb\006proto3"
+        };
+        descriptor =
+                com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
+                        descriptorData, new com.google.protobuf.Descriptors.FileDescriptor[] {});
+        internal_static_urlfrontier_Stats_descriptor = getDescriptor().getMessageTypes().get(0);
+        internal_static_urlfrontier_Stats_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_Stats_descriptor,
+                        new java.lang.String[] {
+                            "Size", "InProcess", "Counts", "NumberOfQueues",
+                        });
+        internal_static_urlfrontier_Stats_CountsEntry_descriptor =
+                internal_static_urlfrontier_Stats_descriptor.getNestedTypes().get(0);
+        internal_static_urlfrontier_Stats_CountsEntry_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_Stats_CountsEntry_descriptor,
+                        new java.lang.String[] {
+                            "Key", "Value",
+                        });
+        internal_static_urlfrontier_Pagination_descriptor =
+                getDescriptor().getMessageTypes().get(1);
+        internal_static_urlfrontier_Pagination_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_Pagination_descriptor,
+                        new java.lang.String[] {
+                            "Start", "Size", "IncludeInactive",
+                        });
+        internal_static_urlfrontier_Empty_descriptor = getDescriptor().getMessageTypes().get(2);
+        internal_static_urlfrontier_Empty_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_Empty_descriptor, new java.lang.String[] {});
+        internal_static_urlfrontier_Boolean_descriptor = getDescriptor().getMessageTypes().get(3);
+        internal_static_urlfrontier_Boolean_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_Boolean_descriptor,
+                        new java.lang.String[] {
+                            "State",
+                        });
+        internal_static_urlfrontier_String_descriptor = getDescriptor().getMessageTypes().get(4);
+        internal_static_urlfrontier_String_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_String_descriptor,
+                        new java.lang.String[] {
+                            "Value",
+                        });
+        internal_static_urlfrontier_Integer_descriptor = getDescriptor().getMessageTypes().get(5);
+        internal_static_urlfrontier_Integer_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_Integer_descriptor,
+                        new java.lang.String[] {
+                            "Value",
+                        });
+        internal_static_urlfrontier_QueueList_descriptor = getDescriptor().getMessageTypes().get(6);
+        internal_static_urlfrontier_QueueList_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_QueueList_descriptor,
+                        new java.lang.String[] {
+                            "Values", "Total", "Start", "Size",
+                        });
+        internal_static_urlfrontier_StringList_descriptor =
+                getDescriptor().getMessageTypes().get(7);
+        internal_static_urlfrontier_StringList_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_StringList_descriptor,
+                        new java.lang.String[] {
+                            "Values",
+                        });
+        internal_static_urlfrontier_QueueDelayParams_descriptor =
+                getDescriptor().getMessageTypes().get(8);
+        internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_QueueDelayParams_descriptor,
+                        new java.lang.String[] {
+                            "Key", "DelayRequestable",
+                        });
+        internal_static_urlfrontier_BlockQueueParams_descriptor =
+                getDescriptor().getMessageTypes().get(9);
+        internal_static_urlfrontier_BlockQueueParams_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_BlockQueueParams_descriptor,
+                        new java.lang.String[] {
+                            "Key", "Time",
+                        });
+        internal_static_urlfrontier_GetParams_descriptor =
+                getDescriptor().getMessageTypes().get(10);
+        internal_static_urlfrontier_GetParams_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_GetParams_descriptor,
+                        new java.lang.String[] {
+                            "MaxUrlsPerQueue", "MaxQueues", "Key", "DelayRequestable",
+                        });
+        internal_static_urlfrontier_URLItem_descriptor = getDescriptor().getMessageTypes().get(11);
+        internal_static_urlfrontier_URLItem_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_URLItem_descriptor,
+                        new java.lang.String[] {
+                            "Discovered", "Known", "Item",
+                        });
+        internal_static_urlfrontier_URLInfo_descriptor = getDescriptor().getMessageTypes().get(12);
+        internal_static_urlfrontier_URLInfo_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_URLInfo_descriptor,
+                        new java.lang.String[] {
+                            "Url", "Key", "Metadata",
+                        });
+        internal_static_urlfrontier_URLInfo_MetadataEntry_descriptor =
+                internal_static_urlfrontier_URLInfo_descriptor.getNestedTypes().get(0);
+        internal_static_urlfrontier_URLInfo_MetadataEntry_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_URLInfo_MetadataEntry_descriptor,
+                        new java.lang.String[] {
+                            "Key", "Value",
+                        });
+        internal_static_urlfrontier_KnownURLItem_descriptor =
+                getDescriptor().getMessageTypes().get(13);
+        internal_static_urlfrontier_KnownURLItem_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_KnownURLItem_descriptor,
+                        new java.lang.String[] {
+                            "Info", "RefetchableFromDate",
+                        });
+        internal_static_urlfrontier_DiscoveredURLItem_descriptor =
+                getDescriptor().getMessageTypes().get(14);
+        internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_DiscoveredURLItem_descriptor,
+                        new java.lang.String[] {
+                            "Info",
+                        });
     }
 
-    public static crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<DiscoveredURLItem>
-        PARSER = new com.google.protobuf.AbstractParser<DiscoveredURLItem>() {
-      @java.lang.Override
-      public DiscoveredURLItem parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DiscoveredURLItem(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<DiscoveredURLItem> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<DiscoveredURLItem> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_Stats_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_Stats_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_Stats_CountsEntry_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_Stats_CountsEntry_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_Pagination_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_Pagination_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_Empty_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_Empty_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_Boolean_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_Boolean_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_String_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_String_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_Integer_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_Integer_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_QueueList_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_QueueList_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_StringList_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_StringList_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_QueueDelayParams_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_BlockQueueParams_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_BlockQueueParams_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_GetParams_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_GetParams_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_URLItem_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_URLItem_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_URLInfo_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_URLInfo_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_URLInfo_MetadataEntry_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_URLInfo_MetadataEntry_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_KnownURLItem_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_KnownURLItem_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_urlfrontier_DiscoveredURLItem_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable;
-
-  public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
-    return descriptor;
-  }
-  private static  com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
-  static {
-    java.lang.String[] descriptorData = {
-      "\n\021urlfrontier.proto\022\013urlfrontier\"\237\001\n\005Sta" +
-      "ts\022\014\n\004size\030\001 \001(\004\022\021\n\tinProcess\030\002 \001(\r\022.\n\006c" +
-      "ounts\030\003 \003(\0132\036.urlfrontier.Stats.CountsEn" +
-      "try\022\026\n\016numberOfQueues\030\004 \001(\004\032-\n\013CountsEnt" +
-      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\004:\0028\001\"C\n\nPa" +
-      "gination\022\r\n\005start\030\001 \001(\r\022\014\n\004size\030\002 \001(\r\022\030\n" +
-      "\020include_inactive\030\003 \001(\010\"\007\n\005Empty\"\030\n\007Bool" +
-      "ean\022\r\n\005state\030\001 \001(\010\"\027\n\006String\022\r\n\005value\030\001 " +
-      "\001(\t\"\030\n\007Integer\022\r\n\005value\030\001 \001(\004\"G\n\tQueueLi" +
-      "st\022\016\n\006values\030\001 \003(\t\022\r\n\005total\030\002 \001(\004\022\r\n\005sta" +
-      "rt\030\003 \001(\r\022\014\n\004size\030\004 \001(\r\"\034\n\nStringList\022\016\n\006" +
-      "values\030\001 \003(\t\":\n\020QueueDelayParams\022\013\n\003key\030" +
-      "\001 \001(\t\022\031\n\021delay_requestable\030\002 \001(\r\"-\n\020Bloc" +
-      "kQueueParams\022\013\n\003key\030\001 \001(\t\022\014\n\004time\030\002 \001(\004\"" +
-      "c\n\tGetParams\022\032\n\022max_urls_per_queue\030\001 \001(\r" +
-      "\022\022\n\nmax_queues\030\002 \001(\r\022\013\n\003key\030\003 \001(\t\022\031\n\021del" +
-      "ay_requestable\030\004 \001(\r\"s\n\007URLItem\0224\n\ndisco" +
-      "vered\030\001 \001(\0132\036.urlfrontier.DiscoveredURLI" +
-      "temH\000\022*\n\005known\030\002 \001(\0132\031.urlfrontier.Known" +
-      "URLItemH\000B\006\n\004item\"\243\001\n\007URLInfo\022\013\n\003url\030\001 \001" +
-      "(\t\022\013\n\003key\030\002 \001(\t\0224\n\010metadata\030\003 \003(\0132\".urlf" +
-      "rontier.URLInfo.MetadataEntry\032H\n\rMetadat" +
-      "aEntry\022\013\n\003key\030\001 \001(\t\022&\n\005value\030\002 \001(\0132\027.url" +
-      "frontier.StringList:\0028\001\"Q\n\014KnownURLItem\022" +
-      "\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLInfo\022\035\n\025r" +
-      "efetchable_from_date\030\002 \001(\004\"7\n\021Discovered" +
-      "URLItem\022\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLI" +
-      "nfo2\265\004\n\013URLFrontier\022?\n\nListQueues\022\027.urlf" +
-      "rontier.Pagination\032\026.urlfrontier.QueueLi" +
-      "st\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetParams\032" +
-      "\024.urlfrontier.URLInfo\"\0000\001\022:\n\007PutURLs\022\024.u" +
-      "rlfrontier.URLItem\032\023.urlfrontier.String\"" +
-      "\000(\0010\001\0225\n\010GetStats\022\023.urlfrontier.String\032\022" +
-      ".urlfrontier.Stats\"\000\022:\n\013DeleteQueue\022\023.ur" +
-      "lfrontier.String\032\024.urlfrontier.Integer\"\000" +
-      "\022F\n\017BlockQueueUntil\022\035.urlfrontier.BlockQ" +
-      "ueueParams\032\022.urlfrontier.Empty\"\000\0227\n\tSetA" +
-      "ctive\022\024.urlfrontier.Boolean\032\022.urlfrontie" +
-      "r.Empty\"\000\0227\n\tGetActive\022\022.urlfrontier.Emp" +
-      "ty\032\024.urlfrontier.Boolean\"\000\022?\n\010SetDelay\022\035" +
-      ".urlfrontier.QueueDelayParams\032\022.urlfront" +
-      "ier.Empty\"\000B\034\n\032crawlercommons.urlfrontie" +
-      "rb\006proto3"
-    };
-    descriptor = com.google.protobuf.Descriptors.FileDescriptor
-      .internalBuildGeneratedFileFrom(descriptorData,
-        new com.google.protobuf.Descriptors.FileDescriptor[] {
-        });
-    internal_static_urlfrontier_Stats_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_urlfrontier_Stats_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_Stats_descriptor,
-        new java.lang.String[] { "Size", "InProcess", "Counts", "NumberOfQueues", });
-    internal_static_urlfrontier_Stats_CountsEntry_descriptor =
-      internal_static_urlfrontier_Stats_descriptor.getNestedTypes().get(0);
-    internal_static_urlfrontier_Stats_CountsEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_Stats_CountsEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
-    internal_static_urlfrontier_Pagination_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_urlfrontier_Pagination_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_Pagination_descriptor,
-        new java.lang.String[] { "Start", "Size", "IncludeInactive", });
-    internal_static_urlfrontier_Empty_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_urlfrontier_Empty_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_Empty_descriptor,
-        new java.lang.String[] { });
-    internal_static_urlfrontier_Boolean_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_urlfrontier_Boolean_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_Boolean_descriptor,
-        new java.lang.String[] { "State", });
-    internal_static_urlfrontier_String_descriptor =
-      getDescriptor().getMessageTypes().get(4);
-    internal_static_urlfrontier_String_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_String_descriptor,
-        new java.lang.String[] { "Value", });
-    internal_static_urlfrontier_Integer_descriptor =
-      getDescriptor().getMessageTypes().get(5);
-    internal_static_urlfrontier_Integer_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_Integer_descriptor,
-        new java.lang.String[] { "Value", });
-    internal_static_urlfrontier_QueueList_descriptor =
-      getDescriptor().getMessageTypes().get(6);
-    internal_static_urlfrontier_QueueList_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_QueueList_descriptor,
-        new java.lang.String[] { "Values", "Total", "Start", "Size", });
-    internal_static_urlfrontier_StringList_descriptor =
-      getDescriptor().getMessageTypes().get(7);
-    internal_static_urlfrontier_StringList_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_StringList_descriptor,
-        new java.lang.String[] { "Values", });
-    internal_static_urlfrontier_QueueDelayParams_descriptor =
-      getDescriptor().getMessageTypes().get(8);
-    internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_QueueDelayParams_descriptor,
-        new java.lang.String[] { "Key", "DelayRequestable", });
-    internal_static_urlfrontier_BlockQueueParams_descriptor =
-      getDescriptor().getMessageTypes().get(9);
-    internal_static_urlfrontier_BlockQueueParams_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_BlockQueueParams_descriptor,
-        new java.lang.String[] { "Key", "Time", });
-    internal_static_urlfrontier_GetParams_descriptor =
-      getDescriptor().getMessageTypes().get(10);
-    internal_static_urlfrontier_GetParams_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_GetParams_descriptor,
-        new java.lang.String[] { "MaxUrlsPerQueue", "MaxQueues", "Key", "DelayRequestable", });
-    internal_static_urlfrontier_URLItem_descriptor =
-      getDescriptor().getMessageTypes().get(11);
-    internal_static_urlfrontier_URLItem_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_URLItem_descriptor,
-        new java.lang.String[] { "Discovered", "Known", "Item", });
-    internal_static_urlfrontier_URLInfo_descriptor =
-      getDescriptor().getMessageTypes().get(12);
-    internal_static_urlfrontier_URLInfo_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_URLInfo_descriptor,
-        new java.lang.String[] { "Url", "Key", "Metadata", });
-    internal_static_urlfrontier_URLInfo_MetadataEntry_descriptor =
-      internal_static_urlfrontier_URLInfo_descriptor.getNestedTypes().get(0);
-    internal_static_urlfrontier_URLInfo_MetadataEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_URLInfo_MetadataEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
-    internal_static_urlfrontier_KnownURLItem_descriptor =
-      getDescriptor().getMessageTypes().get(13);
-    internal_static_urlfrontier_KnownURLItem_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_KnownURLItem_descriptor,
-        new java.lang.String[] { "Info", "RefetchableFromDate", });
-    internal_static_urlfrontier_DiscoveredURLItem_descriptor =
-      getDescriptor().getMessageTypes().get(14);
-    internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_urlfrontier_DiscoveredURLItem_descriptor,
-        new java.lang.String[] { "Info", });
-  }
-
-  // @@protoc_insertion_point(outer_class_scope)
+    // @@protoc_insertion_point(outer_class_scope)
 }
