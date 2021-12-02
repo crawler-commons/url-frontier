@@ -384,7 +384,7 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
 | ListCrawls | [Empty](#urlfrontier.Empty) | [StringList](#urlfrontier.StringList) | Return the list of crawls handled by the frontier * |
-| DeleteCrawl | [Empty](#urlfrontier.Empty) | [Empty](#urlfrontier.Empty) | Delete an entire crawl * |
+| DeleteCrawl | [CrawlID](#urlfrontier.CrawlID) | [Integer](#urlfrontier.Integer) | Delete an entire crawl, returns the number of URLs removed this way * |
 | ListQueues | [Pagination](#urlfrontier.Pagination) | [QueueList](#urlfrontier.QueueList) | Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching); by default the service will return up to 100 results from offset 0 and exclude inactive queues.* |
 | GetURLs | [GetParams](#urlfrontier.GetParams) | [URLInfo](#urlfrontier.URLInfo) stream | Stream URLs due for fetching from M queues with up to N items per queue * |
 | PutURLs | [URLItem](#urlfrontier.URLItem) stream | [String](#urlfrontier.String) stream | Push URL items to the server; they get created (if they don&#39;t already exist) in case of DiscoveredURLItems or updated if KnownURLItems * |

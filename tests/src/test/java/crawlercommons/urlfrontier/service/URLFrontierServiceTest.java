@@ -22,6 +22,7 @@ import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
+import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
@@ -254,5 +255,12 @@ public class URLFrontierServiceTest {
                                 .build());
 
         Assert.assertEquals("incorrect number of queues deleted", 1, deleted.getValue());
+    }
+
+    @Test
+    public void testCrawlIDs() {
+        StringList crawlids = blockingFrontier.listCrawls(Urlfrontier.Empty.getDefaultInstance());
+
+        Assert.assertEquals("incorrect number of queues deleted", 1, crawlids.getValuesCount());
     }
 }

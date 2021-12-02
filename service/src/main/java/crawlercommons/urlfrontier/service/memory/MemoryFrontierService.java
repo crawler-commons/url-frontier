@@ -19,6 +19,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
+import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.stub.StreamObserver;
 import java.util.Iterator;
 import java.util.PriorityQueue;
@@ -116,11 +117,16 @@ public class MemoryFrontierService extends AbstractFrontierService {
                     return;
                 }
 
+                // TODO get the crawlID from the URLItem
+                String crawlid = "DEFAULT";
+
+                QueueWithinCrawl qk = QueueWithinCrawl.get(key, crawlid);
+
                 // get the priority queue or create one
                 synchronized (queues) {
-                    URLQueue queue = (URLQueue) queues.get(key);
+                    URLQueue queue = (URLQueue) queues.get(qk);
                     if (queue == null) {
-                        queues.put(key, new URLQueue(iu));
+                        queues.put(qk, new URLQueue(iu));
                         // ack reception of the URL
                         responseObserver.onNext(
                                 crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()

@@ -21,17 +21,20 @@ import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
+import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import io.grpc.stub.StreamObserver;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
@@ -45,7 +48,7 @@ public abstract class AbstractFrontierService
     private int defaultDelayForQueues = 1;
 
     // in memory map of metadata for each queue
-    protected final Map<String, QueueInterface> queues =
+    protected final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
 
     public int getDefaultDelayForQueues() {
@@ -58,6 +61,34 @@ public abstract class AbstractFrontierService
 
     protected boolean isActive() {
         return active;
+    }
+
+    @Override
+    public void listCrawls(
+            crawlercommons.urlfrontier.Urlfrontier.Empty request,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList>
+                    responseObserver) {
+
+        Set<String> _queues = new HashSet<>();
+
+        synchronized (queues) {
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                    queues.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                _queues.add(e.getKey().getCrawlid());
+            }
+        }
+        responseObserver.onNext(StringList.newBuilder().addAllValues(_queues).build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void deleteCrawl(
+            crawlercommons.urlfrontier.Urlfrontier.Empty request,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
+                    responseObserver) {
+        // TODO
     }
 
     @Override
@@ -137,10 +168,11 @@ public abstract class AbstractFrontierService
         crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder list = QueueList.newBuilder();
 
         synchronized (queues) {
-            Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                    queues.entrySet().iterator();
 
             while (iterator.hasNext() && sent <= maxQueues) {
-                Entry<String, QueueInterface> e = iterator.next();
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 pos++;
 
                 // check that it isn't blocked
@@ -151,7 +183,7 @@ public abstract class AbstractFrontierService
                 // ignore the nextfetchdate
                 if (include_inactive || e.getValue().countActive() > 0) {
                     if (pos >= start) {
-                        list.addValues(e.getKey());
+                        list.addValues(e.getKey().getQueue());
                         sent++;
                     }
                 }
@@ -371,9 +403,11 @@ public abstract class AbstractFrontierService
             QueueInterface currentQueue = null;
 
             synchronized (queues) {
-                Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
-                Entry<String, QueueInterface> e = iterator.next();
-                currentQueueKey = e.getKey();
+                Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                        queues.entrySet().iterator();
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                currentQueueKey = e.getKey().getQueue();
+                String currentCrawl = e.getKey().getCrawlid();
                 currentQueue = e.getValue();
 
                 // to make sure we don't loop over the ones we already processed
@@ -385,7 +419,7 @@ public abstract class AbstractFrontierService
                 // We remove the entry and put it at the end of the map
                 iterator.remove();
 
-                queues.put(currentQueueKey, currentQueue);
+                queues.put(new QueueWithinCrawl(currentQueueKey, currentCrawl), currentQueue);
             }
 
             // it is locked

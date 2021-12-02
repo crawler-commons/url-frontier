@@ -66,22 +66,22 @@ public final class URLFrontierGrpc {
     }
 
     private static volatile io.grpc.MethodDescriptor<
-                    crawlercommons.urlfrontier.Urlfrontier.Empty,
-                    crawlercommons.urlfrontier.Urlfrontier.Empty>
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                    crawlercommons.urlfrontier.Urlfrontier.Integer>
             getDeleteCrawlMethod;
 
     @io.grpc.stub.annotations.RpcMethod(
             fullMethodName = SERVICE_NAME + '/' + "DeleteCrawl",
-            requestType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
-            responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+            requestType = crawlercommons.urlfrontier.Urlfrontier.CrawlID.class,
+            responseType = crawlercommons.urlfrontier.Urlfrontier.Integer.class,
             methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
     public static io.grpc.MethodDescriptor<
-                    crawlercommons.urlfrontier.Urlfrontier.Empty,
-                    crawlercommons.urlfrontier.Urlfrontier.Empty>
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                    crawlercommons.urlfrontier.Urlfrontier.Integer>
             getDeleteCrawlMethod() {
         io.grpc.MethodDescriptor<
-                        crawlercommons.urlfrontier.Urlfrontier.Empty,
-                        crawlercommons.urlfrontier.Urlfrontier.Empty>
+                        crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                        crawlercommons.urlfrontier.Urlfrontier.Integer>
                 getDeleteCrawlMethod;
         if ((getDeleteCrawlMethod = URLFrontierGrpc.getDeleteCrawlMethod) == null) {
             synchronized (URLFrontierGrpc.class) {
@@ -89,8 +89,8 @@ public final class URLFrontierGrpc {
                     URLFrontierGrpc.getDeleteCrawlMethod =
                             getDeleteCrawlMethod =
                                     io.grpc.MethodDescriptor
-                                            .<crawlercommons.urlfrontier.Urlfrontier.Empty,
-                                                    crawlercommons.urlfrontier.Urlfrontier.Empty>
+                                            .<crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                                                    crawlercommons.urlfrontier.Urlfrontier.Integer>
                                                     newBuilder()
                                             .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
                                             .setFullMethodName(
@@ -100,11 +100,11 @@ public final class URLFrontierGrpc {
                                             .setRequestMarshaller(
                                                     io.grpc.protobuf.ProtoUtils.marshaller(
                                                             crawlercommons.urlfrontier.Urlfrontier
-                                                                    .Empty.getDefaultInstance()))
+                                                                    .CrawlID.getDefaultInstance()))
                                             .setResponseMarshaller(
                                                     io.grpc.protobuf.ProtoUtils.marshaller(
                                                             crawlercommons.urlfrontier.Urlfrontier
-                                                                    .Empty.getDefaultInstance()))
+                                                                    .Integer.getDefaultInstance()))
                                             .setSchemaDescriptor(
                                                     new URLFrontierMethodDescriptorSupplier(
                                                             "DeleteCrawl"))
@@ -643,12 +643,12 @@ public final class URLFrontierGrpc {
          *
          *
          * <pre>
-         * * Delete an entire crawl *
+         * * Delete an entire crawl, returns the number of URLs removed this way *
          * </pre>
          */
         public void deleteCrawl(
-                crawlercommons.urlfrontier.Urlfrontier.Empty request,
-                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
+                crawlercommons.urlfrontier.Urlfrontier.CrawlID request,
+                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
                         responseObserver) {
             io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
                     getDeleteCrawlMethod(), responseObserver);
@@ -808,8 +808,8 @@ public final class URLFrontierGrpc {
                             getDeleteCrawlMethod(),
                             io.grpc.stub.ServerCalls.asyncUnaryCall(
                                     new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.Empty,
-                                            crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                                            crawlercommons.urlfrontier.Urlfrontier.Integer>(
                                             this, METHODID_DELETE_CRAWL)))
                     .addMethod(
                             getListQueuesMethod(),
@@ -913,12 +913,12 @@ public final class URLFrontierGrpc {
          *
          *
          * <pre>
-         * * Delete an entire crawl *
+         * * Delete an entire crawl, returns the number of URLs removed this way *
          * </pre>
          */
         public void deleteCrawl(
-                crawlercommons.urlfrontier.Urlfrontier.Empty request,
-                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
+                crawlercommons.urlfrontier.Urlfrontier.CrawlID request,
+                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
                         responseObserver) {
             io.grpc.stub.ClientCalls.asyncUnaryCall(
                     getChannel().newCall(getDeleteCrawlMethod(), getCallOptions()),
@@ -1113,11 +1113,11 @@ public final class URLFrontierGrpc {
          *
          *
          * <pre>
-         * * Delete an entire crawl *
+         * * Delete an entire crawl, returns the number of URLs removed this way *
          * </pre>
          */
-        public crawlercommons.urlfrontier.Urlfrontier.Empty deleteCrawl(
-                crawlercommons.urlfrontier.Urlfrontier.Empty request) {
+        public crawlercommons.urlfrontier.Urlfrontier.Integer deleteCrawl(
+                crawlercommons.urlfrontier.Urlfrontier.CrawlID request) {
             return io.grpc.stub.ClientCalls.blockingUnaryCall(
                     getChannel(), getDeleteCrawlMethod(), getCallOptions(), request);
         }
@@ -1264,12 +1264,12 @@ public final class URLFrontierGrpc {
          *
          *
          * <pre>
-         * * Delete an entire crawl *
+         * * Delete an entire crawl, returns the number of URLs removed this way *
          * </pre>
          */
         public com.google.common.util.concurrent.ListenableFuture<
-                        crawlercommons.urlfrontier.Urlfrontier.Empty>
-                deleteCrawl(crawlercommons.urlfrontier.Urlfrontier.Empty request) {
+                        crawlercommons.urlfrontier.Urlfrontier.Integer>
+                deleteCrawl(crawlercommons.urlfrontier.Urlfrontier.CrawlID request) {
             return io.grpc.stub.ClientCalls.futureUnaryCall(
                     getChannel().newCall(getDeleteCrawlMethod(), getCallOptions()), request);
         }
@@ -1417,9 +1417,9 @@ public final class URLFrontierGrpc {
                     break;
                 case METHODID_DELETE_CRAWL:
                     serviceImpl.deleteCrawl(
-                            (crawlercommons.urlfrontier.Urlfrontier.Empty) request,
+                            (crawlercommons.urlfrontier.Urlfrontier.CrawlID) request,
                             (io.grpc.stub.StreamObserver<
-                                            crawlercommons.urlfrontier.Urlfrontier.Empty>)
+                                            crawlercommons.urlfrontier.Urlfrontier.Integer>)
                                     responseObserver);
                     break;
                 case METHODID_LIST_QUEUES:

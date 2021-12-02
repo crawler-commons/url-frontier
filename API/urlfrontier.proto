@@ -26,8 +26,8 @@ service URLFrontier {
      /** Return the list of crawls handled by the frontier **/
      rpc ListCrawls(Empty) returns (StringList) {}
 
-     /** Delete an entire crawl **/
-     rpc DeleteCrawl(Empty) returns (Empty) {}
+     /** Delete an entire crawl, returns the number of URLs removed this way **/
+     rpc DeleteCrawl(CrawlID) returns (Integer) {}
 
      /** Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
        by default the service will return up to 100 results from offset 0 and exclude inactive queues.**/

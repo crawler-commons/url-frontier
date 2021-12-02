@@ -21,6 +21,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
+import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.stub.StreamObserver;
 import java.io.Closeable;
 import java.io.File;
@@ -74,7 +75,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         this(new HashMap<String, String>());
     }
 
-    private final ConcurrentHashMap<String, String> queuesBeingDeleted = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<QueueWithinCrawl, QueueWithinCrawl> queuesBeingDeleted =
+            new ConcurrentHashMap<>();
 
     public RocksDBService(final Map<String, String> configuration) {
 
@@ -175,8 +177,12 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
                 final int pos = currentKey.indexOf('_');
                 final String Qkey = keyDeNormalisation(currentKey.substring(0, pos));
+
+                // TODO handle different crawls
+                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, "DEFAULT");
+
                 QueueMetadata queueMD =
-                        (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
+                        (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
                 queueMD.incrementActive();
             }
         }
@@ -203,10 +209,13 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                     numScheduled = 0;
                 }
 
+                // TODO handle different crawls
+                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, "DEFAULT");
+
                 // queue might not exist if it had nothing scheduled for it
                 // i.e. all done
                 QueueMetadata queueMD =
-                        (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
+                        (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
 
                 // check the value - if it is an empty byte array it means that the URL has been
                 // processed and is not scheduled
@@ -373,9 +382,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                     return;
                 }
 
+                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, "DEFAULT");
+
                 // get the priority queue or create one
                 QueueMetadata queueMD =
-                        (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
+                        (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
                 try {
                     // known - remove from queues
                     // its key in the queues was stored in the default cf
@@ -446,12 +457,15 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     public void deleteQueue(
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
-        final String Qkey = request.getKey();
+        final String crawl = request.getCrawlID().toString();
+
+        final QueueWithinCrawl qc = QueueWithinCrawl.get(request.getKey(), crawl);
+
         int sizeQueue = 0;
 
         // is this queue is already being deleted?
         // no need to do it again
-        if (queuesBeingDeleted.contains(Qkey)) {
+        if (queuesBeingDeleted.contains(qc)) {
             responseObserver.onNext(
                     crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
                             .setValue(sizeQueue)
@@ -460,7 +474,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             return;
         }
 
-        queuesBeingDeleted.put(Qkey, Qkey);
+        queuesBeingDeleted.put(qc, qc);
 
         // find the next key by alphabetical order
         String[] array = new String[queues.size()];
@@ -472,7 +486,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             if (wantNext) {
                 endKey = (keyNormalisation(s) + "_").getBytes(StandardCharsets.UTF_8);
                 break;
-            } else if (s.equals(Qkey)) {
+            } else if (s.equals(qc.getQueue())) {
                 wantNext = true;
             }
         }
@@ -496,11 +510,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 // processed
                 rocksDB.deleteRange(
                         columnFamilyHandleList.get(1),
-                        (keyNormalisation(Qkey) + "_").getBytes(StandardCharsets.UTF_8),
+                        (keyNormalisation(qc.getQueue()) + "_").getBytes(StandardCharsets.UTF_8),
                         endKey);
                 rocksDB.deleteRange(
                         columnFamilyHandleList.get(0),
-                        (keyNormalisation(Qkey) + "_").getBytes(StandardCharsets.UTF_8),
+                        (keyNormalisation(qc.getQueue()) + "_").getBytes(StandardCharsets.UTF_8),
                         endKey);
                 if (endKeyMustAlsoDie) {
                     rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
@@ -512,11 +526,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             LOG.error("RocksDBException", e);
         }
 
-        QueueInterface q = queues.remove(Qkey);
+        QueueInterface q = queues.remove(qc);
         sizeQueue += q.countActive();
         sizeQueue += q.getCountCompleted();
 
-        queuesBeingDeleted.remove(Qkey);
+        queuesBeingDeleted.remove(qc);
 
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
