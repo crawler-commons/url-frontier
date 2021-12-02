@@ -444,9 +444,9 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
      */
     @Override
     public void deleteQueue(
-            crawlercommons.urlfrontier.Urlfrontier.String request,
+            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
-        final String Qkey = request.getValue();
+        final String Qkey = request.getKey();
         int sizeQueue = 0;
 
         // is this queue is already being deleted?
@@ -536,7 +536,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
     @Override
     public void getStats(
-            crawlercommons.urlfrontier.Urlfrontier.String request,
+            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<Stats> responseObserver) {
         if (statistics != null) {
             LOG.info("RockdSB stats: {}", statistics);

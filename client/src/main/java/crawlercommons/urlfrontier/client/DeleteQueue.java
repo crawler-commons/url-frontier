@@ -16,6 +16,8 @@ package crawlercommons.urlfrontier.client;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
+import crawlercommons.urlfrontier.Urlfrontier;
+import crawlercommons.urlfrontier.Urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.Integer;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -35,6 +37,13 @@ public class DeleteQueue implements Runnable {
             description = "key for the queue to be deleted")
     private String key;
 
+    @Option(
+            names = {"-c", "--crawlID"},
+            defaultValue = "DEFAULT",
+            paramLabel = "STRING",
+            description = "crawl to get the stats for")
+    private String crawl;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -44,11 +53,15 @@ public class DeleteQueue implements Runnable {
 
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
-        crawlercommons.urlfrontier.Urlfrontier.String.Builder builder =
-                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder();
+        Urlfrontier.QueueWithinCrawlParams.Builder builder =
+                Urlfrontier.QueueWithinCrawlParams.newBuilder();
+
         if (key.length() > 0) {
-            builder.setValue(key);
+            builder.setKey(key);
         }
+
+        // TODO set the crawlID
+        builder.setCrawlID(CrawlID.newBuilder().build());
 
         Integer s = blockingFrontier.deleteQueue(builder.build());
         System.out.println(s.getValue() + " URLs deleted");

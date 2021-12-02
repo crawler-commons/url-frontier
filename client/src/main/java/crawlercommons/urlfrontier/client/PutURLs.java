@@ -18,8 +18,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
+import crawlercommons.urlfrontier.Urlfrontier;
+import crawlercommons.urlfrontier.Urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
+import crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -45,6 +48,13 @@ public class PutURLs implements Runnable {
             paramLabel = "STRING",
             description = "path to file containing the URLs to inject into the Frontier")
     private String file;
+
+    @Option(
+            names = {"-c", "--crawlID"},
+            defaultValue = "DEFAULT",
+            paramLabel = "STRING",
+            description = "crawl to get the stats for")
+    private String crawl;
 
     @Override
     public void run() {
@@ -100,11 +110,11 @@ public class PutURLs implements Runnable {
                     }
                 }
 
-                URLItem item = parse(line);
+                URLItem item = parse(line, crawl);
                 if (item == null) {
                     System.err.println("Invalid input line " + linenum);
                 } else {
-                    streamObserver.onNext(parse(line));
+                    streamObserver.onNext(parse(line, crawl));
                     sent++;
                 }
                 linenum++;
@@ -140,7 +150,7 @@ public class PutURLs implements Runnable {
      *
      * <p>The input file can mix json and text lines.
      */
-    private static URLItem parse(String input) {
+    private static URLItem parse(String input, String crawl) {
         crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder = URLItem.newBuilder();
         if (input.trim().startsWith("{")) {
             try {
@@ -150,7 +160,12 @@ public class PutURLs implements Runnable {
             }
         } else {
             String url = input.trim();
-            URLInfo info = URLInfo.newBuilder().setUrl(url).build();
+            Builder builder2 = URLInfo.newBuilder().setUrl(url);
+            builder2.setCrawlID(
+                    CrawlID.newBuilder()
+                            .setNamedcrawlid(
+                                    Urlfrontier.String.newBuilder().setValue(crawl).build()));
+            URLInfo info = builder2.build();
             DiscoveredURLItem value = DiscoveredURLItem.newBuilder().setInfo(info).build();
             builder.setDiscovered(value);
         }

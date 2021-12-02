@@ -195,9 +195,11 @@ public abstract class AbstractFrontierService
      */
     @Override
     public void deleteQueue(
-            crawlercommons.urlfrontier.Urlfrontier.String request,
-            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
-        QueueInterface q = queues.remove(request.getValue());
+            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
+                    responseObserver) {
+        super.deleteQueue(request, responseObserver);
+        QueueInterface q = queues.remove(request.getKey());
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
                         .setValue(q.countActive())
@@ -207,7 +209,7 @@ public abstract class AbstractFrontierService
 
     @Override
     public void getStats(
-            crawlercommons.urlfrontier.Urlfrontier.String request,
+            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<Stats> responseObserver) {
         LOG.info("Received stats request");
 
@@ -222,10 +224,10 @@ public abstract class AbstractFrontierService
         Collection<QueueInterface> _queues = queues.values();
 
         // specific queue?
-        if (!request.getValue().isEmpty()) {
+        if (!request.getKey().isEmpty()) {
             _queues = new LinkedList<>();
 
-            QueueInterface q = queues.get(request.getValue());
+            QueueInterface q = queues.get(request.getKey());
             if (q != null) {
                 _queues.add(q);
             } else {

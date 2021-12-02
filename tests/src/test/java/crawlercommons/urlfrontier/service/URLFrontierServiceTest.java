@@ -154,7 +154,7 @@ public class URLFrontierServiceTest {
         /** Get stats about the queue * */
         Stats stats =
                 blockingFrontier.getStats(
-                        Urlfrontier.String.newBuilder().setValue("key1.com").build());
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder().setKey("key1.com").build());
 
         Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
 
@@ -176,20 +176,20 @@ public class URLFrontierServiceTest {
         // bug fix in 0.2
         stats =
                 blockingFrontier.getStats(
-                        Urlfrontier.String.newBuilder().setValue("key1.com").build());
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder().setKey("key1.com").build());
 
         Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
         Assert.assertEquals("incorrect number of in process from stats", 0, stats.getInProcess());
 
         crawlercommons.urlfrontier.Urlfrontier.Integer deleted =
                 blockingFrontier.deleteQueue(
-                        Urlfrontier.String.newBuilder().setValue("key1.com").build());
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder().setKey("key1.com").build());
 
         Assert.assertEquals("incorrect number of queues deleted", 1, deleted.getValue());
 
         stats =
                 blockingFrontier.getStats(
-                        Urlfrontier.String.newBuilder().setValue("key1.com").build());
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder().setKey("key1.com").build());
 
         Assert.assertEquals("incorrect number of queues from stats", 0, stats.getNumberOfQueues());
     }
@@ -242,14 +242,16 @@ public class URLFrontierServiceTest {
 
         Stats stats =
                 blockingFrontier.getStats(
-                        crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                .setValue("gac.icann.org")
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder()
+                                .setKey("gac.icann.org")
                                 .build());
         Assert.assertEquals("number of queues matching", 1, stats.getSize());
 
         crawlercommons.urlfrontier.Urlfrontier.Integer deleted =
                 blockingFrontier.deleteQueue(
-                        Urlfrontier.String.newBuilder().setValue("gac.icann.org").build());
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder()
+                                .setKey("gac.icann.org")
+                                .build());
 
         Assert.assertEquals("incorrect number of queues deleted", 1, deleted.getValue());
     }

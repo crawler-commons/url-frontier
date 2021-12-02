@@ -16,6 +16,7 @@ package crawlercommons.urlfrontier.client;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
+import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -37,6 +38,13 @@ public class GetStats implements Runnable {
             description = "restrict the stats to a specific queue")
     private String key;
 
+    @Option(
+            names = {"-c", "--crawlID"},
+            defaultValue = "DEFAULT",
+            paramLabel = "STRING",
+            description = "crawl to get the stats for")
+    private String crawl;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -46,10 +54,11 @@ public class GetStats implements Runnable {
 
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
-        crawlercommons.urlfrontier.Urlfrontier.String.Builder builder =
-                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder();
+        Urlfrontier.QueueWithinCrawlParams.Builder builder =
+                Urlfrontier.QueueWithinCrawlParams.newBuilder();
+
         if (key.length() > 0) {
-            builder.setValue(key);
+            builder.setKey(key);
         }
 
         Stats s = blockingFrontier.getStats(builder.build());

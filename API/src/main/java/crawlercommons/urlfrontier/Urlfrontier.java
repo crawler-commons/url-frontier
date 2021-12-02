@@ -109,6 +109,41 @@ public final class Urlfrontier {
          * @return The numberOfQueues.
          */
         long getNumberOfQueues();
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        boolean hasCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         *
+         * @return The crawlID.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder();
     }
     /**
      *
@@ -192,6 +227,25 @@ public final class Urlfrontier {
                         case 32:
                             {
                                 numberOfQueues_ = input.readUInt64();
+                                break;
+                            }
+                        case 42:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder subBuilder =
+                                        null;
+                                if (crawlID_ != null) {
+                                    subBuilder = crawlID_.toBuilder();
+                                }
+                                crawlID_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.CrawlID
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(crawlID_);
+                                    crawlID_ = subBuilder.buildPartial();
+                                }
+
                                 break;
                             }
                         default:
@@ -396,6 +450,54 @@ public final class Urlfrontier {
             return numberOfQueues_;
         }
 
+        public static final int CRAWLID_FIELD_NUMBER = 5;
+        private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        @java.lang.Override
+        public boolean hasCrawlID() {
+            return crawlID_ != null;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         *
+         * @return The crawlID.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+            return crawlID_ == null
+                    ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                    : crawlID_;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+            return getCrawlID();
+        }
+
         private byte memoizedIsInitialized = -1;
 
         @java.lang.Override
@@ -421,6 +523,9 @@ public final class Urlfrontier {
                     output, internalGetCounts(), CountsDefaultEntryHolder.defaultEntry, 3);
             if (numberOfQueues_ != 0L) {
                 output.writeUInt64(4, numberOfQueues_);
+            }
+            if (crawlID_ != null) {
+                output.writeMessage(5, getCrawlID());
             }
             unknownFields.writeTo(output);
         }
@@ -450,6 +555,9 @@ public final class Urlfrontier {
             if (numberOfQueues_ != 0L) {
                 size += com.google.protobuf.CodedOutputStream.computeUInt64Size(4, numberOfQueues_);
             }
+            if (crawlID_ != null) {
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(5, getCrawlID());
+            }
             size += unknownFields.getSerializedSize();
             memoizedSize = size;
             return size;
@@ -470,6 +578,10 @@ public final class Urlfrontier {
             if (getInProcess() != other.getInProcess()) return false;
             if (!internalGetCounts().equals(other.internalGetCounts())) return false;
             if (getNumberOfQueues() != other.getNumberOfQueues()) return false;
+            if (hasCrawlID() != other.hasCrawlID()) return false;
+            if (hasCrawlID()) {
+                if (!getCrawlID().equals(other.getCrawlID())) return false;
+            }
             if (!unknownFields.equals(other.unknownFields)) return false;
             return true;
         }
@@ -491,6 +603,10 @@ public final class Urlfrontier {
             }
             hash = (37 * hash) + NUMBEROFQUEUES_FIELD_NUMBER;
             hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getNumberOfQueues());
+            if (hasCrawlID()) {
+                hash = (37 * hash) + CRAWLID_FIELD_NUMBER;
+                hash = (53 * hash) + getCrawlID().hashCode();
+            }
             hash = (29 * hash) + unknownFields.hashCode();
             memoizedHashCode = hash;
             return hash;
@@ -671,6 +787,12 @@ public final class Urlfrontier {
                 internalGetMutableCounts().clear();
                 numberOfQueues_ = 0L;
 
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
                 return this;
             }
 
@@ -704,6 +826,11 @@ public final class Urlfrontier {
                 result.counts_ = internalGetCounts();
                 result.counts_.makeImmutable();
                 result.numberOfQueues_ = numberOfQueues_;
+                if (crawlIDBuilder_ == null) {
+                    result.crawlID_ = crawlID_;
+                } else {
+                    result.crawlID_ = crawlIDBuilder_.build();
+                }
                 onBuilt();
                 return result;
             }
@@ -765,6 +892,9 @@ public final class Urlfrontier {
                 internalGetMutableCounts().mergeFrom(other.internalGetCounts());
                 if (other.getNumberOfQueues() != 0L) {
                     setNumberOfQueues(other.getNumberOfQueues());
+                }
+                if (other.hasCrawlID()) {
+                    mergeCrawlID(other.getCrawlID());
                 }
                 this.mergeUnknownFields(other.unknownFields);
                 onChanged();
@@ -1112,6 +1242,192 @@ public final class Urlfrontier {
                 return this;
             }
 
+            private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    crawlIDBuilder_;
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             *
+             * @return Whether the crawlID field is set.
+             */
+            public boolean hasCrawlID() {
+                return crawlIDBuilder_ != null || crawlID_ != null;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             *
+             * @return The crawlID.
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                } else {
+                    return crawlIDBuilder_.getMessage();
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public Builder setCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    crawlID_ = value;
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public Builder setCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder builderForValue) {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(builderForValue.build());
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public Builder mergeCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (crawlID_ != null) {
+                        crawlID_ =
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.newBuilder(crawlID_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        crawlID_ = value;
+                    }
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.mergeFrom(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public Builder clearCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                    onChanged();
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder getCrawlIDBuilder() {
+
+                onChanged();
+                return getCrawlIDFieldBuilder().getBuilder();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+                if (crawlIDBuilder_ != null) {
+                    return crawlIDBuilder_.getMessageOrBuilder();
+                } else {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    getCrawlIDFieldBuilder() {
+                if (crawlIDBuilder_ == null) {
+                    crawlIDBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>(
+                                    getCrawlID(), getParentForChildren(), isClean());
+                    crawlID_ = null;
+                }
+                return crawlIDBuilder_;
+            }
+
             @java.lang.Override
             public final Builder setUnknownFields(
                     final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1207,6 +1523,41 @@ public final class Urlfrontier {
          * @return The includeInactive.
          */
         boolean getIncludeInactive();
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        boolean hasCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         *
+         * @return The crawlID.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder();
     }
     /** Protobuf type {@code urlfrontier.Pagination} */
     public static final class Pagination extends com.google.protobuf.GeneratedMessageV3
@@ -1263,6 +1614,25 @@ public final class Urlfrontier {
                         case 24:
                             {
                                 includeInactive_ = input.readBool();
+                                break;
+                            }
+                        case 34:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder subBuilder =
+                                        null;
+                                if (crawlID_ != null) {
+                                    subBuilder = crawlID_.toBuilder();
+                                }
+                                crawlID_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.CrawlID
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(crawlID_);
+                                    crawlID_ = subBuilder.buildPartial();
+                                }
+
                                 break;
                             }
                         default:
@@ -1355,6 +1725,54 @@ public final class Urlfrontier {
             return includeInactive_;
         }
 
+        public static final int CRAWLID_FIELD_NUMBER = 4;
+        private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        @java.lang.Override
+        public boolean hasCrawlID() {
+            return crawlID_ != null;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         *
+         * @return The crawlID.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+            return crawlID_ == null
+                    ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                    : crawlID_;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+            return getCrawlID();
+        }
+
         private byte memoizedIsInitialized = -1;
 
         @java.lang.Override
@@ -1379,6 +1797,9 @@ public final class Urlfrontier {
             if (includeInactive_ != false) {
                 output.writeBool(3, includeInactive_);
             }
+            if (crawlID_ != null) {
+                output.writeMessage(4, getCrawlID());
+            }
             unknownFields.writeTo(output);
         }
 
@@ -1396,6 +1817,9 @@ public final class Urlfrontier {
             }
             if (includeInactive_ != false) {
                 size += com.google.protobuf.CodedOutputStream.computeBoolSize(3, includeInactive_);
+            }
+            if (crawlID_ != null) {
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(4, getCrawlID());
             }
             size += unknownFields.getSerializedSize();
             memoizedSize = size;
@@ -1416,6 +1840,10 @@ public final class Urlfrontier {
             if (getStart() != other.getStart()) return false;
             if (getSize() != other.getSize()) return false;
             if (getIncludeInactive() != other.getIncludeInactive()) return false;
+            if (hasCrawlID() != other.hasCrawlID()) return false;
+            if (hasCrawlID()) {
+                if (!getCrawlID().equals(other.getCrawlID())) return false;
+            }
             if (!unknownFields.equals(other.unknownFields)) return false;
             return true;
         }
@@ -1433,6 +1861,10 @@ public final class Urlfrontier {
             hash = (53 * hash) + getSize();
             hash = (37 * hash) + INCLUDE_INACTIVE_FIELD_NUMBER;
             hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(getIncludeInactive());
+            if (hasCrawlID()) {
+                hash = (37 * hash) + CRAWLID_FIELD_NUMBER;
+                hash = (53 * hash) + getCrawlID().hashCode();
+            }
             hash = (29 * hash) + unknownFields.hashCode();
             memoizedHashCode = hash;
             return hash;
@@ -1584,6 +2016,12 @@ public final class Urlfrontier {
 
                 includeInactive_ = false;
 
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
                 return this;
             }
 
@@ -1614,6 +2052,11 @@ public final class Urlfrontier {
                 result.start_ = start_;
                 result.size_ = size_;
                 result.includeInactive_ = includeInactive_;
+                if (crawlIDBuilder_ == null) {
+                    result.crawlID_ = crawlID_;
+                } else {
+                    result.crawlID_ = crawlIDBuilder_.build();
+                }
                 onBuilt();
                 return result;
             }
@@ -1674,6 +2117,9 @@ public final class Urlfrontier {
                 }
                 if (other.getIncludeInactive() != false) {
                     setIncludeInactive(other.getIncludeInactive());
+                }
+                if (other.hasCrawlID()) {
+                    mergeCrawlID(other.getCrawlID());
                 }
                 this.mergeUnknownFields(other.unknownFields);
                 onChanged();
@@ -1860,6 +2306,192 @@ public final class Urlfrontier {
                 includeInactive_ = false;
                 onChanged();
                 return this;
+            }
+
+            private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    crawlIDBuilder_;
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             *
+             * @return Whether the crawlID field is set.
+             */
+            public boolean hasCrawlID() {
+                return crawlIDBuilder_ != null || crawlID_ != null;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             *
+             * @return The crawlID.
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                } else {
+                    return crawlIDBuilder_.getMessage();
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public Builder setCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    crawlID_ = value;
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public Builder setCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder builderForValue) {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(builderForValue.build());
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public Builder mergeCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (crawlID_ != null) {
+                        crawlID_ =
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.newBuilder(crawlID_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        crawlID_ = value;
+                    }
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.mergeFrom(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public Builder clearCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                    onChanged();
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder getCrawlIDBuilder() {
+
+                onChanged();
+                return getCrawlIDFieldBuilder().getBuilder();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+                if (crawlIDBuilder_ != null) {
+                    return crawlIDBuilder_.getMessageOrBuilder();
+                } else {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    getCrawlIDFieldBuilder() {
+                if (crawlIDBuilder_ == null) {
+                    crawlIDBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>(
+                                    getCrawlID(), getParentForChildren(), isClean());
+                    crawlID_ = null;
+                }
+                return crawlIDBuilder_;
             }
 
             @java.lang.Override
@@ -4039,6 +4671,41 @@ public final class Urlfrontier {
          * @return The size.
          */
         int getSize();
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        boolean hasCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         *
+         * @return The crawlID.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder();
     }
     /**
      *
@@ -4116,6 +4783,25 @@ public final class Urlfrontier {
                         case 32:
                             {
                                 size_ = input.readUInt32();
+                                break;
+                            }
+                        case 42:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder subBuilder =
+                                        null;
+                                if (crawlID_ != null) {
+                                    subBuilder = crawlID_.toBuilder();
+                                }
+                                crawlID_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.CrawlID
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(crawlID_);
+                                    crawlID_ = subBuilder.buildPartial();
+                                }
+
                                 break;
                             }
                         default:
@@ -4248,6 +4934,54 @@ public final class Urlfrontier {
             return size_;
         }
 
+        public static final int CRAWLID_FIELD_NUMBER = 5;
+        private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        @java.lang.Override
+        public boolean hasCrawlID() {
+            return crawlID_ != null;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         *
+         * @return The crawlID.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+            return crawlID_ == null
+                    ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                    : crawlID_;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+            return getCrawlID();
+        }
+
         private byte memoizedIsInitialized = -1;
 
         @java.lang.Override
@@ -4275,6 +5009,9 @@ public final class Urlfrontier {
             if (size_ != 0) {
                 output.writeUInt32(4, size_);
             }
+            if (crawlID_ != null) {
+                output.writeMessage(5, getCrawlID());
+            }
             unknownFields.writeTo(output);
         }
 
@@ -4301,6 +5038,9 @@ public final class Urlfrontier {
             if (size_ != 0) {
                 size += com.google.protobuf.CodedOutputStream.computeUInt32Size(4, size_);
             }
+            if (crawlID_ != null) {
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(5, getCrawlID());
+            }
             size += unknownFields.getSerializedSize();
             memoizedSize = size;
             return size;
@@ -4321,6 +5061,10 @@ public final class Urlfrontier {
             if (getTotal() != other.getTotal()) return false;
             if (getStart() != other.getStart()) return false;
             if (getSize() != other.getSize()) return false;
+            if (hasCrawlID() != other.hasCrawlID()) return false;
+            if (hasCrawlID()) {
+                if (!getCrawlID().equals(other.getCrawlID())) return false;
+            }
             if (!unknownFields.equals(other.unknownFields)) return false;
             return true;
         }
@@ -4342,6 +5086,10 @@ public final class Urlfrontier {
             hash = (53 * hash) + getStart();
             hash = (37 * hash) + SIZE_FIELD_NUMBER;
             hash = (53 * hash) + getSize();
+            if (hasCrawlID()) {
+                hash = (37 * hash) + CRAWLID_FIELD_NUMBER;
+                hash = (53 * hash) + getCrawlID().hashCode();
+            }
             hash = (29 * hash) + unknownFields.hashCode();
             memoizedHashCode = hash;
             return hash;
@@ -4503,6 +5251,12 @@ public final class Urlfrontier {
 
                 size_ = 0;
 
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
                 return this;
             }
 
@@ -4539,6 +5293,11 @@ public final class Urlfrontier {
                 result.total_ = total_;
                 result.start_ = start_;
                 result.size_ = size_;
+                if (crawlIDBuilder_ == null) {
+                    result.crawlID_ = crawlID_;
+                } else {
+                    result.crawlID_ = crawlIDBuilder_.build();
+                }
                 onBuilt();
                 return result;
             }
@@ -4609,6 +5368,9 @@ public final class Urlfrontier {
                 }
                 if (other.getSize() != 0) {
                     setSize(other.getSize());
+                }
+                if (other.hasCrawlID()) {
+                    mergeCrawlID(other.getCrawlID());
                 }
                 this.mergeUnknownFields(other.unknownFields);
                 onChanged();
@@ -4911,6 +5673,192 @@ public final class Urlfrontier {
                 size_ = 0;
                 onChanged();
                 return this;
+            }
+
+            private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    crawlIDBuilder_;
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             *
+             * @return Whether the crawlID field is set.
+             */
+            public boolean hasCrawlID() {
+                return crawlIDBuilder_ != null || crawlID_ != null;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             *
+             * @return The crawlID.
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                } else {
+                    return crawlIDBuilder_.getMessage();
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public Builder setCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    crawlID_ = value;
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public Builder setCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder builderForValue) {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(builderForValue.build());
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public Builder mergeCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (crawlID_ != null) {
+                        crawlID_ =
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.newBuilder(crawlID_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        crawlID_ = value;
+                    }
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.mergeFrom(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public Builder clearCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                    onChanged();
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder getCrawlIDBuilder() {
+
+                onChanged();
+                return getCrawlIDFieldBuilder().getBuilder();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+                if (crawlIDBuilder_ != null) {
+                    return crawlIDBuilder_.getMessageOrBuilder();
+                } else {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 5;</code>
+             */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    getCrawlIDFieldBuilder() {
+                if (crawlIDBuilder_ == null) {
+                    crawlIDBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>(
+                                    getCrawlID(), getParentForChildren(), isClean());
+                    crawlID_ = null;
+                }
+                return crawlIDBuilder_;
             }
 
             @java.lang.Override
@@ -5636,6 +6584,982 @@ public final class Urlfrontier {
         }
     }
 
+    public interface QueueWithinCrawlParamsOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.QueueWithinCrawlParams)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The key.
+         */
+        java.lang.String getKey();
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The bytes for key.
+         */
+        com.google.protobuf.ByteString getKeyBytes();
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        boolean hasCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+         *
+         * @return The crawlID.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder();
+    }
+    /** Protobuf type {@code urlfrontier.QueueWithinCrawlParams} */
+    public static final class QueueWithinCrawlParams extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.QueueWithinCrawlParams)
+            QueueWithinCrawlParamsOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use QueueWithinCrawlParams.newBuilder() to construct.
+        private QueueWithinCrawlParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private QueueWithinCrawlParams() {
+            key_ = "";
+        }
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new QueueWithinCrawlParams();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private QueueWithinCrawlParams(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                java.lang.String s = input.readStringRequireUtf8();
+
+                                key_ = s;
+                                break;
+                            }
+                        case 18:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder subBuilder =
+                                        null;
+                                if (crawlID_ != null) {
+                                    subBuilder = crawlID_.toBuilder();
+                                }
+                                crawlID_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.CrawlID
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(crawlID_);
+                                    crawlID_ = subBuilder.buildPartial();
+                                }
+
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_QueueWithinCrawlParams_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_QueueWithinCrawlParams_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams.class,
+                            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams.Builder
+                                    .class);
+        }
+
+        public static final int KEY_FIELD_NUMBER = 1;
+        private volatile java.lang.Object key_;
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The key.
+         */
+        @java.lang.Override
+        public java.lang.String getKey() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                key_ = s;
+                return s;
+            }
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The bytes for key.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getKeyBytes() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                key_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int CRAWLID_FIELD_NUMBER = 2;
+        private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        @java.lang.Override
+        public boolean hasCrawlID() {
+            return crawlID_ != null;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+         *
+         * @return The crawlID.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+            return crawlID_ == null
+                    ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                    : crawlID_;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+            return getCrawlID();
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (!getKeyBytes().isEmpty()) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
+            }
+            if (crawlID_ != null) {
+                output.writeMessage(2, getCrawlID());
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (!getKeyBytes().isEmpty()) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
+            }
+            if (crawlID_ != null) {
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(2, getCrawlID());
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams other =
+                    (crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams) obj;
+
+            if (!getKey().equals(other.getKey())) return false;
+            if (hasCrawlID() != other.hasCrawlID()) return false;
+            if (hasCrawlID()) {
+                if (!getCrawlID().equals(other.getCrawlID())) return false;
+            }
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + KEY_FIELD_NUMBER;
+            hash = (53 * hash) + getKey().hashCode();
+            if (hasCrawlID()) {
+                hash = (37 * hash) + CRAWLID_FIELD_NUMBER;
+                hash = (53 * hash) + getCrawlID().hashCode();
+            }
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parseFrom(
+                byte[] data) throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams
+                parseDelimitedFrom(java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams
+                parseDelimitedFrom(
+                        java.io.InputStream input,
+                        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                        throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /** Protobuf type {@code urlfrontier.QueueWithinCrawlParams} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.QueueWithinCrawlParams)
+                crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParamsOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_QueueWithinCrawlParams_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_QueueWithinCrawlParams_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams.class,
+                                crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams
+                                        .Builder.class);
+            }
+
+            // Construct using
+            // crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                key_ = "";
+
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_QueueWithinCrawlParams_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams
+                    getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams
+                        .getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams build() {
+                crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams result =
+                        buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams result =
+                        new crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams(this);
+                result.key_ = key_;
+                if (crawlIDBuilder_ == null) {
+                    result.crawlID_ = crawlID_;
+                } else {
+                    result.crawlID_ = crawlIDBuilder_.build();
+                }
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other
+                        instanceof crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams) {
+                    return mergeFrom(
+                            (crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(
+                    crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams other) {
+                if (other
+                        == crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams
+                                .getDefaultInstance()) return this;
+                if (!other.getKey().isEmpty()) {
+                    key_ = other.key_;
+                    onChanged();
+                }
+                if (other.hasCrawlID()) {
+                    mergeCrawlID(other.getCrawlID());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private java.lang.Object key_ = "";
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return The key.
+             */
+            public java.lang.String getKey() {
+                java.lang.Object ref = key_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    key_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return The bytes for key.
+             */
+            public com.google.protobuf.ByteString getKeyBytes() {
+                java.lang.Object ref = key_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    key_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @param value The key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKey(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearKey() {
+
+                key_ = getDefaultInstance().getKey();
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @param value The bytes for key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKeyBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+
+            private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    crawlIDBuilder_;
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+             *
+             * @return Whether the crawlID field is set.
+             */
+            public boolean hasCrawlID() {
+                return crawlIDBuilder_ != null || crawlID_ != null;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+             *
+             * @return The crawlID.
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                } else {
+                    return crawlIDBuilder_.getMessage();
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+             */
+            public Builder setCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    crawlID_ = value;
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+             */
+            public Builder setCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder builderForValue) {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(builderForValue.build());
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+             */
+            public Builder mergeCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (crawlID_ != null) {
+                        crawlID_ =
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.newBuilder(crawlID_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        crawlID_ = value;
+                    }
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.mergeFrom(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+             */
+            public Builder clearCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                    onChanged();
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder getCrawlIDBuilder() {
+
+                onChanged();
+                return getCrawlIDFieldBuilder().getBuilder();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+                if (crawlIDBuilder_ != null) {
+                    return crawlIDBuilder_.getMessageOrBuilder();
+                } else {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 2;</code>
+             */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    getCrawlIDFieldBuilder() {
+                if (crawlIDBuilder_ == null) {
+                    crawlIDBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>(
+                                    getCrawlID(), getParentForChildren(), isClean());
+                    crawlID_ = null;
+                }
+                return crawlIDBuilder_;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.QueueWithinCrawlParams)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.QueueWithinCrawlParams)
+        private static final crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams
+                DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams
+                getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<QueueWithinCrawlParams> PARSER =
+                new com.google.protobuf.AbstractParser<QueueWithinCrawlParams>() {
+                    @java.lang.Override
+                    public QueueWithinCrawlParams parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new QueueWithinCrawlParams(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<QueueWithinCrawlParams> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<QueueWithinCrawlParams> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams
+                getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
+    }
+
     public interface QueueDelayParamsOrBuilder
             extends
             // @@protoc_insertion_point(interface_extends:urlfrontier.QueueDelayParams)
@@ -5678,6 +7602,41 @@ public final class Urlfrontier {
          * @return The delayRequestable.
          */
         int getDelayRequestable();
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        boolean hasCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         *
+         * @return The crawlID.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder();
     }
     /**
      *
@@ -5741,6 +7700,25 @@ public final class Urlfrontier {
                         case 16:
                             {
                                 delayRequestable_ = input.readUInt32();
+                                break;
+                            }
+                        case 26:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder subBuilder =
+                                        null;
+                                if (crawlID_ != null) {
+                                    subBuilder = crawlID_.toBuilder();
+                                }
+                                crawlID_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.CrawlID
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(crawlID_);
+                                    crawlID_ = subBuilder.buildPartial();
+                                }
+
                                 break;
                             }
                         default:
@@ -5846,6 +7824,54 @@ public final class Urlfrontier {
             return delayRequestable_;
         }
 
+        public static final int CRAWLID_FIELD_NUMBER = 3;
+        private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        @java.lang.Override
+        public boolean hasCrawlID() {
+            return crawlID_ != null;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         *
+         * @return The crawlID.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+            return crawlID_ == null
+                    ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                    : crawlID_;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID - empty string for default
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+            return getCrawlID();
+        }
+
         private byte memoizedIsInitialized = -1;
 
         @java.lang.Override
@@ -5867,6 +7893,9 @@ public final class Urlfrontier {
             if (delayRequestable_ != 0) {
                 output.writeUInt32(2, delayRequestable_);
             }
+            if (crawlID_ != null) {
+                output.writeMessage(3, getCrawlID());
+            }
             unknownFields.writeTo(output);
         }
 
@@ -5883,6 +7912,9 @@ public final class Urlfrontier {
                 size +=
                         com.google.protobuf.CodedOutputStream.computeUInt32Size(
                                 2, delayRequestable_);
+            }
+            if (crawlID_ != null) {
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(3, getCrawlID());
             }
             size += unknownFields.getSerializedSize();
             memoizedSize = size;
@@ -5902,6 +7934,10 @@ public final class Urlfrontier {
 
             if (!getKey().equals(other.getKey())) return false;
             if (getDelayRequestable() != other.getDelayRequestable()) return false;
+            if (hasCrawlID() != other.hasCrawlID()) return false;
+            if (hasCrawlID()) {
+                if (!getCrawlID().equals(other.getCrawlID())) return false;
+            }
             if (!unknownFields.equals(other.unknownFields)) return false;
             return true;
         }
@@ -5917,6 +7953,10 @@ public final class Urlfrontier {
             hash = (53 * hash) + getKey().hashCode();
             hash = (37 * hash) + DELAY_REQUESTABLE_FIELD_NUMBER;
             hash = (53 * hash) + getDelayRequestable();
+            if (hasCrawlID()) {
+                hash = (37 * hash) + CRAWLID_FIELD_NUMBER;
+                hash = (53 * hash) + getCrawlID().hashCode();
+            }
             hash = (29 * hash) + unknownFields.hashCode();
             memoizedHashCode = hash;
             return hash;
@@ -6075,6 +8115,12 @@ public final class Urlfrontier {
 
                 delayRequestable_ = 0;
 
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
                 return this;
             }
 
@@ -6105,6 +8151,11 @@ public final class Urlfrontier {
                         new crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams(this);
                 result.key_ = key_;
                 result.delayRequestable_ = delayRequestable_;
+                if (crawlIDBuilder_ == null) {
+                    result.crawlID_ = crawlID_;
+                } else {
+                    result.crawlID_ = crawlIDBuilder_.build();
+                }
                 onBuilt();
                 return result;
             }
@@ -6166,6 +8217,9 @@ public final class Urlfrontier {
                 }
                 if (other.getDelayRequestable() != 0) {
                     setDelayRequestable(other.getDelayRequestable());
+                }
+                if (other.hasCrawlID()) {
+                    mergeCrawlID(other.getCrawlID());
                 }
                 this.mergeUnknownFields(other.unknownFields);
                 onChanged();
@@ -6356,6 +8410,192 @@ public final class Urlfrontier {
                 return this;
             }
 
+            private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    crawlIDBuilder_;
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             *
+             * @return Whether the crawlID field is set.
+             */
+            public boolean hasCrawlID() {
+                return crawlIDBuilder_ != null || crawlID_ != null;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             *
+             * @return The crawlID.
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                } else {
+                    return crawlIDBuilder_.getMessage();
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public Builder setCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    crawlID_ = value;
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public Builder setCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder builderForValue) {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(builderForValue.build());
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public Builder mergeCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (crawlID_ != null) {
+                        crawlID_ =
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.newBuilder(crawlID_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        crawlID_ = value;
+                    }
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.mergeFrom(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public Builder clearCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                    onChanged();
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder getCrawlIDBuilder() {
+
+                onChanged();
+                return getCrawlIDFieldBuilder().getBuilder();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+                if (crawlIDBuilder_ != null) {
+                    return crawlIDBuilder_.getMessageOrBuilder();
+                } else {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID - empty string for default
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    getCrawlIDFieldBuilder() {
+                if (crawlIDBuilder_ == null) {
+                    crawlIDBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>(
+                                    getCrawlID(), getParentForChildren(), isClean());
+                    crawlID_ = null;
+                }
+                return crawlIDBuilder_;
+            }
+
             @java.lang.Override
             public final Builder setUnknownFields(
                     final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -6452,6 +8692,41 @@ public final class Urlfrontier {
          * @return The time.
          */
         long getTime();
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        boolean hasCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         *
+         * @return The crawlID.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder();
     }
     /**
      *
@@ -6515,6 +8790,25 @@ public final class Urlfrontier {
                         case 16:
                             {
                                 time_ = input.readUInt64();
+                                break;
+                            }
+                        case 26:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder subBuilder =
+                                        null;
+                                if (crawlID_ != null) {
+                                    subBuilder = crawlID_.toBuilder();
+                                }
+                                crawlID_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.CrawlID
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(crawlID_);
+                                    crawlID_ = subBuilder.buildPartial();
+                                }
+
                                 break;
                             }
                         default:
@@ -6621,6 +8915,54 @@ public final class Urlfrontier {
             return time_;
         }
 
+        public static final int CRAWLID_FIELD_NUMBER = 3;
+        private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        @java.lang.Override
+        public boolean hasCrawlID() {
+            return crawlID_ != null;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         *
+         * @return The crawlID.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+            return crawlID_ == null
+                    ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                    : crawlID_;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+            return getCrawlID();
+        }
+
         private byte memoizedIsInitialized = -1;
 
         @java.lang.Override
@@ -6642,6 +8984,9 @@ public final class Urlfrontier {
             if (time_ != 0L) {
                 output.writeUInt64(2, time_);
             }
+            if (crawlID_ != null) {
+                output.writeMessage(3, getCrawlID());
+            }
             unknownFields.writeTo(output);
         }
 
@@ -6656,6 +9001,9 @@ public final class Urlfrontier {
             }
             if (time_ != 0L) {
                 size += com.google.protobuf.CodedOutputStream.computeUInt64Size(2, time_);
+            }
+            if (crawlID_ != null) {
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(3, getCrawlID());
             }
             size += unknownFields.getSerializedSize();
             memoizedSize = size;
@@ -6675,6 +9023,10 @@ public final class Urlfrontier {
 
             if (!getKey().equals(other.getKey())) return false;
             if (getTime() != other.getTime()) return false;
+            if (hasCrawlID() != other.hasCrawlID()) return false;
+            if (hasCrawlID()) {
+                if (!getCrawlID().equals(other.getCrawlID())) return false;
+            }
             if (!unknownFields.equals(other.unknownFields)) return false;
             return true;
         }
@@ -6690,6 +9042,10 @@ public final class Urlfrontier {
             hash = (53 * hash) + getKey().hashCode();
             hash = (37 * hash) + TIME_FIELD_NUMBER;
             hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getTime());
+            if (hasCrawlID()) {
+                hash = (37 * hash) + CRAWLID_FIELD_NUMBER;
+                hash = (53 * hash) + getCrawlID().hashCode();
+            }
             hash = (29 * hash) + unknownFields.hashCode();
             memoizedHashCode = hash;
             return hash;
@@ -6848,6 +9204,12 @@ public final class Urlfrontier {
 
                 time_ = 0L;
 
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
                 return this;
             }
 
@@ -6878,6 +9240,11 @@ public final class Urlfrontier {
                         new crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams(this);
                 result.key_ = key_;
                 result.time_ = time_;
+                if (crawlIDBuilder_ == null) {
+                    result.crawlID_ = crawlID_;
+                } else {
+                    result.crawlID_ = crawlIDBuilder_.build();
+                }
                 onBuilt();
                 return result;
             }
@@ -6939,6 +9306,9 @@ public final class Urlfrontier {
                 }
                 if (other.getTime() != 0L) {
                     setTime(other.getTime());
+                }
+                if (other.hasCrawlID()) {
+                    mergeCrawlID(other.getCrawlID());
                 }
                 this.mergeUnknownFields(other.unknownFields);
                 onChanged();
@@ -7132,6 +9502,192 @@ public final class Urlfrontier {
                 return this;
             }
 
+            private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    crawlIDBuilder_;
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             *
+             * @return Whether the crawlID field is set.
+             */
+            public boolean hasCrawlID() {
+                return crawlIDBuilder_ != null || crawlID_ != null;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             *
+             * @return The crawlID.
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                } else {
+                    return crawlIDBuilder_.getMessage();
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public Builder setCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    crawlID_ = value;
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public Builder setCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder builderForValue) {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(builderForValue.build());
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public Builder mergeCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (crawlID_ != null) {
+                        crawlID_ =
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.newBuilder(crawlID_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        crawlID_ = value;
+                    }
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.mergeFrom(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public Builder clearCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                    onChanged();
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder getCrawlIDBuilder() {
+
+                onChanged();
+                return getCrawlIDFieldBuilder().getBuilder();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+                if (crawlIDBuilder_ != null) {
+                    return crawlIDBuilder_.getMessageOrBuilder();
+                } else {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 3;</code>
+             */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    getCrawlIDFieldBuilder() {
+                if (crawlIDBuilder_ == null) {
+                    crawlIDBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>(
+                                    getCrawlID(), getParentForChildren(), isClean());
+                    crawlID_ = null;
+                }
+                return crawlIDBuilder_;
+            }
+
             @java.lang.Override
             public final Builder setUnknownFields(
                     final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -7253,6 +9809,38 @@ public final class Urlfrontier {
          * @return The delayRequestable.
          */
         int getDelayRequestable();
+
+        /**
+         * <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code>
+         *
+         * @return Whether the anyCrawlID field is set.
+         */
+        boolean hasAnyCrawlID();
+        /**
+         * <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code>
+         *
+         * @return The anyCrawlID.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID getAnyCrawlID();
+        /** <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code> */
+        crawlercommons.urlfrontier.Urlfrontier.AnyCrawlIDOrBuilder getAnyCrawlIDOrBuilder();
+
+        /**
+         * <code>.urlfrontier.CrawlID specificCrawlID = 6;</code>
+         *
+         * @return Whether the specificCrawlID field is set.
+         */
+        boolean hasSpecificCrawlID();
+        /**
+         * <code>.urlfrontier.CrawlID specificCrawlID = 6;</code>
+         *
+         * @return The specificCrawlID.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlID getSpecificCrawlID();
+        /** <code>.urlfrontier.CrawlID specificCrawlID = 6;</code> */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getSpecificCrawlIDOrBuilder();
+
+        public crawlercommons.urlfrontier.Urlfrontier.GetParams.ItemCase getItemCase();
     }
     /**
      *
@@ -7328,6 +9916,52 @@ public final class Urlfrontier {
                                 delayRequestable_ = input.readUInt32();
                                 break;
                             }
+                        case 42:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.Builder
+                                        subBuilder = null;
+                                if (itemCase_ == 5) {
+                                    subBuilder =
+                                            ((crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID)
+                                                            item_)
+                                                    .toBuilder();
+                                }
+                                item_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(
+                                            (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID)
+                                                    item_);
+                                    item_ = subBuilder.buildPartial();
+                                }
+                                itemCase_ = 5;
+                                break;
+                            }
+                        case 50:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder subBuilder =
+                                        null;
+                                if (itemCase_ == 6) {
+                                    subBuilder =
+                                            ((crawlercommons.urlfrontier.Urlfrontier.CrawlID) item_)
+                                                    .toBuilder();
+                                }
+                                item_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.CrawlID
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(
+                                            (crawlercommons.urlfrontier.Urlfrontier.CrawlID) item_);
+                                    item_ = subBuilder.buildPartial();
+                                }
+                                itemCase_ = 6;
+                                break;
+                            }
                         default:
                             {
                                 if (!parseUnknownField(
@@ -7362,6 +9996,53 @@ public final class Urlfrontier {
                     .ensureFieldAccessorsInitialized(
                             crawlercommons.urlfrontier.Urlfrontier.GetParams.class,
                             crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder.class);
+        }
+
+        private int itemCase_ = 0;
+        private java.lang.Object item_;
+
+        public enum ItemCase
+                implements
+                        com.google.protobuf.Internal.EnumLite,
+                        com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+            ANYCRAWLID(5),
+            SPECIFICCRAWLID(6),
+            ITEM_NOT_SET(0);
+            private final int value;
+
+            private ItemCase(int value) {
+                this.value = value;
+            }
+            /**
+             * @param value The number of the enum to look for.
+             * @return The enum associated with the given number.
+             * @deprecated Use {@link #forNumber(int)} instead.
+             */
+            @java.lang.Deprecated
+            public static ItemCase valueOf(int value) {
+                return forNumber(value);
+            }
+
+            public static ItemCase forNumber(int value) {
+                switch (value) {
+                    case 5:
+                        return ANYCRAWLID;
+                    case 6:
+                        return SPECIFICCRAWLID;
+                    case 0:
+                        return ITEM_NOT_SET;
+                    default:
+                        return null;
+                }
+            }
+
+            public int getNumber() {
+                return this.value;
+            }
+        };
+
+        public ItemCase getItemCase() {
+            return ItemCase.forNumber(itemCase_);
         }
 
         public static final int MAX_URLS_PER_QUEUE_FIELD_NUMBER = 1;
@@ -7467,6 +10148,69 @@ public final class Urlfrontier {
             return delayRequestable_;
         }
 
+        public static final int ANYCRAWLID_FIELD_NUMBER = 5;
+        /**
+         * <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code>
+         *
+         * @return Whether the anyCrawlID field is set.
+         */
+        @java.lang.Override
+        public boolean hasAnyCrawlID() {
+            return itemCase_ == 5;
+        }
+        /**
+         * <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code>
+         *
+         * @return The anyCrawlID.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID getAnyCrawlID() {
+            if (itemCase_ == 5) {
+                return (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.getDefaultInstance();
+        }
+        /** <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code> */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.AnyCrawlIDOrBuilder getAnyCrawlIDOrBuilder() {
+            if (itemCase_ == 5) {
+                return (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.getDefaultInstance();
+        }
+
+        public static final int SPECIFICCRAWLID_FIELD_NUMBER = 6;
+        /**
+         * <code>.urlfrontier.CrawlID specificCrawlID = 6;</code>
+         *
+         * @return Whether the specificCrawlID field is set.
+         */
+        @java.lang.Override
+        public boolean hasSpecificCrawlID() {
+            return itemCase_ == 6;
+        }
+        /**
+         * <code>.urlfrontier.CrawlID specificCrawlID = 6;</code>
+         *
+         * @return The specificCrawlID.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlID getSpecificCrawlID() {
+            if (itemCase_ == 6) {
+                return (crawlercommons.urlfrontier.Urlfrontier.CrawlID) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance();
+        }
+        /** <code>.urlfrontier.CrawlID specificCrawlID = 6;</code> */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder
+                getSpecificCrawlIDOrBuilder() {
+            if (itemCase_ == 6) {
+                return (crawlercommons.urlfrontier.Urlfrontier.CrawlID) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance();
+        }
+
         private byte memoizedIsInitialized = -1;
 
         @java.lang.Override
@@ -7494,6 +10238,12 @@ public final class Urlfrontier {
             if (delayRequestable_ != 0) {
                 output.writeUInt32(4, delayRequestable_);
             }
+            if (itemCase_ == 5) {
+                output.writeMessage(5, (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID) item_);
+            }
+            if (itemCase_ == 6) {
+                output.writeMessage(6, (crawlercommons.urlfrontier.Urlfrontier.CrawlID) item_);
+            }
             unknownFields.writeTo(output);
         }
 
@@ -7519,6 +10269,16 @@ public final class Urlfrontier {
                         com.google.protobuf.CodedOutputStream.computeUInt32Size(
                                 4, delayRequestable_);
             }
+            if (itemCase_ == 5) {
+                size +=
+                        com.google.protobuf.CodedOutputStream.computeMessageSize(
+                                5, (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID) item_);
+            }
+            if (itemCase_ == 6) {
+                size +=
+                        com.google.protobuf.CodedOutputStream.computeMessageSize(
+                                6, (crawlercommons.urlfrontier.Urlfrontier.CrawlID) item_);
+            }
             size += unknownFields.getSerializedSize();
             memoizedSize = size;
             return size;
@@ -7539,6 +10299,17 @@ public final class Urlfrontier {
             if (getMaxQueues() != other.getMaxQueues()) return false;
             if (!getKey().equals(other.getKey())) return false;
             if (getDelayRequestable() != other.getDelayRequestable()) return false;
+            if (!getItemCase().equals(other.getItemCase())) return false;
+            switch (itemCase_) {
+                case 5:
+                    if (!getAnyCrawlID().equals(other.getAnyCrawlID())) return false;
+                    break;
+                case 6:
+                    if (!getSpecificCrawlID().equals(other.getSpecificCrawlID())) return false;
+                    break;
+                case 0:
+                default:
+            }
             if (!unknownFields.equals(other.unknownFields)) return false;
             return true;
         }
@@ -7558,6 +10329,18 @@ public final class Urlfrontier {
             hash = (53 * hash) + getKey().hashCode();
             hash = (37 * hash) + DELAY_REQUESTABLE_FIELD_NUMBER;
             hash = (53 * hash) + getDelayRequestable();
+            switch (itemCase_) {
+                case 5:
+                    hash = (37 * hash) + ANYCRAWLID_FIELD_NUMBER;
+                    hash = (53 * hash) + getAnyCrawlID().hashCode();
+                    break;
+                case 6:
+                    hash = (37 * hash) + SPECIFICCRAWLID_FIELD_NUMBER;
+                    hash = (53 * hash) + getSpecificCrawlID().hashCode();
+                    break;
+                case 0:
+                default:
+            }
             hash = (29 * hash) + unknownFields.hashCode();
             memoizedHashCode = hash;
             return hash;
@@ -7719,6 +10502,8 @@ public final class Urlfrontier {
 
                 delayRequestable_ = 0;
 
+                itemCase_ = 0;
+                item_ = null;
                 return this;
             }
 
@@ -7750,6 +10535,21 @@ public final class Urlfrontier {
                 result.maxQueues_ = maxQueues_;
                 result.key_ = key_;
                 result.delayRequestable_ = delayRequestable_;
+                if (itemCase_ == 5) {
+                    if (anyCrawlIDBuilder_ == null) {
+                        result.item_ = item_;
+                    } else {
+                        result.item_ = anyCrawlIDBuilder_.build();
+                    }
+                }
+                if (itemCase_ == 6) {
+                    if (specificCrawlIDBuilder_ == null) {
+                        result.item_ = item_;
+                    } else {
+                        result.item_ = specificCrawlIDBuilder_.build();
+                    }
+                }
+                result.itemCase_ = itemCase_;
                 onBuilt();
                 return result;
             }
@@ -7815,6 +10615,22 @@ public final class Urlfrontier {
                 if (other.getDelayRequestable() != 0) {
                     setDelayRequestable(other.getDelayRequestable());
                 }
+                switch (other.getItemCase()) {
+                    case ANYCRAWLID:
+                        {
+                            mergeAnyCrawlID(other.getAnyCrawlID());
+                            break;
+                        }
+                    case SPECIFICCRAWLID:
+                        {
+                            mergeSpecificCrawlID(other.getSpecificCrawlID());
+                            break;
+                        }
+                    case ITEM_NOT_SET:
+                        {
+                            break;
+                        }
+                }
                 this.mergeUnknownFields(other.unknownFields);
                 onChanged();
                 return this;
@@ -7843,6 +10659,20 @@ public final class Urlfrontier {
                         mergeFrom(parsedMessage);
                     }
                 }
+                return this;
+            }
+
+            private int itemCase_ = 0;
+            private java.lang.Object item_;
+
+            public ItemCase getItemCase() {
+                return ItemCase.forNumber(itemCase_);
+            }
+
+            public Builder clearItem() {
+                itemCase_ = 0;
+                item_ = null;
+                onChanged();
                 return this;
             }
 
@@ -8108,6 +10938,303 @@ public final class Urlfrontier {
                 return this;
             }
 
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.AnyCrawlIDOrBuilder>
+                    anyCrawlIDBuilder_;
+            /**
+             * <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code>
+             *
+             * @return Whether the anyCrawlID field is set.
+             */
+            @java.lang.Override
+            public boolean hasAnyCrawlID() {
+                return itemCase_ == 5;
+            }
+            /**
+             * <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code>
+             *
+             * @return The anyCrawlID.
+             */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID getAnyCrawlID() {
+                if (anyCrawlIDBuilder_ == null) {
+                    if (itemCase_ == 5) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.getDefaultInstance();
+                } else {
+                    if (itemCase_ == 5) {
+                        return anyCrawlIDBuilder_.getMessage();
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code> */
+            public Builder setAnyCrawlID(crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID value) {
+                if (anyCrawlIDBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    item_ = value;
+                    onChanged();
+                } else {
+                    anyCrawlIDBuilder_.setMessage(value);
+                }
+                itemCase_ = 5;
+                return this;
+            }
+            /** <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code> */
+            public Builder setAnyCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.Builder builderForValue) {
+                if (anyCrawlIDBuilder_ == null) {
+                    item_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    anyCrawlIDBuilder_.setMessage(builderForValue.build());
+                }
+                itemCase_ = 5;
+                return this;
+            }
+            /** <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code> */
+            public Builder mergeAnyCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID value) {
+                if (anyCrawlIDBuilder_ == null) {
+                    if (itemCase_ == 5
+                            && item_
+                                    != crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID
+                                            .getDefaultInstance()) {
+                        item_ =
+                                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.newBuilder(
+                                                (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID)
+                                                        item_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        item_ = value;
+                    }
+                    onChanged();
+                } else {
+                    if (itemCase_ == 5) {
+                        anyCrawlIDBuilder_.mergeFrom(value);
+                    }
+                    anyCrawlIDBuilder_.setMessage(value);
+                }
+                itemCase_ = 5;
+                return this;
+            }
+            /** <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code> */
+            public Builder clearAnyCrawlID() {
+                if (anyCrawlIDBuilder_ == null) {
+                    if (itemCase_ == 5) {
+                        itemCase_ = 0;
+                        item_ = null;
+                        onChanged();
+                    }
+                } else {
+                    if (itemCase_ == 5) {
+                        itemCase_ = 0;
+                        item_ = null;
+                    }
+                    anyCrawlIDBuilder_.clear();
+                }
+                return this;
+            }
+            /** <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code> */
+            public crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.Builder
+                    getAnyCrawlIDBuilder() {
+                return getAnyCrawlIDFieldBuilder().getBuilder();
+            }
+            /** <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code> */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.AnyCrawlIDOrBuilder
+                    getAnyCrawlIDOrBuilder() {
+                if ((itemCase_ == 5) && (anyCrawlIDBuilder_ != null)) {
+                    return anyCrawlIDBuilder_.getMessageOrBuilder();
+                } else {
+                    if (itemCase_ == 5) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.AnyCrawlID anyCrawlID = 5;</code> */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.AnyCrawlIDOrBuilder>
+                    getAnyCrawlIDFieldBuilder() {
+                if (anyCrawlIDBuilder_ == null) {
+                    if (!(itemCase_ == 5)) {
+                        item_ =
+                                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID
+                                        .getDefaultInstance();
+                    }
+                    anyCrawlIDBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID,
+                                    crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.AnyCrawlIDOrBuilder>(
+                                    (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID) item_,
+                                    getParentForChildren(),
+                                    isClean());
+                    item_ = null;
+                }
+                itemCase_ = 5;
+                onChanged();
+                ;
+                return anyCrawlIDBuilder_;
+            }
+
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    specificCrawlIDBuilder_;
+            /**
+             * <code>.urlfrontier.CrawlID specificCrawlID = 6;</code>
+             *
+             * @return Whether the specificCrawlID field is set.
+             */
+            @java.lang.Override
+            public boolean hasSpecificCrawlID() {
+                return itemCase_ == 6;
+            }
+            /**
+             * <code>.urlfrontier.CrawlID specificCrawlID = 6;</code>
+             *
+             * @return The specificCrawlID.
+             */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID getSpecificCrawlID() {
+                if (specificCrawlIDBuilder_ == null) {
+                    if (itemCase_ == 6) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.CrawlID) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance();
+                } else {
+                    if (itemCase_ == 6) {
+                        return specificCrawlIDBuilder_.getMessage();
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.CrawlID specificCrawlID = 6;</code> */
+            public Builder setSpecificCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (specificCrawlIDBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    item_ = value;
+                    onChanged();
+                } else {
+                    specificCrawlIDBuilder_.setMessage(value);
+                }
+                itemCase_ = 6;
+                return this;
+            }
+            /** <code>.urlfrontier.CrawlID specificCrawlID = 6;</code> */
+            public Builder setSpecificCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder builderForValue) {
+                if (specificCrawlIDBuilder_ == null) {
+                    item_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    specificCrawlIDBuilder_.setMessage(builderForValue.build());
+                }
+                itemCase_ = 6;
+                return this;
+            }
+            /** <code>.urlfrontier.CrawlID specificCrawlID = 6;</code> */
+            public Builder mergeSpecificCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (specificCrawlIDBuilder_ == null) {
+                    if (itemCase_ == 6
+                            && item_
+                                    != crawlercommons.urlfrontier.Urlfrontier.CrawlID
+                                            .getDefaultInstance()) {
+                        item_ =
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.newBuilder(
+                                                (crawlercommons.urlfrontier.Urlfrontier.CrawlID)
+                                                        item_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        item_ = value;
+                    }
+                    onChanged();
+                } else {
+                    if (itemCase_ == 6) {
+                        specificCrawlIDBuilder_.mergeFrom(value);
+                    }
+                    specificCrawlIDBuilder_.setMessage(value);
+                }
+                itemCase_ = 6;
+                return this;
+            }
+            /** <code>.urlfrontier.CrawlID specificCrawlID = 6;</code> */
+            public Builder clearSpecificCrawlID() {
+                if (specificCrawlIDBuilder_ == null) {
+                    if (itemCase_ == 6) {
+                        itemCase_ = 0;
+                        item_ = null;
+                        onChanged();
+                    }
+                } else {
+                    if (itemCase_ == 6) {
+                        itemCase_ = 0;
+                        item_ = null;
+                    }
+                    specificCrawlIDBuilder_.clear();
+                }
+                return this;
+            }
+            /** <code>.urlfrontier.CrawlID specificCrawlID = 6;</code> */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder
+                    getSpecificCrawlIDBuilder() {
+                return getSpecificCrawlIDFieldBuilder().getBuilder();
+            }
+            /** <code>.urlfrontier.CrawlID specificCrawlID = 6;</code> */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder
+                    getSpecificCrawlIDOrBuilder() {
+                if ((itemCase_ == 6) && (specificCrawlIDBuilder_ != null)) {
+                    return specificCrawlIDBuilder_.getMessageOrBuilder();
+                } else {
+                    if (itemCase_ == 6) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.CrawlID) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.CrawlID specificCrawlID = 6;</code> */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    getSpecificCrawlIDFieldBuilder() {
+                if (specificCrawlIDBuilder_ == null) {
+                    if (!(itemCase_ == 6)) {
+                        item_ = crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance();
+                    }
+                    specificCrawlIDBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>(
+                                    (crawlercommons.urlfrontier.Urlfrontier.CrawlID) item_,
+                                    getParentForChildren(),
+                                    isClean());
+                    item_ = null;
+                }
+                itemCase_ = 6;
+                onChanged();
+                ;
+                return specificCrawlIDBuilder_;
+            }
+
             @java.lang.Override
             public final Builder setUnknownFields(
                     final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -8156,6 +11283,1919 @@ public final class Urlfrontier {
 
         @java.lang.Override
         public crawlercommons.urlfrontier.Urlfrontier.GetParams getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
+    }
+
+    public interface CrawlIDOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.CrawlID)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         * <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code>
+         *
+         * @return Whether the defaultcrawlid field is set.
+         */
+        boolean hasDefaultcrawlid();
+        /**
+         * <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code>
+         *
+         * @return The defaultcrawlid.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID getDefaultcrawlid();
+        /** <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code> */
+        crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlIDOrBuilder getDefaultcrawlidOrBuilder();
+
+        /**
+         * <code>.urlfrontier.String namedcrawlid = 2;</code>
+         *
+         * @return Whether the namedcrawlid field is set.
+         */
+        boolean hasNamedcrawlid();
+        /**
+         * <code>.urlfrontier.String namedcrawlid = 2;</code>
+         *
+         * @return The namedcrawlid.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.String getNamedcrawlid();
+        /** <code>.urlfrontier.String namedcrawlid = 2;</code> */
+        crawlercommons.urlfrontier.Urlfrontier.StringOrBuilder getNamedcrawlidOrBuilder();
+
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlID.ItemCase getItemCase();
+    }
+    /**
+     *
+     *
+     * <pre>
+     * * Either the default crawl or one named specifically *
+     * </pre>
+     *
+     * Protobuf type {@code urlfrontier.CrawlID}
+     */
+    public static final class CrawlID extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.CrawlID)
+            CrawlIDOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use CrawlID.newBuilder() to construct.
+        private CrawlID(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private CrawlID() {}
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new CrawlID();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private CrawlID(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.Builder
+                                        subBuilder = null;
+                                if (itemCase_ == 1) {
+                                    subBuilder =
+                                            ((crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID)
+                                                            item_)
+                                                    .toBuilder();
+                                }
+                                item_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier
+                                                        .DefaultCrawlID.parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(
+                                            (crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID)
+                                                    item_);
+                                    item_ = subBuilder.buildPartial();
+                                }
+                                itemCase_ = 1;
+                                break;
+                            }
+                        case 18:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.String.Builder subBuilder =
+                                        null;
+                                if (itemCase_ == 2) {
+                                    subBuilder =
+                                            ((crawlercommons.urlfrontier.Urlfrontier.String) item_)
+                                                    .toBuilder();
+                                }
+                                item_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.String
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(
+                                            (crawlercommons.urlfrontier.Urlfrontier.String) item_);
+                                    item_ = subBuilder.buildPartial();
+                                }
+                                itemCase_ = 2;
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_CrawlID_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_CrawlID_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.class,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder.class);
+        }
+
+        private int itemCase_ = 0;
+        private java.lang.Object item_;
+
+        public enum ItemCase
+                implements
+                        com.google.protobuf.Internal.EnumLite,
+                        com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+            DEFAULTCRAWLID(1),
+            NAMEDCRAWLID(2),
+            ITEM_NOT_SET(0);
+            private final int value;
+
+            private ItemCase(int value) {
+                this.value = value;
+            }
+            /**
+             * @param value The number of the enum to look for.
+             * @return The enum associated with the given number.
+             * @deprecated Use {@link #forNumber(int)} instead.
+             */
+            @java.lang.Deprecated
+            public static ItemCase valueOf(int value) {
+                return forNumber(value);
+            }
+
+            public static ItemCase forNumber(int value) {
+                switch (value) {
+                    case 1:
+                        return DEFAULTCRAWLID;
+                    case 2:
+                        return NAMEDCRAWLID;
+                    case 0:
+                        return ITEM_NOT_SET;
+                    default:
+                        return null;
+                }
+            }
+
+            public int getNumber() {
+                return this.value;
+            }
+        };
+
+        public ItemCase getItemCase() {
+            return ItemCase.forNumber(itemCase_);
+        }
+
+        public static final int DEFAULTCRAWLID_FIELD_NUMBER = 1;
+        /**
+         * <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code>
+         *
+         * @return Whether the defaultcrawlid field is set.
+         */
+        @java.lang.Override
+        public boolean hasDefaultcrawlid() {
+            return itemCase_ == 1;
+        }
+        /**
+         * <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code>
+         *
+         * @return The defaultcrawlid.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID getDefaultcrawlid() {
+            if (itemCase_ == 1) {
+                return (crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.getDefaultInstance();
+        }
+        /** <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code> */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlIDOrBuilder
+                getDefaultcrawlidOrBuilder() {
+            if (itemCase_ == 1) {
+                return (crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.getDefaultInstance();
+        }
+
+        public static final int NAMEDCRAWLID_FIELD_NUMBER = 2;
+        /**
+         * <code>.urlfrontier.String namedcrawlid = 2;</code>
+         *
+         * @return Whether the namedcrawlid field is set.
+         */
+        @java.lang.Override
+        public boolean hasNamedcrawlid() {
+            return itemCase_ == 2;
+        }
+        /**
+         * <code>.urlfrontier.String namedcrawlid = 2;</code>
+         *
+         * @return The namedcrawlid.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.String getNamedcrawlid() {
+            if (itemCase_ == 2) {
+                return (crawlercommons.urlfrontier.Urlfrontier.String) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance();
+        }
+        /** <code>.urlfrontier.String namedcrawlid = 2;</code> */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.StringOrBuilder getNamedcrawlidOrBuilder() {
+            if (itemCase_ == 2) {
+                return (crawlercommons.urlfrontier.Urlfrontier.String) item_;
+            }
+            return crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance();
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (itemCase_ == 1) {
+                output.writeMessage(
+                        1, (crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID) item_);
+            }
+            if (itemCase_ == 2) {
+                output.writeMessage(2, (crawlercommons.urlfrontier.Urlfrontier.String) item_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (itemCase_ == 1) {
+                size +=
+                        com.google.protobuf.CodedOutputStream.computeMessageSize(
+                                1, (crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID) item_);
+            }
+            if (itemCase_ == 2) {
+                size +=
+                        com.google.protobuf.CodedOutputStream.computeMessageSize(
+                                2, (crawlercommons.urlfrontier.Urlfrontier.String) item_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.CrawlID)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.CrawlID other =
+                    (crawlercommons.urlfrontier.Urlfrontier.CrawlID) obj;
+
+            if (!getItemCase().equals(other.getItemCase())) return false;
+            switch (itemCase_) {
+                case 1:
+                    if (!getDefaultcrawlid().equals(other.getDefaultcrawlid())) return false;
+                    break;
+                case 2:
+                    if (!getNamedcrawlid().equals(other.getNamedcrawlid())) return false;
+                    break;
+                case 0:
+                default:
+            }
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            switch (itemCase_) {
+                case 1:
+                    hash = (37 * hash) + DEFAULTCRAWLID_FIELD_NUMBER;
+                    hash = (53 * hash) + getDefaultcrawlid().hashCode();
+                    break;
+                case 2:
+                    hash = (37 * hash) + NAMEDCRAWLID_FIELD_NUMBER;
+                    hash = (53 * hash) + getNamedcrawlid().hashCode();
+                    break;
+                case 0:
+                default:
+            }
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(crawlercommons.urlfrontier.Urlfrontier.CrawlID prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * Either the default crawl or one named specifically *
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.CrawlID}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.CrawlID)
+                crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_CrawlID_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_CrawlID_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.class,
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.CrawlID.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                itemCase_ = 0;
+                item_ = null;
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_CrawlID_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID build() {
+                crawlercommons.urlfrontier.Urlfrontier.CrawlID result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.CrawlID result =
+                        new crawlercommons.urlfrontier.Urlfrontier.CrawlID(this);
+                if (itemCase_ == 1) {
+                    if (defaultcrawlidBuilder_ == null) {
+                        result.item_ = item_;
+                    } else {
+                        result.item_ = defaultcrawlidBuilder_.build();
+                    }
+                }
+                if (itemCase_ == 2) {
+                    if (namedcrawlidBuilder_ == null) {
+                        result.item_ = item_;
+                    } else {
+                        result.item_ = namedcrawlidBuilder_.build();
+                    }
+                }
+                result.itemCase_ = itemCase_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.CrawlID) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.CrawlID) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.CrawlID other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance())
+                    return this;
+                switch (other.getItemCase()) {
+                    case DEFAULTCRAWLID:
+                        {
+                            mergeDefaultcrawlid(other.getDefaultcrawlid());
+                            break;
+                        }
+                    case NAMEDCRAWLID:
+                        {
+                            mergeNamedcrawlid(other.getNamedcrawlid());
+                            break;
+                        }
+                    case ITEM_NOT_SET:
+                        {
+                            break;
+                        }
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.CrawlID parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.CrawlID)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private int itemCase_ = 0;
+            private java.lang.Object item_;
+
+            public ItemCase getItemCase() {
+                return ItemCase.forNumber(itemCase_);
+            }
+
+            public Builder clearItem() {
+                itemCase_ = 0;
+                item_ = null;
+                onChanged();
+                return this;
+            }
+
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlIDOrBuilder>
+                    defaultcrawlidBuilder_;
+            /**
+             * <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code>
+             *
+             * @return Whether the defaultcrawlid field is set.
+             */
+            @java.lang.Override
+            public boolean hasDefaultcrawlid() {
+                return itemCase_ == 1;
+            }
+            /**
+             * <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code>
+             *
+             * @return The defaultcrawlid.
+             */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID getDefaultcrawlid() {
+                if (defaultcrawlidBuilder_ == null) {
+                    if (itemCase_ == 1) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID
+                            .getDefaultInstance();
+                } else {
+                    if (itemCase_ == 1) {
+                        return defaultcrawlidBuilder_.getMessage();
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID
+                            .getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code> */
+            public Builder setDefaultcrawlid(
+                    crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID value) {
+                if (defaultcrawlidBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    item_ = value;
+                    onChanged();
+                } else {
+                    defaultcrawlidBuilder_.setMessage(value);
+                }
+                itemCase_ = 1;
+                return this;
+            }
+            /** <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code> */
+            public Builder setDefaultcrawlid(
+                    crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.Builder builderForValue) {
+                if (defaultcrawlidBuilder_ == null) {
+                    item_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    defaultcrawlidBuilder_.setMessage(builderForValue.build());
+                }
+                itemCase_ = 1;
+                return this;
+            }
+            /** <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code> */
+            public Builder mergeDefaultcrawlid(
+                    crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID value) {
+                if (defaultcrawlidBuilder_ == null) {
+                    if (itemCase_ == 1
+                            && item_
+                                    != crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID
+                                            .getDefaultInstance()) {
+                        item_ =
+                                crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.newBuilder(
+                                                (crawlercommons.urlfrontier.Urlfrontier
+                                                                .DefaultCrawlID)
+                                                        item_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        item_ = value;
+                    }
+                    onChanged();
+                } else {
+                    if (itemCase_ == 1) {
+                        defaultcrawlidBuilder_.mergeFrom(value);
+                    }
+                    defaultcrawlidBuilder_.setMessage(value);
+                }
+                itemCase_ = 1;
+                return this;
+            }
+            /** <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code> */
+            public Builder clearDefaultcrawlid() {
+                if (defaultcrawlidBuilder_ == null) {
+                    if (itemCase_ == 1) {
+                        itemCase_ = 0;
+                        item_ = null;
+                        onChanged();
+                    }
+                } else {
+                    if (itemCase_ == 1) {
+                        itemCase_ = 0;
+                        item_ = null;
+                    }
+                    defaultcrawlidBuilder_.clear();
+                }
+                return this;
+            }
+            /** <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code> */
+            public crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.Builder
+                    getDefaultcrawlidBuilder() {
+                return getDefaultcrawlidFieldBuilder().getBuilder();
+            }
+            /** <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code> */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlIDOrBuilder
+                    getDefaultcrawlidOrBuilder() {
+                if ((itemCase_ == 1) && (defaultcrawlidBuilder_ != null)) {
+                    return defaultcrawlidBuilder_.getMessageOrBuilder();
+                } else {
+                    if (itemCase_ == 1) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID
+                            .getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.DefaultCrawlID defaultcrawlid = 1;</code> */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlIDOrBuilder>
+                    getDefaultcrawlidFieldBuilder() {
+                if (defaultcrawlidBuilder_ == null) {
+                    if (!(itemCase_ == 1)) {
+                        item_ =
+                                crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID
+                                        .getDefaultInstance();
+                    }
+                    defaultcrawlidBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID,
+                                    crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlIDOrBuilder>(
+                                    (crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID) item_,
+                                    getParentForChildren(),
+                                    isClean());
+                    item_ = null;
+                }
+                itemCase_ = 1;
+                onChanged();
+                ;
+                return defaultcrawlidBuilder_;
+            }
+
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.String,
+                            crawlercommons.urlfrontier.Urlfrontier.String.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.StringOrBuilder>
+                    namedcrawlidBuilder_;
+            /**
+             * <code>.urlfrontier.String namedcrawlid = 2;</code>
+             *
+             * @return Whether the namedcrawlid field is set.
+             */
+            @java.lang.Override
+            public boolean hasNamedcrawlid() {
+                return itemCase_ == 2;
+            }
+            /**
+             * <code>.urlfrontier.String namedcrawlid = 2;</code>
+             *
+             * @return The namedcrawlid.
+             */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.String getNamedcrawlid() {
+                if (namedcrawlidBuilder_ == null) {
+                    if (itemCase_ == 2) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.String) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance();
+                } else {
+                    if (itemCase_ == 2) {
+                        return namedcrawlidBuilder_.getMessage();
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.String namedcrawlid = 2;</code> */
+            public Builder setNamedcrawlid(crawlercommons.urlfrontier.Urlfrontier.String value) {
+                if (namedcrawlidBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    item_ = value;
+                    onChanged();
+                } else {
+                    namedcrawlidBuilder_.setMessage(value);
+                }
+                itemCase_ = 2;
+                return this;
+            }
+            /** <code>.urlfrontier.String namedcrawlid = 2;</code> */
+            public Builder setNamedcrawlid(
+                    crawlercommons.urlfrontier.Urlfrontier.String.Builder builderForValue) {
+                if (namedcrawlidBuilder_ == null) {
+                    item_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    namedcrawlidBuilder_.setMessage(builderForValue.build());
+                }
+                itemCase_ = 2;
+                return this;
+            }
+            /** <code>.urlfrontier.String namedcrawlid = 2;</code> */
+            public Builder mergeNamedcrawlid(crawlercommons.urlfrontier.Urlfrontier.String value) {
+                if (namedcrawlidBuilder_ == null) {
+                    if (itemCase_ == 2
+                            && item_
+                                    != crawlercommons.urlfrontier.Urlfrontier.String
+                                            .getDefaultInstance()) {
+                        item_ =
+                                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder(
+                                                (crawlercommons.urlfrontier.Urlfrontier.String)
+                                                        item_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        item_ = value;
+                    }
+                    onChanged();
+                } else {
+                    if (itemCase_ == 2) {
+                        namedcrawlidBuilder_.mergeFrom(value);
+                    }
+                    namedcrawlidBuilder_.setMessage(value);
+                }
+                itemCase_ = 2;
+                return this;
+            }
+            /** <code>.urlfrontier.String namedcrawlid = 2;</code> */
+            public Builder clearNamedcrawlid() {
+                if (namedcrawlidBuilder_ == null) {
+                    if (itemCase_ == 2) {
+                        itemCase_ = 0;
+                        item_ = null;
+                        onChanged();
+                    }
+                } else {
+                    if (itemCase_ == 2) {
+                        itemCase_ = 0;
+                        item_ = null;
+                    }
+                    namedcrawlidBuilder_.clear();
+                }
+                return this;
+            }
+            /** <code>.urlfrontier.String namedcrawlid = 2;</code> */
+            public crawlercommons.urlfrontier.Urlfrontier.String.Builder getNamedcrawlidBuilder() {
+                return getNamedcrawlidFieldBuilder().getBuilder();
+            }
+            /** <code>.urlfrontier.String namedcrawlid = 2;</code> */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.StringOrBuilder
+                    getNamedcrawlidOrBuilder() {
+                if ((itemCase_ == 2) && (namedcrawlidBuilder_ != null)) {
+                    return namedcrawlidBuilder_.getMessageOrBuilder();
+                } else {
+                    if (itemCase_ == 2) {
+                        return (crawlercommons.urlfrontier.Urlfrontier.String) item_;
+                    }
+                    return crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance();
+                }
+            }
+            /** <code>.urlfrontier.String namedcrawlid = 2;</code> */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.String,
+                            crawlercommons.urlfrontier.Urlfrontier.String.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.StringOrBuilder>
+                    getNamedcrawlidFieldBuilder() {
+                if (namedcrawlidBuilder_ == null) {
+                    if (!(itemCase_ == 2)) {
+                        item_ = crawlercommons.urlfrontier.Urlfrontier.String.getDefaultInstance();
+                    }
+                    namedcrawlidBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.String,
+                                    crawlercommons.urlfrontier.Urlfrontier.String.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.StringOrBuilder>(
+                                    (crawlercommons.urlfrontier.Urlfrontier.String) item_,
+                                    getParentForChildren(),
+                                    isClean());
+                    item_ = null;
+                }
+                itemCase_ = 2;
+                onChanged();
+                ;
+                return namedcrawlidBuilder_;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.CrawlID)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.CrawlID)
+        private static final crawlercommons.urlfrontier.Urlfrontier.CrawlID DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.CrawlID();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlID getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<CrawlID> PARSER =
+                new com.google.protobuf.AbstractParser<CrawlID>() {
+                    @java.lang.Override
+                    public CrawlID parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new CrawlID(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<CrawlID> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<CrawlID> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlID getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
+    }
+
+    public interface DefaultCrawlIDOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.DefaultCrawlID)
+            com.google.protobuf.MessageOrBuilder {}
+    /** Protobuf type {@code urlfrontier.DefaultCrawlID} */
+    public static final class DefaultCrawlID extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.DefaultCrawlID)
+            DefaultCrawlIDOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use DefaultCrawlID.newBuilder() to construct.
+        private DefaultCrawlID(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private DefaultCrawlID() {}
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new DefaultCrawlID();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private DefaultCrawlID(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_DefaultCrawlID_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_DefaultCrawlID_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.class,
+                            crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.Builder.class);
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID other =
+                    (crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID) obj;
+
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /** Protobuf type {@code urlfrontier.DefaultCrawlID} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.DefaultCrawlID)
+                crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlIDOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_DefaultCrawlID_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_DefaultCrawlID_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.class,
+                                crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.Builder
+                                        .class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_DefaultCrawlID_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID
+                    getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID build() {
+                crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID result =
+                        new crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID(this);
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID other) {
+                if (other
+                        == crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID
+                                .getDefaultInstance()) return this;
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.DefaultCrawlID)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.DefaultCrawlID)
+        private static final crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<DefaultCrawlID> PARSER =
+                new com.google.protobuf.AbstractParser<DefaultCrawlID>() {
+                    @java.lang.Override
+                    public DefaultCrawlID parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new DefaultCrawlID(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<DefaultCrawlID> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<DefaultCrawlID> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.DefaultCrawlID getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
+    }
+
+    public interface AnyCrawlIDOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.AnyCrawlID)
+            com.google.protobuf.MessageOrBuilder {}
+    /** Protobuf type {@code urlfrontier.AnyCrawlID} */
+    public static final class AnyCrawlID extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.AnyCrawlID)
+            AnyCrawlIDOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use AnyCrawlID.newBuilder() to construct.
+        private AnyCrawlID(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private AnyCrawlID() {}
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new AnyCrawlID();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private AnyCrawlID(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_AnyCrawlID_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_AnyCrawlID_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.class,
+                            crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.Builder.class);
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID other =
+                    (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID) obj;
+
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /** Protobuf type {@code urlfrontier.AnyCrawlID} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.AnyCrawlID)
+                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlIDOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_AnyCrawlID_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_AnyCrawlID_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.class,
+                                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.Builder.class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_AnyCrawlID_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID build() {
+                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID result =
+                        new crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID(this);
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID other) {
+                if (other == crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID.getDefaultInstance())
+                    return this;
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.AnyCrawlID)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.AnyCrawlID)
+        private static final crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<AnyCrawlID> PARSER =
+                new com.google.protobuf.AbstractParser<AnyCrawlID>() {
+                    @java.lang.Override
+                    public AnyCrawlID parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new AnyCrawlID(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<AnyCrawlID> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<AnyCrawlID> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID getDefaultInstanceForType() {
             return DEFAULT_INSTANCE;
         }
     }
@@ -9321,6 +14361,41 @@ public final class Urlfrontier {
          * <code>map&lt;string, .urlfrontier.StringList&gt; metadata = 3;</code>
          */
         crawlercommons.urlfrontier.Urlfrontier.StringList getMetadataOrThrow(java.lang.String key);
+
+        /**
+         *
+         *
+         * <pre>
+         * * crawl ID *
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        boolean hasCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * * crawl ID *
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         *
+         * @return The crawlID.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * * crawl ID *
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         */
+        crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder();
     }
     /** Protobuf type {@code urlfrontier.URLInfo} */
     public static final class URLInfo extends com.google.protobuf.GeneratedMessageV3
@@ -9401,6 +14476,25 @@ public final class Urlfrontier {
                                 metadata_
                                         .getMutableMap()
                                         .put(metadata__.getKey(), metadata__.getValue());
+                                break;
+                            }
+                        case 34:
+                            {
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder subBuilder =
+                                        null;
+                                if (crawlID_ != null) {
+                                    subBuilder = crawlID_.toBuilder();
+                                }
+                                crawlID_ =
+                                        input.readMessage(
+                                                crawlercommons.urlfrontier.Urlfrontier.CrawlID
+                                                        .parser(),
+                                                extensionRegistry);
+                                if (subBuilder != null) {
+                                    subBuilder.mergeFrom(crawlID_);
+                                    crawlID_ = subBuilder.buildPartial();
+                                }
+
                                 break;
                             }
                         default:
@@ -9671,6 +14765,54 @@ public final class Urlfrontier {
             return map.get(key);
         }
 
+        public static final int CRAWLID_FIELD_NUMBER = 4;
+        private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+        /**
+         *
+         *
+         * <pre>
+         * * crawl ID *
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         *
+         * @return Whether the crawlID field is set.
+         */
+        @java.lang.Override
+        public boolean hasCrawlID() {
+            return crawlID_ != null;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * crawl ID *
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         *
+         * @return The crawlID.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+            return crawlID_ == null
+                    ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                    : crawlID_;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * crawl ID *
+         * </pre>
+         *
+         * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+            return getCrawlID();
+        }
+
         private byte memoizedIsInitialized = -1;
 
         @java.lang.Override
@@ -9694,6 +14836,9 @@ public final class Urlfrontier {
             }
             com.google.protobuf.GeneratedMessageV3.serializeStringMapTo(
                     output, internalGetMetadata(), MetadataDefaultEntryHolder.defaultEntry, 3);
+            if (crawlID_ != null) {
+                output.writeMessage(4, getCrawlID());
+            }
             unknownFields.writeTo(output);
         }
 
@@ -9722,6 +14867,9 @@ public final class Urlfrontier {
                                         .build();
                 size += com.google.protobuf.CodedOutputStream.computeMessageSize(3, metadata__);
             }
+            if (crawlID_ != null) {
+                size += com.google.protobuf.CodedOutputStream.computeMessageSize(4, getCrawlID());
+            }
             size += unknownFields.getSerializedSize();
             memoizedSize = size;
             return size;
@@ -9741,6 +14889,10 @@ public final class Urlfrontier {
             if (!getUrl().equals(other.getUrl())) return false;
             if (!getKey().equals(other.getKey())) return false;
             if (!internalGetMetadata().equals(other.internalGetMetadata())) return false;
+            if (hasCrawlID() != other.hasCrawlID()) return false;
+            if (hasCrawlID()) {
+                if (!getCrawlID().equals(other.getCrawlID())) return false;
+            }
             if (!unknownFields.equals(other.unknownFields)) return false;
             return true;
         }
@@ -9759,6 +14911,10 @@ public final class Urlfrontier {
             if (!internalGetMetadata().getMap().isEmpty()) {
                 hash = (37 * hash) + METADATA_FIELD_NUMBER;
                 hash = (53 * hash) + internalGetMetadata().hashCode();
+            }
+            if (hasCrawlID()) {
+                hash = (37 * hash) + CRAWLID_FIELD_NUMBER;
+                hash = (53 * hash) + getCrawlID().hashCode();
             }
             hash = (29 * hash) + unknownFields.hashCode();
             memoizedHashCode = hash;
@@ -9929,6 +15085,12 @@ public final class Urlfrontier {
                 key_ = "";
 
                 internalGetMutableMetadata().clear();
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
                 return this;
             }
 
@@ -9961,6 +15123,11 @@ public final class Urlfrontier {
                 result.key_ = key_;
                 result.metadata_ = internalGetMetadata();
                 result.metadata_.makeImmutable();
+                if (crawlIDBuilder_ == null) {
+                    result.crawlID_ = crawlID_;
+                } else {
+                    result.crawlID_ = crawlIDBuilder_.build();
+                }
                 onBuilt();
                 return result;
             }
@@ -10022,6 +15189,9 @@ public final class Urlfrontier {
                     onChanged();
                 }
                 internalGetMutableMetadata().mergeFrom(other.internalGetMetadata());
+                if (other.hasCrawlID()) {
+                    mergeCrawlID(other.getCrawlID());
+                }
                 this.mergeUnknownFields(other.unknownFields);
                 onChanged();
                 return this;
@@ -10457,6 +15627,192 @@ public final class Urlfrontier {
                             values) {
                 internalGetMutableMetadata().getMutableMap().putAll(values);
                 return this;
+            }
+
+            private crawlercommons.urlfrontier.Urlfrontier.CrawlID crawlID_;
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    crawlIDBuilder_;
+            /**
+             *
+             *
+             * <pre>
+             * * crawl ID *
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             *
+             * @return Whether the crawlID field is set.
+             */
+            public boolean hasCrawlID() {
+                return crawlIDBuilder_ != null || crawlID_ != null;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * crawl ID *
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             *
+             * @return The crawlID.
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID getCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                } else {
+                    return crawlIDBuilder_.getMessage();
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * crawl ID *
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public Builder setCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    crawlID_ = value;
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * crawl ID *
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public Builder setCrawlID(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder builderForValue) {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.setMessage(builderForValue.build());
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * crawl ID *
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public Builder mergeCrawlID(crawlercommons.urlfrontier.Urlfrontier.CrawlID value) {
+                if (crawlIDBuilder_ == null) {
+                    if (crawlID_ != null) {
+                        crawlID_ =
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlID.newBuilder(crawlID_)
+                                        .mergeFrom(value)
+                                        .buildPartial();
+                    } else {
+                        crawlID_ = value;
+                    }
+                    onChanged();
+                } else {
+                    crawlIDBuilder_.mergeFrom(value);
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * crawl ID *
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public Builder clearCrawlID() {
+                if (crawlIDBuilder_ == null) {
+                    crawlID_ = null;
+                    onChanged();
+                } else {
+                    crawlID_ = null;
+                    crawlIDBuilder_ = null;
+                }
+
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * crawl ID *
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder getCrawlIDBuilder() {
+
+                onChanged();
+                return getCrawlIDFieldBuilder().getBuilder();
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * crawl ID *
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder getCrawlIDOrBuilder() {
+                if (crawlIDBuilder_ != null) {
+                    return crawlIDBuilder_.getMessageOrBuilder();
+                } else {
+                    return crawlID_ == null
+                            ? crawlercommons.urlfrontier.Urlfrontier.CrawlID.getDefaultInstance()
+                            : crawlID_;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * crawl ID *
+             * </pre>
+             *
+             * <code>.urlfrontier.CrawlID crawlID = 4;</code>
+             */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>
+                    getCrawlIDFieldBuilder() {
+                if (crawlIDBuilder_ == null) {
+                    crawlIDBuilder_ =
+                            new com.google.protobuf.SingleFieldBuilderV3<
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlID.Builder,
+                                    crawlercommons.urlfrontier.Urlfrontier.CrawlIDOrBuilder>(
+                                    getCrawlID(), getParentForChildren(), isClean());
+                    crawlID_ = null;
+                }
+                return crawlIDBuilder_;
             }
 
             @java.lang.Override
@@ -12011,6 +17367,10 @@ public final class Urlfrontier {
     private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internal_static_urlfrontier_StringList_fieldAccessorTable;
     private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_QueueWithinCrawlParams_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_QueueWithinCrawlParams_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
             internal_static_urlfrontier_QueueDelayParams_descriptor;
     private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable;
@@ -12022,6 +17382,18 @@ public final class Urlfrontier {
             internal_static_urlfrontier_GetParams_descriptor;
     private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internal_static_urlfrontier_GetParams_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_CrawlID_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_CrawlID_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_DefaultCrawlID_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_DefaultCrawlID_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_AnyCrawlID_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_AnyCrawlID_fieldAccessorTable;
     private static final com.google.protobuf.Descriptors.Descriptor
             internal_static_urlfrontier_URLItem_descriptor;
     private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -12051,49 +17423,67 @@ public final class Urlfrontier {
 
     static {
         java.lang.String[] descriptorData = {
-            "\n\021urlfrontier.proto\022\013urlfrontier\"\237\001\n\005Sta"
+            "\n\021urlfrontier.proto\022\013urlfrontier\"\306\001\n\005Sta"
                     + "ts\022\014\n\004size\030\001 \001(\004\022\021\n\tinProcess\030\002 \001(\r\022.\n\006c"
                     + "ounts\030\003 \003(\0132\036.urlfrontier.Stats.CountsEn"
-                    + "try\022\026\n\016numberOfQueues\030\004 \001(\004\032-\n\013CountsEnt"
-                    + "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\004:\0028\001\"C\n\nPa"
-                    + "gination\022\r\n\005start\030\001 \001(\r\022\014\n\004size\030\002 \001(\r\022\030\n"
-                    + "\020include_inactive\030\003 \001(\010\"\007\n\005Empty\"\030\n\007Bool"
-                    + "ean\022\r\n\005state\030\001 \001(\010\"\027\n\006String\022\r\n\005value\030\001 "
-                    + "\001(\t\"\030\n\007Integer\022\r\n\005value\030\001 \001(\004\"G\n\tQueueLi"
-                    + "st\022\016\n\006values\030\001 \003(\t\022\r\n\005total\030\002 \001(\004\022\r\n\005sta"
-                    + "rt\030\003 \001(\r\022\014\n\004size\030\004 \001(\r\"\034\n\nStringList\022\016\n\006"
-                    + "values\030\001 \003(\t\":\n\020QueueDelayParams\022\013\n\003key\030"
-                    + "\001 \001(\t\022\031\n\021delay_requestable\030\002 \001(\r\"-\n\020Bloc"
-                    + "kQueueParams\022\013\n\003key\030\001 \001(\t\022\014\n\004time\030\002 \001(\004\""
-                    + "c\n\tGetParams\022\032\n\022max_urls_per_queue\030\001 \001(\r"
-                    + "\022\022\n\nmax_queues\030\002 \001(\r\022\013\n\003key\030\003 \001(\t\022\031\n\021del"
-                    + "ay_requestable\030\004 \001(\r\"s\n\007URLItem\0224\n\ndisco"
-                    + "vered\030\001 \001(\0132\036.urlfrontier.DiscoveredURLI"
-                    + "temH\000\022*\n\005known\030\002 \001(\0132\031.urlfrontier.Known"
-                    + "URLItemH\000B\006\n\004item\"\243\001\n\007URLInfo\022\013\n\003url\030\001 \001"
-                    + "(\t\022\013\n\003key\030\002 \001(\t\0224\n\010metadata\030\003 \003(\0132\".urlf"
-                    + "rontier.URLInfo.MetadataEntry\032H\n\rMetadat"
-                    + "aEntry\022\013\n\003key\030\001 \001(\t\022&\n\005value\030\002 \001(\0132\027.url"
-                    + "frontier.StringList:\0028\001\"Q\n\014KnownURLItem\022"
-                    + "\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLInfo\022\035\n\025r"
-                    + "efetchable_from_date\030\002 \001(\004\"7\n\021Discovered"
+                    + "try\022\026\n\016numberOfQueues\030\004 \001(\004\022%\n\007crawlID\030\005"
+                    + " \001(\0132\024.urlfrontier.CrawlID\032-\n\013CountsEntr"
+                    + "y\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\004:\0028\001\"j\n\nPag"
+                    + "ination\022\r\n\005start\030\001 \001(\r\022\014\n\004size\030\002 \001(\r\022\030\n\020"
+                    + "include_inactive\030\003 \001(\010\022%\n\007crawlID\030\004 \001(\0132"
+                    + "\024.urlfrontier.CrawlID\"\007\n\005Empty\"\030\n\007Boolea"
+                    + "n\022\r\n\005state\030\001 \001(\010\"\027\n\006String\022\r\n\005value\030\001 \001("
+                    + "\t\"\030\n\007Integer\022\r\n\005value\030\001 \001(\004\"n\n\tQueueList"
+                    + "\022\016\n\006values\030\001 \003(\t\022\r\n\005total\030\002 \001(\004\022\r\n\005start"
+                    + "\030\003 \001(\r\022\014\n\004size\030\004 \001(\r\022%\n\007crawlID\030\005 \001(\0132\024."
+                    + "urlfrontier.CrawlID\"\034\n\nStringList\022\016\n\006val"
+                    + "ues\030\001 \003(\t\"L\n\026QueueWithinCrawlParams\022\013\n\003k"
+                    + "ey\030\001 \001(\t\022%\n\007crawlID\030\002 \001(\0132\024.urlfrontier."
+                    + "CrawlID\"a\n\020QueueDelayParams\022\013\n\003key\030\001 \001(\t"
+                    + "\022\031\n\021delay_requestable\030\002 \001(\r\022%\n\007crawlID\030\003"
+                    + " \001(\0132\024.urlfrontier.CrawlID\"T\n\020BlockQueue"
+                    + "Params\022\013\n\003key\030\001 \001(\t\022\014\n\004time\030\002 \001(\004\022%\n\007cra"
+                    + "wlID\030\003 \001(\0132\024.urlfrontier.CrawlID\"\313\001\n\tGet"
+                    + "Params\022\032\n\022max_urls_per_queue\030\001 \001(\r\022\022\n\nma"
+                    + "x_queues\030\002 \001(\r\022\013\n\003key\030\003 \001(\t\022\031\n\021delay_req"
+                    + "uestable\030\004 \001(\r\022-\n\nanyCrawlID\030\005 \001(\0132\027.url"
+                    + "frontier.AnyCrawlIDH\000\022/\n\017specificCrawlID"
+                    + "\030\006 \001(\0132\024.urlfrontier.CrawlIDH\000B\006\n\004item\"u"
+                    + "\n\007CrawlID\0225\n\016defaultcrawlid\030\001 \001(\0132\033.urlf"
+                    + "rontier.DefaultCrawlIDH\000\022+\n\014namedcrawlid"
+                    + "\030\002 \001(\0132\023.urlfrontier.StringH\000B\006\n\004item\"\020\n"
+                    + "\016DefaultCrawlID\"\014\n\nAnyCrawlID\"s\n\007URLItem"
+                    + "\0224\n\ndiscovered\030\001 \001(\0132\036.urlfrontier.Disco"
+                    + "veredURLItemH\000\022*\n\005known\030\002 \001(\0132\031.urlfront"
+                    + "ier.KnownURLItemH\000B\006\n\004item\"\312\001\n\007URLInfo\022\013"
+                    + "\n\003url\030\001 \001(\t\022\013\n\003key\030\002 \001(\t\0224\n\010metadata\030\003 \003"
+                    + "(\0132\".urlfrontier.URLInfo.MetadataEntry\022%"
+                    + "\n\007crawlID\030\004 \001(\0132\024.urlfrontier.CrawlID\032H\n"
+                    + "\rMetadataEntry\022\013\n\003key\030\001 \001(\t\022&\n\005value\030\002 \001"
+                    + "(\0132\027.urlfrontier.StringList:\0028\001\"Q\n\014Known"
                     + "URLItem\022\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLI"
-                    + "nfo2\265\004\n\013URLFrontier\022?\n\nListQueues\022\027.urlf"
-                    + "rontier.Pagination\032\026.urlfrontier.QueueLi"
-                    + "st\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetParams\032"
-                    + "\024.urlfrontier.URLInfo\"\0000\001\022:\n\007PutURLs\022\024.u"
-                    + "rlfrontier.URLItem\032\023.urlfrontier.String\""
-                    + "\000(\0010\001\0225\n\010GetStats\022\023.urlfrontier.String\032\022"
-                    + ".urlfrontier.Stats\"\000\022:\n\013DeleteQueue\022\023.ur"
-                    + "lfrontier.String\032\024.urlfrontier.Integer\"\000"
-                    + "\022F\n\017BlockQueueUntil\022\035.urlfrontier.BlockQ"
-                    + "ueueParams\032\022.urlfrontier.Empty\"\000\0227\n\tSetA"
-                    + "ctive\022\024.urlfrontier.Boolean\032\022.urlfrontie"
-                    + "r.Empty\"\000\0227\n\tGetActive\022\022.urlfrontier.Emp"
-                    + "ty\032\024.urlfrontier.Boolean\"\000\022?\n\010SetDelay\022\035"
-                    + ".urlfrontier.QueueDelayParams\032\022.urlfront"
-                    + "ier.Empty\"\000B\034\n\032crawlercommons.urlfrontie"
-                    + "rb\006proto3"
+                    + "nfo\022\035\n\025refetchable_from_date\030\002 \001(\004\"7\n\021Di"
+                    + "scoveredURLItem\022\"\n\004info\030\001 \001(\0132\024.urlfront"
+                    + "ier.URLInfo2\313\005\n\013URLFrontier\022;\n\nListCrawl"
+                    + "s\022\022.urlfrontier.Empty\032\027.urlfrontier.Stri"
+                    + "ngList\"\000\0227\n\013DeleteCrawl\022\022.urlfrontier.Em"
+                    + "pty\032\022.urlfrontier.Empty\"\000\022?\n\nListQueues\022"
+                    + "\027.urlfrontier.Pagination\032\026.urlfrontier.Q"
+                    + "ueueList\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetP"
+                    + "arams\032\024.urlfrontier.URLInfo\"\0000\001\022:\n\007PutUR"
+                    + "Ls\022\024.urlfrontier.URLItem\032\023.urlfrontier.S"
+                    + "tring\"\000(\0010\001\022E\n\010GetStats\022#.urlfrontier.Qu"
+                    + "eueWithinCrawlParams\032\022.urlfrontier.Stats"
+                    + "\"\000\022J\n\013DeleteQueue\022#.urlfrontier.QueueWit"
+                    + "hinCrawlParams\032\024.urlfrontier.Integer\"\000\022F"
+                    + "\n\017BlockQueueUntil\022\035.urlfrontier.BlockQue"
+                    + "ueParams\032\022.urlfrontier.Empty\"\000\0227\n\tSetAct"
+                    + "ive\022\024.urlfrontier.Boolean\032\022.urlfrontier."
+                    + "Empty\"\000\0227\n\tGetActive\022\022.urlfrontier.Empty"
+                    + "\032\024.urlfrontier.Boolean\"\000\022?\n\010SetDelay\022\035.u"
+                    + "rlfrontier.QueueDelayParams\032\022.urlfrontie"
+                    + "r.Empty\"\000B\034\n\032crawlercommons.urlfrontierb"
+                    + "\006proto3"
         };
         descriptor =
                 com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
@@ -12103,7 +17493,7 @@ public final class Urlfrontier {
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_Stats_descriptor,
                         new java.lang.String[] {
-                            "Size", "InProcess", "Counts", "NumberOfQueues",
+                            "Size", "InProcess", "Counts", "NumberOfQueues", "CrawlID",
                         });
         internal_static_urlfrontier_Stats_CountsEntry_descriptor =
                 internal_static_urlfrontier_Stats_descriptor.getNestedTypes().get(0);
@@ -12119,7 +17509,7 @@ public final class Urlfrontier {
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_Pagination_descriptor,
                         new java.lang.String[] {
-                            "Start", "Size", "IncludeInactive",
+                            "Start", "Size", "IncludeInactive", "CrawlID",
                         });
         internal_static_urlfrontier_Empty_descriptor = getDescriptor().getMessageTypes().get(2);
         internal_static_urlfrontier_Empty_fieldAccessorTable =
@@ -12151,7 +17541,7 @@ public final class Urlfrontier {
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_QueueList_descriptor,
                         new java.lang.String[] {
-                            "Values", "Total", "Start", "Size",
+                            "Values", "Total", "Start", "Size", "CrawlID",
                         });
         internal_static_urlfrontier_StringList_descriptor =
                 getDescriptor().getMessageTypes().get(7);
@@ -12161,43 +17551,76 @@ public final class Urlfrontier {
                         new java.lang.String[] {
                             "Values",
                         });
-        internal_static_urlfrontier_QueueDelayParams_descriptor =
+        internal_static_urlfrontier_QueueWithinCrawlParams_descriptor =
                 getDescriptor().getMessageTypes().get(8);
+        internal_static_urlfrontier_QueueWithinCrawlParams_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_QueueWithinCrawlParams_descriptor,
+                        new java.lang.String[] {
+                            "Key", "CrawlID",
+                        });
+        internal_static_urlfrontier_QueueDelayParams_descriptor =
+                getDescriptor().getMessageTypes().get(9);
         internal_static_urlfrontier_QueueDelayParams_fieldAccessorTable =
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_QueueDelayParams_descriptor,
                         new java.lang.String[] {
-                            "Key", "DelayRequestable",
+                            "Key", "DelayRequestable", "CrawlID",
                         });
         internal_static_urlfrontier_BlockQueueParams_descriptor =
-                getDescriptor().getMessageTypes().get(9);
+                getDescriptor().getMessageTypes().get(10);
         internal_static_urlfrontier_BlockQueueParams_fieldAccessorTable =
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_BlockQueueParams_descriptor,
                         new java.lang.String[] {
-                            "Key", "Time",
+                            "Key", "Time", "CrawlID",
                         });
         internal_static_urlfrontier_GetParams_descriptor =
-                getDescriptor().getMessageTypes().get(10);
+                getDescriptor().getMessageTypes().get(11);
         internal_static_urlfrontier_GetParams_fieldAccessorTable =
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_GetParams_descriptor,
                         new java.lang.String[] {
-                            "MaxUrlsPerQueue", "MaxQueues", "Key", "DelayRequestable",
+                            "MaxUrlsPerQueue",
+                            "MaxQueues",
+                            "Key",
+                            "DelayRequestable",
+                            "AnyCrawlID",
+                            "SpecificCrawlID",
+                            "Item",
                         });
-        internal_static_urlfrontier_URLItem_descriptor = getDescriptor().getMessageTypes().get(11);
+        internal_static_urlfrontier_CrawlID_descriptor = getDescriptor().getMessageTypes().get(12);
+        internal_static_urlfrontier_CrawlID_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_CrawlID_descriptor,
+                        new java.lang.String[] {
+                            "Defaultcrawlid", "Namedcrawlid", "Item",
+                        });
+        internal_static_urlfrontier_DefaultCrawlID_descriptor =
+                getDescriptor().getMessageTypes().get(13);
+        internal_static_urlfrontier_DefaultCrawlID_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_DefaultCrawlID_descriptor,
+                        new java.lang.String[] {});
+        internal_static_urlfrontier_AnyCrawlID_descriptor =
+                getDescriptor().getMessageTypes().get(14);
+        internal_static_urlfrontier_AnyCrawlID_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_AnyCrawlID_descriptor,
+                        new java.lang.String[] {});
+        internal_static_urlfrontier_URLItem_descriptor = getDescriptor().getMessageTypes().get(15);
         internal_static_urlfrontier_URLItem_fieldAccessorTable =
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_URLItem_descriptor,
                         new java.lang.String[] {
                             "Discovered", "Known", "Item",
                         });
-        internal_static_urlfrontier_URLInfo_descriptor = getDescriptor().getMessageTypes().get(12);
+        internal_static_urlfrontier_URLInfo_descriptor = getDescriptor().getMessageTypes().get(16);
         internal_static_urlfrontier_URLInfo_fieldAccessorTable =
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_URLInfo_descriptor,
                         new java.lang.String[] {
-                            "Url", "Key", "Metadata",
+                            "Url", "Key", "Metadata", "CrawlID",
                         });
         internal_static_urlfrontier_URLInfo_MetadataEntry_descriptor =
                 internal_static_urlfrontier_URLInfo_descriptor.getNestedTypes().get(0);
@@ -12208,7 +17631,7 @@ public final class Urlfrontier {
                             "Key", "Value",
                         });
         internal_static_urlfrontier_KnownURLItem_descriptor =
-                getDescriptor().getMessageTypes().get(13);
+                getDescriptor().getMessageTypes().get(17);
         internal_static_urlfrontier_KnownURLItem_fieldAccessorTable =
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_KnownURLItem_descriptor,
@@ -12216,7 +17639,7 @@ public final class Urlfrontier {
                             "Info", "RefetchableFromDate",
                         });
         internal_static_urlfrontier_DiscoveredURLItem_descriptor =
-                getDescriptor().getMessageTypes().get(14);
+                getDescriptor().getMessageTypes().get(18);
         internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable =
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_DiscoveredURLItem_descriptor,
