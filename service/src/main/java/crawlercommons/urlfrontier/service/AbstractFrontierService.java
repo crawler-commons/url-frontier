@@ -85,10 +85,26 @@ public abstract class AbstractFrontierService
 
     @Override
     public void deleteCrawl(
-            crawlercommons.urlfrontier.Urlfrontier.Empty request,
-            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
+            crawlercommons.urlfrontier.Urlfrontier.CrawlID request,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
                     responseObserver) {
-        // TODO
+
+        long total = 0;
+
+        synchronized (queues) {
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                    queues.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                QueueInterface q = queues.remove(e.getKey());
+                total += q.countActive();
+            }
+        }
+        responseObserver.onNext(
+                crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
+                        .setValue(total)
+                        .build());
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -230,8 +246,9 @@ public abstract class AbstractFrontierService
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
                     responseObserver) {
-        super.deleteQueue(request, responseObserver);
-        QueueInterface q = queues.remove(request.getKey());
+        QueueWithinCrawl qwc =
+                QueueWithinCrawl.get(request.getKey(), request.getCrawlID().toString());
+        QueueInterface q = queues.remove(qwc);
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
                         .setValue(q.countActive())

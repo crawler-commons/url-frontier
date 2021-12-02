@@ -261,6 +261,6 @@ public class URLFrontierServiceTest {
     public void testCrawlIDs() {
         StringList crawlids = blockingFrontier.listCrawls(Urlfrontier.Empty.getDefaultInstance());
 
-        Assert.assertEquals("incorrect number of queues deleted", 1, crawlids.getValuesCount());
+        Assert.assertEquals("incorrect number of crawlids", 1, crawlids.getValuesCount());
     }
 }

@@ -322,6 +322,9 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
                 String Qkey = info.getKey();
                 String url = info.getUrl();
+                String crawlID = info.getCrawlID().toString();
+
+                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
 
                 // has a queue key been defined? if not use the hostname
                 if (Qkey.equals("")) {
@@ -339,9 +342,9 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                     info = URLInfo.newBuilder(info).setKey(Qkey).build();
                 }
 
-                // ignore this url if the queue is being deleted
-                if (queuesBeingDeleted.containsKey(Qkey)) {
-                    LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
+                // check that the key is not too long
+                if (Qkey.length() > 255) {
+                    LOG.error("Key too long: {}", Qkey);
                     responseObserver.onNext(
                             crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
                                     .setValue(url)
@@ -349,9 +352,9 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                     return;
                 }
 
-                // check that the key is not too long
-                if (Qkey.length() > 255) {
-                    LOG.error("Key too long: {}", Qkey);
+                // ignore this url if the queue is being deleted
+                if (queuesBeingDeleted.containsKey(qk)) {
+                    LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
                     responseObserver.onNext(
                             crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
                                     .setValue(url)
@@ -381,8 +384,6 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                                     .build());
                     return;
                 }
-
-                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, "DEFAULT");
 
                 // get the priority queue or create one
                 QueueMetadata queueMD =
