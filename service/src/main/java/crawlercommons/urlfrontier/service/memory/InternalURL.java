@@ -59,7 +59,7 @@ class InternalURL implements Comparable<InternalURL>, Serializable {
         // keep the whole original serialization into memory
         iu.serialised = info.toByteArray();
         iu.url = info.getUrl();
-        iu.crawlID = info.getCrawlID().toString();
+        iu.crawlID = info.getCrawlID();
         return new Object[] {info.getKey(), disco, iu};
     }
 

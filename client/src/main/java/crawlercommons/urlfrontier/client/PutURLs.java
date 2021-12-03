@@ -16,11 +16,11 @@ package crawlercommons.urlfrontier.client;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
+import crawlercommons.urlfrontier.Constants;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
-import crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -49,7 +49,7 @@ public class PutURLs implements Runnable {
 
     @Option(
             names = {"-c", "--crawlID"},
-            defaultValue = "DEFAULT",
+            defaultValue = Constants.DEFAULT_CRAWLID,
             paramLabel = "STRING",
             description = "crawl to get the stats for")
     private String crawl;
@@ -158,9 +158,7 @@ public class PutURLs implements Runnable {
             }
         } else {
             String url = input.trim();
-            Builder builder2 = URLInfo.newBuilder().setUrl(url);
-            builder2.setCrawlID(crawl);
-            URLInfo info = builder2.build();
+            URLInfo info = URLInfo.newBuilder().setUrl(url).setCrawlID(crawl).build();
             DiscoveredURLItem value = DiscoveredURLItem.newBuilder().setInfo(info).build();
             builder.setDiscovered(value);
         }

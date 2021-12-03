@@ -315,7 +315,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
                 String Qkey = info.getKey();
                 String url = info.getUrl();
-                String crawlID = info.getCrawlID().toString();
+                String crawlID = info.getCrawlID();
 
                 // has a queue key been defined? if not use the hostname
                 if (Qkey.equals("")) {
@@ -452,9 +452,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
 
-        final String crawl = request.getCrawlID().toString();
-
-        final QueueWithinCrawl qc = QueueWithinCrawl.get(request.getKey(), crawl);
+        final QueueWithinCrawl qc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
 
         int sizeQueue = 0;
 

@@ -59,7 +59,6 @@ public class DeleteQueue implements Runnable {
             builder.setKey(key);
         }
 
-        // set the crawlID
         builder.setCrawlID(crawl);
 
         Integer s = blockingFrontier.deleteQueue(builder.build());

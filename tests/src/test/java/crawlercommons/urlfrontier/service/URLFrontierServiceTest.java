@@ -14,6 +14,7 @@
  */
 package crawlercommons.urlfrontier.service;
 
+import crawlercommons.urlfrontier.Constants;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
@@ -146,7 +147,7 @@ public class URLFrontierServiceTest {
                         .setKey("key1.com")
                         .setMaxUrlsPerQueue(1)
                         .setDelayRequestable(delayrequestable)
-                        .setCrawlID("")
+                        .setCrawlID(Constants.DEFAULT_CRAWLID)
                         .build();
 
         String urlreturned = blockingFrontier.getURLs(request2).next().getUrl();

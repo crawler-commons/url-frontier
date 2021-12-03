@@ -214,8 +214,7 @@ public abstract class AbstractFrontierService
 
     @Override
     public void blockQueueUntil(BlockQueueParams request, StreamObserver<Empty> responseObserver) {
-        QueueWithinCrawl qwc =
-                QueueWithinCrawl.get(request.getKey(), request.getCrawlID().toString());
+        QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
         QueueInterface queue = queues.get(qwc);
         if (queue != null) {
             queue.setBlockedUntil(request.getTime());
@@ -229,8 +228,7 @@ public abstract class AbstractFrontierService
         if (request.getKey().isEmpty()) {
             setDefaultDelayForQueues(request.getDelayRequestable());
         } else {
-            QueueWithinCrawl qwc =
-                    QueueWithinCrawl.get(request.getKey(), request.getCrawlID().toString());
+            QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
             QueueInterface queue = queues.get(qwc);
             if (queue != null) {
                 queue.setDelay(request.getDelayRequestable());
@@ -252,8 +250,7 @@ public abstract class AbstractFrontierService
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
                     responseObserver) {
-        QueueWithinCrawl qwc =
-                QueueWithinCrawl.get(request.getKey(), request.getCrawlID().toString());
+        QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
         QueueInterface q = queues.remove(qwc);
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
@@ -282,8 +279,7 @@ public abstract class AbstractFrontierService
         if (!request.getKey().isEmpty()) {
             _queues = new LinkedList<>();
 
-            QueueWithinCrawl qwc =
-                    QueueWithinCrawl.get(request.getKey(), request.getCrawlID().toString());
+            QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
             QueueInterface q = queues.get(qwc);
             if (q != null) {
                 _queues.add(q);
@@ -360,11 +356,11 @@ public abstract class AbstractFrontierService
 
         long start = System.currentTimeMillis();
 
-        // if null - want any crawlID
+        // if null -> don't care about a particular crawl
         String crawlID = null;
 
         // default is an empty string
-        if (request.hasCrawlID()) crawlID = request.getCrawlID().toString();
+        if (request.hasCrawlID()) crawlID = request.getCrawlID();
 
         String key = request.getKey();
 

@@ -61,6 +61,8 @@ public class GetStats implements Runnable {
             builder.setKey(key);
         }
 
+        builder.setCrawlID(crawl);
+
         Stats s = blockingFrontier.getStats(builder.build());
         System.out.println("Number of queues: " + s.getNumberOfQueues());
         System.out.println("Active URLs: " + s.getSize());
