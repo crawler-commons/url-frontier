@@ -27,7 +27,7 @@ service URLFrontier {
      rpc ListCrawls(Empty) returns (StringList) {}
 
      /** Delete an entire crawl, returns the number of URLs removed this way **/
-     rpc DeleteCrawl(CrawlID) returns (Integer) {}
+     rpc DeleteCrawl(String) returns (Integer) {}
 
      /** Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
        by default the service will return up to 100 results from offset 0 and exclude inactive queues.**/
@@ -78,7 +78,7 @@ message Stats {
   // number of active queues in the frontier
   uint64 numberOfQueues = 4;
   // crawl ID
-  CrawlID crawlID = 5;
+  string crawlID = 5;
 }
 
 message Pagination {
@@ -89,7 +89,7 @@ message Pagination {
   // include inactive queues; defaults to false
   bool include_inactive = 3;
   // crawl ID
-  CrawlID crawlID = 4;
+  string crawlID = 4;
 }
 
 message Empty {
@@ -117,7 +117,7 @@ message QueueList {
   // number of values returned
   uint32 size = 4;
   // crawl ID - empty string for default
-  CrawlID crawlID = 5;
+  string crawlID = 5;
 }
 
 message StringList {
@@ -129,7 +129,7 @@ message QueueWithinCrawlParams {
   /** ID for the queue **/
   string key = 1;
   // crawl ID - empty string for default
-  CrawlID crawlID = 2;
+  string crawlID = 2;
 }
 
 /** Parameter message for SetDelay **/
@@ -139,7 +139,7 @@ message QueueDelayParams {
   //  delay in seconds before a queue can provide new URLs
   uint32 delay_requestable = 2;
   // crawl ID - empty string for default
-  CrawlID crawlID = 3;
+  string crawlID = 3;
 }
 
 /** Parameter message for BlockQueueUntil **/
@@ -151,7 +151,7 @@ message BlockQueueParams {
   **/
   uint64 time = 2;
   // crawl ID
-  CrawlID crawlID = 3;
+  string crawlID = 3;
 }
 
 /** Parameter message for GetURLs **/
@@ -166,19 +166,9 @@ message GetParams {
   uint32 delay_requestable = 4;
   oneof item {
     AnyCrawlID anyCrawlID = 5;
-    CrawlID specificCrawlID = 6;
+    string crawlID = 6;
   }
 }
-
-/** Either the default crawl or one named specifically **/
-message CrawlID {
-oneof item {
-    DefaultCrawlID defaultcrawlid = 1;
-    String namedcrawlid = 2;
-  }
-}
-
-message DefaultCrawlID {}
 
 message AnyCrawlID {}
 
@@ -202,7 +192,7 @@ message URLInfo {
   **/
   map<string, StringList> metadata = 3;
   /** crawl ID **/
-  CrawlID crawlID = 4;
+  string crawlID = 4;
 }
 
 /**

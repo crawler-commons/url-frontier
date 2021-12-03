@@ -175,19 +175,14 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 rocksDB.newIterator(columnFamilyHandleList.get(1))) {
             for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
                 final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-                final int pos = currentKey.indexOf('_');
-                final String Qkey = keyDeNormalisation(currentKey.substring(0, pos));
-
-                // TODO handle different crawls
-                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, "DEFAULT");
-
+                final QueueWithinCrawl qk = parseAndDeNormalise(currentKey);
                 QueueMetadata queueMD =
                         (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
                 queueMD.incrementActive();
             }
         }
 
-        String previousQueueID = null;
+        QueueWithinCrawl previousQueueID = null;
         long numScheduled = 0;
 
         // now get the counts of URLs already finished
@@ -195,8 +190,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 rocksDB.newIterator(columnFamilyHandleList.get(0))) {
             for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
                 final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-                final int pos = currentKey.indexOf('_');
-                final String Qkey = keyDeNormalisation(currentKey.substring(0, pos));
+                final QueueWithinCrawl Qkey = parseAndDeNormalise(currentKey);
 
                 // changed ID? check that the previous one had the correct values
                 if (previousQueueID == null) {
@@ -209,13 +203,10 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                     numScheduled = 0;
                 }
 
-                // TODO handle different crawls
-                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, "DEFAULT");
-
                 // queue might not exist if it had nothing scheduled for it
                 // i.e. all done
                 QueueMetadata queueMD =
-                        (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
+                        (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
 
                 // check the value - if it is an empty byte array it means that the URL has been
                 // processed and is not scheduled
@@ -239,14 +230,14 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     @Override
     protected int sendURLsForQueue(
             QueueInterface queue,
-            String queueID,
+            QueueWithinCrawl queueID,
             int maxURLsPerQueue,
             int secsUntilRequestable,
             long now,
             StreamObserver<URLInfo> responseObserver) {
 
         int alreadySent = 0;
-        final byte[] prefixKey = (keyNormalisation(queueID) + "_").getBytes(StandardCharsets.UTF_8);
+        final byte[] prefixKey = (normalise(queueID) + "_").getBytes(StandardCharsets.UTF_8);
         // scan the scheduling table
         try (final RocksIterator rocksIterator =
                 rocksDB.newIterator(columnFamilyHandleList.get(1))) {
@@ -259,17 +250,19 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 // don't want to split the whole string _ as the URL part is left as is
                 final int pos = currentKey.indexOf('_');
                 final int pos2 = currentKey.indexOf('_', pos + 1);
+                final int pos3 = currentKey.indexOf('_', pos2 + 1);
 
-                final String keyPart = currentKey.substring(0, pos);
-                final String urlPart = currentKey.substring(pos2 + 1);
+                final String crawlPart = currentKey.substring(0, pos);
+                final String queuePart = currentKey.substring(pos + 1, pos2);
+                final String urlPart = currentKey.substring(pos3 + 1);
 
                 // not for this queue anymore?
-                if (!queueID.equals(keyPart)) {
+                if (!queueID.equals(crawlPart, queuePart)) {
                     return alreadySent;
                 }
 
                 // too early for it?
-                long scheduled = Long.parseLong(currentKey.substring(pos + 1, pos2));
+                long scheduled = Long.parseLong(currentKey.substring(pos2 + 1, pos3));
                 if (scheduled > now) {
                     // they are sorted by date no need to go further
                     return alreadySent;
@@ -324,8 +317,6 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 String url = info.getUrl();
                 String crawlID = info.getCrawlID().toString();
 
-                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
-
                 // has a queue key been defined? if not use the hostname
                 if (Qkey.equals("")) {
                     LOG.debug("key missing for {}", url);
@@ -339,7 +330,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                         return;
                     }
                     // make a new info object ready to return
-                    info = URLInfo.newBuilder(info).setKey(Qkey).build();
+                    info =
+                            URLInfo.newBuilder(info)
+                                    .setKey(Qkey)
+                                    .setCrawlID(info.getCrawlID())
+                                    .build();
                 }
 
                 // check that the key is not too long
@@ -351,6 +346,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                                     .build());
                     return;
                 }
+
+                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
 
                 // ignore this url if the queue is being deleted
                 if (queuesBeingDeleted.containsKey(qk)) {
@@ -365,7 +362,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 byte[] schedulingKey = null;
 
                 final byte[] existenceKey =
-                        (keyNormalisation(Qkey) + "_" + url).getBytes(StandardCharsets.UTF_8);
+                        (normalise(qk) + "_" + url).getBytes(StandardCharsets.UTF_8);
 
                 // is this URL already known?
                 try {
@@ -409,11 +406,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                         // it is either brand new or already known
                         // create a scheduling key for it
                         schedulingKey =
-                                (keyNormalisation(Qkey)
-                                                + "_"
-                                                + DF.format(nextFetchDate)
-                                                + "_"
-                                                + url)
+                                (normalise(qk) + "_" + DF.format(nextFetchDate) + "_" + url)
                                         .getBytes(StandardCharsets.UTF_8);
                         // add to the scheduling
                         rocksDB.put(
@@ -458,6 +451,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     public void deleteQueue(
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
+
         final String crawl = request.getCrawlID().toString();
 
         final QueueWithinCrawl qc = QueueWithinCrawl.get(request.getKey(), crawl);
@@ -478,16 +472,16 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         queuesBeingDeleted.put(qc, qc);
 
         // find the next key by alphabetical order
-        String[] array = new String[queues.size()];
+        QueueWithinCrawl[] array = new QueueWithinCrawl[queues.size()];
         array = queues.keySet().toArray(array);
         Arrays.sort(array);
         boolean wantNext = false;
         byte[] endKey = null;
-        for (String s : array) {
+        for (QueueWithinCrawl prefixed_queue : array) {
             if (wantNext) {
-                endKey = (keyNormalisation(s) + "_").getBytes(StandardCharsets.UTF_8);
+                endKey = (normalise(prefixed_queue) + "_").getBytes(StandardCharsets.UTF_8);
                 break;
-            } else if (s.equals(qc.getQueue())) {
+            } else if (prefixed_queue.equals(qc)) {
                 wantNext = true;
             }
         }
@@ -511,11 +505,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 // processed
                 rocksDB.deleteRange(
                         columnFamilyHandleList.get(1),
-                        (keyNormalisation(qc.getQueue()) + "_").getBytes(StandardCharsets.UTF_8),
+                        (normalise(qc) + "_").getBytes(StandardCharsets.UTF_8),
                         endKey);
                 rocksDB.deleteRange(
                         columnFamilyHandleList.get(0),
-                        (keyNormalisation(qc.getQueue()) + "_").getBytes(StandardCharsets.UTF_8),
+                        (normalise(qc) + "_").getBytes(StandardCharsets.UTF_8),
                         endKey);
                 if (endKeyMustAlsoDie) {
                     rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
@@ -540,13 +534,19 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         responseObserver.onCompleted();
     }
 
-    /** underscores being used as separator for the keys, we need to make sure that */
-    private static final String keyNormalisation(String key) {
-        return key.replaceAll("_", "%5F");
+    /** underscores being used as separator for the keys */
+    public static final String normalise(QueueWithinCrawl qwc) {
+        return qwc.getCrawlid().replaceAll("_", "%5F")
+                + "_"
+                + qwc.getQueue().replaceAll("_", "%5F");
     }
 
-    private static final String keyDeNormalisation(String key) {
-        return key.replaceAll("%5F", "_");
+    public static final QueueWithinCrawl parseAndDeNormalise(String currentKey) {
+        final int pos = currentKey.indexOf('_');
+        final String crawlID = currentKey.substring(0, pos).replaceAll("%5F", "_");
+        final int pos2 = currentKey.indexOf('_', pos + 1);
+        final String queueID = currentKey.substring(pos + 1, pos2).replaceAll("%5F", "_");
+        return QueueWithinCrawl.get(queueID, crawlID);
     }
 
     @Override

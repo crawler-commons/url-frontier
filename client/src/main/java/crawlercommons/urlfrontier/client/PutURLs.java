@@ -18,8 +18,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
-import crawlercommons.urlfrontier.Urlfrontier;
-import crawlercommons.urlfrontier.Urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo.Builder;
@@ -161,10 +159,7 @@ public class PutURLs implements Runnable {
         } else {
             String url = input.trim();
             Builder builder2 = URLInfo.newBuilder().setUrl(url);
-            builder2.setCrawlID(
-                    CrawlID.newBuilder()
-                            .setNamedcrawlid(
-                                    Urlfrontier.String.newBuilder().setValue(crawl).build()));
+            builder2.setCrawlID(crawl);
             URLInfo info = builder2.build();
             DiscoveredURLItem value = DiscoveredURLItem.newBuilder().setInfo(info).build();
             builder.setDiscovered(value);

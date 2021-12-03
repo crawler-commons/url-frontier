@@ -40,7 +40,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
     @Override
     protected int sendURLsForQueue(
             QueueInterface queue,
-            String key,
+            QueueWithinCrawl prefixed_key,
             int maxURLsPerQueue,
             int secsUntilRequestable,
             long now,
@@ -64,7 +64,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
             // this one is good to go
             try {
-                responseObserver.onNext(item.toURLInfo(key));
+                responseObserver.onNext(item.toURLInfo(prefixed_key));
 
                 // mark it as not processable for N secs
                 item.heldUntil = now + secsUntilRequestable;
@@ -117,10 +117,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
                     return;
                 }
 
-                // TODO get the crawlID from the URLItem
-                String crawlid = "DEFAULT";
-
-                QueueWithinCrawl qk = QueueWithinCrawl.get(key, crawlid);
+                QueueWithinCrawl qk = QueueWithinCrawl.get(key, iu.crawlID);
 
                 // get the priority queue or create one
                 synchronized (queues) {

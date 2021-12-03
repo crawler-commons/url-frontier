@@ -140,12 +140,13 @@ public class URLFrontierServiceTest {
         /** Get the URLs due for fetching for a specific key * */
         int delayrequestable = 2;
 
-        // want just one URL for that specific key
+        // want just one URL for that specific key, in the default crawl
         GetParams request2 =
                 GetParams.newBuilder()
                         .setKey("key1.com")
                         .setMaxUrlsPerQueue(1)
                         .setDelayRequestable(delayrequestable)
+                        .setCrawlID("")
                         .build();
 
         String urlreturned = blockingFrontier.getURLs(request2).next().getUrl();
@@ -261,6 +262,6 @@ public class URLFrontierServiceTest {
     public void testCrawlIDs() {
         StringList crawlids = blockingFrontier.listCrawls(Urlfrontier.Empty.getDefaultInstance());
 
-        Assert.assertEquals("incorrect number of crawlids", 1, crawlids.getValuesCount());
+        Assert.assertEquals("incorrect number of crawlids", 0, crawlids.getValuesCount());
     }
 }

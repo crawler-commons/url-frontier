@@ -17,7 +17,6 @@ package crawlercommons.urlfrontier.client;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier;
-import crawlercommons.urlfrontier.Urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.Integer;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -60,8 +59,8 @@ public class DeleteQueue implements Runnable {
             builder.setKey(key);
         }
 
-        // TODO set the crawlID
-        builder.setCrawlID(CrawlID.newBuilder().build());
+        // set the crawlID
+        builder.setCrawlID(crawl);
 
         Integer s = blockingFrontier.deleteQueue(builder.build());
         System.out.println(s.getValue() + " URLs deleted");

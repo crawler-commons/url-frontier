@@ -16,8 +16,8 @@ package crawlercommons.urlfrontier.service;
 
 public class QueueWithinCrawl {
 
-    private String queue;
-    private String crawlid;
+    private String queue = "";
+    private String crawlid = "";
 
     public static QueueWithinCrawl get(String queue, String crawlid) {
         return new QueueWithinCrawl(queue, crawlid);
@@ -43,5 +43,29 @@ public class QueueWithinCrawl {
 
     public void setCrawlid(String crawlid) {
         this.crawlid = crawlid;
+    }
+
+    @Override
+    public boolean equals(Object arg0) {
+        if (arg0 instanceof QueueWithinCrawl == false) return false;
+        return equals((QueueWithinCrawl) arg0);
+    }
+
+    public boolean equals(QueueWithinCrawl qwc) {
+        return this.getCrawlid().equals(qwc.getCrawlid()) && this.getQueue().equals(qwc.getQueue());
+    }
+
+    public boolean equals(String crawlID, String queueID) {
+        return this.getCrawlid().equals(crawlID) && this.getQueue().equals(queueID);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getCrawlid().hashCode() + this.getQueue().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return this.getCrawlid() + "_" + this.getQueue();
     }
 }
