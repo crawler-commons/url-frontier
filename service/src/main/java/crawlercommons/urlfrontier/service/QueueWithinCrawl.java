@@ -14,13 +14,15 @@
  */
 package crawlercommons.urlfrontier.service;
 
-public class QueueWithinCrawl {
+import crawlercommons.urlfrontier.CrawlID;
+
+public class QueueWithinCrawl implements Comparable<QueueWithinCrawl> {
 
     private String queue = "";
     private String crawlid = "";
 
     public static QueueWithinCrawl get(String queue, String crawlid) {
-        return new QueueWithinCrawl(queue, crawlid);
+        return new QueueWithinCrawl(queue, CrawlID.normaliseCrawlID(crawlid));
     }
 
     public QueueWithinCrawl(String queue, String crawlid) {
@@ -67,5 +69,11 @@ public class QueueWithinCrawl {
     @Override
     public String toString() {
         return this.getCrawlid() + "_" + this.getQueue();
+    }
+
+    public int compareTo(QueueWithinCrawl target) {
+        int diff = this.crawlid.compareTo(target.crawlid);
+        if (diff != 0) return diff;
+        return this.queue.compareTo(target.queue);
     }
 }

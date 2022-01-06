@@ -14,7 +14,12 @@
  */
 package crawlercommons.urlfrontier;
 
-public interface Constants {
+public interface CrawlID {
 
-    public String DEFAULT_CRAWLID = "DEFAULT";
+    public String DEFAULT = "DEFAULT";
+
+    public static String normaliseCrawlID(String crawlID) {
+        if (crawlID.trim().isEmpty()) return DEFAULT;
+        return crawlID.toString();
+    }
 }

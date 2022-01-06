@@ -15,6 +15,7 @@
 package crawlercommons.urlfrontier.service.rocksdb;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
@@ -315,7 +316,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
                 String Qkey = info.getKey();
                 String url = info.getUrl();
-                String crawlID = info.getCrawlID();
+                String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
 
                 // has a queue key been defined? if not use the hostname
                 if (Qkey.equals("")) {
@@ -330,11 +331,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                         return;
                     }
                     // make a new info object ready to return
-                    info =
-                            URLInfo.newBuilder(info)
-                                    .setKey(Qkey)
-                                    .setCrawlID(info.getCrawlID())
-                                    .build();
+                    info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
                 }
 
                 // check that the key is not too long
@@ -456,7 +453,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
         int sizeQueue = 0;
 
-        // is this queue is already being deleted?
+        // is this queue already being deleted?
         // no need to do it again
         if (queuesBeingDeleted.contains(qc)) {
             responseObserver.onNext(
@@ -470,8 +467,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         queuesBeingDeleted.put(qc, qc);
 
         // find the next key by alphabetical order
-        QueueWithinCrawl[] array = new QueueWithinCrawl[queues.size()];
-        array = queues.keySet().toArray(array);
+        QueueWithinCrawl[] array = queues.keySet().toArray(new QueueWithinCrawl[0]);
         Arrays.sort(array);
         boolean wantNext = false;
         byte[] endKey = null;

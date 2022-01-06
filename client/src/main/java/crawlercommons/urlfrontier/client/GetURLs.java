@@ -14,7 +14,7 @@
  */
 package crawlercommons.urlfrontier.client;
 
-import crawlercommons.urlfrontier.Constants;
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID;
@@ -95,7 +95,7 @@ public class GetURLs implements Runnable {
             request.setAnyCrawlID(AnyCrawlID.newBuilder());
         } else {
             if (crawl.length() == 0) {
-                request.setCrawlID(Constants.DEFAULT_CRAWLID);
+                request.setCrawlID(CrawlID.DEFAULT);
             } else {
                 request.setCrawlID(crawl);
             }

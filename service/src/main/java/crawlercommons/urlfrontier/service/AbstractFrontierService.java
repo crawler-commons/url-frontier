@@ -14,6 +14,7 @@
  */
 package crawlercommons.urlfrontier.service;
 
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
@@ -91,13 +92,15 @@ public abstract class AbstractFrontierService
 
         long total = 0;
 
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID.toString());
+
         synchronized (queues) {
             Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
                     queues.entrySet().iterator();
             while (iterator.hasNext()) {
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 QueueWithinCrawl qwc = e.getKey();
-                if (qwc.getCrawlid().equals(crawlID)) {
+                if (qwc.getCrawlid().equals(normalisedCrawlID)) {
                     QueueInterface q = queues.remove(qwc);
                     total += q.countActive();
                 }
@@ -169,6 +172,8 @@ public abstract class AbstractFrontierService
 
         boolean include_inactive = request.getIncludeInactive();
 
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+
         // 100 by default
         if (maxQueues == 0) {
             maxQueues = 100;
@@ -193,6 +198,11 @@ public abstract class AbstractFrontierService
             while (iterator.hasNext() && sent <= maxQueues) {
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 pos++;
+
+                // check that it is within the right crawlID
+                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                    continue;
+                }
 
                 // check that it isn't blocked
                 if (!include_inactive && e.getValue().getBlockedUntil() >= now) {

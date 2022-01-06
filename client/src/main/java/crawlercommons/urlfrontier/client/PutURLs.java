@@ -16,7 +16,7 @@ package crawlercommons.urlfrontier.client;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
-import crawlercommons.urlfrontier.Constants;
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
@@ -49,7 +49,7 @@ public class PutURLs implements Runnable {
 
     @Option(
             names = {"-c", "--crawlID"},
-            defaultValue = Constants.DEFAULT_CRAWLID,
+            defaultValue = CrawlID.DEFAULT,
             paramLabel = "STRING",
             description = "crawl to get the stats for")
     private String crawl;
