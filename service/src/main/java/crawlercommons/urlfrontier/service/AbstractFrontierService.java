@@ -92,7 +92,9 @@ public abstract class AbstractFrontierService
 
         long total = 0;
 
-        final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID.toString());
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID.getValue());
+
+        final Set<QueueWithinCrawl> toDelete = new HashSet<>();
 
         synchronized (queues) {
             Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
@@ -101,9 +103,13 @@ public abstract class AbstractFrontierService
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 QueueWithinCrawl qwc = e.getKey();
                 if (qwc.getCrawlid().equals(normalisedCrawlID)) {
-                    QueueInterface q = queues.remove(qwc);
-                    total += q.countActive();
+                    toDelete.add(qwc);
                 }
+            }
+
+            for (QueueWithinCrawl quid : toDelete) {
+                QueueInterface q = queues.remove(quid);
+                total += q.countActive();
             }
         }
         responseObserver.onNext(

@@ -20,6 +20,6 @@ public interface CrawlID {
 
     public static String normaliseCrawlID(String crawlID) {
         if (crawlID.trim().isEmpty()) return DEFAULT;
-        return crawlID.toString();
+        return crawlID;
     }
 }
