@@ -26,13 +26,13 @@ import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import io.grpc.stub.StreamObserver;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -70,17 +70,17 @@ public abstract class AbstractFrontierService
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList>
                     responseObserver) {
 
-        Set<String> _queues = new HashSet<>();
+        Set<String> crawlIDs = new HashSet<>();
 
         synchronized (queues) {
             Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
                     queues.entrySet().iterator();
             while (iterator.hasNext()) {
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
-                _queues.add(e.getKey().getCrawlid());
+                crawlIDs.add(e.getKey().getCrawlid());
             }
         }
-        responseObserver.onNext(StringList.newBuilder().addAllValues(_queues).build());
+        responseObserver.onNext(StringList.newBuilder().addAllValues(crawlIDs).build());
         responseObserver.onCompleted();
     }
 
@@ -289,12 +289,12 @@ public abstract class AbstractFrontierService
         long completed = 0;
         long activeQueues = 0;
 
-        Collection<QueueInterface> _queues = queues.values();
+        List<QueueInterface> _queues = new LinkedList<>();
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
 
         // specific queue?
         if (!request.getKey().isEmpty()) {
-            _queues = new LinkedList<>();
-
             QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
             QueueInterface q = queues.get(qwc);
             if (q != null) {
@@ -303,11 +303,27 @@ public abstract class AbstractFrontierService
                 // TODO notify an error to the client
             }
         }
+        // all the queues within the crawlID
+        else {
+
+            synchronized (queues) {
+                // check that the queues belong to the crawlid specified
+                Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                        queues.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                    QueueWithinCrawl qwc = e.getKey();
+                    if (qwc.getCrawlid().equals(normalisedCrawlID)) {
+                        _queues.add(e.getValue());
+                    }
+                }
+            }
+        }
+        // backed by the queues so can result in a
+        // ConcurrentModificationException
 
         long now = Instant.now().getEpochSecond();
 
-        // backed by the queues so can result in a
-        // ConcurrentModificationException
         synchronized (queues) {
             for (QueueInterface q : _queues) {
                 final int inProcForQ = q.getInProcess(now);
@@ -334,6 +350,7 @@ public abstract class AbstractFrontierService
                         .setSize(size)
                         .setInProcess(inProc)
                         .putAllCounts(s)
+                        .setCrawlID(normalisedCrawlID)
                         .build();
         responseObserver.onNext(stats);
         responseObserver.onCompleted();

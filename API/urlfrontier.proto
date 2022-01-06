@@ -39,7 +39,7 @@ service URLFrontier {
      /** Push URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems **/
      rpc PutURLs(stream URLItem) returns (stream String) {}
 
-     /** Return stats for a specific queue or the whole crawl if the value if empty or null **/
+     /** Return stats for a specific queue or an entire crawl. Does not aggregate the stats across different crawlids. **/
      rpc GetStats(QueueWithinCrawlParams) returns (Stats) {}
      
      /** Delete the queue based on the key in parameter, returns the number of URLs removed this way **/
@@ -123,7 +123,6 @@ message QueueList {
 message StringList {
   repeated string values = 1;
 }
-
 
 message QueueWithinCrawlParams {
   /** ID for the queue **/

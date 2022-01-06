@@ -37,8 +37,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.rocksdb.BlockBasedTableConfig;
 import org.rocksdb.BloomFilter;
@@ -571,5 +575,49 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 LOG.error("Closing ", e);
             }
         }
+    }
+
+    @Override
+    public void deleteCrawl(
+            crawlercommons.urlfrontier.Urlfrontier.String crawlID,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
+                    responseObserver) {
+
+        long total = 0;
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID.getValue());
+
+        final Set<QueueWithinCrawl> toDelete = new HashSet<>();
+
+        synchronized (queues) {
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                    queues.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                QueueWithinCrawl qwc = e.getKey();
+                if (qwc.getCrawlid().equals(normalisedCrawlID)) {
+                    toDelete.add(qwc);
+                }
+            }
+
+            for (QueueWithinCrawl quid : toDelete) {
+                if (queuesBeingDeleted.contains(quid)) {
+                    continue;
+                } else {
+                    queuesBeingDeleted.put(quid, quid);
+                }
+
+                QueueInterface q = queues.remove(quid);
+                total += q.countActive();
+            }
+
+            // TODO delete the whole range for the prefix
+
+        }
+        responseObserver.onNext(
+                crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
+                        .setValue(total)
+                        .build());
+        responseObserver.onCompleted();
     }
 }
