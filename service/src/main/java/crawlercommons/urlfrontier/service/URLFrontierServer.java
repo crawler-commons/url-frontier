@@ -128,6 +128,10 @@ public class URLFrontierServer implements Callable<Integer> {
                 Constructor<?> c = implementationClass.getConstructor(Map.class);
                 c.setAccessible(true);
                 service = (URLFrontierImplBase) c.newInstance(configuration);
+            } catch (NoSuchMethodException e) {
+                LOG.info(
+                        "Implementation {} dpes not have a constructor taking a Map as argument",
+                        implementationClassName);
             } catch (Exception e) {
                 LOG.error("Exception caught when initialising the service", e);
                 System.exit(-1);
