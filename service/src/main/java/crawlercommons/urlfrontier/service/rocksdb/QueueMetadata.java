@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueueMetadata implements QueueInterface {
 
-    QueueMetadata() {}
+    public QueueMetadata() {}
 
     /** number of URLs that are not scheduled anymore * */
     private AtomicInteger completed = new AtomicInteger(0);
