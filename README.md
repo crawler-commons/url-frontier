@@ -24,7 +24,7 @@ This project is funded through the [NGI0 Discovery Fund](https://nlnet.nl/discov
 
 ![NLNet](https://nlnet.nl/image/logo_nlnet.svg)
 <br>
-<img src="https://nlnet.nl/image/logos/NGI0_tag.png" alt="NGI0" height="80"/>
+<img src="https://nlnet.nl/image/logos/NGI0Discovery_tag.svg" alt="NGI0" height="80"/>
 
 # License information
 
