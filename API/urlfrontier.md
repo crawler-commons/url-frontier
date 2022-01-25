@@ -11,6 +11,7 @@
     - [GetParams](#urlfrontier.GetParams)
     - [Integer](#urlfrontier.Integer)
     - [KnownURLItem](#urlfrontier.KnownURLItem)
+    - [LogLevelParams](#urlfrontier.LogLevelParams)
     - [Pagination](#urlfrontier.Pagination)
     - [QueueDelayParams](#urlfrontier.QueueDelayParams)
     - [QueueList](#urlfrontier.QueueList)
@@ -21,6 +22,8 @@
     - [URLInfo](#urlfrontier.URLInfo)
     - [URLInfo.MetadataEntry](#urlfrontier.URLInfo.MetadataEntry)
     - [URLItem](#urlfrontier.URLItem)
+  
+    - [LogLevelParams.Level](#urlfrontier.LogLevelParams.Level)
   
     - [URLFrontier](#urlfrontier.URLFrontier)
   
@@ -136,6 +139,23 @@ it will be elligible for fetching after the delay has elapsed.
 | ----- | ---- | ----- | ----------- |
 | info | [URLInfo](#urlfrontier.URLInfo) |  |  |
 | refetchable_from_date | [uint64](#uint64) |  | Expressed in seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. Optional, the default value of 0 indicates that a URL should not be refetched. |
+
+
+
+
+
+
+<a name="urlfrontier.LogLevelParams"></a>
+
+### LogLevelParams
+Configuration of the log level for a particular package, e.g.
+crawlercommons.urlfrontier.service.rocksdb DEBUG
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| package | [string](#string) |  |  |
+| level | [LogLevelParams.Level](#urlfrontier.LogLevelParams.Level) |  |  |
 
 
 
@@ -307,6 +327,21 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 
  
 
+
+<a name="urlfrontier.LogLevelParams.Level"></a>
+
+### LogLevelParams.Level
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| TRACE | 0 |  |
+| DEBUG | 1 |  |
+| INFO | 2 |  |
+| WARN | 3 |  |
+| ERROR | 4 |  |
+
+
  
 
  
@@ -328,6 +363,7 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 | SetActive | [Boolean](#urlfrontier.Boolean) | [Empty](#urlfrontier.Empty) | De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. * |
 | GetActive | [Empty](#urlfrontier.Empty) | [Boolean](#urlfrontier.Boolean) | Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) * |
 | SetDelay | [QueueDelayParams](#urlfrontier.QueueDelayParams) | [Empty](#urlfrontier.Empty) | Set a delay from a given queue. No URLs will be obtained via GetURLs for this queue until the number of seconds specified has elapsed since the last time URLs were retrieved. Usually informed by the delay setting of robots.txt. |
+| SetLogLevel | [LogLevelParams](#urlfrontier.LogLevelParams) | [Empty](#urlfrontier.Empty) | Overrides the log level for a given package * |
 
  
 

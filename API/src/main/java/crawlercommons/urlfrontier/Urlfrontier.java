@@ -11974,6 +11974,867 @@ public final class Urlfrontier {
         }
     }
 
+    public interface LogLevelParamsOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.LogLevelParams)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         * <code>string package = 1;</code>
+         *
+         * @return The package.
+         */
+        java.lang.String getPackage();
+        /**
+         * <code>string package = 1;</code>
+         *
+         * @return The bytes for package.
+         */
+        com.google.protobuf.ByteString getPackageBytes();
+
+        /**
+         * <code>.urlfrontier.LogLevelParams.Level level = 2;</code>
+         *
+         * @return The enum numeric value on the wire for level.
+         */
+        int getLevelValue();
+        /**
+         * <code>.urlfrontier.LogLevelParams.Level level = 2;</code>
+         *
+         * @return The level.
+         */
+        crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level getLevel();
+    }
+    /**
+     *
+     *
+     * <pre>
+     * *
+     * Configuration of the log level for a particular package, e.g.
+     * crawlercommons.urlfrontier.service.rocksdb DEBUG
+     * </pre>
+     *
+     * Protobuf type {@code urlfrontier.LogLevelParams}
+     */
+    public static final class LogLevelParams extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.LogLevelParams)
+            LogLevelParamsOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use LogLevelParams.newBuilder() to construct.
+        private LogLevelParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private LogLevelParams() {
+            package_ = "";
+            level_ = 0;
+        }
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new LogLevelParams();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        private LogLevelParams(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 10:
+                            {
+                                java.lang.String s = input.readStringRequireUtf8();
+
+                                package_ = s;
+                                break;
+                            }
+                        case 16:
+                            {
+                                int rawValue = input.readEnum();
+
+                                level_ = rawValue;
+                                break;
+                            }
+                        default:
+                            {
+                                if (!parseUnknownField(
+                                        input, unknownFields, extensionRegistry, tag)) {
+                                    done = true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                        .setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_LogLevelParams_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_LogLevelParams_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.class,
+                            crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Builder.class);
+        }
+
+        /** Protobuf enum {@code urlfrontier.LogLevelParams.Level} */
+        public enum Level implements com.google.protobuf.ProtocolMessageEnum {
+            /** <code>TRACE = 0;</code> */
+            TRACE(0),
+            /** <code>DEBUG = 1;</code> */
+            DEBUG(1),
+            /** <code>INFO = 2;</code> */
+            INFO(2),
+            /** <code>WARN = 3;</code> */
+            WARN(3),
+            /** <code>ERROR = 4;</code> */
+            ERROR(4),
+            UNRECOGNIZED(-1),
+            ;
+
+            /** <code>TRACE = 0;</code> */
+            public static final int TRACE_VALUE = 0;
+            /** <code>DEBUG = 1;</code> */
+            public static final int DEBUG_VALUE = 1;
+            /** <code>INFO = 2;</code> */
+            public static final int INFO_VALUE = 2;
+            /** <code>WARN = 3;</code> */
+            public static final int WARN_VALUE = 3;
+            /** <code>ERROR = 4;</code> */
+            public static final int ERROR_VALUE = 4;
+
+            public final int getNumber() {
+                if (this == UNRECOGNIZED) {
+                    throw new java.lang.IllegalArgumentException(
+                            "Can't get the number of an unknown enum value.");
+                }
+                return value;
+            }
+
+            /**
+             * @param value The numeric wire value of the corresponding enum entry.
+             * @return The enum associated with the given numeric wire value.
+             * @deprecated Use {@link #forNumber(int)} instead.
+             */
+            @java.lang.Deprecated
+            public static Level valueOf(int value) {
+                return forNumber(value);
+            }
+
+            /**
+             * @param value The numeric wire value of the corresponding enum entry.
+             * @return The enum associated with the given numeric wire value.
+             */
+            public static Level forNumber(int value) {
+                switch (value) {
+                    case 0:
+                        return TRACE;
+                    case 1:
+                        return DEBUG;
+                    case 2:
+                        return INFO;
+                    case 3:
+                        return WARN;
+                    case 4:
+                        return ERROR;
+                    default:
+                        return null;
+                }
+            }
+
+            public static com.google.protobuf.Internal.EnumLiteMap<Level> internalGetValueMap() {
+                return internalValueMap;
+            }
+
+            private static final com.google.protobuf.Internal.EnumLiteMap<Level> internalValueMap =
+                    new com.google.protobuf.Internal.EnumLiteMap<Level>() {
+                        public Level findValueByNumber(int number) {
+                            return Level.forNumber(number);
+                        }
+                    };
+
+            public final com.google.protobuf.Descriptors.EnumValueDescriptor getValueDescriptor() {
+                if (this == UNRECOGNIZED) {
+                    throw new java.lang.IllegalStateException(
+                            "Can't get the descriptor of an unrecognized enum value.");
+                }
+                return getDescriptor().getValues().get(ordinal());
+            }
+
+            public final com.google.protobuf.Descriptors.EnumDescriptor getDescriptorForType() {
+                return getDescriptor();
+            }
+
+            public static final com.google.protobuf.Descriptors.EnumDescriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.getDescriptor()
+                        .getEnumTypes()
+                        .get(0);
+            }
+
+            private static final Level[] VALUES = values();
+
+            public static Level valueOf(com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+                if (desc.getType() != getDescriptor()) {
+                    throw new java.lang.IllegalArgumentException(
+                            "EnumValueDescriptor is not for this type.");
+                }
+                if (desc.getIndex() == -1) {
+                    return UNRECOGNIZED;
+                }
+                return VALUES[desc.getIndex()];
+            }
+
+            private final int value;
+
+            private Level(int value) {
+                this.value = value;
+            }
+
+            // @@protoc_insertion_point(enum_scope:urlfrontier.LogLevelParams.Level)
+        }
+
+        public static final int PACKAGE_FIELD_NUMBER = 1;
+        private volatile java.lang.Object package_;
+        /**
+         * <code>string package = 1;</code>
+         *
+         * @return The package.
+         */
+        @java.lang.Override
+        public java.lang.String getPackage() {
+            java.lang.Object ref = package_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                package_ = s;
+                return s;
+            }
+        }
+        /**
+         * <code>string package = 1;</code>
+         *
+         * @return The bytes for package.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getPackageBytes() {
+            java.lang.Object ref = package_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                package_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int LEVEL_FIELD_NUMBER = 2;
+        private int level_;
+        /**
+         * <code>.urlfrontier.LogLevelParams.Level level = 2;</code>
+         *
+         * @return The enum numeric value on the wire for level.
+         */
+        @java.lang.Override
+        public int getLevelValue() {
+            return level_;
+        }
+        /**
+         * <code>.urlfrontier.LogLevelParams.Level level = 2;</code>
+         *
+         * @return The level.
+         */
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level getLevel() {
+            @SuppressWarnings("deprecation")
+            crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level result =
+                    crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level.valueOf(level_);
+            return result == null
+                    ? crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level.UNRECOGNIZED
+                    : result;
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (!getPackageBytes().isEmpty()) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, package_);
+            }
+            if (level_
+                    != crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level.TRACE
+                            .getNumber()) {
+                output.writeEnum(2, level_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (!getPackageBytes().isEmpty()) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, package_);
+            }
+            if (level_
+                    != crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level.TRACE
+                            .getNumber()) {
+                size += com.google.protobuf.CodedOutputStream.computeEnumSize(2, level_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.LogLevelParams)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.LogLevelParams other =
+                    (crawlercommons.urlfrontier.Urlfrontier.LogLevelParams) obj;
+
+            if (!getPackage().equals(other.getPackage())) return false;
+            if (level_ != other.level_) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + PACKAGE_FIELD_NUMBER;
+            hash = (53 * hash) + getPackage().hashCode();
+            hash = (37 * hash) + LEVEL_FIELD_NUMBER;
+            hash = (53 * hash) + level_;
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * *
+         * Configuration of the log level for a particular package, e.g.
+         * crawlercommons.urlfrontier.service.rocksdb DEBUG
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.LogLevelParams}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.LogLevelParams)
+                crawlercommons.urlfrontier.Urlfrontier.LogLevelParamsOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_LogLevelParams_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_LogLevelParams_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.class,
+                                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Builder
+                                        .class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                package_ = "";
+
+                level_ = 0;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_LogLevelParams_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.LogLevelParams
+                    getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.LogLevelParams build() {
+                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.LogLevelParams buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams result =
+                        new crawlercommons.urlfrontier.Urlfrontier.LogLevelParams(this);
+                result.package_ = package_;
+                result.level_ = level_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.LogLevelParams) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.LogLevelParams) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.LogLevelParams other) {
+                if (other
+                        == crawlercommons.urlfrontier.Urlfrontier.LogLevelParams
+                                .getDefaultInstance()) return this;
+                if (!other.getPackage().isEmpty()) {
+                    package_ = other.package_;
+                    onChanged();
+                }
+                if (other.level_ != 0) {
+                    setLevelValue(other.getLevelValue());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage =
+                            (crawlercommons.urlfrontier.Urlfrontier.LogLevelParams)
+                                    e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private java.lang.Object package_ = "";
+            /**
+             * <code>string package = 1;</code>
+             *
+             * @return The package.
+             */
+            public java.lang.String getPackage() {
+                java.lang.Object ref = package_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    package_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+            /**
+             * <code>string package = 1;</code>
+             *
+             * @return The bytes for package.
+             */
+            public com.google.protobuf.ByteString getPackageBytes() {
+                java.lang.Object ref = package_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    package_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+            /**
+             * <code>string package = 1;</code>
+             *
+             * @param value The package to set.
+             * @return This builder for chaining.
+             */
+            public Builder setPackage(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                package_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>string package = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearPackage() {
+
+                package_ = getDefaultInstance().getPackage();
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>string package = 1;</code>
+             *
+             * @param value The bytes for package to set.
+             * @return This builder for chaining.
+             */
+            public Builder setPackageBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+
+                package_ = value;
+                onChanged();
+                return this;
+            }
+
+            private int level_ = 0;
+            /**
+             * <code>.urlfrontier.LogLevelParams.Level level = 2;</code>
+             *
+             * @return The enum numeric value on the wire for level.
+             */
+            @java.lang.Override
+            public int getLevelValue() {
+                return level_;
+            }
+            /**
+             * <code>.urlfrontier.LogLevelParams.Level level = 2;</code>
+             *
+             * @param value The enum numeric value on the wire for level to set.
+             * @return This builder for chaining.
+             */
+            public Builder setLevelValue(int value) {
+
+                level_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>.urlfrontier.LogLevelParams.Level level = 2;</code>
+             *
+             * @return The level.
+             */
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level getLevel() {
+                @SuppressWarnings("deprecation")
+                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level result =
+                        crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level.valueOf(level_);
+                return result == null
+                        ? crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level.UNRECOGNIZED
+                        : result;
+            }
+            /**
+             * <code>.urlfrontier.LogLevelParams.Level level = 2;</code>
+             *
+             * @param value The level to set.
+             * @return This builder for chaining.
+             */
+            public Builder setLevel(
+                    crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                level_ = value.getNumber();
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>.urlfrontier.LogLevelParams.Level level = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearLevel() {
+
+                level_ = 0;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.LogLevelParams)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.LogLevelParams)
+        private static final crawlercommons.urlfrontier.Urlfrontier.LogLevelParams DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.LogLevelParams();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.LogLevelParams getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<LogLevelParams> PARSER =
+                new com.google.protobuf.AbstractParser<LogLevelParams>() {
+                    @java.lang.Override
+                    public LogLevelParams parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        return new LogLevelParams(input, extensionRegistry);
+                    }
+                };
+
+        public static com.google.protobuf.Parser<LogLevelParams> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<LogLevelParams> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.LogLevelParams getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
+    }
+
     private static final com.google.protobuf.Descriptors.Descriptor
             internal_static_urlfrontier_Stats_descriptor;
     private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -12042,6 +12903,10 @@ public final class Urlfrontier {
             internal_static_urlfrontier_DiscoveredURLItem_descriptor;
     private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internal_static_urlfrontier_DiscoveredURLItem_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_LogLevelParams_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_LogLevelParams_fieldAccessorTable;
 
     public static com.google.protobuf.Descriptors.FileDescriptor getDescriptor() {
         return descriptor;
@@ -12078,22 +12943,27 @@ public final class Urlfrontier {
                     + "\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLInfo\022\035\n\025r"
                     + "efetchable_from_date\030\002 \001(\004\"7\n\021Discovered"
                     + "URLItem\022\"\n\004info\030\001 \001(\0132\024.urlfrontier.URLI"
-                    + "nfo2\265\004\n\013URLFrontier\022?\n\nListQueues\022\027.urlf"
-                    + "rontier.Pagination\032\026.urlfrontier.QueueLi"
-                    + "st\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetParams\032"
-                    + "\024.urlfrontier.URLInfo\"\0000\001\022:\n\007PutURLs\022\024.u"
-                    + "rlfrontier.URLItem\032\023.urlfrontier.String\""
-                    + "\000(\0010\001\0225\n\010GetStats\022\023.urlfrontier.String\032\022"
-                    + ".urlfrontier.Stats\"\000\022:\n\013DeleteQueue\022\023.ur"
-                    + "lfrontier.String\032\024.urlfrontier.Integer\"\000"
-                    + "\022F\n\017BlockQueueUntil\022\035.urlfrontier.BlockQ"
-                    + "ueueParams\032\022.urlfrontier.Empty\"\000\0227\n\tSetA"
-                    + "ctive\022\024.urlfrontier.Boolean\032\022.urlfrontie"
-                    + "r.Empty\"\000\0227\n\tGetActive\022\022.urlfrontier.Emp"
-                    + "ty\032\024.urlfrontier.Boolean\"\000\022?\n\010SetDelay\022\035"
-                    + ".urlfrontier.QueueDelayParams\032\022.urlfront"
-                    + "ier.Empty\"\000B\034\n\032crawlercommons.urlfrontie"
-                    + "rb\006proto3"
+                    + "nfo\"\221\001\n\016LogLevelParams\022\017\n\007package\030\001 \001(\t\022"
+                    + "0\n\005level\030\002 \001(\0162!.urlfrontier.LogLevelPar"
+                    + "ams.Level\"<\n\005Level\022\t\n\005TRACE\020\000\022\t\n\005DEBUG\020\001"
+                    + "\022\010\n\004INFO\020\002\022\010\n\004WARN\020\003\022\t\n\005ERROR\020\0042\367\004\n\013URLF"
+                    + "rontier\022?\n\nListQueues\022\027.urlfrontier.Pagi"
+                    + "nation\032\026.urlfrontier.QueueList\"\000\022;\n\007GetU"
+                    + "RLs\022\026.urlfrontier.GetParams\032\024.urlfrontie"
+                    + "r.URLInfo\"\0000\001\022:\n\007PutURLs\022\024.urlfrontier.U"
+                    + "RLItem\032\023.urlfrontier.String\"\000(\0010\001\0225\n\010Get"
+                    + "Stats\022\023.urlfrontier.String\032\022.urlfrontier"
+                    + ".Stats\"\000\022:\n\013DeleteQueue\022\023.urlfrontier.St"
+                    + "ring\032\024.urlfrontier.Integer\"\000\022F\n\017BlockQue"
+                    + "ueUntil\022\035.urlfrontier.BlockQueueParams\032\022"
+                    + ".urlfrontier.Empty\"\000\0227\n\tSetActive\022\024.urlf"
+                    + "rontier.Boolean\032\022.urlfrontier.Empty\"\000\0227\n"
+                    + "\tGetActive\022\022.urlfrontier.Empty\032\024.urlfron"
+                    + "tier.Boolean\"\000\022?\n\010SetDelay\022\035.urlfrontier"
+                    + ".QueueDelayParams\032\022.urlfrontier.Empty\"\000\022"
+                    + "@\n\013SetLogLevel\022\033.urlfrontier.LogLevelPar"
+                    + "ams\032\022.urlfrontier.Empty\"\000B\034\n\032crawlercomm"
+                    + "ons.urlfrontierb\006proto3"
         };
         descriptor =
                 com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
@@ -12222,6 +13092,14 @@ public final class Urlfrontier {
                         internal_static_urlfrontier_DiscoveredURLItem_descriptor,
                         new java.lang.String[] {
                             "Info",
+                        });
+        internal_static_urlfrontier_LogLevelParams_descriptor =
+                getDescriptor().getMessageTypes().get(15);
+        internal_static_urlfrontier_LogLevelParams_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_LogLevelParams_descriptor,
+                        new java.lang.String[] {
+                            "Package", "Level",
                         });
     }
 

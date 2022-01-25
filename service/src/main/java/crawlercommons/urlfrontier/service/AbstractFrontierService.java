@@ -14,10 +14,13 @@
  */
 package crawlercommons.urlfrontier.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
+import crawlercommons.urlfrontier.Urlfrontier.LogLevelParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
@@ -434,4 +437,14 @@ public abstract class AbstractFrontierService
             int secsUntilRequestable,
             long now,
             StreamObserver<URLInfo> responseObserver);
+
+    @Override
+    public void setLogLevel(LogLevelParams request, StreamObserver<Empty> responseObserver) {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        ch.qos.logback.classic.Logger logger = loggerContext.getLogger(request.getPackage());
+        logger.setLevel(Level.toLevel(request.getLevel().toString()));
+        LOG.info("Log level for {} set to {}", request.getPackage(), request.getLevel().toString());
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
+    }
 }

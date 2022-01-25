@@ -473,6 +473,57 @@ public final class URLFrontierGrpc {
         return getSetDelayMethod;
     }
 
+    private static volatile io.grpc.MethodDescriptor<
+                    crawlercommons.urlfrontier.Urlfrontier.LogLevelParams,
+                    crawlercommons.urlfrontier.Urlfrontier.Empty>
+            getSetLogLevelMethod;
+
+    @io.grpc.stub.annotations.RpcMethod(
+            fullMethodName = SERVICE_NAME + '/' + "SetLogLevel",
+            requestType = crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.class,
+            responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+            methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+    public static io.grpc.MethodDescriptor<
+                    crawlercommons.urlfrontier.Urlfrontier.LogLevelParams,
+                    crawlercommons.urlfrontier.Urlfrontier.Empty>
+            getSetLogLevelMethod() {
+        io.grpc.MethodDescriptor<
+                        crawlercommons.urlfrontier.Urlfrontier.LogLevelParams,
+                        crawlercommons.urlfrontier.Urlfrontier.Empty>
+                getSetLogLevelMethod;
+        if ((getSetLogLevelMethod = URLFrontierGrpc.getSetLogLevelMethod) == null) {
+            synchronized (URLFrontierGrpc.class) {
+                if ((getSetLogLevelMethod = URLFrontierGrpc.getSetLogLevelMethod) == null) {
+                    URLFrontierGrpc.getSetLogLevelMethod =
+                            getSetLogLevelMethod =
+                                    io.grpc.MethodDescriptor
+                                            .<crawlercommons.urlfrontier.Urlfrontier.LogLevelParams,
+                                                    crawlercommons.urlfrontier.Urlfrontier.Empty>
+                                                    newBuilder()
+                                            .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                                            .setFullMethodName(
+                                                    generateFullMethodName(
+                                                            SERVICE_NAME, "SetLogLevel"))
+                                            .setSampledToLocalTracing(true)
+                                            .setRequestMarshaller(
+                                                    io.grpc.protobuf.ProtoUtils.marshaller(
+                                                            crawlercommons.urlfrontier.Urlfrontier
+                                                                    .LogLevelParams
+                                                                    .getDefaultInstance()))
+                                            .setResponseMarshaller(
+                                                    io.grpc.protobuf.ProtoUtils.marshaller(
+                                                            crawlercommons.urlfrontier.Urlfrontier
+                                                                    .Empty.getDefaultInstance()))
+                                            .setSchemaDescriptor(
+                                                    new URLFrontierMethodDescriptorSupplier(
+                                                            "SetLogLevel"))
+                                            .build();
+                }
+            }
+        }
+        return getSetLogLevelMethod;
+    }
+
     /** Creates a new async stub that supports all call types for the service */
     public static URLFrontierStub newStub(io.grpc.Channel channel) {
         io.grpc.stub.AbstractStub.StubFactory<URLFrontierStub> factory =
@@ -658,6 +709,21 @@ public final class URLFrontierGrpc {
                     getSetDelayMethod(), responseObserver);
         }
 
+        /**
+         *
+         *
+         * <pre>
+         * * Overrides the log level for a given package *
+         * </pre>
+         */
+        public void setLogLevel(
+                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams request,
+                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
+                        responseObserver) {
+            io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+                    getSetLogLevelMethod(), responseObserver);
+        }
+
         @java.lang.Override
         public final io.grpc.ServerServiceDefinition bindService() {
             return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
@@ -724,6 +790,13 @@ public final class URLFrontierGrpc {
                                             crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams,
                                             crawlercommons.urlfrontier.Urlfrontier.Empty>(
                                             this, METHODID_SET_DELAY)))
+                    .addMethod(
+                            getSetLogLevelMethod(),
+                            io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                    new MethodHandlers<
+                                            crawlercommons.urlfrontier.Urlfrontier.LogLevelParams,
+                                            crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                                            this, METHODID_SET_LOG_LEVEL)))
                     .build();
         }
     }
@@ -895,6 +968,23 @@ public final class URLFrontierGrpc {
                     request,
                     responseObserver);
         }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Overrides the log level for a given package *
+         * </pre>
+         */
+        public void setLogLevel(
+                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams request,
+                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
+                        responseObserver) {
+            io.grpc.stub.ClientCalls.asyncUnaryCall(
+                    getChannel().newCall(getSetLogLevelMethod(), getCallOptions()),
+                    request,
+                    responseObserver);
+        }
     }
 
     /** */
@@ -1019,6 +1109,19 @@ public final class URLFrontierGrpc {
             return io.grpc.stub.ClientCalls.blockingUnaryCall(
                     getChannel(), getSetDelayMethod(), getCallOptions(), request);
         }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Overrides the log level for a given package *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Empty setLogLevel(
+                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams request) {
+            return io.grpc.stub.ClientCalls.blockingUnaryCall(
+                    getChannel(), getSetLogLevelMethod(), getCallOptions(), request);
+        }
     }
 
     /** */
@@ -1137,6 +1240,20 @@ public final class URLFrontierGrpc {
             return io.grpc.stub.ClientCalls.futureUnaryCall(
                     getChannel().newCall(getSetDelayMethod(), getCallOptions()), request);
         }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Overrides the log level for a given package *
+         * </pre>
+         */
+        public com.google.common.util.concurrent.ListenableFuture<
+                        crawlercommons.urlfrontier.Urlfrontier.Empty>
+                setLogLevel(crawlercommons.urlfrontier.Urlfrontier.LogLevelParams request) {
+            return io.grpc.stub.ClientCalls.futureUnaryCall(
+                    getChannel().newCall(getSetLogLevelMethod(), getCallOptions()), request);
+        }
     }
 
     private static final int METHODID_LIST_QUEUES = 0;
@@ -1147,7 +1264,8 @@ public final class URLFrontierGrpc {
     private static final int METHODID_SET_ACTIVE = 5;
     private static final int METHODID_GET_ACTIVE = 6;
     private static final int METHODID_SET_DELAY = 7;
-    private static final int METHODID_PUT_URLS = 8;
+    private static final int METHODID_SET_LOG_LEVEL = 8;
+    private static final int METHODID_PUT_URLS = 9;
 
     private static final class MethodHandlers<Req, Resp>
             implements io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1218,6 +1336,13 @@ public final class URLFrontierGrpc {
                 case METHODID_SET_DELAY:
                     serviceImpl.setDelay(
                             (crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams) request,
+                            (io.grpc.stub.StreamObserver<
+                                            crawlercommons.urlfrontier.Urlfrontier.Empty>)
+                                    responseObserver);
+                    break;
+                case METHODID_SET_LOG_LEVEL:
+                    serviceImpl.setLogLevel(
+                            (crawlercommons.urlfrontier.Urlfrontier.LogLevelParams) request,
                             (io.grpc.stub.StreamObserver<
                                             crawlercommons.urlfrontier.Urlfrontier.Empty>)
                                     responseObserver);
@@ -1302,6 +1427,7 @@ public final class URLFrontierGrpc {
                                             .addMethod(getSetActiveMethod())
                                             .addMethod(getGetActiveMethod())
                                             .addMethod(getSetDelayMethod())
+                                            .addMethod(getSetLogLevelMethod())
                                             .build();
                 }
             }
