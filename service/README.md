@@ -34,6 +34,15 @@ the call above can have the following equivalent without the config file:
 
 If no path is set explicitly for RocksDB,  the default value _./rocksdb_ will be used.
 
+### Logging configuration
+
+The logging is done with Logback. A default configuration is loaded and will dump logs on the console at INFO level and above but the configuration 
+file can be overriden with 
+
+`java -Xmx2G -Dlogback.configurationFile=test.xml ...`
+
+Alternatively, the Frontier service has a _SetLogLevel_ endpoint and the CLI allows to set the level for a given package from the console.
+
 ## Docker
 
 The easiest way to run the Frontier is to use Docker
