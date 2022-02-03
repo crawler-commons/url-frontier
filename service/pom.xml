@@ -12,6 +12,7 @@
 
 	<properties>
 		<prometheus.version>0.14.1</prometheus.version>
+		<skipFormatCode>false</skipFormatCode>
 	</properties>
 
 	<build>
@@ -38,6 +39,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<skip>${skipFormatCode}</skip>
 					<googleJavaFormatOptions>
 						<aosp>true</aosp>
 						<fixImportsOnly>false</fixImportsOnly>
@@ -90,7 +92,7 @@
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli</artifactId>
-			<version>4.6.1</version>
+			<version>4.6.2</version>
 		</dependency>
 
 		<dependency>
@@ -129,7 +131,7 @@
 		<dependency>
 			<groupId>org.rocksdb</groupId>
 			<artifactId>rocksdbjni</artifactId>
-			<version>6.22.1.1</version>
+			<version>6.27.3</version>
 		</dependency>
 
 	</dependencies>
