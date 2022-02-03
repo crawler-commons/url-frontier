@@ -47,16 +47,19 @@ public abstract class AbstractFrontierService
 
     private static final Counter getURLs_calls =
             Counter.build()
-                    .name("getURLs_calls")
+                    .name("frontier_getURLs_calls_total")
                     .help("Number of times getURLs has been called.")
                     .register();
 
     private static final Counter getURLs_urls_count =
-            Counter.build().name("getURLs_urls_count").help("Number of URLs returned.").register();
+            Counter.build()
+                    .name("frontier_getURLs_total")
+                    .help("Number of URLs returned.")
+                    .register();
 
     private static final Summary getURLs_Latency =
             Summary.build()
-                    .name("getURLs_latency_seconds")
+                    .name("frontier_getURLs_latency_seconds")
                     .help("getURLs latency in seconds.")
                     .register();
 
