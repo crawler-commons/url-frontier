@@ -10,6 +10,10 @@
 
 	<description>Implementation of the URLFrontier Service</description>
 
+	<properties>
+		<skipFormatCode>false</skipFormatCode>
+	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -34,6 +38,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<skip>${skipFormatCode}</skip>
 					<googleJavaFormatOptions>
 						<aosp>true</aosp>
 						<fixImportsOnly>false</fixImportsOnly>
