@@ -12,6 +12,12 @@
   "__elements": [],
   "__requires": [
     {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
@@ -53,10 +59,133 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1643898479268,
+  "iteration": 1643969158782,
   "links": [],
   "liveNow": false,
   "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "interval": "1m",
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "8.3.4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "exemplar": true,
+          "expr": "rate(frontier_getURLs_total{instance=~\"$instance\"}[$__interval])",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Outgoing URLs per sec",
+      "transparent": true,
+      "type": "gauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 8,
+      "interval": "1m",
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
+      },
+      "pluginVersion": "8.3.4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "exemplar": true,
+          "expr": "rate(frontier_putURLs_total{instance=~\"$instance\"}[$__interval])",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Incoming URLs per sec",
+      "transparent": true,
+      "type": "gauge"
+    },
     {
       "fieldConfig": {
         "defaults": {
@@ -112,7 +241,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 8
       },
       "id": 4,
       "interval": "1m",
@@ -133,7 +262,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "frontier_putURLs_completed_total{instance=~\"$instance\"}",
+          "expr": "increase(frontier_putURLs_completed_total{instance=~\"$instance\"}[$__interval])",
           "interval": "",
           "legendFormat": "Completed",
           "refId": "A"
@@ -144,10 +273,10 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "frontier_putURLs_discovered_total{instance=~\"$instance\"}",
+          "expr": "increase(frontier_putURLs_discovered_total{instance=~\"$instance\", discovered=\"false\"}[$__interval])",
           "hide": false,
           "interval": "",
-          "legendFormat": "Discovered",
+          "legendFormat": "Known",
           "refId": "B"
         },
         {
@@ -156,7 +285,19 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "frontier_putURLs_ignored_total{instance=~\"$instance\"}",
+          "expr": "increase(frontier_putURLs_discovered_total{instance=~\"$instance\", discovered=\"true\"}[$__interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Discovered",
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "exemplar": true,
+          "expr": "increase(frontier_putURLs_ignored_total{instance=~\"$instance\"}[$__interval])",
           "hide": false,
           "interval": "",
           "legendFormat": "Ignored",
@@ -168,7 +309,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "frontier_putURLs_total{instance=~\"$instance\"}",
+          "expr": "increase(frontier_putURLs_total{instance=~\"$instance\"}[$__interval])",
           "hide": false,
           "interval": "",
           "legendFormat": "Received",
@@ -228,15 +369,32 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latency call getURLs"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F2CC0C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 12,
-        "x": 0,
+        "x": 12,
         "y": 8
       },
-      "id": 2,
+      "id": 6,
+      "interval": "1m",
       "options": {
         "legend": {
           "calcs": [],
@@ -254,7 +412,106 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "frontier_getURLs_calls_total{instance=~\"$instance\"}",
+          "expr": "increase(frontier_getURLs_total{instance=~\"$instance\"}[$__interval])",
+          "interval": "",
+          "legendFormat": "URLs sent",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "exemplar": true,
+          "expr": "increase(frontier_getURLs_latency_seconds_sum{instance=~\"$instance\"}[$__interval])",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "latency call getURLs",
+          "refId": "B"
+        }
+      ],
+      "title": "Get URLs",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 2,
+      "interval": "1m",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "exemplar": true,
+          "expr": "increase(frontier_getURLs_calls_total{instance=~\"$instance\"}[$__interval])",
           "interval": "",
           "legendFormat": "putURLs",
           "refId": "A"
@@ -265,7 +522,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "frontier_putURLs_calls_total{instance=~\"$instance\"}",
+          "expr": "increase(frontier_putURLs_calls_total{instance=~\"$instance\"}[$__interval])",
           "hide": false,
           "interval": "",
           "legendFormat": "getURLs",
@@ -277,7 +534,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "1m",
+  "refresh": "",
   "schemaVersion": 34,
   "style": "dark",
   "tags": [],
@@ -285,6 +542,10 @@
     "list": [
       {
         "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
         "definition": "label_values(instance)",
         "hide": 0,
         "includeAll": true,
@@ -300,19 +561,18 @@
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
-        "type": "query",
-        "datasource": "${DS_PROMETHEUS}"
+        "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "URL Frontier",
   "uid": "W4p4ym-7z",
-  "version": 4,
+  "version": 12,
   "weekStart": ""
 }
