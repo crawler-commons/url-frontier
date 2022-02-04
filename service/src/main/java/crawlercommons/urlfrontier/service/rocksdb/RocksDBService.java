@@ -338,11 +338,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 putURLs_urls_count.inc();
 
                 if (value.hasDiscovered()) {
-                    putURLs_discovered_count.labels("true");
+                    putURLs_discovered_count.labels("true").inc();
                     info = value.getDiscovered().getInfo();
                     nextFetchDate = Instant.now().getEpochSecond();
                 } else {
-                    putURLs_discovered_count.labels("false");
+                    putURLs_discovered_count.labels("false").inc();
                     KnownURLItem known = value.getKnown();
                     info = known.getInfo();
                     nextFetchDate = known.getRefetchableFromDate();
