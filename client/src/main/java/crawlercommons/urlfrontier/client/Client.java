@@ -21,15 +21,17 @@ import picocli.CommandLine.Option;
 @Command(
         name = "Client",
         mixinStandardHelpOptions = true,
-        version = "1.0",
+        version = "1.1",
         subcommands = {
             ListQueues.class,
+            ListCrawls.class,
             GetStats.class,
             PutURLs.class,
             GetURLs.class,
             SetActive.class,
             GetActive.class,
-            DeleteQueue.class
+            DeleteQueue.class,
+            DeleteCrawl.class
         },
         description = "Interacts with a URL Frontier from the command line")
 public class Client {
