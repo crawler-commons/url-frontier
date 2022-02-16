@@ -10,7 +10,7 @@ WORKDIR /home/urlfrontier
 COPY --chown=urlfrontier ./src src
 COPY --chown=urlfrontier ./pom.xml .
 
-RUN mvn clean package
+RUN mvn clean package -DskipFormatCode=true
 
 RUN rm target/original-*.jar
 RUN cp target/*.jar urlfrontier-service.jar

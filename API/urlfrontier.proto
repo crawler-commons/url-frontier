@@ -63,6 +63,9 @@ service URLFrontier {
        Usually informed by the delay setting of robots.txt.
       **/
      rpc SetDelay(QueueDelayParams) returns (Empty) {}
+     
+     /** Overrides the log level for a given package **/
+     rpc SetLogLevel(LogLevelParams) returns (Empty) {}
 }
 
 /** 
@@ -215,4 +218,19 @@ message DiscoveredURLItem {
   URLInfo info = 1;
 }
 
+/**
+ Configuration of the log level for a particular package, e.g.
+ crawlercommons.urlfrontier.service.rocksdb DEBUG
+**/
+message LogLevelParams {
+  string package = 1;
+  enum Level {
+    TRACE = 0;
+    DEBUG = 1;
+    INFO = 2;
+    WARN = 3;
+    ERROR = 4;
+  }
+  Level level = 2;
+}
 

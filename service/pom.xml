@@ -10,6 +10,10 @@
 
 	<description>Implementation of the URLFrontier Service</description>
 
+	<properties>
+		<skipFormatCode>false</skipFormatCode>
+	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -34,6 +38,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<skip>${skipFormatCode}</skip>
 					<googleJavaFormatOptions>
 						<aosp>true</aosp>
 						<fixImportsOnly>false</fixImportsOnly>
@@ -95,22 +100,17 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!-- native implementation of slf4j -->
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.32</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.32</version>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.10</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.rocksdb</groupId>
 			<artifactId>rocksdbjni</artifactId>
-			<version>6.22.1.1</version>
+			<version>6.27.3</version>
 		</dependency>
 
 	</dependencies>
