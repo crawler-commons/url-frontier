@@ -12,13 +12,19 @@ The two main methods used by a crawler to interact with a URL Frontier service (
 - GetURLs
 - PutURLs
 
-Underpinning them is the concept of *queue(s)*.
+Underpinning them is the concept of *queue(s)* and *crawl(s)*.
 
 ## Queues and keys
 
 What the queues should be based on is determined by the client, through the setting of a string value (_key_) associated with the messages sent with the PutURLs method. The value could be the hostname of a URL, its paid level domain, it's IP or anything else. An empty value leaves the service to route the messages into a queue - the hostname being the default behaviour. It is up the the client code to be consistent in the use of the keys.
 
 The keys are used in several functions: _GetStats_, _DeleteQueue_ and _GetURLs_.
+
+## Crawls and crawlIDs
+
+A service can handle one or more crawls, identified by a _crawlID_. Queues with the same keys can exist in multiple crawls and will be treated as totally distinct instances, i.e. deleting a queue for a particular crawl will not affect the queues with the same keys in other crawls. Similarly, a URL is considered unique to a crawl.
+
+A crawl can be thought of as a namespace. The default _crawlID_ is 'DEFAULT' but it is expected that service implementations will handle empty strings as an equivalent (note: this is due to Protobuff not allowing to have default values for String fields).
 
 ## GetURLs
 

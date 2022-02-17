@@ -4,6 +4,7 @@
 ## Table of Contents
 
 - [urlfrontier.proto](#urlfrontier.proto)
+    - [AnyCrawlID](#urlfrontier.AnyCrawlID)
     - [BlockQueueParams](#urlfrontier.BlockQueueParams)
     - [Boolean](#urlfrontier.Boolean)
     - [DiscoveredURLItem](#urlfrontier.DiscoveredURLItem)
@@ -15,6 +16,7 @@
     - [Pagination](#urlfrontier.Pagination)
     - [QueueDelayParams](#urlfrontier.QueueDelayParams)
     - [QueueList](#urlfrontier.QueueList)
+    - [QueueWithinCrawlParams](#urlfrontier.QueueWithinCrawlParams)
     - [Stats](#urlfrontier.Stats)
     - [Stats.CountsEntry](#urlfrontier.Stats.CountsEntry)
     - [String](#urlfrontier.String)
@@ -38,6 +40,16 @@
 
 
 
+<a name="urlfrontier.AnyCrawlID"></a>
+
+### AnyCrawlID
+
+
+
+
+
+
+
 <a name="urlfrontier.BlockQueueParams"></a>
 
 ### BlockQueueParams
@@ -48,6 +60,7 @@ Parameter message for BlockQueueUntil *
 | ----- | ---- | ----- | ----------- |
 | key | [string](#string) |  | ID for the queue * |
 | time | [uint64](#uint64) |  | Expressed in seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. |
+| crawlID | [string](#string) |  | crawl ID |
 
 
 
@@ -106,6 +119,8 @@ Parameter message for GetURLs *
 | max_queues | [uint32](#uint32) |  | maximum number of queues to get URLs from, the default value of 0 means no limit |
 | key | [string](#string) |  | queue id if restricting to a specific queue |
 | delay_requestable | [uint32](#uint32) |  | delay in seconds before a URL can be unlocked and sent again for fetching |
+| anyCrawlID | [AnyCrawlID](#urlfrontier.AnyCrawlID) |  |  |
+| crawlID | [string](#string) |  |  |
 
 
 
@@ -173,6 +188,7 @@ crawlercommons.urlfrontier.service.rocksdb DEBUG
 | start | [uint32](#uint32) |  | position of the first result in the list; defaults to 0 |
 | size | [uint32](#uint32) |  | max number of values; defaults to 100 |
 | include_inactive | [bool](#bool) |  | include inactive queues; defaults to false |
+| crawlID | [string](#string) |  | crawl ID |
 
 
 
@@ -189,6 +205,7 @@ Parameter message for SetDelay *
 | ----- | ---- | ----- | ----------- |
 | key | [string](#string) |  | ID for the queue - an empty value sets the default for all the queues * |
 | delay_requestable | [uint32](#uint32) |  | delay in seconds before a queue can provide new URLs |
+| crawlID | [string](#string) |  | crawl ID - empty string for default |
 
 
 
@@ -207,6 +224,23 @@ Returned by ListQueues *
 | total | [uint64](#uint64) |  | total number of queues |
 | start | [uint32](#uint32) |  | position of the first result in the list |
 | size | [uint32](#uint32) |  | number of values returned |
+| crawlID | [string](#string) |  | crawl ID - empty string for default |
+
+
+
+
+
+
+<a name="urlfrontier.QueueWithinCrawlParams"></a>
+
+### QueueWithinCrawlParams
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  | ID for the queue * |
+| crawlID | [string](#string) |  | crawl ID - empty string for default |
 
 
 
@@ -225,6 +259,7 @@ Message returned by the GetStats method
 | inProcess | [uint32](#uint32) |  | number of URLs currently in flight |
 | counts | [Stats.CountsEntry](#urlfrontier.Stats.CountsEntry) | repeated | custom counts |
 | numberOfQueues | [uint64](#uint64) |  | number of active queues in the frontier |
+| crawlID | [string](#string) |  | crawl ID |
 
 
 
@@ -288,6 +323,7 @@ Message returned by the GetStats method
 | url | [string](#string) |  | URL * |
 | key | [string](#string) |  | The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname, domain name or IP or the URL. If not set, the service will use a sensible default like hostname. |
 | metadata | [URLInfo.MetadataEntry](#urlfrontier.URLInfo.MetadataEntry) | repeated | Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc... |
+| crawlID | [string](#string) |  | crawl ID * |
 
 
 
@@ -354,11 +390,13 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| ListQueues | [Pagination](#urlfrontier.Pagination) | [QueueList](#urlfrontier.QueueList) | Return a list of queues. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching); by default the service will return up to 100 results from offset 0 and exclude inactive queues.* |
+| ListCrawls | [Empty](#urlfrontier.Empty) | [StringList](#urlfrontier.StringList) | Return the list of crawls handled by the frontier * |
+| DeleteCrawl | [String](#urlfrontier.String) | [Integer](#urlfrontier.Integer) | Delete an entire crawl, returns the number of URLs removed this way * |
+| ListQueues | [Pagination](#urlfrontier.Pagination) | [QueueList](#urlfrontier.QueueList) | Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching); by default the service will return up to 100 results from offset 0 and exclude inactive queues.* |
 | GetURLs | [GetParams](#urlfrontier.GetParams) | [URLInfo](#urlfrontier.URLInfo) stream | Stream URLs due for fetching from M queues with up to N items per queue * |
 | PutURLs | [URLItem](#urlfrontier.URLItem) stream | [String](#urlfrontier.String) stream | Push URL items to the server; they get created (if they don&#39;t already exist) in case of DiscoveredURLItems or updated if KnownURLItems * |
-| GetStats | [String](#urlfrontier.String) | [Stats](#urlfrontier.Stats) | Return stats for a specific queue or the whole crawl if the value if empty or null * |
-| DeleteQueue | [String](#urlfrontier.String) | [Integer](#urlfrontier.Integer) | Delete the queue based on the key in parameter, returns the number of URLs removed this way * |
+| GetStats | [QueueWithinCrawlParams](#urlfrontier.QueueWithinCrawlParams) | [Stats](#urlfrontier.Stats) | Return stats for a specific queue or the whole crawl if the value if empty or null * |
+| DeleteQueue | [QueueWithinCrawlParams](#urlfrontier.QueueWithinCrawlParams) | [Integer](#urlfrontier.Integer) | Delete the queue based on the key in parameter, returns the number of URLs removed this way * |
 | BlockQueueUntil | [BlockQueueParams](#urlfrontier.BlockQueueParams) | [Empty](#urlfrontier.Empty) | Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. |
 | SetActive | [Boolean](#urlfrontier.Boolean) | [Empty](#urlfrontier.Empty) | De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. * |
 | GetActive | [Empty](#urlfrontier.Empty) | [Boolean](#urlfrontier.Boolean) | Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) * |

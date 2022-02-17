@@ -16,6 +16,7 @@ package crawlercommons.urlfrontier.service;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
@@ -24,17 +25,20 @@ import crawlercommons.urlfrontier.Urlfrontier.LogLevelParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
+import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import io.grpc.stub.StreamObserver;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
@@ -48,7 +52,7 @@ public abstract class AbstractFrontierService
     private int defaultDelayForQueues = 1;
 
     // in memory map of metadata for each queue
-    protected final Map<String, QueueInterface> queues =
+    protected final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
 
     public int getDefaultDelayForQueues() {
@@ -61,6 +65,61 @@ public abstract class AbstractFrontierService
 
     protected boolean isActive() {
         return active;
+    }
+
+    @Override
+    public void listCrawls(
+            crawlercommons.urlfrontier.Urlfrontier.Empty request,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList>
+                    responseObserver) {
+
+        Set<String> crawlIDs = new HashSet<>();
+
+        synchronized (queues) {
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                    queues.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                crawlIDs.add(e.getKey().getCrawlid());
+            }
+        }
+        responseObserver.onNext(StringList.newBuilder().addAllValues(crawlIDs).build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void deleteCrawl(
+            crawlercommons.urlfrontier.Urlfrontier.String crawlID,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
+                    responseObserver) {
+
+        long total = 0;
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID.getValue());
+
+        final Set<QueueWithinCrawl> toDelete = new HashSet<>();
+
+        synchronized (queues) {
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                    queues.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                QueueWithinCrawl qwc = e.getKey();
+                if (qwc.getCrawlid().equals(normalisedCrawlID)) {
+                    toDelete.add(qwc);
+                }
+            }
+
+            for (QueueWithinCrawl quid : toDelete) {
+                QueueInterface q = queues.remove(quid);
+                total += q.countActive();
+            }
+        }
+        responseObserver.onNext(
+                crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
+                        .setValue(total)
+                        .build());
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -122,6 +181,8 @@ public abstract class AbstractFrontierService
 
         boolean include_inactive = request.getIncludeInactive();
 
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+
         // 100 by default
         if (maxQueues == 0) {
             maxQueues = 100;
@@ -140,11 +201,17 @@ public abstract class AbstractFrontierService
         crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder list = QueueList.newBuilder();
 
         synchronized (queues) {
-            Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                    queues.entrySet().iterator();
 
             while (iterator.hasNext() && sent <= maxQueues) {
-                Entry<String, QueueInterface> e = iterator.next();
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 pos++;
+
+                // check that it is within the right crawlID
+                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                    continue;
+                }
 
                 // check that it isn't blocked
                 if (!include_inactive && e.getValue().getBlockedUntil() >= now) {
@@ -154,7 +221,7 @@ public abstract class AbstractFrontierService
                 // ignore the nextfetchdate
                 if (include_inactive || e.getValue().countActive() > 0) {
                     if (pos >= start) {
-                        list.addValues(e.getKey());
+                        list.addValues(e.getKey().getQueue());
                         sent++;
                     }
                 }
@@ -166,7 +233,8 @@ public abstract class AbstractFrontierService
 
     @Override
     public void blockQueueUntil(BlockQueueParams request, StreamObserver<Empty> responseObserver) {
-        QueueInterface queue = queues.get(request.getKey());
+        QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+        QueueInterface queue = queues.get(qwc);
         if (queue != null) {
             queue.setBlockedUntil(request.getTime());
         }
@@ -176,11 +244,11 @@ public abstract class AbstractFrontierService
 
     @Override
     public void setDelay(QueueDelayParams request, StreamObserver<Empty> responseObserver) {
-        String key = request.getKey();
-        if (key.isEmpty()) {
+        if (request.getKey().isEmpty()) {
             setDefaultDelayForQueues(request.getDelayRequestable());
         } else {
-            QueueInterface queue = queues.get(request.getKey());
+            QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+            QueueInterface queue = queues.get(qwc);
             if (queue != null) {
                 queue.setDelay(request.getDelayRequestable());
             }
@@ -198,9 +266,11 @@ public abstract class AbstractFrontierService
      */
     @Override
     public void deleteQueue(
-            crawlercommons.urlfrontier.Urlfrontier.String request,
-            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
-        QueueInterface q = queues.remove(request.getValue());
+            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
+                    responseObserver) {
+        QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+        QueueInterface q = queues.remove(qwc);
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
                         .setValue(q.countActive())
@@ -210,7 +280,7 @@ public abstract class AbstractFrontierService
 
     @Override
     public void getStats(
-            crawlercommons.urlfrontier.Urlfrontier.String request,
+            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<Stats> responseObserver) {
         LOG.info("Received stats request");
 
@@ -222,24 +292,41 @@ public abstract class AbstractFrontierService
         long completed = 0;
         long activeQueues = 0;
 
-        Collection<QueueInterface> _queues = queues.values();
+        List<QueueInterface> _queues = new LinkedList<>();
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
 
         // specific queue?
-        if (!request.getValue().isEmpty()) {
-            _queues = new LinkedList<>();
-
-            QueueInterface q = queues.get(request.getValue());
+        if (!request.getKey().isEmpty()) {
+            QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+            QueueInterface q = queues.get(qwc);
             if (q != null) {
                 _queues.add(q);
             } else {
                 // TODO notify an error to the client
             }
         }
+        // all the queues within the crawlID
+        else {
+
+            synchronized (queues) {
+                // check that the queues belong to the crawlid specified
+                Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                        queues.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                    QueueWithinCrawl qwc = e.getKey();
+                    if (qwc.getCrawlid().equals(normalisedCrawlID)) {
+                        _queues.add(e.getValue());
+                    }
+                }
+            }
+        }
+        // backed by the queues so can result in a
+        // ConcurrentModificationException
 
         long now = Instant.now().getEpochSecond();
 
-        // backed by the queues so can result in a
-        // ConcurrentModificationException
         synchronized (queues) {
             for (QueueInterface q : _queues) {
                 final int inProcForQ = q.getInProcess(now);
@@ -266,6 +353,7 @@ public abstract class AbstractFrontierService
                         .setSize(size)
                         .setInProcess(inProc)
                         .putAllCounts(s)
+                        .setCrawlID(normalisedCrawlID)
                         .build();
         responseObserver.onNext(stats);
         responseObserver.onCompleted();
@@ -304,6 +392,12 @@ public abstract class AbstractFrontierService
 
         long start = System.currentTimeMillis();
 
+        // if null -> don't care about a particular crawl
+        String crawlID = null;
+
+        // default is an empty string
+        if (request.hasCrawlID()) crawlID = request.getCrawlID();
+
         String key = request.getKey();
 
         long now = Instant.now().getEpochSecond();
@@ -311,7 +405,18 @@ public abstract class AbstractFrontierService
         // want a specific key only?
         // default is an empty string so should never be null
         if (key != null && key.length() >= 1) {
-            QueueInterface queue = queues.get(key);
+
+            // if want a specific queue - must be in a crawlID
+            // even the default one
+
+            if (crawlID == null) {
+                // TODO log error
+                responseObserver.onCompleted();
+                return;
+            }
+
+            QueueWithinCrawl qwc = QueueWithinCrawl.get(key, crawlID);
+            QueueInterface queue = queues.get(qwc);
 
             // the queue does not exist
             if (queue == null) {
@@ -336,7 +441,7 @@ public abstract class AbstractFrontierService
             int totalSent =
                     sendURLsForQueue(
                             queue,
-                            key,
+                            qwc,
                             maxURLsPerQueue,
                             secsUntilRequestable,
                             now,
@@ -358,7 +463,7 @@ public abstract class AbstractFrontierService
 
         int numQueuesSent = 0;
         int totalSent = 0;
-        String firstQueue = null;
+        QueueWithinCrawl firstCrawlQueue = null;
 
         if (queues.isEmpty()) {
             LOG.info("No queues to get URLs from!");
@@ -368,25 +473,29 @@ public abstract class AbstractFrontierService
 
         while (numQueuesSent < maxQueues) {
 
-            String currentQueueKey = null;
             QueueInterface currentQueue = null;
+            QueueWithinCrawl currentCrawlQueue = null;
 
             synchronized (queues) {
-                Iterator<Entry<String, QueueInterface>> iterator = queues.entrySet().iterator();
-                Entry<String, QueueInterface> e = iterator.next();
-                currentQueueKey = e.getKey();
+                Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                        queues.entrySet().iterator();
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 currentQueue = e.getValue();
+                currentCrawlQueue = e.getKey();
 
                 // to make sure we don't loop over the ones we already processed
-                if (firstQueue == null) {
-                    firstQueue = currentQueueKey;
-                } else if (firstQueue.equals(currentQueueKey)) {
+                if (firstCrawlQueue == null) {
+                    firstCrawlQueue = currentCrawlQueue;
+                } else if (firstCrawlQueue.equals(currentCrawlQueue)) {
                     break;
                 }
                 // We remove the entry and put it at the end of the map
                 iterator.remove();
 
-                queues.put(currentQueueKey, currentQueue);
+                // if a crawlID has been specified make sure it matches
+                if (crawlID == null || crawlID.equals(e.getKey().getCrawlid())) {
+                    queues.put(e.getKey(), currentQueue);
+                }
             }
 
             // it is locked
@@ -409,7 +518,7 @@ public abstract class AbstractFrontierService
             int sentForQ =
                     sendURLsForQueue(
                             currentQueue,
-                            currentQueueKey,
+                            currentCrawlQueue,
                             maxURLsPerQueue,
                             secsUntilRequestable,
                             now,
@@ -432,7 +541,7 @@ public abstract class AbstractFrontierService
 
     protected abstract int sendURLsForQueue(
             QueueInterface queue,
-            String key,
+            QueueWithinCrawl key,
             int maxURLsPerQueue,
             int secsUntilRequestable,
             long now,
