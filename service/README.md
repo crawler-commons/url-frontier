@@ -48,10 +48,10 @@ Alternatively, the Frontier service has a _SetLogLevel_ endpoint and the CLI all
 The easiest way to run the Frontier is to use Docker
 
 ```
- docker pull crawlercommons/url-frontier:1.0
- docker run --rm --name frontier -p 7071:7071 crawlercommons/url-frontier:1.0
+ docker pull crawlercommons/url-frontier:1.1
+ docker run --rm --name frontier -p 7071:7071 crawlercommons/url-frontier:1.1
 ```
 
 The service will run on the default port (7071). Additional parameters can simply be added to the command, for instance, to persist RocksDB between runs
 
-`docker run --rm --name frontier -v /pathOnDisk:/crawldir -p 7071:7071 crawlercommons/url-frontier:1.0 rocksdb.path=/crawldir/rocksdb`
+`docker run --rm --name frontier -v /pathOnDisk:/crawldir -p 7071:7071 crawlercommons/url-frontier:1.1 rocksdb.path=/crawldir/rocksdb`
