@@ -63,6 +63,13 @@ public class ListQueues implements Runnable {
             description = "include inactive queues in the results")
     private boolean inactive;
 
+    @Option(
+            names = {"-c", "--crawlID"},
+            defaultValue = "DEFAULT",
+            paramLabel = "STRING",
+            description = "crawl to get the queues for")
+    private String crawl;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -84,6 +91,7 @@ public class ListQueues implements Runnable {
                 builder.setSize(maxNumQueues);
                 builder.setStart(start);
                 builder.setIncludeInactive(inactive);
+                builder.setCrawlID(crawl);
 
                 QueueList queueslisted = blockingFrontier.listQueues(builder.build());
 
@@ -107,6 +115,7 @@ public class ListQueues implements Runnable {
             builder.setSize(maxNumQueues);
             builder.setStart(start);
             builder.setIncludeInactive(inactive);
+            builder.setCrawlID(crawl);
 
             QueueList queueslisted = blockingFrontier.listQueues(builder.build());
 

@@ -14,6 +14,7 @@
  */
 package crawlercommons.urlfrontier.service;
 
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
@@ -22,6 +23,7 @@ import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
+import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
@@ -53,6 +55,15 @@ public class URLFrontierServiceTest {
         String host = System.getProperty("urlfrontier.host");
         String port = System.getProperty("urlfrontier.port");
 
+        // use default values
+        if (host == null) {
+            host = "localhost";
+        }
+
+        if (port == null) {
+            port = "7071";
+        }
+
         LOG.info("Initialisation of connection to URLFrontier service on {}:{}", host, port);
 
         channel =
@@ -72,54 +83,20 @@ public class URLFrontierServiceTest {
     @Test
     public void testUpdates() {
 
-        final AtomicBoolean completed = new AtomicBoolean(false);
-        final AtomicInteger acked = new AtomicInteger(0);
-
-        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver =
-                new StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>() {
-
-                    @Override
-                    public void onNext(crawlercommons.urlfrontier.Urlfrontier.String value) {
-                        // receives confirmation that the value has been received
-                        acked.addAndGet(1);
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                        completed.set(true);
-                        LOG.info("Error received", t);
-                    }
-
-                    @Override
-                    public void onCompleted() {
-                        completed.set(true);
-                    }
-                };
-
-        StreamObserver<URLItem> streamObserver = frontier.putURLs(responseObserver);
-
         // inject 2 duplicate discovered URLs
         URLInfo info = URLInfo.newBuilder().setUrl("http://key1.com/").setKey("key1.com").build();
 
         DiscoveredURLItem item = DiscoveredURLItem.newBuilder().setInfo(info).build();
         DiscoveredURLItem item2 = DiscoveredURLItem.newBuilder().setInfo(info).build();
 
-        streamObserver.onNext(URLItem.newBuilder().setDiscovered(item).build());
-        streamObserver.onNext(URLItem.newBuilder().setDiscovered(item2).build());
+        int acked =
+                sendURLs(
+                        new URLItem[] {
+                            URLItem.newBuilder().setDiscovered(item).build(),
+                            URLItem.newBuilder().setDiscovered(item2).build()
+                        });
 
-        streamObserver.onCompleted();
-
-        LOG.info("Sending URL: {}", item);
-
-        // wait for completion
-        while (completed.get() == false) {
-            try {
-                Thread.currentThread().sleep(10);
-            } catch (InterruptedException e) {
-            }
-        }
-
-        Assert.assertEquals("incorrect number of url acked", 2, acked.get());
+        Assert.assertEquals("incorrect number of url acked", 2, acked);
 
         /** The methods below use the blocking API * */
 
@@ -139,12 +116,13 @@ public class URLFrontierServiceTest {
         /** Get the URLs due for fetching for a specific key * */
         int delayrequestable = 2;
 
-        // want just one URL for that specific key
+        // want just one URL for that specific key, in the default crawl
         GetParams request2 =
                 GetParams.newBuilder()
                         .setKey("key1.com")
                         .setMaxUrlsPerQueue(1)
                         .setDelayRequestable(delayrequestable)
+                        .setCrawlID(CrawlID.DEFAULT)
                         .build();
 
         String urlreturned = blockingFrontier.getURLs(request2).next().getUrl();
@@ -154,7 +132,7 @@ public class URLFrontierServiceTest {
         /** Get stats about the queue * */
         Stats stats =
                 blockingFrontier.getStats(
-                        Urlfrontier.String.newBuilder().setValue("key1.com").build());
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder().setKey("key1.com").build());
 
         Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
 
@@ -176,26 +154,127 @@ public class URLFrontierServiceTest {
         // bug fix in 0.2
         stats =
                 blockingFrontier.getStats(
-                        Urlfrontier.String.newBuilder().setValue("key1.com").build());
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder().setKey("key1.com").build());
 
         Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
         Assert.assertEquals("incorrect number of in process from stats", 0, stats.getInProcess());
 
         crawlercommons.urlfrontier.Urlfrontier.Integer deleted =
                 blockingFrontier.deleteQueue(
-                        Urlfrontier.String.newBuilder().setValue("key1.com").build());
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder().setKey("key1.com").build());
 
         Assert.assertEquals("incorrect number of queues deleted", 1, deleted.getValue());
 
         stats =
                 blockingFrontier.getStats(
-                        Urlfrontier.String.newBuilder().setValue("key1.com").build());
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder().setKey("key1.com").build());
 
         Assert.assertEquals("incorrect number of queues from stats", 0, stats.getNumberOfQueues());
     }
 
     @Test
     public void testQueueNames() {
+
+        URLInfo info = URLInfo.newBuilder().setUrl("http://gac.icann.org?language_id=9").build();
+
+        DiscoveredURLItem disco = DiscoveredURLItem.newBuilder().setInfo(info).build();
+
+        URLItem item = URLItem.newBuilder().setDiscovered(disco).build();
+
+        sendURLs(item);
+
+        Stats stats =
+                blockingFrontier.getStats(
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder()
+                                .setKey("gac.icann.org")
+                                .build());
+        Assert.assertEquals("number of queues matching", 1, stats.getSize());
+
+        crawlercommons.urlfrontier.Urlfrontier.Integer deleted =
+                blockingFrontier.deleteQueue(
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder()
+                                .setKey("gac.icann.org")
+                                .build());
+
+        Assert.assertEquals("incorrect number of queues deleted", 1, deleted.getValue());
+    }
+
+    @Test
+    public void testCrawlIDs() {
+        StringList crawlids = blockingFrontier.listCrawls(Urlfrontier.Empty.getDefaultInstance());
+
+        Assert.assertEquals("incorrect number of crawlids", 0, crawlids.getValuesCount());
+
+        // custom crawl ID
+        URLInfo info =
+                URLInfo.newBuilder()
+                        .setUrl("http://urlfrontier.net/")
+                        .setCrawlID("BESPOKE")
+                        .build();
+        DiscoveredURLItem disco = DiscoveredURLItem.newBuilder().setInfo(info).build();
+
+        sendURLs(URLItem.newBuilder().setDiscovered(disco).build());
+
+        // implicit default crawl ID
+        URLInfo info2 = URLInfo.newBuilder().setUrl("http://urlfrontier.net/").build();
+        DiscoveredURLItem disco2 = DiscoveredURLItem.newBuilder().setInfo(info2).build();
+
+        sendURLs(URLItem.newBuilder().setDiscovered(disco2).build());
+
+        // explicit default crawl ID
+        URLInfo info3 =
+                URLInfo.newBuilder()
+                        .setUrl("http://urlfrontier.net/")
+                        .setCrawlID(CrawlID.DEFAULT)
+                        .build();
+        DiscoveredURLItem disco3 = DiscoveredURLItem.newBuilder().setInfo(info3).build();
+
+        sendURLs(URLItem.newBuilder().setDiscovered(disco3).build());
+
+        // now check the number of URLs in default crawl
+        Stats stats =
+                blockingFrontier.getStats(Urlfrontier.QueueWithinCrawlParams.newBuilder().build());
+
+        Assert.assertEquals("incorrect number of URLs from stats", 1, stats.getSize());
+        Assert.assertEquals("incorrect crawlID", CrawlID.DEFAULT, stats.getCrawlID());
+        Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
+
+        // now check the number of URLs in custom crawl
+        stats =
+                blockingFrontier.getStats(
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder()
+                                .setCrawlID("BESPOKE")
+                                .build());
+
+        Assert.assertEquals("incorrect number of URLs from stats", 1, stats.getSize());
+        Assert.assertEquals("incorrect crawlID", "BESPOKE", stats.getCrawlID());
+        Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
+
+        blockingFrontier.deleteCrawl(
+                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                        .setValue("BESPOKE")
+                        .build());
+
+        stats =
+                blockingFrontier.getStats(
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder()
+                                .setCrawlID("BESPOKE")
+                                .build());
+
+        Assert.assertEquals("incorrect crawlID", "BESPOKE", stats.getCrawlID());
+        Assert.assertEquals("incorrect number of URLs from stats", 0, stats.getSize());
+
+        blockingFrontier.deleteCrawl(
+                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().build());
+
+        stats =
+                blockingFrontier.getStats(
+                        Urlfrontier.QueueWithinCrawlParams.newBuilder().setCrawlID("").build());
+
+        Assert.assertEquals("incorrect number of URLs from stats", 0, stats.getSize());
+    }
+
+    private final int sendURLs(URLItem... items) {
         final AtomicBoolean completed = new AtomicBoolean(false);
         final AtomicInteger acked = new AtomicInteger(0);
 
@@ -204,7 +283,6 @@ public class URLFrontierServiceTest {
 
                     @Override
                     public void onNext(crawlercommons.urlfrontier.Urlfrontier.String value) {
-                        // receives confirmation that the value has been received
                         acked.addAndGet(1);
                     }
 
@@ -222,15 +300,12 @@ public class URLFrontierServiceTest {
 
         StreamObserver<URLItem> streamObserver = frontier.putURLs(responseObserver);
 
-        URLInfo info = URLInfo.newBuilder().setUrl("http://gac.icann.org?language_id=9").build();
-
-        DiscoveredURLItem item = DiscoveredURLItem.newBuilder().setInfo(info).build();
-
-        streamObserver.onNext(URLItem.newBuilder().setDiscovered(item).build());
+        for (URLItem item : items) {
+            streamObserver.onNext(item);
+            LOG.info("Sending URL: {}", item);
+        }
 
         streamObserver.onCompleted();
-
-        LOG.info("Sending URL: {}", item);
 
         // wait for completion
         while (completed.get() == false) {
@@ -240,17 +315,6 @@ public class URLFrontierServiceTest {
             }
         }
 
-        Stats stats =
-                blockingFrontier.getStats(
-                        crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                .setValue("gac.icann.org")
-                                .build());
-        Assert.assertEquals("number of queues matching", 1, stats.getSize());
-
-        crawlercommons.urlfrontier.Urlfrontier.Integer deleted =
-                blockingFrontier.deleteQueue(
-                        Urlfrontier.String.newBuilder().setValue("gac.icann.org").build());
-
-        Assert.assertEquals("incorrect number of queues deleted", 1, deleted.getValue());
+        return acked.get();
     }
 }

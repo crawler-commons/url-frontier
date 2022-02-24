@@ -16,34 +16,16 @@ package crawlercommons.urlfrontier.client;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
-import crawlercommons.urlfrontier.Urlfrontier;
-import crawlercommons.urlfrontier.Urlfrontier.Stats;
+import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import java.util.Map;
-import java.util.Map.Entry;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
-@Command(name = "GetStats", description = "Prints out stats from the Frontier")
-public class GetStats implements Runnable {
+@Command(name = "ListCrawls", description = "Prints out list of crawls")
+public class ListCrawls implements Runnable {
 
     @ParentCommand private Client parent;
-
-    @Option(
-            names = {"-k", "--key"},
-            defaultValue = "",
-            paramLabel = "STRING",
-            description = "restrict the stats to a specific queue")
-    private String key;
-
-    @Option(
-            names = {"-c", "--crawlID"},
-            defaultValue = "DEFAULT",
-            paramLabel = "STRING",
-            description = "crawl to get the stats for")
-    private String crawl;
 
     @Override
     public void run() {
@@ -54,24 +36,16 @@ public class GetStats implements Runnable {
 
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
-        Urlfrontier.QueueWithinCrawlParams.Builder builder =
-                Urlfrontier.QueueWithinCrawlParams.newBuilder();
+        crawlercommons.urlfrontier.Urlfrontier.Empty.Builder builder =
+                crawlercommons.urlfrontier.Urlfrontier.Empty.newBuilder();
 
-        if (key.length() > 0) {
-            builder.setKey(key);
-        }
+        StringList crawlIDs = blockingFrontier.listCrawls(builder.build());
 
-        builder.setCrawlID(crawl);
-
-        Stats s = blockingFrontier.getStats(builder.build());
-        System.out.println("Number of queues: " + s.getNumberOfQueues());
-        System.out.println("Active URLs: " + s.getSize());
-        System.out.println("In process: " + s.getInProcess());
-
-        Map<String, Long> counts = s.getCountsMap();
-        for (Entry<String, Long> kv : counts.entrySet()) {
-            System.out.println(kv.getKey() + " = " + kv.getValue());
-        }
+        crawlIDs.getValuesList()
+                .forEach(
+                        s -> {
+                            System.out.println(s);
+                        });
 
         channel.shutdownNow();
     }

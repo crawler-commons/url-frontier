@@ -18,6 +18,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -30,6 +31,7 @@ class InternalURL implements Comparable<InternalURL>, Serializable {
     public long nextFetchDate;
     public String url;
     public byte[] serialised;
+    public String crawlID;
 
     // this is set when the URL is sent for processing
     // so that a subsequent call to getURLs does not send it again
@@ -57,6 +59,7 @@ class InternalURL implements Comparable<InternalURL>, Serializable {
         // keep the whole original serialization into memory
         iu.serialised = info.toByteArray();
         iu.url = info.getUrl();
+        iu.crawlID = info.getCrawlID();
         return new Object[] {info.getKey(), disco, iu};
     }
 
@@ -83,10 +86,11 @@ class InternalURL implements Comparable<InternalURL>, Serializable {
         return url.hashCode();
     }
 
-    public URLInfo toURLInfo(String key) throws InvalidProtocolBufferException {
+    public URLInfo toURLInfo(QueueWithinCrawl prefixed_key) throws InvalidProtocolBufferException {
         URLInfo unfrozen = URLInfo.parseFrom(serialised);
         return URLInfo.newBuilder()
-                .setKey(key)
+                .setKey(prefixed_key.getQueue())
+                .setCrawlID(prefixed_key.getCrawlid())
                 .setUrl(url)
                 .putAllMetadata(unfrozen.getMetadataMap())
                 .build();

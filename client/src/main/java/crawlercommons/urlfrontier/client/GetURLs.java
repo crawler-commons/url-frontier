@@ -14,8 +14,10 @@
  */
 package crawlercommons.urlfrontier.client;
 
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
+import crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder;
 import io.grpc.ManagedChannel;
@@ -62,6 +64,13 @@ public class GetURLs implements Runnable {
             description = "max number of queues")
     private int maxQueues;
 
+    @Option(
+            names = {"-c", "--crawlID"},
+            required = false,
+            paramLabel = "STRING",
+            description = "crawlID to get URLs for")
+    private String crawl;
+
     @Override
     public void run() {
 
@@ -80,6 +89,16 @@ public class GetURLs implements Runnable {
 
         if (key != null && key.length() > 0) {
             request.setKey(key);
+        }
+
+        if (crawl == null) {
+            request.setAnyCrawlID(AnyCrawlID.newBuilder());
+        } else {
+            if (crawl.length() == 0) {
+                request.setCrawlID(CrawlID.DEFAULT);
+            } else {
+                request.setCrawlID(crawl);
+            }
         }
 
         stub.getURLs(request.build())

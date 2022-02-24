@@ -19,6 +19,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
+import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.stub.StreamObserver;
 import java.util.Iterator;
 import java.util.PriorityQueue;
@@ -39,7 +40,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
     @Override
     protected int sendURLsForQueue(
             QueueInterface queue,
-            String key,
+            QueueWithinCrawl prefixed_key,
             int maxURLsPerQueue,
             int secsUntilRequestable,
             long now,
@@ -63,7 +64,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
             // this one is good to go
             try {
-                responseObserver.onNext(item.toURLInfo(key));
+                responseObserver.onNext(item.toURLInfo(prefixed_key));
 
                 // mark it as not processable for N secs
                 item.heldUntil = now + secsUntilRequestable;
@@ -116,11 +117,13 @@ public class MemoryFrontierService extends AbstractFrontierService {
                     return;
                 }
 
+                QueueWithinCrawl qk = QueueWithinCrawl.get(key, iu.crawlID);
+
                 // get the priority queue or create one
                 synchronized (queues) {
-                    URLQueue queue = (URLQueue) queues.get(key);
+                    URLQueue queue = (URLQueue) queues.get(qk);
                     if (queue == null) {
-                        queues.put(key, new URLQueue(iu));
+                        queues.put(qk, new URLQueue(iu));
                         // ack reception of the URL
                         responseObserver.onNext(
                                 crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()

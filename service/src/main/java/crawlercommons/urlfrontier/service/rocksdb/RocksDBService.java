@@ -15,12 +15,14 @@
 package crawlercommons.urlfrontier.service.rocksdb;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
+import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.stub.StreamObserver;
 import io.prometheus.client.Counter;
 import java.io.Closeable;
@@ -36,8 +38,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.rocksdb.BlockBasedTableConfig;
 import org.rocksdb.BloomFilter;
@@ -106,7 +110,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         this(new HashMap<String, String>());
     }
 
-    private final ConcurrentHashMap<String, String> queuesBeingDeleted = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<QueueWithinCrawl, QueueWithinCrawl> queuesBeingDeleted =
+            new ConcurrentHashMap<>();
 
     public RocksDBService(final Map<String, String> configuration) {
 
@@ -205,15 +210,14 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 rocksDB.newIterator(columnFamilyHandleList.get(1))) {
             for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
                 final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-                final int pos = currentKey.indexOf('_');
-                final String Qkey = keyDeNormalisation(currentKey.substring(0, pos));
+                final QueueWithinCrawl qk = parseAndDeNormalise(currentKey);
                 QueueMetadata queueMD =
-                        (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
+                        (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
                 queueMD.incrementActive();
             }
         }
 
-        String previousQueueID = null;
+        QueueWithinCrawl previousQueueID = null;
         long numScheduled = 0;
 
         // now get the counts of URLs already finished
@@ -221,8 +225,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 rocksDB.newIterator(columnFamilyHandleList.get(0))) {
             for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
                 final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-                final int pos = currentKey.indexOf('_');
-                final String Qkey = keyDeNormalisation(currentKey.substring(0, pos));
+                final QueueWithinCrawl Qkey = parseAndDeNormalise(currentKey);
 
                 // changed ID? check that the previous one had the correct values
                 if (previousQueueID == null) {
@@ -262,14 +265,14 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     @Override
     protected int sendURLsForQueue(
             QueueInterface queue,
-            String queueID,
+            QueueWithinCrawl queueID,
             int maxURLsPerQueue,
             int secsUntilRequestable,
             long now,
             StreamObserver<URLInfo> responseObserver) {
 
         int alreadySent = 0;
-        final byte[] prefixKey = (keyNormalisation(queueID) + "_").getBytes(StandardCharsets.UTF_8);
+        final byte[] prefixKey = (normalise(queueID) + "_").getBytes(StandardCharsets.UTF_8);
         // scan the scheduling table
         try (final RocksIterator rocksIterator =
                 rocksDB.newIterator(columnFamilyHandleList.get(1))) {
@@ -282,17 +285,19 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 // don't want to split the whole string _ as the URL part is left as is
                 final int pos = currentKey.indexOf('_');
                 final int pos2 = currentKey.indexOf('_', pos + 1);
+                final int pos3 = currentKey.indexOf('_', pos2 + 1);
 
-                final String keyPart = currentKey.substring(0, pos);
-                final String urlPart = currentKey.substring(pos2 + 1);
+                final String crawlPart = currentKey.substring(0, pos);
+                final String queuePart = currentKey.substring(pos + 1, pos2);
+                final String urlPart = currentKey.substring(pos3 + 1);
 
                 // not for this queue anymore?
-                if (!queueID.equals(keyPart)) {
+                if (!queueID.equals(crawlPart, queuePart)) {
                     return alreadySent;
                 }
 
                 // too early for it?
-                long scheduled = Long.parseLong(currentKey.substring(pos + 1, pos2));
+                long scheduled = Long.parseLong(currentKey.substring(pos2 + 1, pos3));
                 if (scheduled > now) {
                     // they are sorted by date no need to go further
                     return alreadySent;
@@ -351,6 +356,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
                 String Qkey = info.getKey();
                 String url = info.getUrl();
+                String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
 
                 // has a queue key been defined? if not use the hostname
                 if (Qkey.equals("")) {
@@ -365,17 +371,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                         return;
                     }
                     // make a new info object ready to return
-                    info = URLInfo.newBuilder(info).setKey(Qkey).build();
-                }
-
-                // ignore this url if the queue is being deleted
-                if (queuesBeingDeleted.containsKey(Qkey)) {
-                    LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
-                    responseObserver.onNext(
-                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                    .setValue(url)
-                                    .build());
-                    return;
+                    info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
                 }
 
                 // check that the key is not too long
@@ -388,10 +384,22 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                     return;
                 }
 
+                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
+
+                // ignore this url if the queue is being deleted
+                if (queuesBeingDeleted.containsKey(qk)) {
+                    LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
+                    responseObserver.onNext(
+                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                                    .setValue(url)
+                                    .build());
+                    return;
+                }
+
                 byte[] schedulingKey = null;
 
                 final byte[] existenceKey =
-                        (keyNormalisation(Qkey) + "_" + url).getBytes(StandardCharsets.UTF_8);
+                        (normalise(qk) + "_" + url).getBytes(StandardCharsets.UTF_8);
 
                 // is this URL already known?
                 try {
@@ -414,7 +422,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
                 // get the priority queue or create one
                 QueueMetadata queueMD =
-                        (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
+                        (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
                 try {
                     // known - remove from queues
                     // its key in the queues was stored in the default cf
@@ -437,11 +445,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                         // it is either brand new or already known
                         // create a scheduling key for it
                         schedulingKey =
-                                (keyNormalisation(Qkey)
-                                                + "_"
-                                                + DF.format(nextFetchDate)
-                                                + "_"
-                                                + url)
+                                (normalise(qk) + "_" + DF.format(nextFetchDate) + "_" + url)
                                         .getBytes(StandardCharsets.UTF_8);
                         // add to the scheduling
                         rocksDB.put(
@@ -484,14 +488,16 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
      */
     @Override
     public void deleteQueue(
-            crawlercommons.urlfrontier.Urlfrontier.String request,
+            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
-        final String Qkey = request.getValue();
+
+        final QueueWithinCrawl qc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+
         int sizeQueue = 0;
 
-        // is this queue is already being deleted?
+        // is this queue already being deleted?
         // no need to do it again
-        if (queuesBeingDeleted.contains(Qkey)) {
+        if (queuesBeingDeleted.contains(qc)) {
             responseObserver.onNext(
                     crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
                             .setValue(sizeQueue)
@@ -500,63 +506,36 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             return;
         }
 
-        queuesBeingDeleted.put(Qkey, Qkey);
+        queuesBeingDeleted.put(qc, qc);
 
         // find the next key by alphabetical order
-        String[] array = new String[queues.size()];
-        array = queues.keySet().toArray(array);
+        QueueWithinCrawl[] array = queues.keySet().toArray(new QueueWithinCrawl[0]);
         Arrays.sort(array);
-        boolean wantNext = false;
+        byte[] startKey = null;
         byte[] endKey = null;
-        for (String s : array) {
-            if (wantNext) {
-                endKey = (keyNormalisation(s) + "_").getBytes(StandardCharsets.UTF_8);
+        for (QueueWithinCrawl prefixed_queue : array) {
+            if (startKey != null) {
+                endKey = (normalise(prefixed_queue) + "_").getBytes(StandardCharsets.UTF_8);
                 break;
-            } else if (s.equals(Qkey)) {
-                wantNext = true;
+            } else if (prefixed_queue.equals(qc)) {
+                startKey = (normalise(qc) + "_").getBytes(StandardCharsets.UTF_8);
             }
         }
 
         try {
-            // what if is is the last one?
-            boolean endKeyMustAlsoDie = false;
-            if (endKey == null) {
-                try (RocksIterator iter = rocksDB.newIterator(columnFamilyHandleList.get(0))) {
-                    iter.seekToLast();
-                    if (iter.isValid()) {
-                        // this is the last known URL
-                        endKey = iter.key();
-                        endKeyMustAlsoDie = true;
-                    }
-                }
-            }
-
-            if (endKey != null) {
-                // delete the ranges in the queues table as well as the URLs already
-                // processed
-                rocksDB.deleteRange(
-                        columnFamilyHandleList.get(1),
-                        (keyNormalisation(Qkey) + "_").getBytes(StandardCharsets.UTF_8),
-                        endKey);
-                rocksDB.deleteRange(
-                        columnFamilyHandleList.get(0),
-                        (keyNormalisation(Qkey) + "_").getBytes(StandardCharsets.UTF_8),
-                        endKey);
-                if (endKeyMustAlsoDie) {
-                    rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
-                    rocksDB.delete(columnFamilyHandleList.get(0), endKey);
-                }
-            }
-
+            deleteRanges(startKey, endKey);
         } catch (RocksDBException e) {
-            LOG.error("RocksDBException", e);
+            LOG.error(
+                    "Exception caught when deleting ranges - {} - {}",
+                    new String(startKey),
+                    new String(endKey));
         }
 
-        QueueInterface q = queues.remove(Qkey);
+        QueueInterface q = queues.remove(qc);
         sizeQueue += q.countActive();
         sizeQueue += q.getCountCompleted();
 
-        queuesBeingDeleted.remove(Qkey);
+        queuesBeingDeleted.remove(qc);
 
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
@@ -565,18 +544,24 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         responseObserver.onCompleted();
     }
 
-    /** underscores being used as separator for the keys, we need to make sure that */
-    private static final String keyNormalisation(String key) {
-        return key.replaceAll("_", "%5F");
+    /** underscores being used as separator for the keys */
+    public static final String normalise(QueueWithinCrawl qwc) {
+        return qwc.getCrawlid().replaceAll("_", "%5F")
+                + "_"
+                + qwc.getQueue().replaceAll("_", "%5F");
     }
 
-    private static final String keyDeNormalisation(String key) {
-        return key.replaceAll("%5F", "_");
+    public static final QueueWithinCrawl parseAndDeNormalise(String currentKey) {
+        final int pos = currentKey.indexOf('_');
+        final String crawlID = currentKey.substring(0, pos).replaceAll("%5F", "_");
+        final int pos2 = currentKey.indexOf('_', pos + 1);
+        final String queueID = currentKey.substring(pos + 1, pos2).replaceAll("%5F", "_");
+        return QueueWithinCrawl.get(queueID, crawlID);
     }
 
     @Override
     public void getStats(
-            crawlercommons.urlfrontier.Urlfrontier.String request,
+            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<Stats> responseObserver) {
         if (statistics != null) {
             LOG.info("RockdSB stats: {}", statistics);
@@ -601,6 +586,105 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             } catch (Exception e) {
                 LOG.error("Closing ", e);
             }
+        }
+    }
+
+    @Override
+    public void deleteCrawl(
+            crawlercommons.urlfrontier.Urlfrontier.String crawlID,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
+                    responseObserver) {
+
+        long total = 0;
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID.getValue());
+
+        final Set<QueueWithinCrawl> toDelete = new HashSet<>();
+
+        synchronized (queues) {
+
+            // find the crawlIDs
+            QueueWithinCrawl[] array = queues.keySet().toArray(new QueueWithinCrawl[0]);
+            Arrays.sort(array);
+
+            byte[] startKey = null;
+            byte[] endKey = null;
+            for (QueueWithinCrawl prefixed_queue : array) {
+                boolean samePrefix = prefixed_queue.getCrawlid().equals(normalisedCrawlID);
+                if (samePrefix) {
+                    if (startKey == null) {
+                        startKey =
+                                (prefixed_queue.getCrawlid().replaceAll("_", "%5F") + "_")
+                                        .getBytes(StandardCharsets.UTF_8);
+                    }
+                    toDelete.add(prefixed_queue);
+                } else if (startKey != null) {
+                    endKey =
+                            (prefixed_queue.getCrawlid().replaceAll("_", "%5F") + "_")
+                                    .getBytes(StandardCharsets.UTF_8);
+                    break;
+                }
+            }
+
+            try {
+                deleteRanges(startKey, endKey);
+            } catch (RocksDBException e) {
+                LOG.error(
+                        "Exception caught when deleting ranges - {} - {}",
+                        new String(startKey),
+                        new String(endKey));
+            }
+
+            for (QueueWithinCrawl quid : toDelete) {
+                if (queuesBeingDeleted.contains(quid)) {
+                    continue;
+                } else {
+                    queuesBeingDeleted.put(quid, quid);
+                }
+
+                QueueInterface q = queues.remove(quid);
+                total += q.countActive();
+                total += q.getCountCompleted();
+
+                queuesBeingDeleted.remove(quid);
+            }
+        }
+        responseObserver.onNext(
+                crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
+                        .setValue(total)
+                        .build());
+        responseObserver.onCompleted();
+    }
+
+    private void deleteRanges(final byte[] prefix, byte[] endKey) throws RocksDBException {
+
+        // if endKey is null it means that there is no other crawlID after this one
+        boolean includeEndKey = false;
+
+        if (endKey == null) {
+            try (RocksIterator iter = rocksDB.newIterator(columnFamilyHandleList.get(0))) {
+                iter.seekToLast();
+                if (iter.isValid()) {
+                    // this is the last known URL
+                    endKey = iter.key();
+                    includeEndKey = true;
+                }
+            }
+        }
+
+        // no end key found?
+        if (endKey == null) {
+            throw new RuntimeException("No endkey found");
+        }
+
+        // delete the ranges in the queues table as well as the URLs already
+        // processed
+        rocksDB.deleteRange(columnFamilyHandleList.get(1), prefix, endKey);
+        rocksDB.deleteRange(columnFamilyHandleList.get(0), prefix, endKey);
+
+        if (includeEndKey) {
+            rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
+            rocksDB.delete(columnFamilyHandleList.get(0), endKey);
         }
     }
 }

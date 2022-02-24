@@ -22,7 +22,14 @@ option java_package = "crawlercommons.urlfrontier";
 package urlfrontier;
 
 service URLFrontier {
-     /** Return a list of queues. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
+
+     /** Return the list of crawls handled by the frontier **/
+     rpc ListCrawls(Empty) returns (StringList) {}
+
+     /** Delete an entire crawl, returns the number of URLs removed this way **/
+     rpc DeleteCrawl(String) returns (Integer) {}
+
+     /** Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
        by default the service will return up to 100 results from offset 0 and exclude inactive queues.**/
      rpc ListQueues(Pagination) returns (QueueList) {}
 
@@ -32,11 +39,11 @@ service URLFrontier {
      /** Push URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems **/
      rpc PutURLs(stream URLItem) returns (stream String) {}
 
-     /** Return stats for a specific queue or the whole crawl if the value if empty or null **/
-     rpc GetStats(String) returns (Stats) {}
+     /** Return stats for a specific queue or an entire crawl. Does not aggregate the stats across different crawlids. **/
+     rpc GetStats(QueueWithinCrawlParams) returns (Stats) {}
      
      /** Delete the queue based on the key in parameter, returns the number of URLs removed this way **/
-     rpc DeleteQueue(String) returns (Integer) {}
+     rpc DeleteQueue(QueueWithinCrawlParams) returns (Integer) {}
 
      /** Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch
       1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time
@@ -73,6 +80,8 @@ message Stats {
   map<string, uint64> counts = 3;
   // number of active queues in the frontier
   uint64 numberOfQueues = 4;
+  // crawl ID
+  string crawlID = 5;
 }
 
 message Pagination {
@@ -82,6 +91,8 @@ message Pagination {
   uint32 size = 2;
   // include inactive queues; defaults to false
   bool include_inactive = 3;
+  // crawl ID
+  string crawlID = 4;
 }
 
 message Empty {
@@ -108,12 +119,20 @@ message QueueList {
   uint32 start = 3;
   // number of values returned
   uint32 size = 4;
+  // crawl ID - empty string for default
+  string crawlID = 5;
 }
 
 message StringList {
   repeated string values = 1;
 }
 
+message QueueWithinCrawlParams {
+  /** ID for the queue **/
+  string key = 1;
+  // crawl ID - empty string for default
+  string crawlID = 2;
+}
 
 /** Parameter message for SetDelay **/
 message QueueDelayParams {
@@ -121,6 +140,8 @@ message QueueDelayParams {
   string key = 1;
   //  delay in seconds before a queue can provide new URLs
   uint32 delay_requestable = 2;
+  // crawl ID - empty string for default
+  string crawlID = 3;
 }
 
 /** Parameter message for BlockQueueUntil **/
@@ -131,6 +152,8 @@ message BlockQueueParams {
       1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
   **/
   uint64 time = 2;
+  // crawl ID
+  string crawlID = 3;
 }
 
 /** Parameter message for GetURLs **/
@@ -143,7 +166,13 @@ message GetParams {
   string key = 3;
   //  delay in seconds before a URL can be unlocked and sent again for fetching 
   uint32 delay_requestable = 4;
+  oneof item {
+    AnyCrawlID anyCrawlID = 5;
+    string crawlID = 6;
+  }
 }
+
+message AnyCrawlID {}
 
 /** Wrapper for a KnownURLItem or DiscoveredURLItem **/
 message URLItem {
@@ -164,6 +193,8 @@ message URLInfo {
   Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
   **/
   map<string, StringList> metadata = 3;
+  /** crawl ID **/
+  string crawlID = 4;
 }
 
 /**
