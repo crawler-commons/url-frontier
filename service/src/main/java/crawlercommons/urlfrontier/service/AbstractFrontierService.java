@@ -491,11 +491,12 @@ public abstract class AbstractFrontierService
                 }
                 // We remove the entry and put it at the end of the map
                 iterator.remove();
+                queues.put(currentCrawlQueue, currentQueue);
+            }
 
-                // if a crawlID has been specified make sure it matches
-                if (crawlID == null || crawlID.equals(e.getKey().getCrawlid())) {
-                    queues.put(e.getKey(), currentQueue);
-                }
+            // if a crawlID has been specified make sure it matches
+            if (!currentCrawlQueue.equals(crawlID)) {
+                continue;
             }
 
             // it is locked
