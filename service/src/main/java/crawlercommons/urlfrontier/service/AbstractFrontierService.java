@@ -523,7 +523,7 @@ public abstract class AbstractFrontierService
             }
 
             // if a crawlID has been specified make sure it matches
-            if (!currentCrawlQueue.equals(crawlID)) {
+            if (crawlID != null && !currentCrawlQueue.equals(crawlID)) {
                 continue;
             }
 
