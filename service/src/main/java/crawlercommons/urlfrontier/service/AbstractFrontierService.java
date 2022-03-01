@@ -28,6 +28,8 @@ import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import io.grpc.stub.StreamObserver;
+import io.prometheus.client.Counter;
+import io.prometheus.client.Summary;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,6 +48,24 @@ public abstract class AbstractFrontierService
 
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(AbstractFrontierService.class);
+
+    private static final Counter getURLs_calls =
+            Counter.build()
+                    .name("frontier_getURLs_calls_total")
+                    .help("Number of times getURLs has been called.")
+                    .register();
+
+    private static final Counter getURLs_urls_count =
+            Counter.build()
+                    .name("frontier_getURLs_total")
+                    .help("Number of URLs returned.")
+                    .register();
+
+    private static final Summary getURLs_Latency =
+            Summary.build()
+                    .name("frontier_getURLs_latency_seconds")
+                    .help("getURLs latency in seconds.")
+                    .register();
 
     private boolean active = true;
 
@@ -367,6 +387,10 @@ public abstract class AbstractFrontierService
             return;
         }
 
+        getURLs_calls.inc();
+
+        Summary.Timer requestTimer = getURLs_Latency.startTimer();
+
         int maxQueues = request.getMaxQueues();
         int maxURLsPerQueue = request.getMaxUrlsPerQueue();
         int secsUntilRequestable = request.getDelayRequestable();
@@ -448,6 +472,8 @@ public abstract class AbstractFrontierService
                             responseObserver);
             responseObserver.onCompleted();
 
+            getURLs_urls_count.inc(totalSent);
+
             LOG.info(
                     "Sent {} from queue {} in {} msec",
                     totalSent,
@@ -457,6 +483,8 @@ public abstract class AbstractFrontierService
             if (totalSent != 0) {
                 queue.setLastProduced(now);
             }
+
+            requestTimer.observeDuration();
 
             return;
         }
@@ -536,6 +564,10 @@ public abstract class AbstractFrontierService
                 totalSent,
                 numQueuesSent,
                 (System.currentTimeMillis() - start));
+
+        getURLs_urls_count.inc(totalSent);
+
+        requestTimer.observeDuration();
 
         responseObserver.onCompleted();
     }

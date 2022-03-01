@@ -15,6 +15,7 @@
 	<description>Implementation of the URLFrontier Service</description>
 
 	<properties>
+		<prometheus.version>0.14.1</prometheus.version>
         <!-- needed to build within Docker -->
 		<skipFormatCode>false</skipFormatCode>
 	</properties>
@@ -94,6 +95,26 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.2.10</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient</artifactId>
+			<version>${prometheus.version}</version>
+		</dependency>
+
+		<!-- Hotspot JVM metrics-->
+		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient_hotspot</artifactId>
+			<version>${prometheus.version}</version>
+		</dependency>
+
+		<!-- Exposition HTTPServer-->
+		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient_httpserver</artifactId>
+			<version>${prometheus.version}</version>
 		</dependency>
 
 		<dependency>

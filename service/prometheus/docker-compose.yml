@@ -1,0 +1,36 @@
+version: '3.1'
+
+services:
+
+# docker network create -d bridge --subnet 192.168.0.0/24 --gateway 192.168.0.1 frontier-network
+  
+#  frontier:
+#    image: crawlercommons/url-frontier:1.1-SNAPSHOT
+#    container_name: frontier
+#    ports:
+#      - 7071:7071
+#      - 9100:9100
+#    command: -s 9100
+
+  prometheus:
+    image: prom/prometheus 
+    container_name: prometheus
+    ports:
+      - 127.0.0.1:9090:9090
+    volumes:
+      -  $PWD:/etc/prometheus
+#      - prometheus-data:/prometheus
+    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+#    volumes:
+#      - $PWD/grafana:/var/lib/grafana
+    ports:
+      - 3000:3000
+
+networks:
+  default:
+    external: true
+    name: frontier-network

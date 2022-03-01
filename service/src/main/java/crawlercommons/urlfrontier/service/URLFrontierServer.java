@@ -18,6 +18,8 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase;
 import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.prometheus.client.exporter.HTTPServer;
+import io.prometheus.client.hotspot.DefaultExports;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -53,11 +55,19 @@ public class URLFrontierServer implements Callable<Integer> {
             description = "key value configuration file")
     String config;
 
+    @Option(
+            names = {"-s", "--prometheus_server"},
+            paramLabel = "NUM",
+            description = "Port number to use for Prometheus server")
+    int prometheus_server;
+
     @Parameters List<String> positional;
 
     private Server server;
 
     private URLFrontierImplBase service = null;
+
+    private HTTPServer prometheus = null;
 
     public static void main(String... args) {
         CommandLine cli = new CommandLine(new URLFrontierServer());
@@ -82,6 +92,18 @@ public class URLFrontierServer implements Callable<Integer> {
         String implementationClassName = RocksDBService.class.getName();
 
         Map<String, String> configuration = new HashMap<>();
+
+        // Do we want to expose Metrics via a Prometheus server?
+        if (prometheus_server > 0) {
+            /**
+             * Register Prometheus collectors for garbage collection, memory pools, classloading,
+             * and thread counts.
+             */
+            DefaultExports.initialize();
+
+            LOG.info("Starting Prometheus server on port {}", prometheus_server);
+            prometheus = new HTTPServer.Builder().withPort(prometheus_server).build();
+        }
 
         if (config != null) {
             try {
@@ -130,7 +152,7 @@ public class URLFrontierServer implements Callable<Integer> {
                 service = (URLFrontierImplBase) c.newInstance(configuration);
             } catch (NoSuchMethodException e) {
                 LOG.info(
-                        "Implementation {} dpes not have a constructor taking a Map as argument",
+                        "Implementation {} does not have a constructor taking a Map as argument",
                         implementationClassName);
             } catch (Exception e) {
                 LOG.error("Exception caught when initialising the service", e);
@@ -188,6 +210,11 @@ public class URLFrontierServer implements Callable<Integer> {
         if (server != null) {
             LOG.info("Shutting down URLFrontierServer on port {}", server.getPort());
             server.shutdown();
+        }
+
+        if (prometheus != null) {
+            LOG.info("Shutting down Prometheus server on port {}", prometheus.getPort());
+            prometheus.close();
         }
     }
 
