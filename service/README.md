@@ -46,6 +46,7 @@ Alternatively, the Frontier service has a _SetLogLevel_ endpoint and the CLI all
 ## Metrics with Prometheus 
 
 The service implementation takes a parameter *-s*, the value of which is used as port number to expose metrics for [Prometheus](https://prometheus.io/).
+A [dashboard](https://github.com/crawler-commons/url-frontier/blob/master/service/prometheus/URL%20Frontier-Grafana-Prometheus.json) for Grafana is provided.
 
 ## Docker
 
