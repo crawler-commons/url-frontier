@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: 'Dashboard provider'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      # currently not used - the exported dashboard can't be loaded this way
+      # point to the current dir when possible later
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true
