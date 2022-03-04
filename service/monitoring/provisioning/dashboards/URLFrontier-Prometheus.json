@@ -1,41 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "Prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
-  "__elements": [],
-  "__requires": [
-    {
-      "type": "panel",
-      "id": "gauge",
-      "name": "Gauge",
-      "version": ""
-    },
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "8.3.4"
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "1.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "timeseries",
-      "name": "Time series",
-      "version": ""
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -58,8 +21,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1646395933198,
+  "id": 1,
+  "iteration": 1646399211195,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -112,7 +75,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "rate(frontier_putURLs_total{instance=~\"$instance\"}[$__interval])",
@@ -173,7 +136,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "rate(frontier_getURLs_total{instance=~\"$instance\"}[$__interval])",
@@ -259,7 +222,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "increase(frontier_putURLs_completed_total{instance=~\"$instance\"}[$__interval])",
@@ -270,7 +233,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "increase(frontier_putURLs_discovered_total{instance=~\"$instance\", discovered=\"false\"}[$__interval])",
@@ -282,7 +245,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "increase(frontier_putURLs_discovered_total{instance=~\"$instance\", discovered=\"true\"}[$__interval])",
@@ -294,7 +257,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "increase(frontier_putURLs_ignored_total{instance=~\"$instance\"}[$__interval])",
@@ -306,7 +269,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "increase(frontier_putURLs_total{instance=~\"$instance\"}[$__interval])",
@@ -409,7 +372,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "increase(frontier_getURLs_total{instance=~\"$instance\"}[$__interval])",
@@ -420,7 +383,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "increase(frontier_getURLs_latency_seconds_sum{instance=~\"$instance\"}[$__interval])",
@@ -508,7 +471,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "increase(frontier_getURLs_calls_total{instance=~\"$instance\"}[$__interval])",
@@ -519,7 +482,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "increase(frontier_putURLs_calls_total{instance=~\"$instance\"}[$__interval])",
@@ -541,10 +504,14 @@
   "templating": {
     "list": [
       {
-        "current": {},
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "prometheus"
         },
         "definition": "label_values(instance)",
         "hide": 0,

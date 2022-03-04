@@ -7,7 +7,5 @@ providers:
     updateIntervalSeconds: 30
     allowUiUpdates: true
     options:
-      # currently not used - the exported dashboard can't be loaded this way
-      # point to the current dir when possible later
-      path: /var/lib/grafana/dashboards
+      path: /etc/grafana/provisioning/dashboards
       foldersFromFilesStructure: true
