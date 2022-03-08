@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1646740845529,
+  "iteration": 1646749892037,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -514,9 +514,92 @@
       "title": "Method calls",
       "transparent": true,
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "line {compose_project=\"monitoring\", compose_service=\"frontier\", container_name=\"frontier\", filename=\"/var/log/docker/a90d8ff280456ae2955d7a7a64aa6969e4888e9f73de70edc6cb6b6aeb5458e9/json.log\", host=\"julien-Inspiron-7559\", source=\"stdout\"}"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 923
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 15,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 12,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": false,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Time"
+          }
+        ]
+      },
+      "pluginVersion": "8.3.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "expr": "{container_name=\"frontier\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "LOGS",
+      "type": "table"
     }
   ],
-  "refresh": "",
+  "refresh": false,
   "schemaVersion": 34,
   "style": "dark",
   "tags": [],
@@ -524,9 +607,13 @@
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
+          "selected": true,
+          "text": [
+            "frontier:9100"
+          ],
+          "value": [
+            "frontier:9100"
+          ]
         },
         "datasource": {
           "type": "prometheus",

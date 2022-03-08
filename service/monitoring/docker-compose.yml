@@ -11,7 +11,9 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: "https://loki:3100/loki/api/v1/push"
+        loki-url: "http://localhost:3100/loki/api/v1/push"
+    networks:
+      - frontier
 
   prometheus:
     image: prom/prometheus 
@@ -21,6 +23,8 @@ services:
     volumes:
       -  $PWD:/etc/prometheus
     command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+    networks:
+      - frontier
 
   grafana:
     image: grafana/grafana:8.3.5
@@ -28,17 +32,18 @@ services:
     volumes:
       - $PWD/provisioning:/etc/grafana/provisioning/
     ports:
-      - "127.0.0.1:3000:3000" 
+      - "127.0.0.1:3000:3000"
+    networks:
+      - frontier
 
   loki:
     image: grafana/loki:2.4.2
     container_name: loki
     ports:
       - "127.0.0.1:3100:3100"
-    volumes:
-      - $PWD:/mnt/config
-    command: --config.file=/mnt/config/loki-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - frontier
 
 networks:
   frontier:
-    name: frontier-network
