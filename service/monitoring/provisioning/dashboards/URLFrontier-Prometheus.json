@@ -22,11 +22,15 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1646399211195,
+  "iteration": 1646740845529,
   "links": [],
   "liveNow": false,
   "panels": [
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -70,7 +74,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": false
       },
-      "pluginVersion": "8.3.4",
+      "pluginVersion": "8.3.5",
       "targets": [
         {
           "datasource": {
@@ -89,6 +93,10 @@
       "type": "gauge"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -129,9 +137,9 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": false
       },
-      "pluginVersion": "8.3.4",
+      "pluginVersion": "8.3.5",
       "targets": [
         {
           "datasource": {
@@ -150,6 +158,10 @@
       "type": "gauge"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -284,6 +296,10 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -388,7 +404,6 @@
           "exemplar": true,
           "expr": "increase(frontier_getURLs_latency_seconds_sum{instance=~\"$instance\"}[$__interval])",
           "hide": false,
-          "instant": false,
           "interval": "",
           "legendFormat": "latency call getURLs",
           "refId": "B"
@@ -399,6 +414,10 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
