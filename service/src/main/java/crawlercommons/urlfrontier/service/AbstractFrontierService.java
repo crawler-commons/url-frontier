@@ -67,6 +67,37 @@ public abstract class AbstractFrontierService
                     .help("getURLs latency in seconds.")
                     .register();
 
+    protected static final Counter putURLs_calls =
+            Counter.build()
+                    .name("frontier_putURLs_calls_total")
+                    .help("Number of times putURLs has been called.")
+                    .register();
+
+    protected static final Counter putURLs_urls_count =
+            Counter.build()
+                    .name("frontier_putURLs_total")
+                    .help("Number of URLs sent to the Frontier")
+                    .register();
+
+    protected static final Counter putURLs_discovered_count =
+            Counter.build()
+                    .name("frontier_putURLs_discovered_total")
+                    .help("Count of discovered URLs sent to the Frontier")
+                    .labelNames("discovered")
+                    .register();
+
+    protected static final Counter putURLs_alreadyknown_count =
+            Counter.build()
+                    .name("frontier_putURLs_ignored_total")
+                    .help("Number of discovered URLs already known to the Frontier")
+                    .register();
+
+    protected static final Counter putURLs_completed_count =
+            Counter.build()
+                    .name("frontier_putURLs_completed_total")
+                    .help("Number of completed URLs")
+                    .register();
+
     private boolean active = true;
 
     private int defaultDelayForQueues = 1;

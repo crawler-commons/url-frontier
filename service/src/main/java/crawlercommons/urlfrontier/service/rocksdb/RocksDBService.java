@@ -24,7 +24,6 @@ import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.stub.StreamObserver;
-import io.prometheus.client.Counter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -61,37 +60,6 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBService.class);
 
     private static final DecimalFormat DF = new DecimalFormat("0000000000");
-
-    private static final Counter putURLs_calls =
-            Counter.build()
-                    .name("frontier_putURLs_calls_total")
-                    .help("Number of times putURLs has been called.")
-                    .register();
-
-    private static final Counter putURLs_urls_count =
-            Counter.build()
-                    .name("frontier_putURLs_total")
-                    .help("Number of URLs sent to the Frontier")
-                    .register();
-
-    private static final Counter putURLs_discovered_count =
-            Counter.build()
-                    .name("frontier_putURLs_discovered_total")
-                    .help("Count of discovered URLs sent to the Frontier")
-                    .labelNames("discovered")
-                    .register();
-
-    private static final Counter putURLs_alreadyknown_count =
-            Counter.build()
-                    .name("frontier_putURLs_ignored_total")
-                    .help("Number of discovered URLs already known to the Frontier")
-                    .register();
-
-    private static final Counter putURLs_completed_count =
-            Counter.build()
-                    .name("frontier_putURLs_completed_total")
-                    .help("Number of completed URLs")
-                    .register();
 
     static {
         RocksDB.loadLibrary();
