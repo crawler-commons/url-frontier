@@ -200,6 +200,7 @@ public class URLFrontierServer implements Callable<Integer> {
     public void stop() {
         // terminate the service if possible
         if (service != null && Closeable.class.isAssignableFrom(service.getClass())) {
+            LOG.info("Shutting down service {}", service.getClass().getSimpleName());
             try {
                 ((Closeable) service).close();
             } catch (IOException e) {
