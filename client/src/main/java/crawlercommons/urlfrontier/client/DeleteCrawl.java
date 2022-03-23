@@ -32,7 +32,7 @@ public class DeleteCrawl implements Runnable {
             names = {"-c", "--crawlID"},
             defaultValue = "DEFAULT",
             paramLabel = "STRING",
-            description = "crawl to get the stats for")
+            description = "crawl to delete")
     private String crawl;
 
     @Override
