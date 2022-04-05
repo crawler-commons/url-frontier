@@ -42,6 +42,7 @@ import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.query.Query;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.cache.query.ScanQuery;
+import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
@@ -52,6 +53,9 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(IgniteService.class);
 
     private static final DecimalFormat DF = new DecimalFormat("0000000000");
+
+    private static final String URLCacheNamePrefix = "urls_";
+    private static final String SchedulingCacheNamePrefix = "schedule_";
 
     private final Ignite ignite;
 
@@ -65,26 +69,40 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
     public IgniteService(final Map<String, String> configuration) {
 
-        String igniteSeedAddress =
-                configuration.getOrDefault("ignite.server", "127.0.0.1:47500..47509");
+        // "127.0.0.1:47500..47509"
+        String igniteSeedAddress = configuration.get("ignite.server");
 
         IgniteConfiguration cfg = new IgniteConfiguration();
-
-        // The node will be started as a client node.
-        cfg.setClientMode(true);
 
         // Classes of custom Java logic will be transferred over the wire from this app.
         cfg.setPeerClassLoadingEnabled(true);
 
-        // Setting up an IP Finder to ensure the client can locate the servers.
-        TcpDiscoveryMulticastIpFinder ipFinder = new TcpDiscoveryMulticastIpFinder();
-        ipFinder.setAddresses(Collections.singletonList(igniteSeedAddress));
-        cfg.setDiscoverySpi(new TcpDiscoverySpi().setIpFinder(ipFinder));
+        if (igniteSeedAddress != null) {
+            // The node will be started as a client node.
+            cfg.setClientMode(true);
+
+            // Setting up an IP Finder to ensure the client can locate the servers.
+            TcpDiscoveryMulticastIpFinder ipFinder = new TcpDiscoveryMulticastIpFinder();
+            ipFinder.setAddresses(Collections.singletonList(igniteSeedAddress));
+            cfg.setDiscoverySpi(new TcpDiscoverySpi().setIpFinder(ipFinder));
+        }
+
+        // specify where the data should be kept
+        // only valid for local mode
+        String path = configuration.get("ignite.path");
+        if (path != null) {
+            DataStorageConfiguration storageCfg = new DataStorageConfiguration();
+            storageCfg.setStoragePath(path);
+            storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
+            cfg.setDataStorageConfiguration(storageCfg);
+        }
 
         long start = System.currentTimeMillis();
 
         // Starting the node
         ignite = Ignition.start(cfg);
+
+        ignite.active(true);
 
         long end = System.currentTimeMillis();
 
@@ -101,33 +119,35 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
     @Override
     public void close() throws IOException {
+        LOG.info("Closing Ignite");
+
         if (ignite != null) ignite.close();
     }
 
     private IgniteCache<String, byte[]> createOrGetScheduleCacheForCrawlID(String crawlID) {
         // TODO configure it
-        return ignite.getOrCreateCache("schedule_" + crawlID);
+        return ignite.getOrCreateCache(SchedulingCacheNamePrefix + crawlID);
     }
 
     private IgniteCache<String, String> createOrGetURLCacheForCrawlID(String crawlID) {
         // TODO configure it
-        return ignite.getOrCreateCache("urls_" + crawlID);
+        return ignite.getOrCreateCache(URLCacheNamePrefix + crawlID);
     }
 
     /** Resurrects the queues from the tables and does sanity checks * */
     private void recoveryQscan() {
 
         for (String cacheName : ignite.cacheNames()) {
-            if (!cacheName.startsWith("urls_")) continue;
+            if (!cacheName.startsWith(URLCacheNamePrefix)) continue;
 
             IgniteCache<String, String> cache = ignite.cache(cacheName);
 
-            int queuesFound = 0;
+            int urlsFound = 0;
 
             try (QueryCursor<Entry<String, String>> cur =
                     cache.query(new ScanQuery<String, String>())) {
                 for (Entry<String, String> entry : cur) {
-                    queuesFound++;
+                    urlsFound++;
                     final QueueWithinCrawl qk =
                             QueueWithinCrawl.parseAndDeNormalise(entry.getKey());
                     QueueMetadata queueMD =
@@ -142,9 +162,9 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
                 }
             }
             LOG.info(
-                    "Found {} queues for crawl : {}",
-                    queuesFound,
-                    cacheName.substring("urls_".length()));
+                    "Found {} URLs for crawl : {}",
+                    urlsFound,
+                    cacheName.substring(URLCacheNamePrefix.length()));
         }
     }
 
@@ -392,8 +412,8 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
                 }
             }
 
-            ignite.destroyCache("urls_" + normalisedCrawlID);
-            ignite.destroyCache("schedule_" + normalisedCrawlID);
+            ignite.destroyCache(URLCacheNamePrefix + normalisedCrawlID);
+            ignite.destroyCache(SchedulingCacheNamePrefix + normalisedCrawlID);
 
             for (QueueWithinCrawl quid : toDelete) {
                 if (queuesBeingDeleted.contains(quid)) {
