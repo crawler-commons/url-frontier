@@ -72,6 +72,15 @@ public class URLFrontierServiceTest {
                         .build();
         frontier = URLFrontierGrpc.newStub(channel);
         blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
+
+        // delete anything that could have been left from a previous run
+        blockingFrontier.deleteCrawl(
+                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                        .setValue("BESPOKE")
+                        .build());
+
+        blockingFrontier.deleteCrawl(
+                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().build());
     }
 
     @After
