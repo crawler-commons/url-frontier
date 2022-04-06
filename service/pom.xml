@@ -16,7 +16,7 @@
 
 	<properties>
 		<prometheus.version>0.14.1</prometheus.version>
-        <!-- needed to build within Docker -->
+		<!-- needed to build within Docker -->
 		<skipFormatCode>false</skipFormatCode>
 		<ignite.version>2.12.0</ignite.version>
 	</properties>
@@ -125,11 +125,17 @@
 		</dependency>
 
 		<dependency>
-            <groupId>org.apache.ignite</groupId>
-            <artifactId>ignite-core</artifactId>
-            <version>${ignite.version}</version>
+			<groupId>org.apache.ignite</groupId>
+			<artifactId>ignite-core</artifactId>
+			<version>${ignite.version}</version>
 		</dependency>
-  
+
+		<dependency>
+			<groupId>org.apache.ignite</groupId>
+			<artifactId>ignite-indexing</artifactId>
+			<version>${ignite.version}</version>
+		</dependency>
+
 	</dependencies>
 
 
