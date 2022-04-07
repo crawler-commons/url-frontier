@@ -77,10 +77,12 @@ public class QueueWithinCrawl implements Comparable<QueueWithinCrawl> {
         return this.queue.compareTo(target.queue);
     }
 
-    public static final QueueWithinCrawl parseAndDeNormalise(String currentKey) {
+    public static final QueueWithinCrawl parseAndDeNormalise(final String currentKey) {
         final int pos = currentKey.indexOf('_');
         final String crawlID = currentKey.substring(0, pos).replaceAll("%5F", "_");
-        final int pos2 = currentKey.indexOf('_', pos + 1);
+        int pos2 = currentKey.indexOf('_', pos + 1);
+        // no separator? just normalise whatever is left
+        if (pos2 == -1) pos2 = currentKey.length();
         final String queueID = currentKey.substring(pos + 1, pos2).replaceAll("%5F", "_");
         return QueueWithinCrawl.get(queueID, crawlID);
     }

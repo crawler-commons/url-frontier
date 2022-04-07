@@ -22,14 +22,11 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
-import crawlercommons.urlfrontier.service.ignite.IgniteService.Key;
-import crawlercommons.urlfrontier.service.ignite.IgniteService.SchedulingKey;
 import crawlercommons.urlfrontier.service.rocksdb.QueueMetadata;
 import io.grpc.stub.StreamObserver;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,7 +44,6 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMode;
-import org.apache.ignite.cache.affinity.AffinityKeyMapped;
 import org.apache.ignite.cache.query.Query;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.cache.query.ScanQuery;
@@ -82,38 +78,39 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
         // Classes of custom Java logic will be transferred over the wire from this app.
         cfg.setPeerClassLoadingEnabled(true);
 
-        // "127.0.0.1:47500..47509"
-        String igniteSeedAddress = configuration.get("ignite.server");
-        if (igniteSeedAddress != null) {
-            // The node will be started as a client node.
-            cfg.setClientMode(true);
+        // client mode to make the frontier stateless is not supported yet
+        // each instance holds some data
 
+        // String clientMode = configuration.getOrDefault("ignite.client.mode",
+        // "false");
+        // cfg.setClientMode(Boolean.parseBoolean(clientMode));
+
+        // "127.0.0.1:47500..47509"
+        String igniteSeedAddress = configuration.get("ignite.seed.address");
+        if (igniteSeedAddress != null) {
             // Setting up an IP Finder to ensure the client can locate the servers.
             TcpDiscoveryMulticastIpFinder ipFinder = new TcpDiscoveryMulticastIpFinder();
             ipFinder.setAddresses(Collections.singletonList(igniteSeedAddress));
             cfg.setDiscoverySpi(new TcpDiscoverySpi().setIpFinder(ipFinder));
-        } else {
-            // specify where the data should be kept
-            // only valid for local mode
-            String path = configuration.get("ignite.path");
-            if (path != null) {
-
-                if (configuration.containsKey("ignite.purge")) {
-                    try {
-                        Files.walk(Paths.get(path))
-                                .sorted(Comparator.reverseOrder())
-                                .map(Path::toFile)
-                                .forEach(File::delete);
-                    } catch (IOException e) {
-                        LOG.error("Couldn't delete path {}", path);
-                    }
+        }
+        // specify where the data should be kept
+        // only valid for local mode
+        String path = configuration.get("ignite.path");
+        if (path != null) {
+            if (configuration.containsKey("ignite.purge")) {
+                try {
+                    Files.walk(Paths.get(path))
+                            .sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(File::delete);
+                } catch (IOException e) {
+                    LOG.error("Couldn't delete path {}", path);
                 }
-
-                DataStorageConfiguration storageCfg = new DataStorageConfiguration();
-                storageCfg.setStoragePath(path);
-                storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
-                cfg.setDataStorageConfiguration(storageCfg);
             }
+            DataStorageConfiguration storageCfg = new DataStorageConfiguration();
+            storageCfg.setStoragePath(path);
+            storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
+            cfg.setDataStorageConfiguration(storageCfg);
         }
 
         long start = System.currentTimeMillis();
@@ -124,11 +121,11 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
         String backups = configuration.getOrDefault("ignite.backups", "0");
 
+        // template for cache configurations
         CacheConfiguration cacheCfg = new CacheConfiguration("cacheTemplate");
         cacheCfg.setBackups(Integer.parseInt(backups));
         cacheCfg.setCacheMode(CacheMode.PARTITIONED);
 
-        // Register the cache template
         ignite.addCacheConfiguration(cacheCfg);
 
         long end = System.currentTimeMillis();
@@ -151,60 +148,34 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
         if (ignite != null) ignite.close();
     }
 
-    static class Key implements Serializable {
-        @AffinityKeyMapped String crawlQueueID;
-
-        String URL;
-
-        Key(String crawlQueueID, String uRL) {
-            super();
-            this.crawlQueueID = crawlQueueID;
-            URL = uRL;
-        }
-    }
-
-    public static class SchedulingKey extends Key implements Serializable {
-
-        static final SchedulingKey dummy = new SchedulingKey(null, null, 0);
-
-        long nextFetchDate;
-
-        SchedulingKey(String crawlQueueID, String uRL, long nextFetchDate) {
-            super(crawlQueueID, uRL);
-            this.nextFetchDate = nextFetchDate;
-        }
-    }
-
     private IgniteCache<SchedulingKey, byte[]> createOrGetScheduleCacheForCrawlID(String crawlID) {
         CacheConfiguration<SchedulingKey, byte[]> ccfg = new CacheConfiguration<>();
-        // ccfg.setIndexedTypes(SchedulingKey.class, byte[].class);
         ccfg.setName(SchedulingCacheNamePrefix + crawlID);
         return ignite.getOrCreateCache(ccfg);
     }
 
     private IgniteCache<Key, SchedulingKey> createOrGetURLCacheForCrawlID(String crawlID) {
         CacheConfiguration<Key, SchedulingKey> ccfg = new CacheConfiguration<>();
-        // ccfg.setIndexedTypes(Key.class, SchedulingKey.class);
         ccfg.setName(URLCacheNamePrefix + crawlID);
         return ignite.getOrCreateCache(ccfg);
     }
 
-    /** Resurrects the queues from the tables and does sanity checks * */
+    /** Resurrects the queues from the tables * */
     private void recoveryQscan() {
 
         for (String cacheName : ignite.cacheNames()) {
             if (!cacheName.startsWith(URLCacheNamePrefix)) continue;
 
-            IgniteCache<String, SchedulingKey> cache = ignite.cache(cacheName);
+            IgniteCache<Key, SchedulingKey> cache = ignite.cache(cacheName);
 
             int urlsFound = 0;
 
-            try (QueryCursor<Entry<String, SchedulingKey>> cur =
-                    cache.query(new ScanQuery<String, SchedulingKey>())) {
-                for (Entry<String, SchedulingKey> entry : cur) {
+            try (QueryCursor<Entry<Key, SchedulingKey>> cur =
+                    cache.query(new ScanQuery<Key, SchedulingKey>().setLocal(true))) {
+                for (Entry<Key, SchedulingKey> entry : cur) {
                     urlsFound++;
                     final QueueWithinCrawl qk =
-                            QueueWithinCrawl.parseAndDeNormalise(entry.getKey());
+                            QueueWithinCrawl.parseAndDeNormalise(entry.getKey().crawlQueueID);
                     QueueMetadata queueMD =
                             (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
                     // active if it has a scheduling value
@@ -382,8 +353,6 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
         int alreadySent = 0;
 
-        // TODO optimise by identifying the partition where the data can be found
-        // TODO use index query
         Query<Entry<SchedulingKey, byte[]>> qry =
                 new ScanQuery<SchedulingKey, byte[]>(
                         (i, p) -> i.crawlQueueID.equals(queueID.toString()));
@@ -518,13 +487,11 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
         IgniteCache<Key, SchedulingKey> URLCache =
                 createOrGetURLCacheForCrawlID(request.getCrawlID());
 
-        // TODO optimise by identifying the partition where the data can be found
-        // TODO use an IndexQuery instead of scanning the whole table
-        Query<Entry<Key, String>> qry2 =
-                new ScanQuery<Key, String>((i, p) -> i.crawlQueueID.equals(qc.toString()));
+        Query<Entry<Key, SchedulingKey>> qry2 =
+                new ScanQuery<Key, SchedulingKey>((i, p) -> i.crawlQueueID.equals(qc.toString()));
 
-        try (QueryCursor<Entry<Key, String>> cur = URLCache.query(qry2)) {
-            for (Entry<Key, String> entry : cur) {
+        try (QueryCursor<Entry<Key, SchedulingKey>> cur = URLCache.query(qry2)) {
+            for (Entry<Key, SchedulingKey> entry : cur) {
                 URLCache.remove(entry.getKey());
             }
         }
