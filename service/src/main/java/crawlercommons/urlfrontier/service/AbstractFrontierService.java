@@ -520,6 +520,7 @@ public abstract class AbstractFrontierService
             return;
         }
 
+        int numQueuesTried = 0;
         int numQueuesSent = 0;
         int totalSent = 0;
         QueueWithinCrawl firstCrawlQueue = null;
@@ -536,6 +537,7 @@ public abstract class AbstractFrontierService
             QueueWithinCrawl currentCrawlQueue = null;
 
             synchronized (queues) {
+                numQueuesTried++;
                 Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
                         queues.entrySet().iterator();
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
@@ -591,10 +593,11 @@ public abstract class AbstractFrontierService
         }
 
         LOG.info(
-                "Sent {} from {} queue(s) in {} msec",
+                "Sent {} from {} queue(s) in {} msec; tried {} queues",
                 totalSent,
                 numQueuesSent,
-                (System.currentTimeMillis() - start));
+                (System.currentTimeMillis() - start),
+                numQueuesTried);
 
         getURLs_urls_count.inc(totalSent);
 

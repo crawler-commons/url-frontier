@@ -15,18 +15,13 @@
 package crawlercommons.urlfrontier.service.ignite;
 
 import java.io.Serializable;
-import org.apache.ignite.cache.affinity.AffinityKeyMapped;
-import org.apache.ignite.cache.query.annotations.QueryTextField;
 
-class Key implements Serializable {
+class Payload implements Serializable {
+    long nextFetchDate;
+    byte[] payload;
 
-    @AffinityKeyMapped @QueryTextField String crawlQueueID;
-
-    String URL;
-
-    Key(String crawlQueueID, String uRL) {
-        super();
-        this.crawlQueueID = crawlQueueID;
-        URL = uRL;
+    public Payload(long nextFetchDate, byte[] bs) {
+        this.nextFetchDate = nextFetchDate;
+        this.payload = bs;
     }
 }

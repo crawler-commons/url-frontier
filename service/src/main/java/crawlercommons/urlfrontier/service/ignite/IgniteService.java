@@ -1,5 +1,5 @@
 /**
- * SPDX-FileCopyrightText: 2020 Crawler-commons SPDX-License-Identifier: Apache-2.0 Licensed to
+ * SPDX-FileCopyrightText: 2022 Crawler-commons SPDX-License-Identifier: Apache-2.0 Licensed to
  * Crawler-Commons under one or more contributor license agreements. See the NOTICE file distributed
  * with this work for additional information regarding copyright ownership. DigitalPebble licenses
  * this file to You under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -47,6 +47,8 @@ import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.cache.query.Query;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.cache.query.ScanQuery;
+import org.apache.ignite.cache.query.TextQuery;
+import org.apache.ignite.cluster.ClusterState;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
@@ -59,7 +61,6 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(IgniteService.class);
 
     private static final String URLCacheNamePrefix = "urls_";
-    private static final String SchedulingCacheNamePrefix = "schedule_";
 
     private final Ignite ignite;
 
@@ -93,8 +94,9 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
             ipFinder.setAddresses(Collections.singletonList(igniteSeedAddress));
             cfg.setDiscoverySpi(new TcpDiscoverySpi().setIpFinder(ipFinder));
         }
+
+        DataStorageConfiguration storageCfg = new DataStorageConfiguration();
         // specify where the data should be kept
-        // only valid for local mode
         String path = configuration.get("ignite.path");
         if (path != null) {
             if (configuration.containsKey("ignite.purge")) {
@@ -107,25 +109,25 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
                     LOG.error("Couldn't delete path {}", path);
                 }
             }
-            DataStorageConfiguration storageCfg = new DataStorageConfiguration();
             storageCfg.setStoragePath(path);
-            storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
-            cfg.setDataStorageConfiguration(storageCfg);
         }
+        // set persistence
+        storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
+        cfg.setDataStorageConfiguration(storageCfg);
 
         long start = System.currentTimeMillis();
 
         // Starting the node
         ignite = Ignition.start(cfg);
-        ignite.active(true);
 
-        String backups = configuration.getOrDefault("ignite.backups", "0");
+        ignite.cluster().state(ClusterState.ACTIVE);
+
+        int backups = Integer.parseInt(configuration.getOrDefault("ignite.backups", "0"));
 
         // template for cache configurations
         CacheConfiguration cacheCfg = new CacheConfiguration("cacheTemplate");
-        cacheCfg.setBackups(Integer.parseInt(backups));
+        cacheCfg.setBackups(backups);
         cacheCfg.setCacheMode(CacheMode.PARTITIONED);
-
         ignite.addCacheConfiguration(cacheCfg);
 
         long end = System.currentTimeMillis();
@@ -134,45 +136,39 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
         LOG.info("Scanning tables to rebuild queues... (can take a long time)");
 
-        recoveryQscan();
+        queueScan(true);
 
         long end2 = System.currentTimeMillis();
 
         LOG.info("{} queues discovered in {} msec", queues.size(), (end2 - end));
     }
 
+    private IgniteCache<Key, Payload> createOrGetCacheForCrawlID(String crawlID) {
+        CacheConfiguration<Key, Payload> ccfg = new CacheConfiguration<>();
+        ccfg.setName(URLCacheNamePrefix + crawlID);
+        ccfg.setIndexedTypes(Key.class, Payload.class);
+        return ignite.getOrCreateCache(ccfg);
+    }
+
     @Override
     public void close() throws IOException {
         LOG.info("Closing Ignite");
-
         if (ignite != null) ignite.close();
     }
 
-    private IgniteCache<SchedulingKey, byte[]> createOrGetScheduleCacheForCrawlID(String crawlID) {
-        CacheConfiguration<SchedulingKey, byte[]> ccfg = new CacheConfiguration<>();
-        ccfg.setName(SchedulingCacheNamePrefix + crawlID);
-        return ignite.getOrCreateCache(ccfg);
-    }
-
-    private IgniteCache<Key, SchedulingKey> createOrGetURLCacheForCrawlID(String crawlID) {
-        CacheConfiguration<Key, SchedulingKey> ccfg = new CacheConfiguration<>();
-        ccfg.setName(URLCacheNamePrefix + crawlID);
-        return ignite.getOrCreateCache(ccfg);
-    }
-
     /** Resurrects the queues from the tables * */
-    private void recoveryQscan() {
+    private void queueScan(boolean localMode) {
 
         for (String cacheName : ignite.cacheNames()) {
             if (!cacheName.startsWith(URLCacheNamePrefix)) continue;
 
-            IgniteCache<Key, SchedulingKey> cache = ignite.cache(cacheName);
+            IgniteCache<Key, Payload> cache = ignite.cache(cacheName);
 
             int urlsFound = 0;
 
-            try (QueryCursor<Entry<Key, SchedulingKey>> cur =
-                    cache.query(new ScanQuery<Key, SchedulingKey>().setLocal(true))) {
-                for (Entry<Key, SchedulingKey> entry : cur) {
+            try (QueryCursor<Entry<Key, Payload>> cur =
+                    cache.query(new ScanQuery<Key, Payload>().setLocal(localMode))) {
+                for (Entry<Key, Payload> entry : cur) {
                     urlsFound++;
                     final QueueWithinCrawl qk =
                             QueueWithinCrawl.parseAndDeNormalise(entry.getKey().crawlQueueID);
@@ -265,20 +261,25 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
                     return;
                 }
 
-                SchedulingKey schedulingKey = null;
+                Payload oldpayload = null;
 
                 final Key existenceKey = new Key(qk.toString(), url);
 
+                Payload newpayload = new Payload(nextFetchDate, info.toByteArray());
+
                 // is this URL already known?
                 try {
-                    schedulingKey = createOrGetURLCacheForCrawlID(crawlID).get(existenceKey);
+                    oldpayload =
+                            (Payload)
+                                    createOrGetCacheForCrawlID(crawlID)
+                                            .getAndPut(existenceKey, newpayload);
                 } catch (Exception e) {
                     LOG.error("Ignite exception", e);
                     return;
                 }
 
                 // already known? ignore if discovered
-                if (schedulingKey != null && discovered) {
+                if (oldpayload != null && discovered) {
                     putURLs_alreadyknown_count.inc();
                     responseObserver.onNext(
                             crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
@@ -287,40 +288,26 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
                     return;
                 }
 
-                // get the priority queue or create one
+                // get the priority queue
                 QueueMetadata queueMD =
                         (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
-                try {
-                    // known - remove from queues
-                    // its key in the queues was stored in the default cf
-                    if (schedulingKey != null) {
-                        createOrGetScheduleCacheForCrawlID(crawlID).remove(schedulingKey);
-                        // remove from queue metadata
-                        queueMD.removeFromProcessed(url);
-                        queueMD.decrementActive();
-                    }
 
-                    // add the new item
-                    // unless it is an update and it's nextFetchDate is 0 == NEVER
-                    if (!discovered && nextFetchDate == 0) {
-                        // does not need scheduling
-                        // give it a dummy scheduling key
-                        schedulingKey = SchedulingKey.dummy;
-                        queueMD.incrementCompleted();
-                        putURLs_completed_count.inc();
-                    } else {
-                        // it is either brand new or already known
-                        // create a scheduling key for it
-                        schedulingKey = new SchedulingKey(qk.toString(), url, nextFetchDate);
-                        // add to the scheduling
-                        createOrGetScheduleCacheForCrawlID(crawlID)
-                                .put(schedulingKey, info.toByteArray());
-                        queueMD.incrementActive();
-                    }
-                    // update the link to its queue
-                    createOrGetURLCacheForCrawlID(crawlID).put(existenceKey, schedulingKey);
-                } catch (Exception e) {
-                    LOG.error("Ignite exception", e);
+                // known - remove from queues
+                // its key in the queues was stored in the default cf
+                if (oldpayload != null) {
+                    // remove from queue metadata
+                    queueMD.removeFromProcessed(url);
+                    queueMD.decrementActive();
+                }
+
+                // add the new item
+                // unless it is an update and it's nextFetchDate is 0 == NEVER
+                if (!discovered && nextFetchDate == 0) {
+                    queueMD.incrementCompleted();
+                    putURLs_completed_count.inc();
+                } else {
+                    // it is either brand new or already known
+                    queueMD.incrementActive();
                 }
 
                 responseObserver.onNext(
@@ -353,18 +340,18 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
         int alreadySent = 0;
 
-        Query<Entry<SchedulingKey, byte[]>> qry =
-                new ScanQuery<SchedulingKey, byte[]>(
-                        (i, p) -> i.crawlQueueID.equals(queueID.toString()));
+        Query<Entry<Key, Payload>> qry = new TextQuery<>(Payload.class, queueID.toString());
+        // the content for the queues should only be local anyway
+        qry.setLocal(true);
 
-        try (QueryCursor<Entry<SchedulingKey, byte[]>> cursor =
-                createOrGetScheduleCacheForCrawlID(queueID.getCrawlid()).query(qry)) {
-            for (Entry<SchedulingKey, byte[]> entry : cursor) {
+        try (QueryCursor<Entry<Key, Payload>> cursor =
+                createOrGetCacheForCrawlID(queueID.getCrawlid()).query(qry)) {
+            for (Entry<Key, Payload> entry : cursor) {
                 if (alreadySent >= maxURLsPerQueue) break;
                 // too early for it?
-                long scheduled = entry.getKey().nextFetchDate;
+                long scheduled = entry.getValue().nextFetchDate;
                 if (scheduled > now) {
-                    // they are sorted by date no need to go further
+                    // they should be sorted by date no need to go further
                     return alreadySent;
                 }
 
@@ -375,7 +362,7 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
                 // this one is good to go
                 try {
-                    responseObserver.onNext(URLInfo.parseFrom(entry.getValue()));
+                    responseObserver.onNext(URLInfo.parseFrom(entry.getValue().payload));
 
                     // mark it as not processable for N secs
                     ((QueueMetadata) queue)
@@ -417,7 +404,6 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
             }
 
             ignite.destroyCache(URLCacheNamePrefix + normalisedCrawlID);
-            ignite.destroyCache(SchedulingCacheNamePrefix + normalisedCrawlID);
 
             for (QueueWithinCrawl quid : toDelete) {
                 if (queuesBeingDeleted.contains(quid)) {
@@ -456,6 +442,16 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
         int sizeQueue = 0;
 
+        // if the queue is unknown
+        if (!queues.containsKey(qc)) {
+            responseObserver.onNext(
+                    crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
+                            .setValue(sizeQueue)
+                            .build());
+            responseObserver.onCompleted();
+            return;
+        }
+
         // is this queue already being deleted?
         // no need to do it again
         if (queuesBeingDeleted.contains(qc)) {
@@ -469,29 +465,14 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
         queuesBeingDeleted.put(qc, qc);
 
-        // TODO optimise by identifying the partition where the data can be found
-        // TODO use an IndexQuery instead of scanning the whole table
-        Query<Entry<SchedulingKey, byte[]>> qry =
-                new ScanQuery<SchedulingKey, byte[]>(
-                        (i, p) -> i.crawlQueueID.equals(qc.toString()));
+        IgniteCache<Key, Payload> URLCache = createOrGetCacheForCrawlID(request.getCrawlID());
 
-        IgniteCache<SchedulingKey, byte[]> scheduleCache =
-                createOrGetScheduleCacheForCrawlID(request.getCrawlID());
+        Query<Entry<Key, Payload>> qry = new TextQuery<>(Payload.class, qc.toString());
+        // the content for the queues should only be local anyway
+        qry.setLocal(true);
 
-        try (QueryCursor<Entry<SchedulingKey, byte[]>> cur = scheduleCache.query(qry)) {
-            for (Entry<SchedulingKey, byte[]> entry : cur) {
-                scheduleCache.remove(entry.getKey());
-            }
-        }
-
-        IgniteCache<Key, SchedulingKey> URLCache =
-                createOrGetURLCacheForCrawlID(request.getCrawlID());
-
-        Query<Entry<Key, SchedulingKey>> qry2 =
-                new ScanQuery<Key, SchedulingKey>((i, p) -> i.crawlQueueID.equals(qc.toString()));
-
-        try (QueryCursor<Entry<Key, SchedulingKey>> cur = URLCache.query(qry2)) {
-            for (Entry<Key, SchedulingKey> entry : cur) {
+        try (QueryCursor<Entry<Key, Payload>> cur = URLCache.query(qry)) {
+            for (Entry<Key, Payload> entry : cur) {
                 URLCache.remove(entry.getKey());
             }
         }
