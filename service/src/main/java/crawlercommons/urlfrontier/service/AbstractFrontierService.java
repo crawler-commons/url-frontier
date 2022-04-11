@@ -631,4 +631,12 @@ public abstract class AbstractFrontierService
         responseObserver.onNext(Empty.getDefaultInstance());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void listNodes(Empty request, StreamObserver<StringList> responseObserver) {
+        // by default return only this node.
+        // cluster-aware implementations will override this
+        responseObserver.onNext(StringList.newBuilder().addValues(this.getHostAndPort()).build());
+        responseObserver.onCompleted();
+    }
 }
