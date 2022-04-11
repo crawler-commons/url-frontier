@@ -178,7 +178,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 rocksDB.newIterator(columnFamilyHandleList.get(1))) {
             for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
                 final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-                final QueueWithinCrawl qk = parseAndDeNormalise(currentKey);
+                final QueueWithinCrawl qk = QueueWithinCrawl.parseAndDeNormalise(currentKey);
                 QueueMetadata queueMD =
                         (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
                 queueMD.incrementActive();
@@ -193,7 +193,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 rocksDB.newIterator(columnFamilyHandleList.get(0))) {
             for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
                 final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-                final QueueWithinCrawl Qkey = parseAndDeNormalise(currentKey);
+                final QueueWithinCrawl Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
 
                 // changed ID? check that the previous one had the correct values
                 if (previousQueueID == null) {
@@ -240,7 +240,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             StreamObserver<URLInfo> responseObserver) {
 
         int alreadySent = 0;
-        final byte[] prefixKey = (normalise(queueID) + "_").getBytes(StandardCharsets.UTF_8);
+        final byte[] prefixKey = (queueID.toString() + "_").getBytes(StandardCharsets.UTF_8);
         // scan the scheduling table
         try (final RocksIterator rocksIterator =
                 rocksDB.newIterator(columnFamilyHandleList.get(1))) {
@@ -367,7 +367,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 byte[] schedulingKey = null;
 
                 final byte[] existenceKey =
-                        (normalise(qk) + "_" + url).getBytes(StandardCharsets.UTF_8);
+                        (qk.toString() + "_" + url).getBytes(StandardCharsets.UTF_8);
 
                 // is this URL already known?
                 try {
@@ -413,7 +413,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                         // it is either brand new or already known
                         // create a scheduling key for it
                         schedulingKey =
-                                (normalise(qk) + "_" + DF.format(nextFetchDate) + "_" + url)
+                                (qk.toString() + "_" + DF.format(nextFetchDate) + "_" + url)
                                         .getBytes(StandardCharsets.UTF_8);
                         // add to the scheduling
                         rocksDB.put(
@@ -483,10 +483,10 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         byte[] endKey = null;
         for (QueueWithinCrawl prefixed_queue : array) {
             if (startKey != null) {
-                endKey = (normalise(prefixed_queue) + "_").getBytes(StandardCharsets.UTF_8);
+                endKey = (prefixed_queue.toString() + "_").getBytes(StandardCharsets.UTF_8);
                 break;
             } else if (prefixed_queue.equals(qc)) {
-                startKey = (normalise(qc) + "_").getBytes(StandardCharsets.UTF_8);
+                startKey = (qc.toString() + "_").getBytes(StandardCharsets.UTF_8);
             }
         }
 
@@ -510,21 +510,6 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                         .setValue(sizeQueue)
                         .build());
         responseObserver.onCompleted();
-    }
-
-    /** underscores being used as separator for the keys */
-    public static final String normalise(QueueWithinCrawl qwc) {
-        return qwc.getCrawlid().replaceAll("_", "%5F")
-                + "_"
-                + qwc.getQueue().replaceAll("_", "%5F");
-    }
-
-    public static final QueueWithinCrawl parseAndDeNormalise(String currentKey) {
-        final int pos = currentKey.indexOf('_');
-        final String crawlID = currentKey.substring(0, pos).replaceAll("%5F", "_");
-        final int pos2 = currentKey.indexOf('_', pos + 1);
-        final String queueID = currentKey.substring(pos + 1, pos2).replaceAll("%5F", "_");
-        return QueueWithinCrawl.get(queueID, crawlID);
     }
 
     @Override

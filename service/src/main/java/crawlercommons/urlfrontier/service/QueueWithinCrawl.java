@@ -68,7 +68,9 @@ public class QueueWithinCrawl implements Comparable<QueueWithinCrawl> {
 
     @Override
     public String toString() {
-        return this.getCrawlid() + "_" + this.getQueue();
+        return this.getCrawlid().replaceAll("_", "%5F")
+                + "_"
+                + this.getQueue().replaceAll("_", "%5F");
     }
 
     public int compareTo(QueueWithinCrawl target) {

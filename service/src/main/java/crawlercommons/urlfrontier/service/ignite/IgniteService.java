@@ -67,6 +67,10 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
     private final ConcurrentHashMap<QueueWithinCrawl, QueueWithinCrawl> queuesBeingDeleted =
             new ConcurrentHashMap<>();
 
+    private final IgniteCache<String, String> globalQueueCache;
+
+    private boolean closing = false;
+
     // no explicit config
     public IgniteService() {
         this(new HashMap<String, String>());
@@ -125,9 +129,10 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
         int backups = Integer.parseInt(configuration.getOrDefault("ignite.backups", "0"));
 
         // template for cache configurations
-        CacheConfiguration cacheCfg = new CacheConfiguration("cacheTemplate");
+        CacheConfiguration cacheCfg = new CacheConfiguration("urls_*");
         cacheCfg.setBackups(backups);
         cacheCfg.setCacheMode(CacheMode.PARTITIONED);
+        cacheCfg.setIndexedTypes(Key.class, Payload.class);
         ignite.addCacheConfiguration(cacheCfg);
 
         long end = System.currentTimeMillis();
@@ -136,28 +141,36 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
         LOG.info("Scanning tables to rebuild queues... (can take a long time)");
 
-        queueScan(true);
+        recoveryQscan(true);
 
         long end2 = System.currentTimeMillis();
 
+        // all the queues across the frontier instances
+        CacheConfiguration cacheCfg2 = new CacheConfiguration("queues");
+        cacheCfg2.setBackups(backups);
+        cacheCfg2.setCacheMode(CacheMode.PARTITIONED);
+        globalQueueCache = ignite.getOrCreateCache(cacheCfg2);
+
         LOG.info("{} queues discovered in {} msec", queues.size(), (end2 - end));
+
+        // check the global queue list
+        // every 2 minutes
+        new QueueCheck(120).start();
     }
 
     private IgniteCache<Key, Payload> createOrGetCacheForCrawlID(String crawlID) {
-        CacheConfiguration<Key, Payload> ccfg = new CacheConfiguration<>();
-        ccfg.setName(URLCacheNamePrefix + crawlID);
-        ccfg.setIndexedTypes(Key.class, Payload.class);
-        return ignite.getOrCreateCache(ccfg);
+        return ignite.getOrCreateCache(URLCacheNamePrefix + crawlID);
     }
 
     @Override
     public void close() throws IOException {
+        closing = true;
         LOG.info("Closing Ignite");
         if (ignite != null) ignite.close();
     }
 
     /** Resurrects the queues from the tables * */
-    private void queueScan(boolean localMode) {
+    private void recoveryQscan(boolean localMode) {
 
         for (String cacheName : ignite.cacheNames()) {
             if (!cacheName.startsWith(URLCacheNamePrefix)) continue;
@@ -188,6 +201,76 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
                     "Found {} URLs for crawl : {}",
                     urlsFound,
                     cacheName.substring(URLCacheNamePrefix.length()));
+        }
+    }
+
+    // periodically go through the list of queues
+    // assigned to this node
+    class QueueCheck extends Thread {
+
+        private Instant lastQuery = Instant.EPOCH;
+
+        private final int delaySec;
+
+        QueueCheck(int delay) {
+            delaySec = delay;
+        }
+
+        @Override
+        public void run() {
+
+            while (true) {
+                if (closing) return;
+
+                // implement delay between requests
+                long msecTowait =
+                        delaySec * 1000 - (Instant.now().toEpochMilli() - lastQuery.toEpochMilli());
+                if (msecTowait > 0) {
+                    try {
+                        Thread.sleep(msecTowait);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    continue;
+                }
+
+                LOG.info("Checking queues");
+
+                lastQuery = Instant.now();
+
+                synchronized (queues) {
+                    Set<QueueWithinCrawl> existingQueues =
+                            new HashSet<QueueWithinCrawl>(queues.keySet());
+
+                    int queuesFound = 0;
+                    int queuesRemoved = 0;
+
+                    // add any missing queues
+                    try (QueryCursor<Entry<String, String>> cur =
+                            globalQueueCache.query(
+                                    new ScanQuery<String, String>().setLocal(true))) {
+                        for (Entry<String, String> entry : cur) {
+                            final QueueWithinCrawl qk =
+                                    QueueWithinCrawl.parseAndDeNormalise(entry.getKey());
+                            existingQueues.remove(qk);
+                            queues.computeIfAbsent(qk, s -> new QueueMetadata());
+                            queuesFound++;
+                        }
+                    }
+
+                    // delete anything that would have been removed
+                    for (QueueWithinCrawl remaining : existingQueues) {
+                        queues.remove(remaining);
+                        queuesRemoved++;
+                    }
+
+                    LOG.info(
+                            "Found {} queues, removed {}, total {}",
+                            queuesFound,
+                            queuesRemoved,
+                            queues.size());
+                }
+            }
         }
     }
 
@@ -289,9 +372,14 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
                     return;
                 }
 
-                // get the priority queue
+                // get the priority queue - if it is a local one
+                // or create a dummy one
+                // but do not create it in the queues
                 QueueMetadata queueMD =
-                        (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
+                        (QueueMetadata) queues.getOrDefault(qk, new QueueMetadata());
+
+                // but make sure it exists globally anyway
+                globalQueueCache.putIfAbsent(qk.toString(), qk.toString());
 
                 // known - remove from queues
                 // its key in the queues was stored in the default cf
@@ -417,6 +505,9 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
                 total += q.countActive();
                 total += q.getCountCompleted();
 
+                // remove at the global level
+                globalQueueCache.remove(quid.toString());
+
                 queuesBeingDeleted.remove(quid);
             }
         }
@@ -483,6 +574,9 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
         sizeQueue += q.getCountCompleted();
 
         queuesBeingDeleted.remove(qc);
+
+        // remove at the global level
+        globalQueueCache.remove(qc.toString());
 
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
