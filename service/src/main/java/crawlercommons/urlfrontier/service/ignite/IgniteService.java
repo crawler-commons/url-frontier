@@ -181,6 +181,7 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
                     } else {
                         queueMD.incrementActive();
                     }
+                    cache.put(entry.getKey(), entry.getValue());
                 }
             }
             LOG.info(
