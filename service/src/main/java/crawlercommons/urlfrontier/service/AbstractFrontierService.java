@@ -102,6 +102,9 @@ public abstract class AbstractFrontierService
 
     private int defaultDelayForQueues = 1;
 
+    // used for reporting itself in a cluster setup
+    private String address;
+
     // in memory map of metadata for each queue
     protected final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
@@ -116,6 +119,14 @@ public abstract class AbstractFrontierService
 
     protected boolean isActive() {
         return active;
+    }
+
+    void setHostAndPort(String hostname, int port) {
+        address = hostname + ":" + port;
+    }
+
+    public String getHostAndPort() {
+        return address;
     }
 
     @Override
