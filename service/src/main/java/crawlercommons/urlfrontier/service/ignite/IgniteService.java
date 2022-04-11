@@ -123,7 +123,8 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
         // Starting the node
         ignite = Ignition.start(cfg);
-
+        ignite.cluster().baselineAutoAdjustEnabled(true);
+        ignite.cluster().baselineAutoAdjustTimeout(30000);
         ignite.cluster().state(ClusterState.ACTIVE);
 
         int backups = Integer.parseInt(configuration.getOrDefault("ignite.backups", "0"));
