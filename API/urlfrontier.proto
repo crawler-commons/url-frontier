@@ -23,6 +23,9 @@ package urlfrontier;
 
 service URLFrontier {
 
+     /** Return the list of nodes forming the cluster the current node belongs to **/
+     rpc ListNodes(Empty) returns (StringList) {}
+
      /** Return the list of crawls handled by the frontier **/
      rpc ListCrawls(Empty) returns (StringList) {}
 

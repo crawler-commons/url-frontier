@@ -14,7 +14,6 @@
  */
 package crawlercommons.urlfrontier.service;
 
-import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase;
 import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -36,7 +35,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name = "URL Frontier Server", mixinStandardHelpOptions = true, version = "1.2")
+@Command(name = "URL Frontier Server", mixinStandardHelpOptions = true, version = "2.0-SNAPSHOT")
 public class URLFrontierServer implements Callable<Integer> {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLFrontierServer.class);
@@ -47,6 +46,14 @@ public class URLFrontierServer implements Callable<Integer> {
             paramLabel = "NUM",
             description = "URL Frontier port (default to 7071)")
     int port;
+
+    @Option(
+            names = {"-h", "--hostname"},
+            required = false,
+            defaultValue = "localhost",
+            paramLabel = "STRING",
+            description = "hostname value to report - defaults to localhost")
+    String host;
 
     @Option(
             names = {"-c", "--config"},
@@ -65,7 +72,7 @@ public class URLFrontierServer implements Callable<Integer> {
 
     private Server server;
 
-    private URLFrontierImplBase service = null;
+    private AbstractFrontierService service = null;
 
     private HTTPServer prometheus = null;
 
@@ -137,9 +144,9 @@ public class URLFrontierServer implements Callable<Integer> {
 
         Class<?> implementationClass = Class.forName(implementationClassName);
 
-        if (!URLFrontierImplBase.class.isAssignableFrom(implementationClass)) {
+        if (!AbstractFrontierService.class.isAssignableFrom(implementationClass)) {
             LOG.error(
-                    "Implementation class {} does not extend URLFrontierImplBase",
+                    "Implementation class {} does not extend AbstractFrontierService",
                     implementationClassName);
             System.exit(-1);
         }
@@ -149,7 +156,7 @@ public class URLFrontierServer implements Callable<Integer> {
             try {
                 Constructor<?> c = implementationClass.getConstructor(Map.class);
                 c.setAccessible(true);
-                service = (URLFrontierImplBase) c.newInstance(configuration);
+                service = (AbstractFrontierService) c.newInstance(configuration);
             } catch (NoSuchMethodException e) {
                 LOG.info(
                         "Implementation {} does not have a constructor taking a Map as argument",
@@ -162,12 +169,14 @@ public class URLFrontierServer implements Callable<Integer> {
 
         if (service == null) {
             try {
-                service = (URLFrontierImplBase) implementationClass.newInstance();
+                service = (AbstractFrontierService) implementationClass.newInstance();
             } catch (Exception e) {
                 LOG.error("Exception caught when initialising the service", e);
                 System.exit(-1);
             }
         }
+
+        service.setHostAndPort(host, port);
 
         this.server = ServerBuilder.forPort(port).addService(service).build();
         server.start();

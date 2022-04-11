@@ -16,6 +16,58 @@ public final class URLFrontierGrpc {
     private static volatile io.grpc.MethodDescriptor<
                     crawlercommons.urlfrontier.Urlfrontier.Empty,
                     crawlercommons.urlfrontier.Urlfrontier.StringList>
+            getListNodesMethod;
+
+    @io.grpc.stub.annotations.RpcMethod(
+            fullMethodName = SERVICE_NAME + '/' + "ListNodes",
+            requestType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+            responseType = crawlercommons.urlfrontier.Urlfrontier.StringList.class,
+            methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+    public static io.grpc.MethodDescriptor<
+                    crawlercommons.urlfrontier.Urlfrontier.Empty,
+                    crawlercommons.urlfrontier.Urlfrontier.StringList>
+            getListNodesMethod() {
+        io.grpc.MethodDescriptor<
+                        crawlercommons.urlfrontier.Urlfrontier.Empty,
+                        crawlercommons.urlfrontier.Urlfrontier.StringList>
+                getListNodesMethod;
+        if ((getListNodesMethod = URLFrontierGrpc.getListNodesMethod) == null) {
+            synchronized (URLFrontierGrpc.class) {
+                if ((getListNodesMethod = URLFrontierGrpc.getListNodesMethod) == null) {
+                    URLFrontierGrpc.getListNodesMethod =
+                            getListNodesMethod =
+                                    io.grpc.MethodDescriptor
+                                            .<crawlercommons.urlfrontier.Urlfrontier.Empty,
+                                                    crawlercommons.urlfrontier.Urlfrontier
+                                                            .StringList>
+                                                    newBuilder()
+                                            .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                                            .setFullMethodName(
+                                                    generateFullMethodName(
+                                                            SERVICE_NAME, "ListNodes"))
+                                            .setSampledToLocalTracing(true)
+                                            .setRequestMarshaller(
+                                                    io.grpc.protobuf.ProtoUtils.marshaller(
+                                                            crawlercommons.urlfrontier.Urlfrontier
+                                                                    .Empty.getDefaultInstance()))
+                                            .setResponseMarshaller(
+                                                    io.grpc.protobuf.ProtoUtils.marshaller(
+                                                            crawlercommons.urlfrontier.Urlfrontier
+                                                                    .StringList
+                                                                    .getDefaultInstance()))
+                                            .setSchemaDescriptor(
+                                                    new URLFrontierMethodDescriptorSupplier(
+                                                            "ListNodes"))
+                                            .build();
+                }
+            }
+        }
+        return getListNodesMethod;
+    }
+
+    private static volatile io.grpc.MethodDescriptor<
+                    crawlercommons.urlfrontier.Urlfrontier.Empty,
+                    crawlercommons.urlfrontier.Urlfrontier.StringList>
             getListCrawlsMethod;
 
     @io.grpc.stub.annotations.RpcMethod(
@@ -679,6 +731,21 @@ public final class URLFrontierGrpc {
          *
          *
          * <pre>
+         * * Return the list of nodes forming the cluster the current node belongs to *
+         * </pre>
+         */
+        public void listNodes(
+                crawlercommons.urlfrontier.Urlfrontier.Empty request,
+                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList>
+                        responseObserver) {
+            io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+                    getListNodesMethod(), responseObserver);
+        }
+
+        /**
+         *
+         *
+         * <pre>
          * * Return the list of crawls handled by the frontier *
          * </pre>
          */
@@ -864,6 +931,13 @@ public final class URLFrontierGrpc {
         public final io.grpc.ServerServiceDefinition bindService() {
             return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
                     .addMethod(
+                            getListNodesMethod(),
+                            io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                    new MethodHandlers<
+                                            crawlercommons.urlfrontier.Urlfrontier.Empty,
+                                            crawlercommons.urlfrontier.Urlfrontier.StringList>(
+                                            this, METHODID_LIST_NODES)))
+                    .addMethod(
                             getListCrawlsMethod(),
                             io.grpc.stub.ServerCalls.asyncUnaryCall(
                                     new MethodHandlers<
@@ -963,6 +1037,23 @@ public final class URLFrontierGrpc {
         @java.lang.Override
         protected URLFrontierStub build(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
             return new URLFrontierStub(channel, callOptions);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Return the list of nodes forming the cluster the current node belongs to *
+         * </pre>
+         */
+        public void listNodes(
+                crawlercommons.urlfrontier.Urlfrontier.Empty request,
+                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList>
+                        responseObserver) {
+            io.grpc.stub.ClientCalls.asyncUnaryCall(
+                    getChannel().newCall(getListNodesMethod(), getCallOptions()),
+                    request,
+                    responseObserver);
         }
 
         /**
@@ -1190,6 +1281,19 @@ public final class URLFrontierGrpc {
          *
          *
          * <pre>
+         * * Return the list of nodes forming the cluster the current node belongs to *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.StringList listNodes(
+                crawlercommons.urlfrontier.Urlfrontier.Empty request) {
+            return io.grpc.stub.ClientCalls.blockingUnaryCall(
+                    getChannel(), getListNodesMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
          * * Return the list of crawls handled by the frontier *
          * </pre>
          */
@@ -1353,6 +1457,20 @@ public final class URLFrontierGrpc {
          *
          *
          * <pre>
+         * * Return the list of nodes forming the cluster the current node belongs to *
+         * </pre>
+         */
+        public com.google.common.util.concurrent.ListenableFuture<
+                        crawlercommons.urlfrontier.Urlfrontier.StringList>
+                listNodes(crawlercommons.urlfrontier.Urlfrontier.Empty request) {
+            return io.grpc.stub.ClientCalls.futureUnaryCall(
+                    getChannel().newCall(getListNodesMethod(), getCallOptions()), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
          * * Return the list of crawls handled by the frontier *
          * </pre>
          */
@@ -1496,18 +1614,19 @@ public final class URLFrontierGrpc {
         }
     }
 
-    private static final int METHODID_LIST_CRAWLS = 0;
-    private static final int METHODID_DELETE_CRAWL = 1;
-    private static final int METHODID_LIST_QUEUES = 2;
-    private static final int METHODID_GET_URLS = 3;
-    private static final int METHODID_GET_STATS = 4;
-    private static final int METHODID_DELETE_QUEUE = 5;
-    private static final int METHODID_BLOCK_QUEUE_UNTIL = 6;
-    private static final int METHODID_SET_ACTIVE = 7;
-    private static final int METHODID_GET_ACTIVE = 8;
-    private static final int METHODID_SET_DELAY = 9;
-    private static final int METHODID_SET_LOG_LEVEL = 10;
-    private static final int METHODID_PUT_URLS = 11;
+    private static final int METHODID_LIST_NODES = 0;
+    private static final int METHODID_LIST_CRAWLS = 1;
+    private static final int METHODID_DELETE_CRAWL = 2;
+    private static final int METHODID_LIST_QUEUES = 3;
+    private static final int METHODID_GET_URLS = 4;
+    private static final int METHODID_GET_STATS = 5;
+    private static final int METHODID_DELETE_QUEUE = 6;
+    private static final int METHODID_BLOCK_QUEUE_UNTIL = 7;
+    private static final int METHODID_SET_ACTIVE = 8;
+    private static final int METHODID_GET_ACTIVE = 9;
+    private static final int METHODID_SET_DELAY = 10;
+    private static final int METHODID_SET_LOG_LEVEL = 11;
+    private static final int METHODID_PUT_URLS = 12;
 
     private static final class MethodHandlers<Req, Resp>
             implements io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1526,6 +1645,13 @@ public final class URLFrontierGrpc {
         @java.lang.SuppressWarnings("unchecked")
         public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
             switch (methodId) {
+                case METHODID_LIST_NODES:
+                    serviceImpl.listNodes(
+                            (crawlercommons.urlfrontier.Urlfrontier.Empty) request,
+                            (io.grpc.stub.StreamObserver<
+                                            crawlercommons.urlfrontier.Urlfrontier.StringList>)
+                                    responseObserver);
+                    break;
                 case METHODID_LIST_CRAWLS:
                     serviceImpl.listCrawls(
                             (crawlercommons.urlfrontier.Urlfrontier.Empty) request,
@@ -1674,6 +1800,7 @@ public final class URLFrontierGrpc {
                                     io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
                                             .setSchemaDescriptor(
                                                     new URLFrontierFileDescriptorSupplier())
+                                            .addMethod(getListNodesMethod())
                                             .addMethod(getListCrawlsMethod())
                                             .addMethod(getDeleteCrawlMethod())
                                             .addMethod(getListQueuesMethod())

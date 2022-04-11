@@ -390,12 +390,13 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
+| ListNodes | [Empty](#urlfrontier.Empty) | [StringList](#urlfrontier.StringList) | Return the list of nodes forming the cluster the current node belongs to * |
 | ListCrawls | [Empty](#urlfrontier.Empty) | [StringList](#urlfrontier.StringList) | Return the list of crawls handled by the frontier * |
 | DeleteCrawl | [String](#urlfrontier.String) | [Integer](#urlfrontier.Integer) | Delete an entire crawl, returns the number of URLs removed this way * |
 | ListQueues | [Pagination](#urlfrontier.Pagination) | [QueueList](#urlfrontier.QueueList) | Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching); by default the service will return up to 100 results from offset 0 and exclude inactive queues.* |
 | GetURLs | [GetParams](#urlfrontier.GetParams) | [URLInfo](#urlfrontier.URLInfo) stream | Stream URLs due for fetching from M queues with up to N items per queue * |
 | PutURLs | [URLItem](#urlfrontier.URLItem) stream | [String](#urlfrontier.String) stream | Push URL items to the server; they get created (if they don&#39;t already exist) in case of DiscoveredURLItems or updated if KnownURLItems * |
-| GetStats | [QueueWithinCrawlParams](#urlfrontier.QueueWithinCrawlParams) | [Stats](#urlfrontier.Stats) | Return stats for a specific queue or the whole crawl if the value if empty or null * |
+| GetStats | [QueueWithinCrawlParams](#urlfrontier.QueueWithinCrawlParams) | [Stats](#urlfrontier.Stats) | Return stats for a specific queue or an entire crawl. Does not aggregate the stats across different crawlids. * |
 | DeleteQueue | [QueueWithinCrawlParams](#urlfrontier.QueueWithinCrawlParams) | [Integer](#urlfrontier.Integer) | Delete the queue based on the key in parameter, returns the number of URLs removed this way * |
 | BlockQueueUntil | [BlockQueueParams](#urlfrontier.BlockQueueParams) | [Empty](#urlfrontier.Empty) | Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. |
 | SetActive | [Boolean](#urlfrontier.Boolean) | [Empty](#urlfrontier.Empty) | De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. * |
