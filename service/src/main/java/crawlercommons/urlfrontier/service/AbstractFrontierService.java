@@ -105,6 +105,9 @@ public abstract class AbstractFrontierService
     // used for reporting itself in a cluster setup
     private String address;
 
+    // known nodes in a cluster setup
+    private Set<String> nodes;
+
     // in memory map of metadata for each queue
     protected final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
@@ -127,6 +130,10 @@ public abstract class AbstractFrontierService
 
     public String getHostAndPort() {
         return address;
+    }
+
+    public void setNodes(Set<String> n) {
+        this.nodes = n;
     }
 
     @Override
@@ -632,6 +639,16 @@ public abstract class AbstractFrontierService
         logger.setLevel(Level.toLevel(request.getLevel().toString()));
         LOG.info("Log level for {} set to {}", request.getPackage(), request.getLevel().toString());
         responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listNodes(Empty request, StreamObserver<StringList> responseObserver) {
+        // by default return only this node.
+        if (nodes == null || nodes.isEmpty()) {
+            nodes.add(this.getHostAndPort());
+        }
+        responseObserver.onNext(StringList.newBuilder().addAllValues(nodes).build());
         responseObserver.onCompleted();
     }
 }
