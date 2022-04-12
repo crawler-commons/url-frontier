@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -48,12 +49,15 @@ import org.apache.ignite.cache.query.Query;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.cache.query.ScanQuery;
 import org.apache.ignite.cache.query.TextQuery;
+import org.apache.ignite.cluster.BaselineNode;
+import org.apache.ignite.cluster.ClusterNode;
 import org.apache.ignite.cluster.ClusterState;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
 public class IgniteService extends AbstractFrontierService implements Closeable {
@@ -123,9 +127,24 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
         // Starting the node
         ignite = Ignition.start(cfg);
+
+        if (ignite.cluster().state().equals(ClusterState.INACTIVE)) {
+            ignite.cluster().state(ClusterState.ACTIVE);
+        }
+
+        ClusterNode currentNode = ignite.cluster().localNode();
+        @Nullable
+        Collection<BaselineNode> baselineTopo = ignite.cluster().currentBaselineTopology();
+
+        if (baselineTopo != null && !baselineTopo.contains(currentNode)) {
+            baselineTopo.add(currentNode);
+            // turn it off temporarily
+            ignite.cluster().baselineAutoAdjustEnabled(false);
+            ignite.cluster().setBaselineTopology(baselineTopo);
+        }
+
         ignite.cluster().baselineAutoAdjustEnabled(true);
-        ignite.cluster().baselineAutoAdjustTimeout(30000);
-        ignite.cluster().state(ClusterState.ACTIVE);
+        ignite.cluster().baselineAutoAdjustTimeout(60000);
 
         int backups = Integer.parseInt(configuration.getOrDefault("ignite.backups", "0"));
 
