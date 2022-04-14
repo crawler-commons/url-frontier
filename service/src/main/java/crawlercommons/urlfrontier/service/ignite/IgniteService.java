@@ -20,6 +20,7 @@ import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
+import crawlercommons.urlfrontier.service.HeartbeatListener;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.rocksdb.QueueMetadata;
@@ -41,6 +42,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.cache.Cache.Entry;
+import javax.cache.expiry.CreatedExpiryPolicy;
+import javax.cache.expiry.Duration;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
@@ -60,9 +63,11 @@ import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMultic
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
-public class IgniteService extends AbstractFrontierService implements Closeable {
+public class IgniteService extends AbstractFrontierService implements Closeable, HeartbeatListener {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(IgniteService.class);
+
+    public static final String frontiersCacheName = "frontiers";
 
     private static final String URLCacheNamePrefix = "urls_";
 
@@ -73,7 +78,11 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
     private final IgniteCache<String, String> globalQueueCache;
 
+    private final IgniteCache<String, String> frontiersCache;
+
     private boolean closing = false;
+
+    private final IgniteHeartbeat ihb;
 
     // no explicit config
     public IgniteService() {
@@ -146,7 +155,7 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
         ignite.cluster().baselineAutoAdjustEnabled(true);
         ignite.cluster().baselineAutoAdjustTimeout(60000);
 
-        int backups = Integer.parseInt(configuration.getOrDefault("ignite.backups", "0"));
+        int backups = Integer.parseInt(configuration.getOrDefault("ignite.backups", "3"));
 
         // template for cache configurations
         CacheConfiguration cacheCfg = new CacheConfiguration("urls_*");
@@ -165,17 +174,34 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
 
         long end2 = System.currentTimeMillis();
 
-        // all the queues across the frontier instances
-        CacheConfiguration cacheCfg2 = new CacheConfiguration("queues");
-        cacheCfg2.setBackups(backups);
-        cacheCfg2.setCacheMode(CacheMode.PARTITIONED);
-        globalQueueCache = ignite.getOrCreateCache(cacheCfg2);
-
         LOG.info("{} queues discovered in {} msec", queues.size(), (end2 - end));
+
+        // all the queues across the frontier instances
+        CacheConfiguration cacheCfgQueues = new CacheConfiguration("queues");
+        cacheCfgQueues.setBackups(backups);
+        cacheCfgQueues.setCacheMode(CacheMode.PARTITIONED);
+        globalQueueCache = ignite.getOrCreateCache(cacheCfgQueues);
+
+        // heartbeats of Frontiers
+        CacheConfiguration cacheCfgFrontiers = new CacheConfiguration(frontiersCacheName);
+        cacheCfgFrontiers.setBackups(backups);
+        cacheCfgFrontiers.setCacheMode(CacheMode.REPLICATED);
+        // TODO change to updated + make TTL configurable
+        cacheCfgFrontiers.setExpiryPolicyFactory(
+                CreatedExpiryPolicy.factoryOf(Duration.FIVE_MINUTES));
+
+        frontiersCache = ignite.getOrCreateCache(cacheCfgFrontiers);
 
         // check the global queue list
         // every 2 minutes
         new QueueCheck(120).start();
+
+        // start the heartbeat - sent every minute
+        int heartbeatdelay = Integer.parseInt(configuration.getOrDefault("ignite.heartbeat", "60"));
+
+        ihb = new IgniteHeartbeat(heartbeatdelay, ignite);
+        ihb.setListener(this);
+        ihb.start();
     }
 
     private IgniteCache<Key, Payload> createOrGetCacheForCrawlID(String crawlID) {
@@ -187,6 +213,7 @@ public class IgniteService extends AbstractFrontierService implements Closeable 
         closing = true;
         LOG.info("Closing Ignite");
         if (ignite != null) ignite.close();
+        if (ihb != null) ihb.close();
     }
 
     /** Resurrects the queues from the tables * */

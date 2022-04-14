@@ -18,6 +18,7 @@ Interacts with a URL Frontier from the command line
   -t, --host=STRING   URL Frontier hostname (defaults to 'localhost')
   -V, --version       Print version information and exit.
 Commands:
+  ListNodes    Prints out list of nodes forming the cluster
   ListQueues   Prints out active queues
   ListCrawls   Prints out list of crawls
   GetStats     Prints out stats from the Frontier
@@ -27,4 +28,5 @@ Commands:
   GetActive    Check whether the Frontier has been paused
   DeleteQueue  Delete a queue from the Frontier
   DeleteCrawl  Delete an entire crawl from the Frontier
+  SetLogLevel  Change the log level of a package in the Frontier service
 ```
