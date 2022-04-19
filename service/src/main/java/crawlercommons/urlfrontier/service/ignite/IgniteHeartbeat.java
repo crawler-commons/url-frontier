@@ -14,7 +14,7 @@
  */
 package crawlercommons.urlfrontier.service.ignite;
 
-import crawlercommons.urlfrontier.service.Hearbeat;
+import crawlercommons.urlfrontier.service.cluster.Hearbeat;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;

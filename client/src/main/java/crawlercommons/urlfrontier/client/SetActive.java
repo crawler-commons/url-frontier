@@ -42,8 +42,8 @@ public class SetActive implements Runnable {
 
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
-        crawlercommons.urlfrontier.Urlfrontier.Boolean.Builder builder =
-                crawlercommons.urlfrontier.Urlfrontier.Boolean.newBuilder();
+        crawlercommons.urlfrontier.Urlfrontier.Active.Builder builder =
+                crawlercommons.urlfrontier.Urlfrontier.Active.newBuilder();
         builder.setState(state);
 
         blockingFrontier.setActive(builder.build());

@@ -16,7 +16,7 @@ package crawlercommons.urlfrontier.client;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
-import crawlercommons.urlfrontier.Urlfrontier.Integer;
+import crawlercommons.urlfrontier.Urlfrontier.Long;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import picocli.CommandLine.Command;
@@ -44,9 +44,9 @@ public class DeleteCrawl implements Runnable {
 
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
-        Integer s =
+        Long s =
                 blockingFrontier.deleteCrawl(
-                        crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                        crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage.newBuilder()
                                 .setValue(crawl)
                                 .build());
         System.out.println(s.getValue() + " URLs deleted");

@@ -19,10 +19,10 @@ import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
-import crawlercommons.urlfrontier.service.AbstractFrontierService;
-import crawlercommons.urlfrontier.service.HeartbeatListener;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
+import crawlercommons.urlfrontier.service.cluster.DistributedFrontierService;
+import crawlercommons.urlfrontier.service.cluster.HeartbeatListener;
 import crawlercommons.urlfrontier.service.rocksdb.QueueMetadata;
 import io.grpc.stub.StreamObserver;
 import java.io.Closeable;
@@ -64,7 +64,8 @@ import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMultic
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
-public class IgniteService extends AbstractFrontierService implements Closeable, HeartbeatListener {
+public class IgniteService extends DistributedFrontierService
+        implements Closeable, HeartbeatListener {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(IgniteService.class);
 
@@ -518,8 +519,8 @@ public class IgniteService extends AbstractFrontierService implements Closeable,
 
     @Override
     public void deleteCrawl(
-            crawlercommons.urlfrontier.Urlfrontier.String crawlID,
-            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
+            crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage crawlID,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                     responseObserver) {
 
         long total = 0;
@@ -561,9 +562,7 @@ public class IgniteService extends AbstractFrontierService implements Closeable,
             }
         }
         responseObserver.onNext(
-                crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
-                        .setValue(total)
-                        .build());
+                crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder().setValue(total).build());
         responseObserver.onCompleted();
     }
 
@@ -571,42 +570,22 @@ public class IgniteService extends AbstractFrontierService implements Closeable,
      *
      *
      * <pre>
-     * * Delete  the queue based on the key in parameter *
+     * * Delete the queue based on the key in parameter *
      * </pre>
      */
     @Override
-    public void deleteQueue(
-            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
-            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
-
-        final QueueWithinCrawl qc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+    public int deleteLocalQueue(final QueueWithinCrawl qc) {
 
         int sizeQueue = 0;
 
-        // if the queue is unknown
-        if (!queues.containsKey(qc)) {
-            responseObserver.onNext(
-                    crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
-                            .setValue(sizeQueue)
-                            .build());
-            responseObserver.onCompleted();
-            return;
-        }
-
-        // is this queue already being deleted?
-        // no need to do it again
-        if (queuesBeingDeleted.contains(qc)) {
-            responseObserver.onNext(
-                    crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
-                            .setValue(sizeQueue)
-                            .build());
-            responseObserver.onCompleted();
-            return;
+        // if the queue is unknown or already being deleted
+        if (!queues.containsKey(qc) || queuesBeingDeleted.contains(qc)) {
+            return sizeQueue;
         }
 
         queuesBeingDeleted.put(qc, qc);
 
-        IgniteCache<Key, Payload> URLCache = createOrGetCacheForCrawlID(request.getCrawlID());
+        IgniteCache<Key, Payload> URLCache = createOrGetCacheForCrawlID(qc.getCrawlid());
 
         Query<Entry<Key, Payload>> qry = new TextQuery<>(Payload.class, qc.toString());
         // the content for the queues should only be local anyway
@@ -627,10 +606,46 @@ public class IgniteService extends AbstractFrontierService implements Closeable,
         // remove at the global level
         globalQueueCache.remove(qc.toString());
 
-        responseObserver.onNext(
-                crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
-                        .setValue(sizeQueue)
-                        .build());
-        responseObserver.onCompleted();
+        return sizeQueue;
+    }
+
+    @Override
+    protected long deleteLocalCrawl(String normalisedCrawlID) {
+        final Set<QueueWithinCrawl> toDelete = new HashSet<>();
+
+        long total = 0;
+
+        synchronized (queues) {
+            // find the crawlIDs
+            QueueWithinCrawl[] array = queues.keySet().toArray(new QueueWithinCrawl[0]);
+            Arrays.sort(array);
+
+            for (QueueWithinCrawl prefixed_queue : array) {
+                boolean samePrefix = prefixed_queue.getCrawlid().equals(normalisedCrawlID);
+                if (samePrefix) {
+                    toDelete.add(prefixed_queue);
+                }
+            }
+
+            ignite.destroyCache(URLCacheNamePrefix + normalisedCrawlID);
+
+            for (QueueWithinCrawl quid : toDelete) {
+                if (queuesBeingDeleted.contains(quid)) {
+                    continue;
+                } else {
+                    queuesBeingDeleted.put(quid, quid);
+                }
+
+                QueueInterface q = queues.remove(quid);
+                total += q.countActive();
+                total += q.getCountCompleted();
+
+                // remove at the global level
+                globalQueueCache.remove(quid.toString());
+
+                queuesBeingDeleted.remove(quid);
+            }
+        }
+        return total;
     }
 }

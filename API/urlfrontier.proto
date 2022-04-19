@@ -26,11 +26,11 @@ service URLFrontier {
      /** Return the list of nodes forming the cluster the current node belongs to **/
      rpc ListNodes(Empty) returns (StringList) {}
 
-     /** Return the list of crawls handled by the frontier **/
-     rpc ListCrawls(Empty) returns (StringList) {}
+     /** Return the list of crawls handled by the frontier(s) **/
+     rpc ListCrawls(Local) returns (StringList) {}
 
      /** Delete an entire crawl, returns the number of URLs removed this way **/
-     rpc DeleteCrawl(String) returns (Integer) {}
+     rpc DeleteCrawl(DeleteCrawlMessage) returns (Long) {}
 
      /** Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
        by default the service will return up to 100 results from offset 0 and exclude inactive queues.**/
@@ -46,19 +46,19 @@ service URLFrontier {
      rpc GetStats(QueueWithinCrawlParams) returns (Stats) {}
      
      /** Delete the queue based on the key in parameter, returns the number of URLs removed this way **/
-     rpc DeleteQueue(QueueWithinCrawlParams) returns (Integer) {}
+     rpc DeleteQueue(QueueWithinCrawlParams) returns (Long) {}
 
      /** Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch
       1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time
       indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
       **/
      rpc BlockQueueUntil(BlockQueueParams) returns (Empty) {}
-     
+          
      /** De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. **/
-     rpc SetActive(Boolean) returns (Empty) {}
+     rpc SetActive(Active) returns (Empty) {}
 
      /** Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) **/
-     rpc GetActive(Empty) returns (Boolean) {}
+     rpc GetActive(Local) returns (Boolean) {}
      
      /** Set a delay from a given queue.
       No URLs will be obtained via GetURLs for this queue until the number of seconds specified has 
@@ -66,7 +66,7 @@ service URLFrontier {
        Usually informed by the delay setting of robots.txt.
       **/
      rpc SetDelay(QueueDelayParams) returns (Empty) {}
-     
+          
      /** Overrides the log level for a given package **/
      rpc SetLogLevel(LogLevelParams) returns (Empty) {}
 }
@@ -96,9 +96,25 @@ message Pagination {
   bool include_inactive = 3;
   // crawl ID
   string crawlID = 4;
+  // only for the current local instance
+  bool local = 5;
+}
+
+message DeleteCrawlMessage {
+  string value = 1;
+  bool local = 2;
 }
 
 message Empty {
+}
+
+message Local {
+  bool local = 1;
+}
+
+message Active {
+  bool state = 1;
+  bool local = 2;
 }
 
 message Boolean {
@@ -109,7 +125,7 @@ message String {
   string value = 1;
 }
 
-message Integer {
+message Long {
   uint64 value = 1;
 }
 
@@ -135,6 +151,8 @@ message QueueWithinCrawlParams {
   string key = 1;
   // crawl ID - empty string for default
   string crawlID = 2;
+  // only for this instance
+  bool local = 3;
 }
 
 /** Parameter message for SetDelay **/
@@ -145,6 +163,8 @@ message QueueDelayParams {
   uint32 delay_requestable = 2;
   // crawl ID - empty string for default
   string crawlID = 3;
+  // only for this instance
+  bool local = 4;
 }
 
 /** Parameter message for BlockQueueUntil **/
@@ -157,6 +177,8 @@ message BlockQueueParams {
   uint64 time = 2;
   // crawl ID
   string crawlID = 3;
+  // only for this instance
+  bool local = 4;
 }
 
 /** Parameter message for GetURLs **/
@@ -235,5 +257,7 @@ message LogLevelParams {
     ERROR = 4;
   }
   Level level = 2;
+  // only for this instance
+  bool local = 3;
 }
 

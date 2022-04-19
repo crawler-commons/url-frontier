@@ -35,11 +35,9 @@ public class ListCrawls implements Runnable {
                         .build();
 
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
-
-        crawlercommons.urlfrontier.Urlfrontier.Empty.Builder builder =
-                crawlercommons.urlfrontier.Urlfrontier.Empty.newBuilder();
-
-        StringList crawlIDs = blockingFrontier.listCrawls(builder.build());
+        StringList crawlIDs =
+                blockingFrontier.listCrawls(
+                        crawlercommons.urlfrontier.Urlfrontier.Local.newBuilder().build());
 
         crawlIDs.getValuesList()
                 .forEach(

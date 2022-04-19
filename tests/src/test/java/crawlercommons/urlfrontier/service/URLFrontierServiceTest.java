@@ -75,12 +75,12 @@ public class URLFrontierServiceTest {
 
         // delete anything that could have been left from a previous run
         blockingFrontier.deleteCrawl(
-                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage.newBuilder()
                         .setValue("BESPOKE")
                         .build());
 
         blockingFrontier.deleteCrawl(
-                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().build());
+                crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage.newBuilder().build());
     }
 
     @After
@@ -168,7 +168,7 @@ public class URLFrontierServiceTest {
         Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
         Assert.assertEquals("incorrect number of in process from stats", 0, stats.getInProcess());
 
-        crawlercommons.urlfrontier.Urlfrontier.Integer deleted =
+        crawlercommons.urlfrontier.Urlfrontier.Long deleted =
                 blockingFrontier.deleteQueue(
                         Urlfrontier.QueueWithinCrawlParams.newBuilder().setKey("key1.com").build());
 
@@ -199,7 +199,7 @@ public class URLFrontierServiceTest {
                                 .build());
         Assert.assertEquals("number of queues matching", 1, stats.getSize());
 
-        crawlercommons.urlfrontier.Urlfrontier.Integer deleted =
+        crawlercommons.urlfrontier.Urlfrontier.Long deleted =
                 blockingFrontier.deleteQueue(
                         Urlfrontier.QueueWithinCrawlParams.newBuilder()
                                 .setKey("gac.icann.org")
@@ -210,7 +210,7 @@ public class URLFrontierServiceTest {
 
     @Test
     public void testCrawlIDs() {
-        StringList crawlids = blockingFrontier.listCrawls(Urlfrontier.Empty.getDefaultInstance());
+        StringList crawlids = blockingFrontier.listCrawls(Urlfrontier.Local.getDefaultInstance());
 
         Assert.assertEquals("incorrect number of crawlids", 0, crawlids.getValuesCount());
 
@@ -260,7 +260,7 @@ public class URLFrontierServiceTest {
         Assert.assertEquals("incorrect number of queues from stats", 1, stats.getNumberOfQueues());
 
         blockingFrontier.deleteCrawl(
-                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage.newBuilder()
                         .setValue("BESPOKE")
                         .build());
 
@@ -274,7 +274,7 @@ public class URLFrontierServiceTest {
         Assert.assertEquals("incorrect number of URLs from stats", 0, stats.getSize());
 
         blockingFrontier.deleteCrawl(
-                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder().build());
+                crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage.newBuilder().build());
 
         stats =
                 blockingFrontier.getStats(

@@ -16,6 +16,7 @@ package crawlercommons.urlfrontier.client;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
+import crawlercommons.urlfrontier.Urlfrontier.Local.Builder;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import picocli.CommandLine.Command;
@@ -35,8 +36,7 @@ public class GetActive implements Runnable {
 
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
-        crawlercommons.urlfrontier.Urlfrontier.Empty.Builder builder =
-                crawlercommons.urlfrontier.Urlfrontier.Empty.newBuilder();
+        Builder builder = crawlercommons.urlfrontier.Urlfrontier.Local.newBuilder();
 
         crawlercommons.urlfrontier.Urlfrontier.Boolean b =
                 blockingFrontier.getActive(builder.build());

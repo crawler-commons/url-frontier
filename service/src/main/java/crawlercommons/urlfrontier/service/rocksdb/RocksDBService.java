@@ -457,7 +457,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     @Override
     public void deleteQueue(
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
-            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer> responseObserver) {
+            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long> responseObserver) {
 
         final QueueWithinCrawl qc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
 
@@ -467,7 +467,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         // no need to do it again
         if (queuesBeingDeleted.contains(qc)) {
             responseObserver.onNext(
-                    crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
+                    crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
                             .setValue(sizeQueue)
                             .build());
             responseObserver.onCompleted();
@@ -506,7 +506,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         queuesBeingDeleted.remove(qc);
 
         responseObserver.onNext(
-                crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
+                crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
                         .setValue(sizeQueue)
                         .build());
         responseObserver.onCompleted();
@@ -544,8 +544,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
     @Override
     public void deleteCrawl(
-            crawlercommons.urlfrontier.Urlfrontier.String crawlID,
-            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
+            crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage crawlID,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                     responseObserver) {
 
         long total = 0;
@@ -603,9 +603,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             }
         }
         responseObserver.onNext(
-                crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
-                        .setValue(total)
-                        .build());
+                crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder().setValue(total).build());
         responseObserver.onCompleted();
     }
 

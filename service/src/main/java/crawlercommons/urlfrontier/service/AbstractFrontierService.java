@@ -21,6 +21,7 @@ import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
+import crawlercommons.urlfrontier.Urlfrontier.Local;
 import crawlercommons.urlfrontier.Urlfrontier.LogLevelParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
@@ -103,10 +104,10 @@ public abstract class AbstractFrontierService
     private int defaultDelayForQueues = 1;
 
     // used for reporting itself in a cluster setup
-    private String address;
+    protected String address;
 
     // known nodes in a cluster setup
-    private Set<String> nodes;
+    protected Set<String> nodes;
 
     // in memory map of metadata for each queue
     protected final Map<QueueWithinCrawl, QueueInterface> queues =
@@ -138,7 +139,7 @@ public abstract class AbstractFrontierService
 
     @Override
     public void listCrawls(
-            crawlercommons.urlfrontier.Urlfrontier.Empty request,
+            crawlercommons.urlfrontier.Urlfrontier.Local request,
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList>
                     responseObserver) {
 
@@ -158,8 +159,8 @@ public abstract class AbstractFrontierService
 
     @Override
     public void deleteCrawl(
-            crawlercommons.urlfrontier.Urlfrontier.String crawlID,
-            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
+            crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage crawlID,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                     responseObserver) {
 
         long total = 0;
@@ -185,15 +186,13 @@ public abstract class AbstractFrontierService
             }
         }
         responseObserver.onNext(
-                crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
-                        .setValue(total)
-                        .build());
+                crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder().setValue(total).build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void setActive(
-            crawlercommons.urlfrontier.Urlfrontier.Boolean request,
+            crawlercommons.urlfrontier.Urlfrontier.Active request,
             StreamObserver<Empty> responseObserver) {
         active = request.getState();
         responseObserver.onNext(Empty.getDefaultInstance());
@@ -201,7 +200,7 @@ public abstract class AbstractFrontierService
     }
 
     @Override
-    public void getActive(Empty request, StreamObserver<Boolean> responseObserver) {
+    public void getActive(Local request, StreamObserver<Boolean> responseObserver) {
         responseObserver.onNext(Boolean.newBuilder().setState(active).build());
         responseObserver.onCompleted();
     }
@@ -336,12 +335,12 @@ public abstract class AbstractFrontierService
     @Override
     public void deleteQueue(
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
-            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Integer>
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                     responseObserver) {
         QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
         QueueInterface q = queues.remove(qwc);
         responseObserver.onNext(
-                crawlercommons.urlfrontier.Urlfrontier.Integer.newBuilder()
+                crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
                         .setValue(q.countActive())
                         .build());
         responseObserver.onCompleted();
