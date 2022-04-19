@@ -27,6 +27,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.slf4j.LoggerFactory;
 
 public abstract class DistributedFrontierService extends AbstractFrontierService {
@@ -137,6 +138,14 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             numQueues += localStats.getNumberOfQueues();
             size += localStats.getSize();
             inProc += localStats.getInProcess();
+            for (Entry<String, Long> entry : localStats.getCountsMap().entrySet()) {
+                counts.compute(
+                        entry.getKey(),
+                        (w, prev) ->
+                                prev != null
+                                        ? prev + entry.getValue().longValue()
+                                        : entry.getValue().longValue());
+            }
         }
 
         Stats stats =
