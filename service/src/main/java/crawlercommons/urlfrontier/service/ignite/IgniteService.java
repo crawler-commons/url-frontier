@@ -41,9 +41,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import javax.cache.Cache.Entry;
-import javax.cache.expiry.CreatedExpiryPolicy;
 import javax.cache.expiry.Duration;
+import javax.cache.expiry.ModifiedExpiryPolicy;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
@@ -77,8 +78,6 @@ public class IgniteService extends AbstractFrontierService implements Closeable,
             new ConcurrentHashMap<>();
 
     private final IgniteCache<String, String> globalQueueCache;
-
-    private final IgniteCache<String, String> frontiersCache;
 
     private boolean closing = false;
 
@@ -182,23 +181,26 @@ public class IgniteService extends AbstractFrontierService implements Closeable,
         cacheCfgQueues.setCacheMode(CacheMode.PARTITIONED);
         globalQueueCache = ignite.getOrCreateCache(cacheCfgQueues);
 
+        int heartbeatdelay =
+                Integer.parseInt(configuration.getOrDefault("ignite.frontiers.heartbeat", "60"));
+        int ttlFrontiers =
+                Integer.parseInt(
+                        configuration.getOrDefault(
+                                "ignite.frontiers.ttl", Integer.toString(heartbeatdelay * 2)));
+
         // heartbeats of Frontiers
         CacheConfiguration cacheCfgFrontiers = new CacheConfiguration(frontiersCacheName);
         cacheCfgFrontiers.setBackups(backups);
         cacheCfgFrontiers.setCacheMode(CacheMode.REPLICATED);
-        // TODO change to updated + make TTL configurable
         cacheCfgFrontiers.setExpiryPolicyFactory(
-                CreatedExpiryPolicy.factoryOf(Duration.FIVE_MINUTES));
-
-        frontiersCache = ignite.getOrCreateCache(cacheCfgFrontiers);
+                ModifiedExpiryPolicy.factoryOf(new Duration(TimeUnit.SECONDS, ttlFrontiers)));
+        ignite.getOrCreateCache(cacheCfgFrontiers);
 
         // check the global queue list
         // every 2 minutes
         new QueueCheck(120).start();
 
-        // start the heartbeat - sent every minute
-        int heartbeatdelay = Integer.parseInt(configuration.getOrDefault("ignite.heartbeat", "60"));
-
+        // start the heartbeat
         ihb = new IgniteHeartbeat(heartbeatdelay, ignite);
         ihb.setListener(this);
         ihb.start();
