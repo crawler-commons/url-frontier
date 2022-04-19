@@ -20,12 +20,21 @@ import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "ListCrawls", description = "Prints out list of crawls")
 public class ListCrawls implements Runnable {
 
     @ParentCommand private Client parent;
+
+    @Option(
+            names = {"-l", "--local"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description =
+                    "restricts the scope to this frontier instance instead of aggregating over the cluster")
+    private Boolean local;
 
     @Override
     public void run() {
@@ -37,7 +46,9 @@ public class ListCrawls implements Runnable {
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
         StringList crawlIDs =
                 blockingFrontier.listCrawls(
-                        crawlercommons.urlfrontier.Urlfrontier.Local.newBuilder().build());
+                        crawlercommons.urlfrontier.Urlfrontier.Local.newBuilder()
+                                .setLocal(local)
+                                .build());
 
         crawlIDs.getValuesList()
                 .forEach(

@@ -19,6 +19,7 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
 
@@ -33,6 +34,14 @@ public class SetActive implements Runnable {
             description = "whether the frontier should return URLs or not")
     private boolean state;
 
+    @Option(
+            names = {"-l", "--local"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description =
+                    "restricts the scope to this frontier instance instead of aggregating over the cluster")
+    private Boolean local;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -44,6 +53,7 @@ public class SetActive implements Runnable {
 
         crawlercommons.urlfrontier.Urlfrontier.Active.Builder builder =
                 crawlercommons.urlfrontier.Urlfrontier.Active.newBuilder();
+        builder.setLocal(local);
         builder.setState(state);
 
         blockingFrontier.setActive(builder.build());

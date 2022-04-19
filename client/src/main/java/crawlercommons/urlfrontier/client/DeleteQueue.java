@@ -43,6 +43,14 @@ public class DeleteQueue implements Runnable {
             description = "crawl to get the stats for")
     private String crawl;
 
+    @Option(
+            names = {"-l", "--local"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description =
+                    "restricts the scope to this frontier instance instead of aggregating over the cluster")
+    private Boolean local;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -60,6 +68,7 @@ public class DeleteQueue implements Runnable {
         }
 
         builder.setCrawlID(crawl);
+        builder.setLocal(local);
 
         Long s = blockingFrontier.deleteQueue(builder.build());
         System.out.println(s.getValue() + " URLs deleted");

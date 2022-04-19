@@ -35,6 +35,14 @@ public class DeleteCrawl implements Runnable {
             description = "crawl to delete")
     private String crawl;
 
+    @Option(
+            names = {"-l", "--local"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description =
+                    "restricts the scope to this frontier instance instead of aggregating over the cluster")
+    private Boolean local;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -48,6 +56,7 @@ public class DeleteCrawl implements Runnable {
                 blockingFrontier.deleteCrawl(
                         crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage.newBuilder()
                                 .setValue(crawl)
+                                .setLocal(local)
                                 .build());
         System.out.println(s.getValue() + " URLs deleted");
 

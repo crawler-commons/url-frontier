@@ -17,13 +17,22 @@ package crawlercommons.urlfrontier.service.cluster;
 import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
+import crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage;
+import crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams;
+import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
+import java.util.HashMap;
+import java.util.Map;
+import org.slf4j.LoggerFactory;
 
 public abstract class DistributedFrontierService extends AbstractFrontierService {
+
+    private static final org.slf4j.Logger LOG =
+            LoggerFactory.getLogger(DistributedFrontierService.class);
 
     /** Delete the queue based on the key in parameter */
     @Override
@@ -35,30 +44,23 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         int sizeQueue = 0;
 
-        // if the queue is unknown - distribute the call to all the other nodes in the
-        // cluster
-        if (!queues.containsKey(qc)) {
+        if (!request.getLocal()) {
             for (String node : nodes) {
-                if (nodes.equals(address)) continue;
+                if (node.equals(address)) continue;
                 // call the delete endpoint in the target node
+                // force to local so that remote node don't go recursive
+                QueueWithinCrawlParams local =
+                        QueueWithinCrawlParams.newBuilder(request).setLocal(true).build();
                 ManagedChannel channel =
                         ManagedChannelBuilder.forTarget(node).usePlaintext().build();
                 URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
                 crawlercommons.urlfrontier.Urlfrontier.Long total =
-                        blockingFrontier.deleteQueue(request);
+                        blockingFrontier.deleteQueue(local);
                 sizeQueue += total.getValue();
             }
-
-            responseObserver.onNext(
-                    crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
-                            .setValue(sizeQueue)
-                            .build());
-            responseObserver.onCompleted();
-            return;
-        } else {
-            // delete the queue held by this node
-            sizeQueue = deleteLocalQueue(qc);
         }
+        // delete the queue held by this node
+        sizeQueue += deleteLocalQueue(qc);
 
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
@@ -71,20 +73,30 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     @Override
     public void deleteCrawl(
-            crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage crawlID,
+            crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage message,
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                     responseObserver) {
         long total = 0;
-        final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID.getValue());
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(message.getValue());
 
-        for (String node : nodes) {
-            if (nodes.equals(address)) continue;
-            // call the delete endpoint in the target node
-            ManagedChannel channel = ManagedChannelBuilder.forTarget(node).usePlaintext().build();
-            URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
-            crawlercommons.urlfrontier.Urlfrontier.Long local =
-                    blockingFrontier.deleteCrawl(crawlID);
-            total += local.getValue();
+        // distributed mode
+        if (!message.getLocal()) {
+            // force to local so that remote node don't go recursive
+            DeleteCrawlMessage local =
+                    DeleteCrawlMessage.newBuilder()
+                            .setLocal(true)
+                            .setValue(message.getValue())
+                            .build();
+            for (String node : nodes) {
+                if (node.equals(address)) continue;
+                // call the delete endpoint in the target node
+                ManagedChannel channel =
+                        ManagedChannelBuilder.forTarget(node).usePlaintext().build();
+                URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
+                crawlercommons.urlfrontier.Urlfrontier.Long localCount =
+                        blockingFrontier.deleteCrawl(local);
+                total += localCount.getValue();
+            }
         }
 
         // delete on the current node
@@ -96,4 +108,46 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
     }
 
     protected abstract long deleteLocalCrawl(String crawlID);
+
+    @Override
+    public void getStats(
+            crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
+            StreamObserver<Stats> responseObserver) {
+        LOG.info("Received stats request");
+
+        if (request.getLocal()) {
+            super.getStats(request, responseObserver);
+            return;
+        }
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+        long numQueues = 0;
+        long size = 0;
+        int inProc = 0;
+        Map<String, Long> counts = new HashMap<>();
+
+        // force to local so that remote nodes don't go recursive
+        QueueWithinCrawlParams local =
+                QueueWithinCrawlParams.newBuilder(request).setLocal(true).build();
+        for (String node : nodes) {
+            // call the delete endpoint in the target node
+            ManagedChannel channel = ManagedChannelBuilder.forTarget(node).usePlaintext().build();
+            URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
+            Stats localStats = blockingFrontier.getStats(local);
+            numQueues += localStats.getNumberOfQueues();
+            size += localStats.getSize();
+            inProc += localStats.getInProcess();
+        }
+
+        Stats stats =
+                Stats.newBuilder()
+                        .setNumberOfQueues(numQueues)
+                        .setSize(size)
+                        .setInProcess(inProc)
+                        .putAllCounts(counts)
+                        .setCrawlID(normalisedCrawlID)
+                        .build();
+        responseObserver.onNext(stats);
+        responseObserver.onCompleted();
+    }
 }

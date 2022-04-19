@@ -70,6 +70,14 @@ public class ListQueues implements Runnable {
             description = "crawl to get the queues for")
     private String crawl;
 
+    @Option(
+            names = {"-l", "--local"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description =
+                    "restricts the scope to this frontier instance instead of aggregating over the cluster")
+    private Boolean local;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -87,7 +95,7 @@ public class ListQueues implements Runnable {
             while (true) {
 
                 Builder builder = crawlercommons.urlfrontier.Urlfrontier.Pagination.newBuilder();
-
+                builder.setLocal(local);
                 builder.setSize(maxNumQueues);
                 builder.setStart(start);
                 builder.setIncludeInactive(inactive);
@@ -111,7 +119,7 @@ public class ListQueues implements Runnable {
 
         } else {
             Builder builder = crawlercommons.urlfrontier.Urlfrontier.Pagination.newBuilder();
-
+            builder.setLocal(local);
             builder.setSize(maxNumQueues);
             builder.setStart(start);
             builder.setIncludeInactive(inactive);

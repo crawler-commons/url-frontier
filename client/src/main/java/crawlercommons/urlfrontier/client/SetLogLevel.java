@@ -45,6 +45,14 @@ public class SetLogLevel implements Runnable {
             description = "Log level [TRACE, DEBUG, INFO, WARN, ERROR]")
     private String level;
 
+    @Option(
+            names = {"-c", "--local"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description =
+                    "restricts the scope to this frontier instance instead of aggregating over the cluster")
+    private Boolean local;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -55,7 +63,7 @@ public class SetLogLevel implements Runnable {
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
         Builder builder = crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.newBuilder();
-        builder.setPackage(packge).setLevel(Level.valueOf(level));
+        builder.setLocal(local).setPackage(packge).setLevel(Level.valueOf(level));
         blockingFrontier.setLogLevel(builder.build());
 
         System.out.println("Set log level for " + packge + " to " + level);

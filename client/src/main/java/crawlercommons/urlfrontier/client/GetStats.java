@@ -45,6 +45,14 @@ public class GetStats implements Runnable {
             description = "crawl to get the stats for")
     private String crawl;
 
+    @Option(
+            names = {"-l", "--local"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description =
+                    "restricts the scope to this frontier instance instead of aggregating over the cluster")
+    private Boolean local;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -62,6 +70,7 @@ public class GetStats implements Runnable {
         }
 
         builder.setCrawlID(crawl);
+        builder.setLocal(local);
 
         Stats s = blockingFrontier.getStats(builder.build());
         System.out.println("Number of queues: " + s.getNumberOfQueues());
