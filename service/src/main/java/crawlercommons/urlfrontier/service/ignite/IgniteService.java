@@ -198,8 +198,8 @@ public class IgniteService extends DistributedFrontierService
         ignite.getOrCreateCache(cacheCfgFrontiers);
 
         // check the global queue list
-        // every 2 minutes
-        new QueueCheck(120).start();
+        // every minute
+        new QueueCheck(60).start();
 
         // start the heartbeat
         ihb = new IgniteHeartbeat(heartbeatdelay, ignite);
@@ -314,11 +314,14 @@ public class IgniteService extends DistributedFrontierService
                         queuesRemoved++;
                     }
 
+                    long time = Instant.now().toEpochMilli() - lastQuery.toEpochMilli();
+
                     LOG.info(
-                            "Found {} queues, removed {}, total {}",
+                            "Found {} queues, removed {}, total {} in {}",
                             queuesFound,
                             queuesRemoved,
-                            queues.size());
+                            queues.size(),
+                            time);
                 }
             }
         }
