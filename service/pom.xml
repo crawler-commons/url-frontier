@@ -16,44 +16,11 @@
 
 	<properties>
 		<prometheus.version>0.14.1</prometheus.version>
-		<!-- needed to build within Docker -->
-		<skipFormatCode>false</skipFormatCode>
 		<ignite.version>2.12.0</ignite.version>
 	</properties>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>com.cosium.code</groupId>
-				<artifactId>git-code-format-maven-plugin</artifactId>
-				<version>2.7</version>
-				<executions>
-					<!-- On commit, format the modified java files -->
-					<execution>
-						<id>install-formatter-hook</id>
-						<goals>
-							<goal>install-hooks</goal>
-						</goals>
-					</execution>
-					<!-- On Maven verify phase, fail if any file (including unmodified) 
-						is badly formatted -->
-					<execution>
-						<id>validate-code-format</id>
-						<goals>
-							<goal>validate-code-format</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<skip>${skipFormatCode}</skip>
-					<googleJavaFormatOptions>
-						<aosp>true</aosp>
-						<fixImportsOnly>false</fixImportsOnly>
-						<skipSortingImports>false</skipSortingImports>
-						<skipRemovingUnusedImports>false</skipRemovingUnusedImports>
-					</googleJavaFormatOptions>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
@@ -137,6 +104,5 @@
 		</dependency>
 
 	</dependencies>
-
 
 </project>

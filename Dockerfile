@@ -6,14 +6,17 @@ USER urlfrontier
 
 WORKDIR /home/urlfrontier
 
-# copy the source tree and the pom.xml to our new container
-COPY --chown=urlfrontier ./src src
-COPY --chown=urlfrontier ./pom.xml .
+COPY --chown=urlfrontier pom.xml .
+
+COPY --chown=urlfrontier API API
+COPY --chown=urlfrontier client client
+COPY --chown=urlfrontier service service
+COPY --chown=urlfrontier tests tests
 
 RUN mvn clean package -DskipFormatCode=true
 
-RUN rm target/original-*.jar
-RUN cp target/*.jar urlfrontier-service.jar
+RUN rm service/target/original-*.jar
+RUN cp service/target/*.jar urlfrontier-service.jar
 
 FROM openjdk:8-jdk-slim
 
