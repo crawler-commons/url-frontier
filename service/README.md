@@ -46,7 +46,7 @@ Alternatively, the Frontier service has a _SetLogLevel_ endpoint and the CLI all
 ## Metrics with Prometheus 
 
 The service implementation takes a parameter *-s*, the value of which is used as port number to expose metrics for [Prometheus](https://prometheus.io/).
-A [dashboard](https://github.com/crawler-commons/url-frontier/blob/master/service/prometheus/URL%20Frontier-Grafana-Prometheus.json) for Grafana is provided.
+A [dashboard](https://github.com/crawler-commons/url-frontier/blob/2.x/service/monitoring/provisioning/dashboards/URLFrontier-Prometheus.json) for Grafana is provided.
 
 ## Docker
 
@@ -54,7 +54,7 @@ The easiest way to run the Frontier is to use Docker
 
 ```
  docker pull crawlercommons/url-frontier
- docker run --rm --name frontier -p 7071:7071 crawlercommons/url-frontier
+ docker run --rm --name frontier -p 7071:7071 crawlercommons/url-frontier -s 9100
 ```
 
 The service will run on the default port (7071). Additional parameters can simply be added to the command, for instance, to persist RocksDB between runs
