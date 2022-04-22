@@ -14,8 +14,11 @@
  */
 package crawlercommons.urlfrontier.service.cluster;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
@@ -34,22 +37,48 @@ import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.LoggerFactory;
 
-public abstract class DistributedFrontierService extends AbstractFrontierService {
+public abstract class DistributedFrontierService extends AbstractFrontierService
+        implements Closeable {
 
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(DistributedFrontierService.class);
 
+    protected boolean clusterMode = false;
+
+    private final CacheLoader<String, URLFrontierBlockingStub> loader =
+            new CacheLoader<String, URLFrontierBlockingStub>() {
+                @Override
+                public URLFrontierBlockingStub load(String target) {
+                    ManagedChannel channel =
+                            ManagedChannelBuilder.forTarget(target).usePlaintext().build();
+                    return URLFrontierGrpc.newBlockingStub(channel);
+                }
+            };
+
+    private final RemovalListener<String, URLFrontierBlockingStub> listener =
+            new RemovalListener<String, URLFrontierBlockingStub>() {
+                @Override
+                public void onRemoval(RemovalNotification<String, URLFrontierBlockingStub> n) {
+                    ((ManagedChannel) n.getValue().getChannel()).shutdownNow();
+                }
+            };
+
+    private LoadingCache<String, URLFrontierBlockingStub> cache =
+            CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES).build(loader);
+
     private URLFrontierBlockingStub getFrontier(String target) {
-        ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
-        return URLFrontierGrpc.newBlockingStub(channel);
+        return cache.getUnchecked(target);
     }
 
     /** Delete the queue based on the key in parameter */
@@ -62,7 +91,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         int sizeQueue = 0;
 
-        if (!request.getLocal()) {
+        if (!request.getLocal() || !clusterMode) {
             for (String node : nodes) {
                 if (node.equals(address)) continue;
                 // call the delete endpoint in the target node
@@ -92,6 +121,12 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage message,
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                     responseObserver) {
+
+        if (!clusterMode) {
+            super.deleteCrawl(message, responseObserver);
+            return;
+        }
+
         long total = 0;
         final String normalisedCrawlID = CrawlID.normaliseCrawlID(message.getValue());
 
@@ -129,7 +164,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             StreamObserver<Stats> responseObserver) {
         LOG.info("Received stats request");
 
-        if (request.getLocal()) {
+        if (request.getLocal() || !clusterMode) {
             super.getStats(request, responseObserver);
             return;
         }
@@ -173,8 +208,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     @Override
     public void setLogLevel(LogLevelParams request, StreamObserver<Empty> responseObserver) {
-
-        if (!request.getLocal()) {
+        if (!request.getLocal() || clusterMode) {
             // force to local so that remote node don't go recursive
             LogLevelParams local = LogLevelParams.newBuilder(request).setLocal(true).build();
             for (String node : nodes) {
@@ -184,13 +218,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 blockingFrontier.setLogLevel(local);
             }
         }
-
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        ch.qos.logback.classic.Logger logger = loggerContext.getLogger(request.getPackage());
-        logger.setLevel(Level.toLevel(request.getLevel().toString()));
-        LOG.info("Log level for {} set to {}", request.getPackage(), request.getLevel().toString());
-        responseObserver.onNext(Empty.getDefaultInstance());
-        responseObserver.onCompleted();
+        super.setLogLevel(request, responseObserver);
     }
 
     @Override
@@ -201,7 +229,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         Set<String> crawlIDs = new HashSet<>();
 
-        if (!request.getLocal()) {
+        if (!request.getLocal() || clusterMode) {
             // force to local so that remote node don't go recursive
             Local local = Local.newBuilder().setLocal(true).build();
             for (String node : nodes) {
@@ -232,7 +260,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.QueueList>
                     responseObserver) {
 
-        if (request.getLocal()) {
+        if (request.getLocal() || !clusterMode) {
             super.listQueues(request, responseObserver);
             return;
         }
@@ -252,5 +280,11 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         list.addAllValues(dedup);
         responseObserver.onNext(list.build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void close() throws IOException {
+        // close all the connections
+        cache.invalidateAll();
     }
 }

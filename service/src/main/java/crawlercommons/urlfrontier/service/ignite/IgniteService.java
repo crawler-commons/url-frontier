@@ -106,6 +106,7 @@ public class IgniteService extends DistributedFrontierService
         // "127.0.0.1:47500..47509"
         String igniteSeedAddress = configuration.get("ignite.seed.address");
         if (igniteSeedAddress != null) {
+            clusterMode = true;
             // Setting up an IP Finder to ensure the client can locate the servers.
             TcpDiscoveryMulticastIpFinder ipFinder = new TcpDiscoveryMulticastIpFinder();
             ipFinder.setAddresses(Collections.singletonList(igniteSeedAddress));
@@ -427,9 +428,15 @@ public class IgniteService extends DistributedFrontierService
 
                 // get the priority queue - if it is a local one
                 // or create a dummy one
-                // but do not create it in the queues
-                QueueMetadata queueMD =
-                        (QueueMetadata) queues.getOrDefault(qk, new QueueMetadata());
+                // but do not create it in the queues unless we are in a non distributed
+                // environment
+                QueueMetadata queueMD = null;
+
+                if (clusterMode) {
+                    queueMD = (QueueMetadata) queues.getOrDefault(qk, new QueueMetadata());
+                } else {
+                    queueMD = (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
+                }
 
                 // but make sure it exists globally anyway
                 globalQueueCache.putIfAbsent(qk.toString(), qk.toString());
