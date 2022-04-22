@@ -82,6 +82,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
     public StreamObserver<URLItem> putURLs(
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
 
+        putURLs_calls.inc();
+
         return new StreamObserver<URLItem>() {
 
             @Override
@@ -92,6 +94,10 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 String key = (String) parsed[0];
                 Boolean discovered = (Boolean) parsed[1];
                 InternalURL iu = (InternalURL) parsed[2];
+
+                putURLs_urls_count.inc();
+
+                putURLs_discovered_count.labels(discovered.toString().toLowerCase()).inc();
 
                 // has a queue key been defined? if not use the hostname
                 if (key.equals("")) {
@@ -135,6 +141,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
                     // check whether the URL already exists
                     if (queue.contains(iu)) {
                         if (discovered) {
+                            putURLs_alreadyknown_count.inc();
                             // we already discovered it - so no need for it
                             responseObserver.onNext(
                                     crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
@@ -150,6 +157,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
                     // add the new item
                     // unless it is an update and it's nextFetchDate is 0 == NEVER
                     if (!discovered && iu.nextFetchDate == 0) {
+                        putURLs_completed_count.inc();
                         queue.addToCompleted(iu.url);
                     } else {
                         queue.add(iu);
