@@ -21,6 +21,7 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
+import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
@@ -30,6 +31,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
@@ -87,6 +89,85 @@ public class URLFrontierServiceTest {
     public void shutdown() {
         LOG.info("Shutting down connection to URLFrontier service");
         channel.shutdown();
+    }
+
+    @Test
+    public void NeverRefetched() {
+
+        // inject 2 duplicate discovered URLs
+        URLInfo info = URLInfo.newBuilder().setUrl("http://key1.com/").setKey("key1.com").build();
+
+        KnownURLItem item = KnownURLItem.newBuilder().setInfo(info).build();
+        int acked =
+                sendURLs(
+                        new URLItem[] {
+                            URLItem.newBuilder().setKnown(item).build(),
+                        });
+
+        Assert.assertEquals("incorrect number of url acked", 1, acked);
+
+        /** Get the URLs due for fetching for a specific key * */
+        int delayrequestable = 2;
+
+        // want just one URL for that specific key, in the default crawl
+        GetParams request2 =
+                GetParams.newBuilder()
+                        .setKey("key1.com")
+                        .setMaxUrlsPerQueue(1)
+                        .setDelayRequestable(delayrequestable)
+                        .setCrawlID(CrawlID.DEFAULT)
+                        .build();
+
+        boolean hasAny = blockingFrontier.getURLs(request2).hasNext();
+
+        Assert.assertEquals("Should not return URLs", false, hasAny);
+    }
+
+    @Test
+    public void RightOrder() {
+
+        URLInfo info =
+                URLInfo.newBuilder().setUrl("http://key1.com/later").setKey("key1.com").build();
+        URLInfo info2 =
+                URLInfo.newBuilder().setUrl("http://key1.com/sooner").setKey("key1.com").build();
+
+        KnownURLItem item =
+                KnownURLItem.newBuilder()
+                        .setInfo(info)
+                        .setRefetchableFromDate(Instant.now().getEpochSecond())
+                        .build();
+        KnownURLItem item2 =
+                KnownURLItem.newBuilder()
+                        .setInfo(info2)
+                        .setRefetchableFromDate(Instant.now().getEpochSecond() - 10000)
+                        .build();
+
+        int acked =
+                sendURLs(
+                        new URLItem[] {
+                            URLItem.newBuilder().setKnown(item).build(),
+                            URLItem.newBuilder().setKnown(item2).build()
+                        });
+
+        Assert.assertEquals("incorrect number of url acked", 2, acked);
+
+        /** Get the URLs due for fetching for a specific key * */
+        int delayrequestable = 2;
+
+        // want just one URL for that specific key, in the default crawl
+        GetParams request2 =
+                GetParams.newBuilder()
+                        .setKey("key1.com")
+                        .setMaxUrlsPerQueue(2)
+                        .setDelayRequestable(delayrequestable)
+                        .setCrawlID(CrawlID.DEFAULT)
+                        .build();
+
+        // 2nd doc should be returned before the first
+
+        String URLFirst = blockingFrontier.getURLs(request2).next().getUrl();
+
+        Assert.assertEquals("Should not return URLs", "http://key1.com/sooner", URLFirst);
     }
 
     @Test

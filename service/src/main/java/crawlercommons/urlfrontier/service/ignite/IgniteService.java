@@ -420,6 +420,13 @@ public class IgniteService extends DistributedFrontierService
 
                 final Key existenceKey = new Key(qk.toString(), url);
 
+                // if nextFetchDate == 0 give the payload a ridiculously large value
+                // so that it is never refetched
+                // ideally it should be removed from the index
+                if (nextFetchDate == 0) {
+                    nextFetchDate = Long.MAX_VALUE;
+                }
+
                 Payload newpayload = new Payload(nextFetchDate, info.toByteArray());
 
                 // is this URL already known?
@@ -509,6 +516,7 @@ public class IgniteService extends DistributedFrontierService
         Query<Entry<Key, Payload>> qry = new TextQuery<>(Payload.class, queueID.toString());
         // the content for the queues should only be local anyway
         qry.setLocal(true);
+        qry.setPageSize(maxURLsPerQueue);
 
         try (QueryCursor<Entry<Key, Payload>> cursor =
                 createOrGetCacheForCrawlID(queueID.getCrawlid()).query(qry)) {
