@@ -129,6 +129,23 @@ public class IgniteService extends DistributedFrontierService
             }
             storageCfg.setStoragePath(path);
         }
+
+        // set the work directory to the same location unless overridden
+        String workdir = configuration.getOrDefault("ignite.workdir", path);
+        if (workdir != null) {
+            if (configuration.containsKey("ignite.purge")) {
+                try {
+                    Files.walk(Paths.get(workdir))
+                            .sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(File::delete);
+                } catch (IOException e) {
+                    LOG.error("Couldn't delete workdir {}", workdir);
+                }
+            }
+            cfg.setWorkDirectory(workdir);
+        }
+
         // set persistence
         storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
         cfg.setDataStorageConfiguration(storageCfg);
