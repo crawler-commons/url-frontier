@@ -47,6 +47,7 @@ import javax.cache.expiry.Duration;
 import javax.cache.expiry.ModifiedExpiryPolicy;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
+import org.apache.ignite.IgniteEvents;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.cache.query.Query;
@@ -59,8 +60,31 @@ import org.apache.ignite.cluster.ClusterState;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.events.CacheEvent;
+import org.apache.ignite.events.EventType;
+import org.apache.ignite.lang.IgnitePredicate;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.NumericDocValuesField;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BooleanQuery.Builder;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +108,10 @@ public class IgniteService extends DistributedFrontierService
 
     private final IgniteHeartbeat ihb;
 
+    private final IndexWriter iwriter;
+
+    private IndexSearcher isearcher;
+
     // no explicit config
     public IgniteService() {
         this(new HashMap<String, String>());
@@ -95,13 +123,6 @@ public class IgniteService extends DistributedFrontierService
 
         // Classes of custom Java logic will be transferred over the wire from this app.
         cfg.setPeerClassLoadingEnabled(true);
-
-        // client mode to make the frontier stateless is not supported yet
-        // each instance holds some data
-
-        // String clientMode = configuration.getOrDefault("ignite.client.mode",
-        // "false");
-        // cfg.setClientMode(Boolean.parseBoolean(clientMode));
 
         // "127.0.0.1:47500..47509"
         String igniteSeedAddress = configuration.get("ignite.seed.address");
@@ -150,6 +171,30 @@ public class IgniteService extends DistributedFrontierService
         storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
         cfg.setDataStorageConfiguration(storageCfg);
 
+        Path index_path = Paths.get(configuration.getOrDefault("ignite.index", "index"));
+        // the index is always recreated from scratch
+        try {
+            Files.walk(index_path)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (IOException e) {
+            LOG.error("Couldn't delete workdir {}", workdir);
+        }
+
+        Analyzer analyzer = new StandardAnalyzer();
+
+        try {
+            Directory directory = FSDirectory.open(index_path);
+            IndexWriterConfig config = new IndexWriterConfig(analyzer);
+            iwriter = new IndexWriter(directory, config);
+            DirectoryReader ireader = DirectoryReader.open(iwriter);
+            isearcher = new IndexSearcher(ireader);
+        } catch (IOException e) {
+            LOG.error("Couldn't initialise Lucene writer {}", e);
+            throw new RuntimeException(e);
+        }
+
         long start = System.currentTimeMillis();
 
         // Starting the node
@@ -179,16 +224,45 @@ public class IgniteService extends DistributedFrontierService
         CacheConfiguration cacheCfg = new CacheConfiguration("urls_*");
         cacheCfg.setBackups(backups);
         cacheCfg.setCacheMode(CacheMode.PARTITIONED);
-        cacheCfg.setIndexedTypes(Key.class, Payload.class);
+        // cacheCfg.setIndexedTypes(Key.class, Payload.class);
         ignite.addCacheConfiguration(cacheCfg);
 
         long end = System.currentTimeMillis();
 
         LOG.info("Ignite loaded in {} msec", end - start);
 
+        IgniteEvents events = ignite.events();
+
+        // Local listener that listens to local events.
+        IgnitePredicate<CacheEvent> localListener =
+                evt -> {
+                    if (evt.key() instanceof Key == false) return true;
+
+                    // TODO deal with updates?
+                    final QueueWithinCrawl qk =
+                            QueueWithinCrawl.parseAndDeNormalise(((Key) evt.key()).crawlQueueID);
+                    try {
+                        indexKeyValue(
+                                qk,
+                                ((Key) evt.key()).URL,
+                                ((Payload) evt.newValue()).nextFetchDate);
+                    } catch (Exception e) {
+                        // TODO
+                    }
+                    return true; // Continue listening.
+                };
+
+        // Subscribe to the cache events that are triggered on the local node.
+        events.localListen(localListener, EventType.EVT_CACHE_OBJECT_PUT);
+
         LOG.info("Scanning tables to rebuild queues... (can take a long time)");
 
-        recoveryQscan(true);
+        try {
+            recoveryQscan(true);
+        } catch (IOException e) {
+            LOG.error("Exception while rebuilding the content", e);
+            throw new RuntimeException(e);
+        }
 
         long end2 = System.currentTimeMillis();
 
@@ -237,8 +311,12 @@ public class IgniteService extends DistributedFrontierService
         if (ihb != null) ihb.close();
     }
 
-    /** Resurrects the queues from the tables * */
-    private void recoveryQscan(boolean localMode) {
+    /**
+     * Resurrects the queues from the tables *
+     *
+     * @throws IOException
+     */
+    private void recoveryQscan(boolean localMode) throws IOException {
 
         for (String cacheName : ignite.cacheNames()) {
             if (!cacheName.startsWith(URLCacheNamePrefix)) continue;
@@ -263,13 +341,29 @@ public class IgniteService extends DistributedFrontierService
                         queueMD.incrementActive();
                     }
                     cache.put(entry.getKey(), entry.getValue());
+
+                    // index if not done
+                    if (!done) {
+                        indexKeyValue(qk, entry.getKey().URL, entry.getValue().nextFetchDate);
+                    }
                 }
             }
             LOG.info(
                     "Found {} URLs for crawl : {}",
                     urlsFound,
                     cacheName.substring(URLCacheNamePrefix.length()));
+            iwriter.commit();
         }
+    }
+
+    private final void indexKeyValue(QueueWithinCrawl qk, String url, long nextFetchDate)
+            throws IOException {
+        Document doc = new Document();
+        doc.add(new StringField("crawlid", qk.getCrawlid(), Store.NO));
+        doc.add(new StringField("queue", qk.getQueue(), Store.NO));
+        doc.add(new StringField("url", url, Store.YES));
+        doc.add(new NumericDocValuesField("nextFetchDate", nextFetchDate));
+        iwriter.addDocument(doc);
     }
 
     // periodically go through the list of queues
@@ -513,40 +607,54 @@ public class IgniteService extends DistributedFrontierService
 
         int alreadySent = 0;
 
-        Query<Entry<Key, Payload>> qry = new TextQuery<>(Payload.class, queueID.toString());
-        // the content for the queues should only be local anyway
-        qry.setLocal(true);
-        qry.setPageSize(maxURLsPerQueue);
+        Builder query = new BooleanQuery.Builder();
+        query.add(new TermQuery(new Term("crawlid", queueID.getCrawlid())), Occur.FILTER);
+        query.add(new TermQuery(new Term("queue", queueID.getQueue())), Occur.FILTER);
 
-        try (QueryCursor<Entry<Key, Payload>> cursor =
-                createOrGetCacheForCrawlID(queueID.getCrawlid()).query(qry)) {
-            for (Entry<Key, Payload> entry : cursor) {
-                if (alreadySent >= maxURLsPerQueue) break;
+        SortField sortField = new SortField("nextFetchDate", SortField.Type.INT, false);
+        Sort sortByNextFetchDate = new Sort(sortField);
+
+        IgniteCache<Key, Payload> _cache = createOrGetCacheForCrawlID(queueID.getCrawlid());
+
+        try {
+            ScoreDoc[] hits =
+                    isearcher.search(query.build(), maxURLsPerQueue * 3, sortByNextFetchDate)
+                            .scoreDocs;
+            // Iterate through the results:
+            for (int i = 0; i < hits.length && alreadySent >= maxURLsPerQueue; i++) {
+                Document hitDoc = isearcher.doc(hits[i].doc);
+                String url = hitDoc.get("url");
+
+                // check that the URL is not already being processed
+                if (((QueueMetadata) queue).isHeld(url, now)) {
+                    continue;
+                }
+
+                Payload payload = _cache.get(new Key(queueID.toString(), url));
+                // might have disappeared since
+                if (payload == null) continue;
+
                 // too early for it?
-                long scheduled = entry.getValue().nextFetchDate;
-                if (scheduled > now) {
+                if (payload.nextFetchDate > now) {
                     // they should be sorted by date no need to go further
                     return alreadySent;
                 }
 
-                // check that the URL is not already being processed
-                if (((QueueMetadata) queue).isHeld(entry.getKey().URL, now)) {
-                    continue;
-                }
-
                 // this one is good to go
                 try {
-                    responseObserver.onNext(URLInfo.parseFrom(entry.getValue().payload));
+                    responseObserver.onNext(URLInfo.parseFrom(payload.payload));
 
                     // mark it as not processable for N secs
-                    ((QueueMetadata) queue)
-                            .holdUntil(entry.getKey().URL, now + secsUntilRequestable);
+                    ((QueueMetadata) queue).holdUntil(url, now + secsUntilRequestable);
 
                     alreadySent++;
                 } catch (InvalidProtocolBufferException e) {
                     LOG.error("Caught unlikely error ", e);
                 }
             }
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
         }
 
         return alreadySent;

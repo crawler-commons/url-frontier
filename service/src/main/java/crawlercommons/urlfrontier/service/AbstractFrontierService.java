@@ -554,7 +554,6 @@ public abstract class AbstractFrontierService
             QueueWithinCrawl currentCrawlQueue = null;
 
             synchronized (queues) {
-                numQueuesTried++;
                 Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
                         queues.entrySet().iterator();
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
@@ -602,6 +601,8 @@ public abstract class AbstractFrontierService
                             secsUntilRequestable,
                             now,
                             responseObserver);
+            numQueuesTried++;
+
             if (sentForQ > 0) {
                 currentQueue.setLastProduced(now);
                 totalSent += sentForQ;

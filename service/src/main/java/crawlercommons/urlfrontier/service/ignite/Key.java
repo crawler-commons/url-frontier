@@ -16,11 +16,10 @@ package crawlercommons.urlfrontier.service.ignite;
 
 import java.io.Serializable;
 import org.apache.ignite.cache.affinity.AffinityKeyMapped;
-import org.apache.ignite.cache.query.annotations.QueryTextField;
 
 class Key implements Serializable {
 
-    @AffinityKeyMapped @QueryTextField String crawlQueueID;
+    @AffinityKeyMapped String crawlQueueID;
 
     String URL;
 
