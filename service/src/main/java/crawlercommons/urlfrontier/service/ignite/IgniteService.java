@@ -50,10 +50,8 @@ import org.apache.ignite.IgniteCache;
 import org.apache.ignite.IgniteEvents;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMode;
-import org.apache.ignite.cache.query.Query;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.cache.query.ScanQuery;
-import org.apache.ignite.cache.query.TextQuery;
 import org.apache.ignite.cluster.BaselineNode;
 import org.apache.ignite.cluster.ClusterNode;
 import org.apache.ignite.cluster.ClusterState;
@@ -62,6 +60,7 @@ import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.events.CacheEvent;
 import org.apache.ignite.events.EventType;
+import org.apache.ignite.lang.IgniteBiPredicate;
 import org.apache.ignite.lang.IgnitePredicate;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
@@ -110,7 +109,7 @@ public class IgniteService extends DistributedFrontierService
 
     private final IndexWriter iwriter;
 
-    private IndexSearcher isearcher;
+    private DirectoryReader dir_reader;
 
     // no explicit config
     public IgniteService() {
@@ -172,14 +171,15 @@ public class IgniteService extends DistributedFrontierService
         cfg.setDataStorageConfiguration(storageCfg);
 
         Path index_path = Paths.get(configuration.getOrDefault("ignite.index", "index"));
-        // the index is always recreated from scratch
-        try {
-            Files.walk(index_path)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
-        } catch (IOException e) {
-            LOG.error("Couldn't delete workdir {}", workdir);
+        if (configuration.containsKey("ignite.purge")) {
+            try {
+                Files.walk(index_path)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            } catch (IOException e) {
+                LOG.error("Couldn't delete workdir {}", workdir);
+            }
         }
 
         Analyzer analyzer = new StandardAnalyzer();
@@ -188,14 +188,21 @@ public class IgniteService extends DistributedFrontierService
             Directory directory = FSDirectory.open(index_path);
             IndexWriterConfig config = new IndexWriterConfig(analyzer);
             iwriter = new IndexWriter(directory, config);
-            DirectoryReader ireader = DirectoryReader.open(iwriter);
-            isearcher = new IndexSearcher(ireader);
+            dir_reader = DirectoryReader.open(iwriter);
         } catch (IOException e) {
             LOG.error("Couldn't initialise Lucene writer {}", e);
             throw new RuntimeException(e);
         }
 
+        LOG.info("{} docs in Lucene ", iwriter.getPendingNumDocs());
+
         long start = System.currentTimeMillis();
+
+        // Enable cache events.
+        cfg.setIncludeEventTypes(
+                EventType.EVT_CACHE_OBJECT_PUT,
+                EventType.EVT_CACHE_OBJECT_REMOVED,
+                EventType.EVT_CACHE_STOPPED);
 
         // Starting the node
         ignite = Ignition.start(cfg);
@@ -224,7 +231,6 @@ public class IgniteService extends DistributedFrontierService
         CacheConfiguration cacheCfg = new CacheConfiguration("urls_*");
         cacheCfg.setBackups(backups);
         cacheCfg.setCacheMode(CacheMode.PARTITIONED);
-        // cacheCfg.setIndexedTypes(Key.class, Payload.class);
         ignite.addCacheConfiguration(cacheCfg);
 
         long end = System.currentTimeMillis();
@@ -233,27 +239,98 @@ public class IgniteService extends DistributedFrontierService
 
         IgniteEvents events = ignite.events();
 
-        // Local listener that listens to local events.
-        IgnitePredicate<CacheEvent> localListener =
+        // Local listener that listens to addition / deletion of cache entries
+        IgnitePredicate<CacheEvent> localObjectAddedListener =
                 evt -> {
-                    if (evt.key() instanceof Key == false) return true;
+                    if (!evt.cacheName().startsWith("urls_")) return true;
 
-                    // TODO deal with updates?
-                    final QueueWithinCrawl qk =
-                            QueueWithinCrawl.parseAndDeNormalise(((Key) evt.key()).crawlQueueID);
-                    try {
-                        indexKeyValue(
-                                qk,
-                                ((Key) evt.key()).URL,
-                                ((Payload) evt.newValue()).nextFetchDate);
-                    } catch (Exception e) {
-                        // TODO
+                    long nextFetchDate = ((Payload) evt.newValue()).nextFetchDate;
+                    Term docID = new Term("_id", evt.key().toString());
+
+                    // was there a previous value?
+                    boolean hasOldValue = evt.hasOldValue();
+
+                    // if not due for refetching just delete the old value
+                    if (hasOldValue && nextFetchDate == 0) {
+                        // delete the doc in Lucene
+                        try {
+                            this.iwriter.deleteDocuments(docID);
+                        } catch (IOException e) {
+                            LOG.error("Exception caught when deleting {}", docID, e);
+                        }
+                        return true;
                     }
+
+                    // no previous value - just add the new document
+                    if (!hasOldValue && nextFetchDate != 0) {
+                        try {
+                            final QueueWithinCrawl qk =
+                                    QueueWithinCrawl.parseAndDeNormalise(
+                                            ((Key) evt.key()).crawlQueueID);
+                            Document doc = new Document();
+                            // used for fast updates and deletions
+                            // concatenation of the crawlid queue and url
+                            doc.add(new StringField("_id", evt.key().toString(), Store.NO));
+                            doc.add(new StringField("crawlid", qk.getCrawlid(), Store.NO));
+                            doc.add(new StringField("queue", qk.getQueue(), Store.NO));
+                            doc.add(new StringField("url", ((Key) evt.key()).URL, Store.YES));
+                            doc.add(new NumericDocValuesField("nextFetchDate", nextFetchDate));
+                            iwriter.addDocument(doc);
+                        } catch (Exception e) {
+                            LOG.error("Exception caught when indexing {}", evt.newValue(), e);
+                        }
+                        return true;
+                    }
+
+                    // finally there was a previous value
+                    // just need to update the nextfetchdate
+                    try {
+                        this.iwriter.updateNumericDocValue(docID, "nextFetchDate", nextFetchDate);
+                    } catch (Exception e) {
+                        LOG.error("Exception caught when updating {}", evt.newValue(), e);
+                    }
+
+                    return true; // Continue listening.
+                };
+
+        // listener for objects deletions
+        IgnitePredicate<CacheEvent> localObjectRemovedListener =
+                evt -> {
+                    if (!evt.cacheName().startsWith("urls_")) return true;
+
+                    Term docID = new Term("_id", evt.key().toString());
+
+                    // delete the doc in Lucene
+                    try {
+                        this.iwriter.deleteDocuments(docID);
+                    } catch (IOException e) {
+                        LOG.error("Exception caught when deleting {}", docID, e);
+                    }
+
+                    return true; // Continue listening.
+                };
+
+        // listener for cache deletions
+        IgnitePredicate<CacheEvent> localCacheDeletionListener =
+                evt -> {
+                    if (!evt.cacheName().startsWith("urls_")) return true;
+
+                    String normalisedCrawlID = evt.cacheName().substring("urls_".length());
+
+                    // delete all the docs in Lucene having this crawlid
+                    try {
+                        this.iwriter.deleteDocuments(new Term("crawlid", normalisedCrawlID));
+                    } catch (IOException e) {
+                        LOG.error("Exception caught when deleting {}", normalisedCrawlID, e);
+                    }
+
                     return true; // Continue listening.
                 };
 
         // Subscribe to the cache events that are triggered on the local node.
-        events.localListen(localListener, EventType.EVT_CACHE_OBJECT_PUT);
+        events.localListen(localObjectAddedListener, EventType.EVT_CACHE_OBJECT_PUT);
+        events.localListen(localObjectRemovedListener, EventType.EVT_CACHE_OBJECT_REMOVED);
+        events.localListen(localCacheDeletionListener, EventType.EVT_CACHE_STOPPED);
 
         LOG.info("Scanning tables to rebuild queues... (can take a long time)");
 
@@ -341,11 +418,6 @@ public class IgniteService extends DistributedFrontierService
                         queueMD.incrementActive();
                     }
                     cache.put(entry.getKey(), entry.getValue());
-
-                    // index if not done
-                    if (!done) {
-                        indexKeyValue(qk, entry.getKey().URL, entry.getValue().nextFetchDate);
-                    }
                 }
             }
             LOG.info(
@@ -354,16 +426,6 @@ public class IgniteService extends DistributedFrontierService
                     cacheName.substring(URLCacheNamePrefix.length()));
             iwriter.commit();
         }
-    }
-
-    private final void indexKeyValue(QueueWithinCrawl qk, String url, long nextFetchDate)
-            throws IOException {
-        Document doc = new Document();
-        doc.add(new StringField("crawlid", qk.getCrawlid(), Store.NO));
-        doc.add(new StringField("queue", qk.getQueue(), Store.NO));
-        doc.add(new StringField("url", url, Store.YES));
-        doc.add(new NumericDocValuesField("nextFetchDate", nextFetchDate));
-        iwriter.addDocument(doc);
     }
 
     // periodically go through the list of queues
@@ -510,32 +572,15 @@ public class IgniteService extends DistributedFrontierService
                     return;
                 }
 
-                Payload oldpayload = null;
+                IgniteCache<Key, Payload> _cache = createOrGetCacheForCrawlID(crawlID);
 
-                final Key existenceKey = new Key(qk.toString(), url);
-
-                // if nextFetchDate == 0 give the payload a ridiculously large value
-                // so that it is never refetched
-                // ideally it should be removed from the index
-                if (nextFetchDate == 0) {
-                    nextFetchDate = Long.MAX_VALUE;
-                }
-
-                Payload newpayload = new Payload(nextFetchDate, info.toByteArray());
+                final Key key = new Key(qk.toString(), url);
 
                 // is this URL already known?
-                try {
-                    oldpayload =
-                            (Payload)
-                                    createOrGetCacheForCrawlID(crawlID)
-                                            .getAndPut(existenceKey, newpayload);
-                } catch (Exception e) {
-                    LOG.error("Ignite exception", e);
-                    return;
-                }
+                boolean known = _cache.containsKey(key);
 
                 // already known? ignore if discovered
-                if (oldpayload != null && discovered) {
+                if (known && discovered) {
                     putURLs_alreadyknown_count.inc();
                     responseObserver.onNext(
                             crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
@@ -559,9 +604,13 @@ public class IgniteService extends DistributedFrontierService
                 // but make sure it exists globally anyway
                 globalQueueCache.putIfAbsent(qk.toString(), qk.toString());
 
+                Payload newpayload = new Payload(nextFetchDate, info.toByteArray());
+
+                _cache.put(key, newpayload);
+
                 // known - remove from queues
                 // its key in the queues was stored in the default cf
-                if (oldpayload != null) {
+                if (known) {
                     // remove from queue metadata
                     queueMD.removeFromProcessed(url);
                     queueMD.decrementActive();
@@ -617,11 +666,14 @@ public class IgniteService extends DistributedFrontierService
         IgniteCache<Key, Payload> _cache = createOrGetCacheForCrawlID(queueID.getCrawlid());
 
         try {
+            dir_reader = DirectoryReader.openIfChanged(dir_reader, iwriter);
+            IndexSearcher isearcher = new IndexSearcher(dir_reader);
+
             ScoreDoc[] hits =
                     isearcher.search(query.build(), maxURLsPerQueue * 3, sortByNextFetchDate)
                             .scoreDocs;
             // Iterate through the results:
-            for (int i = 0; i < hits.length && alreadySent >= maxURLsPerQueue; i++) {
+            for (int i = 0; i < hits.length && alreadySent < maxURLsPerQueue; i++) {
                 Document hitDoc = isearcher.doc(hits[i].doc);
                 String url = hitDoc.get("url");
 
@@ -730,11 +782,11 @@ public class IgniteService extends DistributedFrontierService
 
         IgniteCache<Key, Payload> URLCache = createOrGetCacheForCrawlID(qc.getCrawlid());
 
-        Query<Entry<Key, Payload>> qry = new TextQuery<>(Payload.class, qc.toString());
-        // the content for the queues should only be local anyway
-        qry.setLocal(true);
+        // slow version - scan the whole cache
+        IgniteBiPredicate<Key, Payload> filter = (key, p) -> key.crawlQueueID.equals(qc.toString());
 
-        try (QueryCursor<Entry<Key, Payload>> cur = URLCache.query(qry)) {
+        try (QueryCursor<Entry<Key, Payload>> cur =
+                URLCache.query(new ScanQuery<Key, Payload>(filter).setLocal(true))) {
             for (Entry<Key, Payload> entry : cur) {
                 URLCache.remove(entry.getKey());
             }

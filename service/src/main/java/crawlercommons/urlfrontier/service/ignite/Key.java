@@ -28,4 +28,8 @@ class Key implements Serializable {
         this.crawlQueueID = crawlQueueID;
         URL = uRL;
     }
+
+    public String toString() {
+        return this.crawlQueueID + "_" + this.URL;
+    }
 }
