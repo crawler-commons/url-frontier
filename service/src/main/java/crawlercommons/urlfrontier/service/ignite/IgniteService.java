@@ -16,6 +16,7 @@ package crawlercommons.urlfrontier.service.ignite;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.CrawlID;
+import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
@@ -64,13 +65,10 @@ import org.apache.ignite.lang.IgniteBiPredicate;
 import org.apache.ignite.lang.IgnitePredicate;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.document.StringField;
-import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
@@ -79,6 +77,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
@@ -109,7 +108,7 @@ public class IgniteService extends DistributedFrontierService
 
     private final IndexWriter iwriter;
 
-    private DirectoryReader dir_reader;
+    private SearcherManager searcherManager;
 
     // no explicit config
     public IgniteService() {
@@ -182,13 +181,11 @@ public class IgniteService extends DistributedFrontierService
             }
         }
 
-        Analyzer analyzer = new StandardAnalyzer();
-
         try {
             Directory directory = FSDirectory.open(index_path);
-            IndexWriterConfig config = new IndexWriterConfig(analyzer);
+            IndexWriterConfig config = new IndexWriterConfig();
             iwriter = new IndexWriter(directory, config);
-            dir_reader = DirectoryReader.open(iwriter);
+            searcherManager = new SearcherManager(iwriter, null);
         } catch (IOException e) {
             LOG.error("Couldn't initialise Lucene writer {}", e);
             throw new RuntimeException(e);
@@ -250,24 +247,18 @@ public class IgniteService extends DistributedFrontierService
                     // was there a previous value?
                     boolean hasOldValue = evt.hasOldValue();
 
-                    // if not due for refetching just delete the old value
-                    if (hasOldValue && nextFetchDate == 0) {
-                        // delete the doc in Lucene
-                        try {
+                    try {
+                        // if not due for refetching just delete the old value
+                        if (hasOldValue && nextFetchDate == 0) {
+                            // delete the doc in Lucene
                             this.iwriter.deleteDocuments(docID);
-                        } catch (IOException e) {
-                            LOG.error("Exception caught when deleting {}", docID, e);
                         }
-                        return true;
-                    }
-
-                    // no previous value - just add the new document
-                    if (!hasOldValue && nextFetchDate != 0) {
-                        try {
+                        // no previous value - just add the new document
+                        else if (!hasOldValue && nextFetchDate != 0) {
                             final QueueWithinCrawl qk =
                                     QueueWithinCrawl.parseAndDeNormalise(
                                             ((Key) evt.key()).crawlQueueID);
-                            Document doc = new Document();
+                            final Document doc = new Document();
                             // used for fast updates and deletions
                             // concatenation of the crawlid queue and url
                             doc.add(new StringField("_id", evt.key().toString(), Store.NO));
@@ -276,18 +267,14 @@ public class IgniteService extends DistributedFrontierService
                             doc.add(new StringField("url", ((Key) evt.key()).URL, Store.YES));
                             doc.add(new NumericDocValuesField("nextFetchDate", nextFetchDate));
                             iwriter.addDocument(doc);
-                        } catch (Exception e) {
-                            LOG.error("Exception caught when indexing {}", evt.newValue(), e);
+                        } else {
+                            // finally there was a previous value
+                            // just need to update the nextfetchdate
+                            this.iwriter.updateNumericDocValue(
+                                    docID, "nextFetchDate", nextFetchDate);
                         }
-                        return true;
-                    }
-
-                    // finally there was a previous value
-                    // just need to update the nextfetchdate
-                    try {
-                        this.iwriter.updateNumericDocValue(docID, "nextFetchDate", nextFetchDate);
                     } catch (Exception e) {
-                        LOG.error("Exception caught when updating {}", evt.newValue(), e);
+                        LOG.error("Exception caught when indexing {}", evt.newValue(), e);
                     }
 
                     return true; // Continue listening.
@@ -323,7 +310,6 @@ public class IgniteService extends DistributedFrontierService
                     } catch (IOException e) {
                         LOG.error("Exception caught when deleting {}", normalisedCrawlID, e);
                     }
-
                     return true; // Continue listening.
                 };
 
@@ -382,10 +368,19 @@ public class IgniteService extends DistributedFrontierService
 
     @Override
     public void close() throws IOException {
-        closing = true;
         LOG.info("Closing Ignite");
+        closing = true;
+
+        super.close();
+
         if (ignite != null) ignite.close();
         if (ihb != null) ihb.close();
+        if (searcherManager != null) {
+            searcherManager.close();
+        }
+        if (iwriter != null) {
+            iwriter.close();
+        }
     }
 
     /**
@@ -417,7 +412,7 @@ public class IgniteService extends DistributedFrontierService
                     } else {
                         queueMD.incrementActive();
                     }
-                    cache.put(entry.getKey(), entry.getValue());
+                    // cache.put(entry.getKey(), entry.getValue());
                 }
             }
             LOG.info(
@@ -665,9 +660,10 @@ public class IgniteService extends DistributedFrontierService
 
         IgniteCache<Key, Payload> _cache = createOrGetCacheForCrawlID(queueID.getCrawlid());
 
+        IndexSearcher isearcher = null;
+
         try {
-            dir_reader = DirectoryReader.openIfChanged(dir_reader, iwriter);
-            IndexSearcher isearcher = new IndexSearcher(dir_reader);
+            isearcher = searcherManager.acquire();
 
             ScoreDoc[] hits =
                     isearcher.search(query.build(), maxURLsPerQueue * 3, sortByNextFetchDate)
@@ -705,8 +701,16 @@ public class IgniteService extends DistributedFrontierService
                 }
             }
         } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            LOG.error("Caught error while adding doc", e1);
+        } finally {
+            try {
+                if (isearcher != null) searcherManager.release(isearcher);
+            } catch (IOException e) {
+            }
+
+            // Set to null to ensure we never again try to use
+            // this searcher instance after releasing:
+            isearcher = null;
         }
 
         return alreadySent;
@@ -842,5 +846,15 @@ public class IgniteService extends DistributedFrontierService
             }
         }
         return total;
+    }
+
+    @Override
+    public void getURLs(GetParams request, StreamObserver<URLInfo> responseObserver) {
+        try {
+            searcherManager.maybeRefresh();
+        } catch (IOException e) {
+            LOG.error("Exception when calling maybeRefresh in getURLs", e);
+        }
+        super.getURLs(request, responseObserver);
     }
 }

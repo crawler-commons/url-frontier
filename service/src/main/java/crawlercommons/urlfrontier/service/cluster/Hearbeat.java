@@ -49,7 +49,6 @@ public class Hearbeat extends Thread {
     public void run() {
 
         while (!closed) {
-            LOG.info("Sending heartbeat");
 
             // implement delay between requests
             long msecTowait =
@@ -64,6 +63,8 @@ public class Hearbeat extends Thread {
             }
 
             lastQuery = Instant.now();
+
+            LOG.info("Sending heartbeat");
 
             sendHeartBeat();
         }
