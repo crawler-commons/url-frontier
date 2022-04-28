@@ -15,9 +15,10 @@
 	<description>Implementation of the URLFrontier Service</description>
 
 	<properties>
-		<prometheus.version>0.14.1</prometheus.version>
-		<ignite.version>2.12.0</ignite.version>
-        <lucene.version>8.11.1</lucene.version>
+		<prometheus.version>0.15.0</prometheus.version>
+		<ignite.version>2.13.0</ignite.version>
+		<lucene.version>8.11.1</lucene.version>
+		<rocksdb.version>6.29.5</rocksdb.version>
 	</properties>
 
 	<build>
@@ -89,7 +90,7 @@
 		<dependency>
 			<groupId>org.rocksdb</groupId>
 			<artifactId>rocksdbjni</artifactId>
-			<version>6.27.3</version>
+			<version>${rocksdb.version}</version>
 		</dependency>
 
 		<dependency>
