@@ -60,7 +60,7 @@ The easiest way to run the Frontier is to use Docker
 
 ```
  docker pull crawlercommons/url-frontier
- docker run --rm --name frontier -p 7071:7071 crawlercommons/url-frontier -s 9100
+ docker run --rm --name frontier -p 7071:7071 -p 9100:9100  crawlercommons/url-frontier -s 9100
 ```
 
 The service will run on the default port (7071). Additional parameters can simply be added to the command, for instance, to persist RocksDB between runs
