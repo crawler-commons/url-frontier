@@ -3,9 +3,12 @@
 [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/crawlercommons/url-frontier)](https://hub.docker.com/r/crawlercommons/url-frontier)
 [![Docker Pulls](https://img.shields.io/docker/pulls/crawlercommons/url-frontier)](https://hub.docker.com/r/crawlercommons/url-frontier)
 
-Implementation of the URL Frontier Service. There are currently 2 implementations available:
+Implementations of the URL Frontier Service. There are currently 3 implementations available:
 - a simple memory-based which was used primarily for testing
-- the default one which is scalable, persistent and is based on [RocksDB](https://rocksdb.org/).
+- the default one which is scalable, persistent and is based on [RocksDB](https://rocksdb.org/)
+- a persistent and distributed one based on [Ignite](https://ignite.apache.org/)
+
+The Ignite implementation is still in beta mode.
 
 Web crawlers can connect to it using the gRPC code generated from the API. There is also a simple client available 
 which can do basic interactions with a Frontier.
@@ -33,6 +36,9 @@ the call above can have the following equivalent without the config file:
 `java -Xmx2G -cp target/urlfrontier-service-*.jar crawlercommons.urlfrontier.service.URLFrontierServer rocksdb.path=/pathToCrawlDir/rocksdb` 
 
 If no path is set explicitly for RocksDB,  the default value _./rocksdb_ will be used.
+
+For implementation supporting a cluster mode, like the Ignite one, it is required to use the parameter `-h xxx.xxx.xxx.xxx` with the private IP or hostname
+on which it is running so that it can report its location with the heartbeat.
 
 ## Logging configuration
 

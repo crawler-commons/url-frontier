@@ -42,19 +42,21 @@ Discovered URLs are treated differently from known ones which are being updated.
 
 Another difference is in the scheduling of the URLs: discovered URLs are added to the queues (if they are unknown so far) without specific information about when they should be fetched - the service will return them as soon as possible. Known URLs on the other hand can have a _refetchable_from_date_ meaning that the service will put them back in the queues and serve them through _getURLs_ when the delay has elapsed. This is useful for instance when a transient error has occurred when fetching a URL, we might want to try it later. If no value is specified, the URL will be considered done and won't be returned by getURLs ever again.
 
-# Not covered (yet) or out of scope
+## URL priority
+The URLs are sorted by _refetchable_from_date_, which is typically the number seconds of UTC time since Unix epoch. The frontier checks that this value is lower or equal to the current timstamp in order to emit them. 
+With that in mind, you can set any value you want as long as it is not 0 to prioritise URLs within a queue.
+
+## Distributed mode
+Some of the messages used by the API have a field _local_. This is used to indicate whether the action is pertaining only to the target node or to the whole cluster. For instance, the method _GetStats_ can return either the stats for the particular 
+instance of the Frontier or the whole cluster.
+
+# Out of scope
 
 ## URLFiltering
 The filtering logic has to be handled within the crawlers as it is often application specific.
 
 ## Robots.txt
 The robots directives are not stored within the URL Frontier.
-
-## URL / queue priority
-To be added in a future version of the API or handled by the services as extensions outside the API.
-
-## Replication / sharding
-To be added in a future version of the API or handled by the services as extensions outside the API.
 
 --------------------------------------
 
@@ -67,7 +69,7 @@ The Java code generated from the schema is available as a Maven dependency.
 		<dependency>
 			<groupId>com.github.crawler-commons</groupId>
 			<artifactId>urlfrontier-API</artifactId>
-			<version>1.2</version>
+			<version>2.0</version>
 		</dependency>
 	</dependencies>
 ```
