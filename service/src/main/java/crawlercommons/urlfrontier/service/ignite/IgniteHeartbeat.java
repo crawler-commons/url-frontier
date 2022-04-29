@@ -30,7 +30,7 @@ public class IgniteHeartbeat extends Hearbeat {
     private final Ignite ignite;
 
     IgniteHeartbeat(int delay, Ignite ignite) {
-        super(delay);
+        super("IgniteHeartbeat", delay);
         this.ignite = ignite;
     }
 

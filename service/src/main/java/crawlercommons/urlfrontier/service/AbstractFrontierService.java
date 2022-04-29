@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
@@ -437,6 +438,8 @@ public abstract class AbstractFrontierService
 
         getURLs_calls.inc();
 
+        UUID requestID = UUID.randomUUID();
+
         Summary.Timer requestTimer = getURLs_Latency.startTimer();
 
         int maxQueues = request.getMaxQueues();
@@ -457,10 +460,11 @@ public abstract class AbstractFrontierService
         }
 
         LOG.info(
-                "Received request to get fetchable URLs [max queues {}, max URLs {}, delay {}]",
+                "Received request to get fetchable URLs [max queues {}, max URLs {}, delay {}] {}",
                 maxQueues,
                 maxURLsPerQueue,
-                secsUntilRequestable);
+                secsUntilRequestable,
+                requestID.toString());
 
         long start = System.currentTimeMillis();
 
@@ -523,10 +527,11 @@ public abstract class AbstractFrontierService
             getURLs_urls_count.inc(totalSent);
 
             LOG.info(
-                    "Sent {} from queue {} in {} msec",
+                    "Sent {} from queue {} in {} msec {}",
                     totalSent,
                     key,
-                    (System.currentTimeMillis() - start));
+                    (System.currentTimeMillis() - start),
+                    requestID.toString());
 
             if (totalSent != 0) {
                 queue.setLastProduced(now);
@@ -543,7 +548,7 @@ public abstract class AbstractFrontierService
         QueueWithinCrawl firstCrawlQueue = null;
 
         if (queues.isEmpty()) {
-            LOG.info("No queues to get URLs from!");
+            LOG.info("No queues to get URLs from! {}", requestID.toString());
             responseObserver.onCompleted();
             return;
         }
@@ -611,11 +616,12 @@ public abstract class AbstractFrontierService
         }
 
         LOG.info(
-                "Sent {} from {} queue(s) in {} msec; tried {} queues",
+                "Sent {} from {} queue(s) in {} msec; tried {} queues. {}",
                 totalSent,
                 numQueuesSent,
                 (System.currentTimeMillis() - start),
-                numQueuesTried);
+                numQueuesTried,
+                requestID.toString());
 
         getURLs_urls_count.inc(totalSent);
 

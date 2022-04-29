@@ -432,6 +432,7 @@ public class IgniteService extends DistributedFrontierService
         private final int delaySec;
 
         QueueCheck(int delay) {
+            super("IgniteQueueChecker");
             delaySec = delay;
         }
 
@@ -453,7 +454,7 @@ public class IgniteService extends DistributedFrontierService
                     continue;
                 }
 
-                LOG.info("Checking queues");
+                LOG.debug("Checking queues");
 
                 lastQuery = Instant.now();
 

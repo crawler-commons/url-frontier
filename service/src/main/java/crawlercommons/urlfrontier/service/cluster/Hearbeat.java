@@ -34,6 +34,12 @@ public class Hearbeat extends Thread {
     protected HeartbeatListener listener;
 
     protected Hearbeat(int delay) {
+        super("Hearbeat");
+        this.delaySec = delay;
+    }
+
+    protected Hearbeat(String name, int delay) {
+        super(name);
         this.delaySec = delay;
     }
 
@@ -64,7 +70,7 @@ public class Hearbeat extends Thread {
 
             lastQuery = Instant.now();
 
-            LOG.info("Sending heartbeat");
+            LOG.debug("Sending heartbeat");
 
             sendHeartBeat();
         }
