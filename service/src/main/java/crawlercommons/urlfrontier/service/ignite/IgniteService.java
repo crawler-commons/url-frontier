@@ -42,6 +42,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.cache.Cache.Entry;
 import javax.cache.expiry.Duration;
@@ -110,6 +113,14 @@ public class IgniteService extends DistributedFrontierService
 
     private SearcherManager searcherManager;
 
+    // blocking the events is a bad idea, instead we get them
+    // to write additions to a queue and have separate threads to do the indexing
+    private ConcurrentLinkedQueue additions = new ConcurrentLinkedQueue<Document>();
+
+    private ExecutorService executor = Executors.newFixedThreadPool(8);
+
+    private final int maxUncommittedAdditions = 2000;
+
     // no explicit config
     public IgniteService() {
         this(new HashMap<String, String>());
@@ -132,45 +143,44 @@ public class IgniteService extends DistributedFrontierService
             cfg.setDiscoverySpi(new TcpDiscoverySpi().setIpFinder(ipFinder));
         }
 
+        boolean purgeData = configuration.containsKey("ignite.purge");
+
         DataStorageConfiguration storageCfg = new DataStorageConfiguration();
         // specify where the data should be kept
-        String path = configuration.get("ignite.path");
-        if (path != null) {
-            if (configuration.containsKey("ignite.purge")) {
-                try {
-                    Files.walk(Paths.get(path))
-                            .sorted(Comparator.reverseOrder())
-                            .map(Path::toFile)
-                            .forEach(File::delete);
-                } catch (IOException e) {
-                    LOG.error("Couldn't delete path {}", path);
-                }
+        String path = configuration.getOrDefault("ignite.path", "ignite");
+        storageCfg.setStoragePath(path);
+
+        if (purgeData) {
+            try {
+                Files.walk(Paths.get(path))
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            } catch (IOException e) {
+                LOG.error("Couldn't delete path {}", path);
             }
-            storageCfg.setStoragePath(path);
         }
 
         // set the work directory to the same location unless overridden
         String workdir = configuration.getOrDefault("ignite.workdir", path);
-        if (workdir != null) {
-            if (configuration.containsKey("ignite.purge")) {
-                try {
-                    Files.walk(Paths.get(workdir))
-                            .sorted(Comparator.reverseOrder())
-                            .map(Path::toFile)
-                            .forEach(File::delete);
-                } catch (IOException e) {
-                    LOG.error("Couldn't delete workdir {}", workdir);
-                }
+        if (purgeData) {
+            try {
+                Files.walk(Paths.get(workdir))
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            } catch (IOException e) {
+                LOG.error("Couldn't delete workdir {}", workdir);
             }
-            cfg.setWorkDirectory(workdir);
         }
+        cfg.setWorkDirectory(workdir);
 
         // set persistence
         storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
         cfg.setDataStorageConfiguration(storageCfg);
 
         Path index_path = Paths.get(configuration.getOrDefault("ignite.index", "index"));
-        if (configuration.containsKey("ignite.purge")) {
+        if (purgeData) {
             try {
                 Files.walk(index_path)
                         .sorted(Comparator.reverseOrder())
@@ -194,6 +204,9 @@ public class IgniteService extends DistributedFrontierService
         LOG.info("{} docs in Lucene ", iwriter.getPendingNumDocs());
 
         long start = System.currentTimeMillis();
+
+        // disable logging of Ignite metrics
+        cfg.setMetricsLogFrequency(0);
 
         // Enable cache events.
         cfg.setIncludeEventTypes(
@@ -236,6 +249,21 @@ public class IgniteService extends DistributedFrontierService
 
         IgniteEvents events = ignite.events();
 
+        executor.submit(
+                () -> {
+                    while (true) {
+                        Document doc = (Document) additions.poll();
+                        try {
+                            if (doc != null) iwriter.addDocument(doc);
+                            else {
+                                Thread.sleep(10);
+                            }
+                        } catch (Exception e) {
+                            LOG.error("Exception caught when indexing {}", doc, e);
+                        }
+                    }
+                });
+
         // Local listener that listens to addition / deletion of cache entries
         IgnitePredicate<CacheEvent> localObjectAddedListener =
                 evt -> {
@@ -266,7 +294,8 @@ public class IgniteService extends DistributedFrontierService
                             doc.add(new StringField("queue", qk.getQueue(), Store.NO));
                             doc.add(new StringField("url", ((Key) evt.key()).URL, Store.YES));
                             doc.add(new NumericDocValuesField("nextFetchDate", nextFetchDate));
-                            iwriter.addDocument(doc);
+                            additions.add(doc);
+                            // iwriter.addDocument(doc);
                         } else {
                             // finally there was a previous value
                             // just need to update the nextfetchdate
@@ -373,6 +402,8 @@ public class IgniteService extends DistributedFrontierService
 
         super.close();
 
+        executor.shutdown();
+
         if (ignite != null) ignite.close();
         if (ihb != null) ihb.close();
         if (searcherManager != null) {
@@ -458,41 +489,38 @@ public class IgniteService extends DistributedFrontierService
 
                 lastQuery = Instant.now();
 
-                synchronized (queues) {
-                    Set<QueueWithinCrawl> existingQueues =
-                            new HashSet<QueueWithinCrawl>(queues.keySet());
+                Set<QueueWithinCrawl> existingQueues =
+                        new HashSet<QueueWithinCrawl>(queues.keySet());
 
-                    int queuesFound = 0;
-                    int queuesRemoved = 0;
+                int queuesFound = 0;
+                int queuesRemoved = 0;
 
-                    // add any missing queues
-                    try (QueryCursor<Entry<String, String>> cur =
-                            globalQueueCache.query(
-                                    new ScanQuery<String, String>().setLocal(true))) {
-                        for (Entry<String, String> entry : cur) {
-                            final QueueWithinCrawl qk =
-                                    QueueWithinCrawl.parseAndDeNormalise(entry.getKey());
-                            existingQueues.remove(qk);
-                            queues.computeIfAbsent(qk, s -> new QueueMetadata());
-                            queuesFound++;
-                        }
+                // add any missing queues
+                try (QueryCursor<Entry<String, String>> cur =
+                        globalQueueCache.query(new ScanQuery<String, String>().setLocal(true))) {
+                    for (Entry<String, String> entry : cur) {
+                        final QueueWithinCrawl qk =
+                                QueueWithinCrawl.parseAndDeNormalise(entry.getKey());
+                        existingQueues.remove(qk);
+                        queues.computeIfAbsent(qk, s -> new QueueMetadata());
+                        queuesFound++;
                     }
-
-                    // delete anything that would have been removed
-                    for (QueueWithinCrawl remaining : existingQueues) {
-                        queues.remove(remaining);
-                        queuesRemoved++;
-                    }
-
-                    long time = Instant.now().toEpochMilli() - lastQuery.toEpochMilli();
-
-                    LOG.info(
-                            "Found {} queues, removed {}, total {} in {}",
-                            queuesFound,
-                            queuesRemoved,
-                            queues.size(),
-                            time);
                 }
+
+                // delete anything that would have been removed
+                for (QueueWithinCrawl remaining : existingQueues) {
+                    queues.remove(remaining);
+                    queuesRemoved++;
+                }
+
+                long time = Instant.now().toEpochMilli() - lastQuery.toEpochMilli();
+
+                LOG.info(
+                        "Found {} queues, removed {}, total {} in {}",
+                        queuesFound,
+                        queuesRemoved,
+                        queues.size(),
+                        time);
             }
         }
     }
@@ -502,6 +530,15 @@ public class IgniteService extends DistributedFrontierService
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
 
         putURLs_calls.inc();
+
+        // throttle the flow of incoming changes to give Lucene
+        // a chance of keeping up
+        while (this.additions.size() >= maxUncommittedAdditions) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+            }
+        }
 
         return new StreamObserver<URLItem>() {
 
