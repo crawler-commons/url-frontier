@@ -21,6 +21,8 @@ import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.cluster.DistributedFrontierService;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,22 +31,24 @@ import java.util.Map;
  */
 public class ShardedRocksDBService extends DistributedFrontierService {
 
-    private RocksDBService instance;
+    private final RocksDBService instance;
 
     public ShardedRocksDBService(final Map<String, String> configuration) {
         instance = new RocksDBService(configuration);
         // take coordinates of the nodes + able to identify itself in the list
-        String snodes = configuration.get("ignite.nodes");
+        final String snodes = configuration.get("nodes");
         if (snodes == null) {
             throw new RuntimeException("ShardedRocksDBService requires ignite.nodes to be set");
         }
         // comma separated
+        final List<String> lnodes = new ArrayList<>();
         for (String n : snodes.split(",")) {
-            nodes.add(n.trim());
+            lnodes.add(n.trim());
         }
-        if (nodes.size() > 1) {
+        if (lnodes.size() > 1) {
             clusterMode = true;
         }
+        setNodes(lnodes);
     }
 
     @Override

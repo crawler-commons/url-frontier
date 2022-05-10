@@ -108,7 +108,7 @@ public abstract class AbstractFrontierService
     protected String address;
 
     // known nodes in a cluster setup
-    protected List<String> nodes;
+    private List<String> nodes;
 
     // in memory map of metadata for each queue
     protected final Map<QueueWithinCrawl, QueueInterface> queues =
@@ -116,6 +116,10 @@ public abstract class AbstractFrontierService
 
     public int getDefaultDelayForQueues() {
         return defaultDelayForQueues;
+    }
+
+    protected List<String> getNodes() {
+        return nodes;
     }
 
     public void setDefaultDelayForQueues(int defaultDelayForQueues) {
@@ -135,7 +139,8 @@ public abstract class AbstractFrontierService
     }
 
     public void setNodes(List<String> n) {
-        this.nodes = n;
+        nodes = n;
+        Collections.sort(nodes);
     }
 
     @Override

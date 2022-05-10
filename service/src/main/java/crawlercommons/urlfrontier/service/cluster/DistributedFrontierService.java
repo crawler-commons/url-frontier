@@ -22,6 +22,7 @@ import com.google.common.cache.RemovalNotification;
 import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
+import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
@@ -42,7 +43,6 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.LoggerFactory;
 
 public abstract class DistributedFrontierService extends AbstractFrontierService
@@ -60,29 +61,30 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     protected boolean clusterMode = false;
 
-    private final CacheLoader<String, URLFrontierBlockingStub> loader =
-            new CacheLoader<String, URLFrontierBlockingStub>() {
+    private final CacheLoader<String, ManagedChannel> loader =
+            new CacheLoader<String, ManagedChannel>() {
                 @Override
-                public URLFrontierBlockingStub load(String target) {
-                    ManagedChannel channel =
-                            ManagedChannelBuilder.forTarget(target).usePlaintext().build();
-                    return URLFrontierGrpc.newBlockingStub(channel);
+                public ManagedChannel load(String target) {
+                    return ManagedChannelBuilder.forTarget(target).usePlaintext().build();
                 }
             };
 
-    private final RemovalListener<String, URLFrontierBlockingStub> listener =
-            new RemovalListener<String, URLFrontierBlockingStub>() {
+    private final RemovalListener<String, ManagedChannel> listener =
+            new RemovalListener<String, ManagedChannel>() {
                 @Override
-                public void onRemoval(RemovalNotification<String, URLFrontierBlockingStub> n) {
-                    ((ManagedChannel) n.getValue().getChannel()).shutdownNow();
+                public void onRemoval(RemovalNotification<String, ManagedChannel> n) {
+                    n.getValue().shutdownNow();
                 }
             };
 
-    private LoadingCache<String, URLFrontierBlockingStub> cache =
-            CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES).build(loader);
+    private LoadingCache<String, ManagedChannel> cache =
+            CacheBuilder.newBuilder()
+                    .removalListener(listener)
+                    .expireAfterAccess(1, TimeUnit.MINUTES)
+                    .build(loader);
 
     private URLFrontierBlockingStub getFrontier(String target) {
-        return cache.getUnchecked(target);
+        return URLFrontierGrpc.newBlockingStub(cache.getUnchecked(target));
     }
 
     /** Delete the queue based on the key in parameter */
@@ -96,7 +98,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         int sizeQueue = 0;
 
         if (!request.getLocal() || !clusterMode) {
-            for (String node : nodes) {
+            for (String node : getNodes()) {
                 if (node.equals(address)) continue;
                 // call the delete endpoint in the target node
                 // force to local so that remote node don't go recursive
@@ -142,7 +144,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                             .setLocal(true)
                             .setValue(message.getValue())
                             .build();
-            for (String node : nodes) {
+            for (String node : getNodes()) {
                 if (node.equals(address)) continue;
                 // call the delete endpoint in the target node
                 URLFrontierBlockingStub blockingFrontier = getFrontier(node);
@@ -182,7 +184,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         // force to local so that remote nodes don't go recursive
         QueueWithinCrawlParams local =
                 QueueWithinCrawlParams.newBuilder(request).setLocal(true).build();
-        for (String node : nodes) {
+        for (String node : getNodes()) {
             URLFrontierBlockingStub blockingFrontier = getFrontier(node);
             Stats localStats = blockingFrontier.getStats(local);
             numQueues += localStats.getNumberOfQueues();
@@ -215,7 +217,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         if (!request.getLocal() || clusterMode) {
             // force to local so that remote node don't go recursive
             LogLevelParams local = LogLevelParams.newBuilder(request).setLocal(true).build();
-            for (String node : nodes) {
+            for (String node : getNodes()) {
                 // exclude the local node
                 if (node.equals(address)) continue;
                 URLFrontierBlockingStub blockingFrontier = getFrontier(node);
@@ -236,7 +238,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         if (!request.getLocal() || clusterMode) {
             // force to local so that remote node don't go recursive
             Local local = Local.newBuilder().setLocal(true).build();
-            for (String node : nodes) {
+            for (String node : getNodes()) {
                 // exclude the local node
                 if (node.equals(address)) continue;
                 URLFrontierBlockingStub blockingFrontier = getFrontier(node);
@@ -272,7 +274,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         Set<String> dedup = new HashSet<>();
 
         Pagination localPagination = Pagination.newBuilder(request).setLocal(true).build();
-        for (String node : nodes) {
+        for (String node : getNodes()) {
             URLFrontierBlockingStub blockingFrontier = getFrontier(node);
             QueueList listqueues = blockingFrontier.listQueues(localPagination);
             for (String s : listqueues.getValuesList()) {
@@ -317,34 +319,87 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 String url = info.getUrl();
                 String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
 
+                // has a queue key been defined? if not use the hostname
+                if (Qkey.equals("")) {
+                    LOG.debug("key missing for {}", url);
+                    Qkey = provideMissingKey(url);
+                    if (Qkey == null) {
+                        LOG.error("Malformed URL {}", url);
+                        responseObserver.onNext(
+                                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                                        .setValue(url)
+                                        .build());
+                        return;
+                    }
+                    // make a new info object ready to return
+                    info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
+                }
+
                 QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
 
                 // work out which node should receive the item
-                int partition = Math.abs(qk.toString().hashCode() % nodes.size());
+                int partition = Math.abs(qk.toString().hashCode() % getNodes().size());
 
                 // is it the local node?
-                Collections.sort(nodes);
-                int index = nodes.indexOf(address);
+                int index = getNodes().indexOf(address);
                 if (index == -1) {
                     throw new RuntimeException(
-                            "ShardedRocksDBService found ignite.nodes but current node's address not set");
+                            "ShardedRocksDBService found conf 'nodes' but current node's address not set");
                 }
 
                 if (partition == index) {
                     putURLItem(value);
+                    responseObserver.onNext(
+                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                                    .setValue(url)
+                                    .build());
                 } else {
-                    // TODO forward to non-local node
-                    // should not happen too frequently
-                    //					ManagedChannel channel =
-                    // ManagedChannelBuilder.forTarget(nodes.get(index)).usePlaintext().build();
-                    //					 URLFrontierStub stub = URLFrontierGrpc.newStub(channel);
-                    //					 stub.putURLs();
-                }
+                    // forward to non-local node
+                    // should not happen very frequently unless a crawler
+                    // allows outlinks to go outside the hostname
 
-                responseObserver.onNext(
-                        crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                .setValue(url)
-                                .build());
+                    final AtomicBoolean completed = new AtomicBoolean(false);
+
+                    final URLFrontierStub stub =
+                            URLFrontierGrpc.newStub(cache.getUnchecked(getNodes().get(index)));
+
+                    final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> observer =
+                            new StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>() {
+
+                                @Override
+                                public void onNext(
+                                        crawlercommons.urlfrontier.Urlfrontier.String value) {
+                                    // forwards confirmation that the value has been received
+                                    responseObserver.onNext(value);
+                                }
+
+                                @Override
+                                public void onError(Throwable t) {
+                                    completed.set(true);
+                                    LOG.error("Caught throwable when forwardng request ", t);
+                                }
+
+                                @Override
+                                public void onCompleted() {
+                                    completed.set(true);
+                                }
+                            };
+
+                    final StreamObserver<URLItem> streamObserver = stub.putURLs(observer);
+
+                    streamObserver.onNext(value);
+
+                    streamObserver.onCompleted();
+
+                    // wait for completion
+                    while (!completed.get()) {
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                }
             }
 
             @Override
