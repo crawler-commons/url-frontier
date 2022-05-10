@@ -544,121 +544,7 @@ public class IgniteService extends DistributedFrontierService
 
             @Override
             public void onNext(URLItem value) {
-
-                long nextFetchDate;
-                boolean discovered = true;
-                URLInfo info;
-
-                putURLs_urls_count.inc();
-
-                if (value.hasDiscovered()) {
-                    putURLs_discovered_count.labels("true").inc();
-                    info = value.getDiscovered().getInfo();
-                    nextFetchDate = Instant.now().getEpochSecond();
-                } else {
-                    putURLs_discovered_count.labels("false").inc();
-                    KnownURLItem known = value.getKnown();
-                    info = known.getInfo();
-                    nextFetchDate = known.getRefetchableFromDate();
-                    discovered = Boolean.FALSE;
-                }
-
-                String Qkey = info.getKey();
-                String url = info.getUrl();
-                String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
-
-                // has a queue key been defined? if not use the hostname
-                if (Qkey.equals("")) {
-                    LOG.debug("key missing for {}", url);
-                    Qkey = provideMissingKey(url);
-                    if (Qkey == null) {
-                        LOG.error("Malformed URL {}", url);
-                        responseObserver.onNext(
-                                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                        .setValue(url)
-                                        .build());
-                        return;
-                    }
-                    // make a new info object ready to return
-                    info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
-                }
-
-                // check that the key is not too long
-                if (Qkey.length() > 255) {
-                    LOG.error("Key too long: {}", Qkey);
-                    responseObserver.onNext(
-                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                    .setValue(url)
-                                    .build());
-                    return;
-                }
-
-                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
-
-                // ignore this url if the queue is being deleted
-                if (queuesBeingDeleted.containsKey(qk)) {
-                    LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
-                    responseObserver.onNext(
-                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                    .setValue(url)
-                                    .build());
-                    return;
-                }
-
-                IgniteCache<Key, Payload> _cache = createOrGetCacheForCrawlID(crawlID);
-
-                final Key key = new Key(qk.toString(), url);
-
-                // is this URL already known?
-                boolean known = _cache.containsKey(key);
-
-                // already known? ignore if discovered
-                if (known && discovered) {
-                    putURLs_alreadyknown_count.inc();
-                    responseObserver.onNext(
-                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                    .setValue(url)
-                                    .build());
-                    return;
-                }
-
-                // get the priority queue - if it is a local one
-                // or create a dummy one
-                // but do not create it in the queues unless we are in a non distributed
-                // environment
-                QueueMetadata queueMD = null;
-
-                if (clusterMode) {
-                    queueMD = (QueueMetadata) queues.getOrDefault(qk, new QueueMetadata());
-                } else {
-                    queueMD = (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
-                }
-
-                // but make sure it exists globally anyway
-                globalQueueCache.putIfAbsent(qk.toString(), qk.toString());
-
-                Payload newpayload = new Payload(nextFetchDate, info.toByteArray());
-
-                _cache.put(key, newpayload);
-
-                // known - remove from queues
-                // its key in the queues was stored in the default cf
-                if (known) {
-                    // remove from queue metadata
-                    queueMD.removeFromProcessed(url);
-                    queueMD.decrementActive();
-                }
-
-                // add the new item
-                // unless it is an update and it's nextFetchDate is 0 == NEVER
-                if (!discovered && nextFetchDate == 0) {
-                    queueMD.incrementCompleted();
-                    putURLs_completed_count.inc();
-                } else {
-                    // it is either brand new or already known
-                    queueMD.incrementActive();
-                }
-
+                String url = putURLItem(value);
                 responseObserver.onNext(
                         crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
                                 .setValue(url)
@@ -894,5 +780,109 @@ public class IgniteService extends DistributedFrontierService
             LOG.error("Exception when calling maybeRefresh in getURLs", e);
         }
         super.getURLs(request, responseObserver);
+    }
+
+    @Override
+    protected String putURLItem(URLItem value) {
+
+        long nextFetchDate;
+        boolean discovered = true;
+        URLInfo info;
+
+        putURLs_urls_count.inc();
+
+        if (value.hasDiscovered()) {
+            putURLs_discovered_count.labels("true").inc();
+            info = value.getDiscovered().getInfo();
+            nextFetchDate = Instant.now().getEpochSecond();
+        } else {
+            putURLs_discovered_count.labels("false").inc();
+            KnownURLItem known = value.getKnown();
+            info = known.getInfo();
+            nextFetchDate = known.getRefetchableFromDate();
+            discovered = Boolean.FALSE;
+        }
+
+        String Qkey = info.getKey();
+        String url = info.getUrl();
+        String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
+
+        // has a queue key been defined? if not use the hostname
+        if (Qkey.equals("")) {
+            LOG.debug("key missing for {}", url);
+            Qkey = provideMissingKey(url);
+            if (Qkey == null) {
+                LOG.error("Malformed URL {}", url);
+                return url;
+            }
+            // make a new info object ready to return
+            info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
+        }
+
+        // check that the key is not too long
+        if (Qkey.length() > 255) {
+            LOG.error("Key too long: {}", Qkey);
+            return url;
+        }
+
+        QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
+
+        // ignore this url if the queue is being deleted
+        if (queuesBeingDeleted.containsKey(qk)) {
+            LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
+            return url;
+        }
+
+        IgniteCache<Key, Payload> _cache = createOrGetCacheForCrawlID(crawlID);
+
+        final Key key = new Key(qk.toString(), url);
+
+        // is this URL already known?
+        boolean known = _cache.containsKey(key);
+
+        // already known? ignore if discovered
+        if (known && discovered) {
+            putURLs_alreadyknown_count.inc();
+            return url;
+        }
+
+        // get the priority queue - if it is a local one
+        // or create a dummy one
+        // but do not create it in the queues unless we are in a non distributed
+        // environment
+        QueueMetadata queueMD = null;
+
+        if (clusterMode) {
+            queueMD = (QueueMetadata) queues.getOrDefault(qk, new QueueMetadata());
+        } else {
+            queueMD = (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
+        }
+
+        // but make sure it exists globally anyway
+        globalQueueCache.putIfAbsent(qk.toString(), qk.toString());
+
+        Payload newpayload = new Payload(nextFetchDate, info.toByteArray());
+
+        _cache.put(key, newpayload);
+
+        // known - remove from queues
+        // its key in the queues was stored in the default cf
+        if (known) {
+            // remove from queue metadata
+            queueMD.removeFromProcessed(url);
+            queueMD.decrementActive();
+        }
+
+        // add the new item
+        // unless it is an update and it's nextFetchDate is 0 == NEVER
+        if (!discovered && nextFetchDate == 0) {
+            queueMD.incrementCompleted();
+            putURLs_completed_count.inc();
+        } else {
+            // it is either brand new or already known
+            queueMD.incrementActive();
+        }
+
+        return url;
     }
 }

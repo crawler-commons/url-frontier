@@ -16,8 +16,8 @@ package crawlercommons.urlfrontier.service.ignite;
 
 import crawlercommons.urlfrontier.service.cluster.Hearbeat;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import javax.cache.Cache.Entry;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
@@ -39,7 +39,7 @@ public class IgniteHeartbeat extends Hearbeat {
         IgniteCache<String, String> frontiers = ignite.cache(IgniteService.frontiersCacheName);
         frontiers.put(listener.getHostAndPort(), Instant.now().toString());
 
-        Set<String> activeFrontiers = new HashSet<>();
+        List<String> activeFrontiers = new ArrayList<>();
 
         // get all the active frontiers and notify the listener about them
         try (QueryCursor<Entry<String, String>> cur =

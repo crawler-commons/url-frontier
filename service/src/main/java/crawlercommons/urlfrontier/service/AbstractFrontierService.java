@@ -108,7 +108,7 @@ public abstract class AbstractFrontierService
     protected String address;
 
     // known nodes in a cluster setup
-    protected Set<String> nodes;
+    protected List<String> nodes;
 
     // in memory map of metadata for each queue
     protected final Map<QueueWithinCrawl, QueueInterface> queues =
@@ -134,7 +134,7 @@ public abstract class AbstractFrontierService
         return address;
     }
 
-    public void setNodes(Set<String> n) {
+    public void setNodes(List<String> n) {
         this.nodes = n;
     }
 

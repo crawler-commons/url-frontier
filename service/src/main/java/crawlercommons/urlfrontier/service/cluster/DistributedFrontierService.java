@@ -24,6 +24,7 @@ import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
+import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Local;
 import crawlercommons.urlfrontier.Urlfrontier.LogLevelParams;
 import crawlercommons.urlfrontier.Urlfrontier.Pagination;
@@ -31,6 +32,8 @@ import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
+import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
+import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
@@ -39,6 +42,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -287,4 +291,74 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         // close all the connections
         cache.invalidateAll();
     }
+
+    /** Sends the incoming items to a node based on the queue hash * */
+    public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>
+                    responseObserver) {
+
+        putURLs_calls.inc();
+
+        return new StreamObserver<URLItem>() {
+
+            @Override
+            public void onNext(URLItem value) {
+
+                URLInfo info;
+
+                if (value.hasDiscovered()) {
+                    info = value.getDiscovered().getInfo();
+                } else {
+                    KnownURLItem known = value.getKnown();
+                    info = known.getInfo();
+                }
+
+                String Qkey = info.getKey();
+                String url = info.getUrl();
+                String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
+
+                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
+
+                // work out which node should receive the item
+                int partition = Math.abs(qk.toString().hashCode() % nodes.size());
+
+                // is it the local node?
+                Collections.sort(nodes);
+                int index = nodes.indexOf(address);
+                if (index == -1) {
+                    throw new RuntimeException(
+                            "ShardedRocksDBService found ignite.nodes but current node's address not set");
+                }
+
+                if (partition == index) {
+                    putURLItem(value);
+                } else {
+                    // TODO forward to non-local node
+                    // should not happen too frequently
+                    //					ManagedChannel channel =
+                    // ManagedChannelBuilder.forTarget(nodes.get(index)).usePlaintext().build();
+                    //					 URLFrontierStub stub = URLFrontierGrpc.newStub(channel);
+                    //					 stub.putURLs();
+                }
+
+                responseObserver.onNext(
+                        crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                                .setValue(url)
+                                .build());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                LOG.error("Throwable caught", t);
+            }
+
+            @Override
+            public void onCompleted() {
+                // will this ever get called if the client is constantly streaming?
+                responseObserver.onCompleted();
+            }
+        };
+    }
+
+    protected abstract String putURLItem(URLItem item);
 }
