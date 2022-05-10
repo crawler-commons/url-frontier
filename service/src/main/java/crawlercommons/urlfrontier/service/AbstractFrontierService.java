@@ -650,8 +650,13 @@ public abstract class AbstractFrontierService
 
     @Override
     public void listNodes(Empty request, StreamObserver<StringList> responseObserver) {
+
+        if (nodes == null) {
+            nodes = new HashSet();
+        }
+
         // by default return only this node.
-        if (nodes == null || nodes.isEmpty()) {
+        if (nodes.isEmpty()) {
             nodes.add(this.getHostAndPort());
         }
         responseObserver.onNext(StringList.newBuilder().addAllValues(nodes).build());
