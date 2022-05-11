@@ -104,6 +104,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             statistics.setStatsLevel(StatsLevel.ALL);
         }
 
+        boolean checkOnRecovery = configuration.containsKey("rocksdb.recovery.check");
+
         boolean bloomFilters = configuration.containsKey("rocksdb.bloom.filters");
 
         try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()) {
@@ -161,7 +163,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
             LOG.info("Scanning tables to rebuild queues... (can take a long time)");
 
-            recoveryQscan();
+            recoveryQscan(checkOnRecovery);
 
             long end2 = System.currentTimeMillis();
 
@@ -169,19 +171,22 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         }
     }
 
-    /** Resurrects the queues from the tables and does sanity checks * */
-    private void recoveryQscan() {
+    /** Resurrects the queues from the tables and optionally does sanity checks * */
+    private void recoveryQscan(boolean check) {
 
         LOG.info("Recovering queues from existing RocksDB");
 
-        try (final RocksIterator rocksIterator =
-                rocksDB.newIterator(columnFamilyHandleList.get(1))) {
-            for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
-                final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-                final QueueWithinCrawl qk = QueueWithinCrawl.parseAndDeNormalise(currentKey);
-                QueueMetadata queueMD =
-                        (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
-                queueMD.incrementActive();
+        if (check) {
+            try (final RocksIterator rocksIterator =
+                    rocksDB.newIterator(columnFamilyHandleList.get(1))) {
+                for (rocksIterator.seekToFirst(); rocksIterator.isValid(); rocksIterator.next()) {
+                    final String currentKey =
+                            new String(rocksIterator.key(), StandardCharsets.UTF_8);
+                    final QueueWithinCrawl qk = QueueWithinCrawl.parseAndDeNormalise(currentKey);
+                    QueueMetadata queueMD =
+                            (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
+                    queueMD.incrementActive();
+                }
             }
         }
 
@@ -198,7 +203,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 // changed ID? check that the previous one had the correct values
                 if (previousQueueID == null) {
                     previousQueueID = Qkey;
-                } else if (!previousQueueID.equals(Qkey)) {
+                } else if (check && !previousQueueID.equals(Qkey)) {
                     if (queues.get(previousQueueID).countActive() != numScheduled)
                         throw new RuntimeException(
                                 "Incorrect number of active URLs for queue " + previousQueueID);
@@ -218,13 +223,19 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 if (done) {
                     queueMD.incrementCompleted();
                 } else {
+                    // if no checks have been done increment active
+                    if (!check) {
+                        queueMD.incrementActive();
+                    }
                     // double check the number of scheduled later on
                     numScheduled++;
                 }
             }
         }
         // check the last key
-        if (previousQueueID != null && queues.get(previousQueueID).countActive() != numScheduled) {
+        if (check
+                && previousQueueID != null
+                && queues.get(previousQueueID).countActive() != numScheduled) {
             throw new RuntimeException(
                     "Incorrect number of active URLs for queue " + previousQueueID);
         }
