@@ -75,7 +75,10 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             };
 
     private LoadingCache<String, URLFrontierBlockingStub> cache =
-            CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES).build(loader);
+            CacheBuilder.newBuilder()
+                    .expireAfterAccess(1, TimeUnit.MINUTES)
+                    .removalListener(listener)
+                    .build(loader);
 
     private URLFrontierBlockingStub getFrontier(String target) {
         return cache.getUnchecked(target);
