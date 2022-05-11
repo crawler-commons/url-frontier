@@ -1,4 +1,4 @@
-FROM maven:3-jdk-8 AS build
+FROM maven:3-jdk-11 AS build
 
 RUN useradd -m urlfrontier
 
@@ -18,7 +18,7 @@ RUN mvn clean package -DskipFormatCode=true
 RUN rm service/target/original-*.jar
 RUN cp service/target/*.jar urlfrontier-service.jar
 
-FROM openjdk:8-jdk-slim
+FROM openjdk:11-jdk-slim
 
 RUN useradd -m urlfrontier
 
@@ -28,4 +28,4 @@ COPY --chown=urlfrontier --from=build /home/urlfrontier/urlfrontier-service.jar 
 
 USER urlfrontier
 
-ENTRYPOINT ["java", "-Xmx2G", "-jar", "urlfrontier-service.jar"]
+ENTRYPOINT ["java", "-Xms2G", "-Xmx2G", "-XX:+UseG1GC", "-jar", "urlfrontier-service.jar"]
