@@ -17,8 +17,8 @@
 	<properties>
 		<prometheus.version>0.15.0</prometheus.version>
 		<ignite.version>2.13.0</ignite.version>
-		<lucene.version>8.11.1</lucene.version>
-		<rocksdb.version>6.29.5</rocksdb.version>
+		<lucene.version>9.1.0</lucene.version>
+		<rocksdb.version>7.2.2</rocksdb.version>
 	</properties>
 
 	<build>
