@@ -56,32 +56,30 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     protected boolean clusterMode = false;
 
-    private final CacheLoader<String, URLFrontierBlockingStub> loader =
-            new CacheLoader<String, URLFrontierBlockingStub>() {
+    private final CacheLoader<String, ManagedChannel> loader =
+            new CacheLoader<String, ManagedChannel>() {
                 @Override
-                public URLFrontierBlockingStub load(String target) {
-                    ManagedChannel channel =
-                            ManagedChannelBuilder.forTarget(target).usePlaintext().build();
-                    return URLFrontierGrpc.newBlockingStub(channel);
+                public ManagedChannel load(String target) {
+                    return ManagedChannelBuilder.forTarget(target).usePlaintext().build();
                 }
             };
 
-    private final RemovalListener<String, URLFrontierBlockingStub> listener =
-            new RemovalListener<String, URLFrontierBlockingStub>() {
+    private final RemovalListener<String, ManagedChannel> listener =
+            new RemovalListener<String, ManagedChannel>() {
                 @Override
-                public void onRemoval(RemovalNotification<String, URLFrontierBlockingStub> n) {
-                    ((ManagedChannel) n.getValue().getChannel()).shutdownNow();
+                public void onRemoval(RemovalNotification<String, ManagedChannel> n) {
+                    n.getValue().shutdownNow();
                 }
             };
 
-    private LoadingCache<String, URLFrontierBlockingStub> cache =
+    private LoadingCache<String, ManagedChannel> cache =
             CacheBuilder.newBuilder()
-                    .expireAfterAccess(1, TimeUnit.MINUTES)
                     .removalListener(listener)
+                    .expireAfterAccess(1, TimeUnit.MINUTES)
                     .build(loader);
 
     private URLFrontierBlockingStub getFrontier(String target) {
-        return cache.getUnchecked(target);
+        return URLFrontierGrpc.newBlockingStub(cache.getUnchecked(target));
     }
 
     /** Delete the queue based on the key in parameter */
@@ -95,7 +93,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         int sizeQueue = 0;
 
         if (!request.getLocal() || !clusterMode) {
-            for (String node : nodes) {
+            for (String node : getNodes()) {
                 if (node.equals(address)) continue;
                 // call the delete endpoint in the target node
                 // force to local so that remote node don't go recursive
@@ -141,7 +139,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                             .setLocal(true)
                             .setValue(message.getValue())
                             .build();
-            for (String node : nodes) {
+            for (String node : getNodes()) {
                 if (node.equals(address)) continue;
                 // call the delete endpoint in the target node
                 URLFrontierBlockingStub blockingFrontier = getFrontier(node);
@@ -181,7 +179,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         // force to local so that remote nodes don't go recursive
         QueueWithinCrawlParams local =
                 QueueWithinCrawlParams.newBuilder(request).setLocal(true).build();
-        for (String node : nodes) {
+        for (String node : getNodes()) {
             URLFrontierBlockingStub blockingFrontier = getFrontier(node);
             Stats localStats = blockingFrontier.getStats(local);
             numQueues += localStats.getNumberOfQueues();
@@ -214,7 +212,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         if (!request.getLocal() || clusterMode) {
             // force to local so that remote node don't go recursive
             LogLevelParams local = LogLevelParams.newBuilder(request).setLocal(true).build();
-            for (String node : nodes) {
+            for (String node : getNodes()) {
                 // exclude the local node
                 if (node.equals(address)) continue;
                 URLFrontierBlockingStub blockingFrontier = getFrontier(node);
@@ -235,7 +233,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         if (!request.getLocal() || clusterMode) {
             // force to local so that remote node don't go recursive
             Local local = Local.newBuilder().setLocal(true).build();
-            for (String node : nodes) {
+            for (String node : getNodes()) {
                 // exclude the local node
                 if (node.equals(address)) continue;
                 URLFrontierBlockingStub blockingFrontier = getFrontier(node);
@@ -271,7 +269,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         Set<String> dedup = new HashSet<>();
 
         Pagination localPagination = Pagination.newBuilder(request).setLocal(true).build();
-        for (String node : nodes) {
+        for (String node : getNodes()) {
             URLFrontierBlockingStub blockingFrontier = getFrontier(node);
             QueueList listqueues = blockingFrontier.listQueues(localPagination);
             for (String s : listqueues.getValuesList()) {

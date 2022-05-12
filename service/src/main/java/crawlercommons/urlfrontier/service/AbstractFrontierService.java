@@ -28,10 +28,12 @@ import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
+import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.stub.StreamObserver;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Summary;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,7 +110,7 @@ public abstract class AbstractFrontierService
     protected String address;
 
     // known nodes in a cluster setup
-    protected Set<String> nodes;
+    private List<String> nodes;
 
     // in memory map of metadata for each queue
     protected final Map<QueueWithinCrawl, QueueInterface> queues =
@@ -116,6 +118,10 @@ public abstract class AbstractFrontierService
 
     public int getDefaultDelayForQueues() {
         return defaultDelayForQueues;
+    }
+
+    protected List<String> getNodes() {
+        return nodes;
     }
 
     public void setDefaultDelayForQueues(int defaultDelayForQueues) {
@@ -134,8 +140,9 @@ public abstract class AbstractFrontierService
         return address;
     }
 
-    public void setNodes(Set<String> n) {
-        this.nodes = n;
+    public void setNodes(List<String> n) {
+        nodes = n;
+        Collections.sort(nodes);
     }
 
     @Override
@@ -486,7 +493,7 @@ public abstract class AbstractFrontierService
             // even the default one
 
             if (crawlID == null) {
-                // TODO log error
+                LOG.error("Want URLs from a specific queue but the crawlID is not set");
                 responseObserver.onCompleted();
                 return;
             }
@@ -652,7 +659,7 @@ public abstract class AbstractFrontierService
     public void listNodes(Empty request, StreamObserver<StringList> responseObserver) {
 
         if (nodes == null) {
-            nodes = new HashSet();
+            nodes = new ArrayList<>();
         }
 
         // by default return only this node.
@@ -662,4 +669,37 @@ public abstract class AbstractFrontierService
         responseObserver.onNext(StringList.newBuilder().addAllValues(nodes).build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public StreamObserver<URLItem> putURLs(
+            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
+
+        putURLs_calls.inc();
+
+        return new StreamObserver<URLItem>() {
+
+            @Override
+            public void onNext(URLItem value) {
+                String url = putURLItem(value);
+                responseObserver.onNext(
+                        crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                                .setValue(url)
+                                .build());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                LOG.error("Throwable caught", t);
+            }
+
+            @Override
+            public void onCompleted() {
+                // will this ever get called if the client is constantly streaming?
+                responseObserver.onCompleted();
+            }
+        };
+    }
+
+    /** logic for handling an individual item * */
+    protected abstract String putURLItem(URLItem value);
 }

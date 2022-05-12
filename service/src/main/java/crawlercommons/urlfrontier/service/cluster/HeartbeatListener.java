@@ -14,7 +14,7 @@
  */
 package crawlercommons.urlfrontier.service.cluster;
 
-import java.util.Set;
+import java.util.List;
 
 /** Representation of the Frontier instances so that the heartbeats can communicate with them * */
 public interface HeartbeatListener {
@@ -22,5 +22,5 @@ public interface HeartbeatListener {
     String getHostAndPort();
 
     /** Report back to the assigner with the list of nodes in the cluster * */
-    public void setNodes(Set<String> n);
+    public void setNodes(List<String> n);
 }

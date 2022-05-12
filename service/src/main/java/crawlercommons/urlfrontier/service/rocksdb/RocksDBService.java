@@ -305,157 +305,115 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     }
 
     @Override
-    public StreamObserver<URLItem> putURLs(
-            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
+    protected String putURLItem(URLItem value) {
 
-        putURLs_calls.inc();
+        long nextFetchDate;
+        boolean discovered = true;
+        URLInfo info;
 
-        return new StreamObserver<URLItem>() {
+        putURLs_urls_count.inc();
 
-            @Override
-            public void onNext(URLItem value) {
+        if (value.hasDiscovered()) {
+            putURLs_discovered_count.labels("true").inc();
+            info = value.getDiscovered().getInfo();
+            nextFetchDate = Instant.now().getEpochSecond();
+        } else {
+            putURLs_discovered_count.labels("false").inc();
+            KnownURLItem known = value.getKnown();
+            info = known.getInfo();
+            nextFetchDate = known.getRefetchableFromDate();
+            discovered = Boolean.FALSE;
+        }
 
-                long nextFetchDate;
-                boolean discovered = true;
-                URLInfo info;
+        String Qkey = info.getKey();
+        String url = info.getUrl();
+        String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
 
-                putURLs_urls_count.inc();
+        // has a queue key been defined? if not use the hostname
+        if (Qkey.equals("")) {
+            LOG.debug("key missing for {}", url);
+            Qkey = provideMissingKey(url);
+            if (Qkey == null) {
+                LOG.error("Malformed URL {}", url);
+                return url;
+            }
+            // make a new info object ready to return
+            info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
+        }
 
-                if (value.hasDiscovered()) {
-                    putURLs_discovered_count.labels("true").inc();
-                    info = value.getDiscovered().getInfo();
-                    nextFetchDate = Instant.now().getEpochSecond();
-                } else {
-                    putURLs_discovered_count.labels("false").inc();
-                    KnownURLItem known = value.getKnown();
-                    info = known.getInfo();
-                    nextFetchDate = known.getRefetchableFromDate();
-                    discovered = Boolean.FALSE;
-                }
+        // check that the key is not too long
+        if (Qkey.length() > 255) {
+            LOG.error("Key too long: {}", Qkey);
+            return url;
+        }
 
-                String Qkey = info.getKey();
-                String url = info.getUrl();
-                String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
+        QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
 
-                // has a queue key been defined? if not use the hostname
-                if (Qkey.equals("")) {
-                    LOG.debug("key missing for {}", url);
-                    Qkey = provideMissingKey(url);
-                    if (Qkey == null) {
-                        LOG.error("Malformed URL {}", url);
-                        responseObserver.onNext(
-                                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                        .setValue(url)
-                                        .build());
-                        return;
-                    }
-                    // make a new info object ready to return
-                    info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
-                }
+        // ignore this url if the queue is being deleted
+        if (queuesBeingDeleted.containsKey(qk)) {
+            LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
+            return url;
+        }
 
-                // check that the key is not too long
-                if (Qkey.length() > 255) {
-                    LOG.error("Key too long: {}", Qkey);
-                    responseObserver.onNext(
-                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                    .setValue(url)
-                                    .build());
-                    return;
-                }
+        byte[] schedulingKey = null;
 
-                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
+        final byte[] existenceKey = (qk.toString() + "_" + url).getBytes(StandardCharsets.UTF_8);
 
-                // ignore this url if the queue is being deleted
-                if (queuesBeingDeleted.containsKey(qk)) {
-                    LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
-                    responseObserver.onNext(
-                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                    .setValue(url)
-                                    .build());
-                    return;
-                }
+        // is this URL already known?
+        try {
+            schedulingKey = rocksDB.get(existenceKey);
+        } catch (RocksDBException e) {
+            LOG.error("RocksDB exception", e);
+            // TODO notify the client
+            return url;
+        }
 
-                byte[] schedulingKey = null;
+        // already known? ignore if discovered
+        if (schedulingKey != null && discovered) {
+            putURLs_alreadyknown_count.inc();
+            return url;
+        }
 
-                final byte[] existenceKey =
-                        (qk.toString() + "_" + url).getBytes(StandardCharsets.UTF_8);
-
-                // is this URL already known?
-                try {
-                    schedulingKey = rocksDB.get(existenceKey);
-                } catch (RocksDBException e) {
-                    LOG.error("RocksDB exception", e);
-                    // TODO notify the client
-                    return;
-                }
-
-                // already known? ignore if discovered
-                if (schedulingKey != null && discovered) {
-                    putURLs_alreadyknown_count.inc();
-                    responseObserver.onNext(
-                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                    .setValue(url)
-                                    .build());
-                    return;
-                }
-
-                // get the priority queue or create one
-                QueueMetadata queueMD =
-                        (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
-                try {
-                    // known - remove from queues
-                    // its key in the queues was stored in the default cf
-                    if (schedulingKey != null) {
-                        rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
-                        // remove from queue metadata
-                        queueMD.removeFromProcessed(url);
-                        queueMD.decrementActive();
-                    }
-
-                    // add the new item
-                    // unless it is an update and it's nextFetchDate is 0 == NEVER
-                    if (!discovered && nextFetchDate == 0) {
-                        // does not need scheduling
-                        // remove any scheduling key from its value
-                        schedulingKey = new byte[] {};
-                        queueMD.incrementCompleted();
-                        putURLs_completed_count.inc();
-                    } else {
-                        // it is either brand new or already known
-                        // create a scheduling key for it
-                        schedulingKey =
-                                (qk.toString() + "_" + DF.format(nextFetchDate) + "_" + url)
-                                        .getBytes(StandardCharsets.UTF_8);
-                        // add to the scheduling
-                        rocksDB.put(
-                                columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
-                        queueMD.incrementActive();
-                    }
-                    // update the link to its queue
-                    // TODO put in a batch? rocksDB.write(new WriteOptions(), writeBatch);
-                    rocksDB.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
-
-                } catch (RocksDBException e) {
-                    LOG.error("RocksDB exception", e);
-                }
-
-                responseObserver.onNext(
-                        crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                .setValue(url)
-                                .build());
+        // get the priority queue or create one
+        QueueMetadata queueMD =
+                (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
+        try {
+            // known - remove from queues
+            // its key in the queues was stored in the default cf
+            if (schedulingKey != null) {
+                rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
+                // remove from queue metadata
+                queueMD.removeFromProcessed(url);
+                queueMD.decrementActive();
             }
 
-            @Override
-            public void onError(Throwable t) {
-                LOG.error("Throwable caught", t);
+            // add the new item
+            // unless it is an update and it's nextFetchDate is 0 == NEVER
+            if (!discovered && nextFetchDate == 0) {
+                // does not need scheduling
+                // remove any scheduling key from its value
+                schedulingKey = new byte[] {};
+                queueMD.incrementCompleted();
+                putURLs_completed_count.inc();
+            } else {
+                // it is either brand new or already known
+                // create a scheduling key for it
+                schedulingKey =
+                        (qk.toString() + "_" + DF.format(nextFetchDate) + "_" + url)
+                                .getBytes(StandardCharsets.UTF_8);
+                // add to the scheduling
+                rocksDB.put(columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
+                queueMD.incrementActive();
             }
+            // update the link to its queue
+            // TODO put in a batch? rocksDB.write(new WriteOptions(), writeBatch);
+            rocksDB.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
 
-            @Override
-            public void onCompleted() {
-                // will this ever get called if the client is constantly streaming?
-                responseObserver.onCompleted();
-            }
-        };
+        } catch (RocksDBException e) {
+            LOG.error("RocksDB exception", e);
+        }
+
+        return url;
     }
 
     /**
