@@ -494,6 +494,10 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     @Override
     public void close() throws IOException {
 
+        LOG.info("Closing RocksDB");
+
+        super.close();
+
         for (final ColumnFamilyHandle columnFamilyHandle : columnFamilyHandleList) {
             columnFamilyHandle.close();
         }

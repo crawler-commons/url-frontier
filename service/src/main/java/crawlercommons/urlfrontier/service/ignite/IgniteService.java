@@ -105,8 +105,6 @@ public class IgniteService extends DistributedFrontierService
 
     private final IgniteCache<String, String> globalQueueCache;
 
-    private boolean closing = false;
-
     private final IgniteHeartbeat ihb;
 
     private final IndexWriter iwriter;
@@ -398,7 +396,6 @@ public class IgniteService extends DistributedFrontierService
     @Override
     public void close() throws IOException {
         LOG.info("Closing Ignite");
-        closing = true;
 
         super.close();
 
@@ -471,7 +468,7 @@ public class IgniteService extends DistributedFrontierService
         public void run() {
 
             while (true) {
-                if (closing) return;
+                if (isClosing()) return;
 
                 // implement delay between requests
                 long msecTowait =

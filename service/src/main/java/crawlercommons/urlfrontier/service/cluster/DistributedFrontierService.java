@@ -37,7 +37,6 @@ import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,8 +47,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.LoggerFactory;
 
-public abstract class DistributedFrontierService extends AbstractFrontierService
-        implements Closeable {
+public abstract class DistributedFrontierService extends AbstractFrontierService {
 
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(DistributedFrontierService.class);
@@ -285,6 +283,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     @Override
     public void close() throws IOException {
+        super.close();
         // close all the connections
         cache.invalidateAll();
     }
