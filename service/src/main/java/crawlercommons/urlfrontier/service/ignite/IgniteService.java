@@ -105,8 +105,6 @@ public class IgniteService extends DistributedFrontierService
 
     private final IgniteCache<String, String> globalQueueCache;
 
-    private boolean closing = false;
-
     private final IgniteHeartbeat ihb;
 
     private final IndexWriter iwriter;
@@ -398,7 +396,6 @@ public class IgniteService extends DistributedFrontierService
     @Override
     public void close() throws IOException {
         LOG.info("Closing Ignite");
-        closing = true;
 
         super.close();
 
@@ -471,7 +468,7 @@ public class IgniteService extends DistributedFrontierService
         public void run() {
 
             while (true) {
-                if (closing) return;
+                if (isClosing()) return;
 
                 // implement delay between requests
                 long msecTowait =
@@ -529,8 +526,6 @@ public class IgniteService extends DistributedFrontierService
     public StreamObserver<URLItem> putURLs(
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
 
-        putURLs_calls.inc();
-
         // throttle the flow of incoming changes to give Lucene
         // a chance of keeping up
         while (this.additions.size() >= maxUncommittedAdditions) {
@@ -540,28 +535,7 @@ public class IgniteService extends DistributedFrontierService
             }
         }
 
-        return new StreamObserver<URLItem>() {
-
-            @Override
-            public void onNext(URLItem value) {
-                String url = putURLItem(value);
-                responseObserver.onNext(
-                        crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                .setValue(url)
-                                .build());
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                LOG.error("Throwable caught", t);
-            }
-
-            @Override
-            public void onCompleted() {
-                // will this ever get called if the client is constantly streaming?
-                responseObserver.onCompleted();
-            }
-        };
+        return super.putURLs(responseObserver);
     }
 
     @Override

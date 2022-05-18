@@ -79,107 +79,65 @@ public class MemoryFrontierService extends AbstractFrontierService {
     }
 
     @Override
-    public StreamObserver<URLItem> putURLs(
-            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
+    protected String putURLItem(URLItem value) {
 
-        putURLs_calls.inc();
+        Object[] parsed = InternalURL.from(value);
 
-        return new StreamObserver<URLItem>() {
+        String key = (String) parsed[0];
+        Boolean discovered = (Boolean) parsed[1];
+        InternalURL iu = (InternalURL) parsed[2];
 
-            @Override
-            public void onNext(URLItem value) {
+        putURLs_urls_count.inc();
 
-                Object[] parsed = InternalURL.from(value);
+        putURLs_discovered_count.labels(discovered.toString().toLowerCase()).inc();
 
-                String key = (String) parsed[0];
-                Boolean discovered = (Boolean) parsed[1];
-                InternalURL iu = (InternalURL) parsed[2];
+        // has a queue key been defined? if not use the hostname
+        if (key.equals("")) {
+            LOG.debug("key missing for {}", iu.url);
+            key = provideMissingKey(iu.url);
+            if (key == null) {
+                LOG.error("Malformed URL {}", iu.url);
+                return iu.url;
+            }
+        }
 
-                putURLs_urls_count.inc();
+        // check that the key is not too long
+        if (key.length() > 255) {
+            LOG.error("Key too long: {}", key);
+            return iu.url;
+        }
 
-                putURLs_discovered_count.labels(discovered.toString().toLowerCase()).inc();
+        QueueWithinCrawl qk = QueueWithinCrawl.get(key, iu.crawlID);
 
-                // has a queue key been defined? if not use the hostname
-                if (key.equals("")) {
-                    LOG.debug("key missing for {}", iu.url);
-                    key = provideMissingKey(iu.url);
-                    if (key == null) {
-                        LOG.error("Malformed URL {}", iu.url);
-                        responseObserver.onNext(
-                                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                        .setValue(iu.url)
-                                        .build());
-                        return;
-                    }
-                }
-
-                // check that the key is not too long
-                if (key.length() > 255) {
-                    LOG.error("Key too long: {}", key);
-                    responseObserver.onNext(
-                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                    .setValue(iu.url)
-                                    .build());
-                    return;
-                }
-
-                QueueWithinCrawl qk = QueueWithinCrawl.get(key, iu.crawlID);
-
-                // get the priority queue or create one
-                synchronized (queues) {
-                    URLQueue queue = (URLQueue) queues.get(qk);
-                    if (queue == null) {
-                        queues.put(qk, new URLQueue(iu));
-                        // ack reception of the URL
-                        responseObserver.onNext(
-                                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                        .setValue(iu.url)
-                                        .build());
-                        return;
-                    }
-
-                    // check whether the URL already exists
-                    if (queue.contains(iu)) {
-                        if (discovered) {
-                            putURLs_alreadyknown_count.inc();
-                            // we already discovered it - so no need for it
-                            responseObserver.onNext(
-                                    crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                            .setValue(iu.url)
-                                            .build());
-                            return;
-                        } else {
-                            // overwrite the existing version
-                            queue.remove(iu);
-                        }
-                    }
-
-                    // add the new item
-                    // unless it is an update and it's nextFetchDate is 0 == NEVER
-                    if (!discovered && iu.nextFetchDate == 0) {
-                        putURLs_completed_count.inc();
-                        queue.addToCompleted(iu.url);
-                    } else {
-                        queue.add(iu);
-                    }
-                }
-
-                responseObserver.onNext(
-                        crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                .setValue(iu.url)
-                                .build());
+        // get the priority queue or create one
+        synchronized (queues) {
+            URLQueue queue = (URLQueue) queues.get(qk);
+            if (queue == null) {
+                queues.put(qk, new URLQueue(iu));
+                return iu.url;
             }
 
-            @Override
-            public void onError(Throwable t) {
-                LOG.error("Throwable caught", t);
+            // check whether the URL already exists
+            if (queue.contains(iu)) {
+                if (discovered) {
+                    putURLs_alreadyknown_count.inc();
+                    // we already discovered it - so no need for it
+                    return iu.url;
+                } else {
+                    // overwrite the existing version
+                    queue.remove(iu);
+                }
             }
 
-            @Override
-            public void onCompleted() {
-                // will this ever get called if the client is constantly streaming?
-                responseObserver.onCompleted();
+            // add the new item
+            // unless it is an update and it's nextFetchDate is 0 == NEVER
+            if (!discovered && iu.nextFetchDate == 0) {
+                putURLs_completed_count.inc();
+                queue.addToCompleted(iu.url);
+            } else {
+                queue.add(iu);
             }
-        };
+        }
+        return iu.url;
     }
 }

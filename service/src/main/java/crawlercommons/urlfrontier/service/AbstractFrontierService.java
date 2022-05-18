@@ -28,10 +28,14 @@ import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
+import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.stub.StreamObserver;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Summary;
+import java.io.Closeable;
+import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,7 +50,8 @@ import java.util.UUID;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
-        extends crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase {
+        extends crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierImplBase
+        implements Closeable {
 
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(AbstractFrontierService.class);
@@ -114,6 +119,12 @@ public abstract class AbstractFrontierService
     protected final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
 
+    private boolean closing = false;
+
+    protected boolean isClosing() {
+        return closing;
+    }
+
     public int getDefaultDelayForQueues() {
         return defaultDelayForQueues;
     }
@@ -168,27 +179,29 @@ public abstract class AbstractFrontierService
             crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage crawlID,
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                     responseObserver) {
+        long total = -1;
 
-        long total = 0;
+        if (!isClosing()) {
+            total = 0;
+            final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID.getValue());
 
-        final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID.getValue());
+            final Set<QueueWithinCrawl> toDelete = new HashSet<>();
 
-        final Set<QueueWithinCrawl> toDelete = new HashSet<>();
-
-        synchronized (queues) {
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    queues.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
-                QueueWithinCrawl qwc = e.getKey();
-                if (qwc.getCrawlid().equals(normalisedCrawlID)) {
-                    toDelete.add(qwc);
+            synchronized (queues) {
+                Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                        queues.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                    QueueWithinCrawl qwc = e.getKey();
+                    if (qwc.getCrawlid().equals(normalisedCrawlID)) {
+                        toDelete.add(qwc);
+                    }
                 }
-            }
 
-            for (QueueWithinCrawl quid : toDelete) {
-                QueueInterface q = queues.remove(quid);
-                total += q.countActive();
+                for (QueueWithinCrawl quid : toDelete) {
+                    QueueInterface q = queues.remove(quid);
+                    total += q.countActive();
+                }
             }
         }
         responseObserver.onNext(
@@ -307,10 +320,12 @@ public abstract class AbstractFrontierService
 
     @Override
     public void blockQueueUntil(BlockQueueParams request, StreamObserver<Empty> responseObserver) {
-        QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
-        QueueInterface queue = queues.get(qwc);
-        if (queue != null) {
-            queue.setBlockedUntil(request.getTime());
+        if (!isClosing()) {
+            QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+            QueueInterface queue = queues.get(qwc);
+            if (queue != null) {
+                queue.setBlockedUntil(request.getTime());
+            }
         }
         responseObserver.onNext(Empty.getDefaultInstance());
         responseObserver.onCompleted();
@@ -318,13 +333,15 @@ public abstract class AbstractFrontierService
 
     @Override
     public void setDelay(QueueDelayParams request, StreamObserver<Empty> responseObserver) {
-        if (request.getKey().isEmpty()) {
-            setDefaultDelayForQueues(request.getDelayRequestable());
-        } else {
-            QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
-            QueueInterface queue = queues.get(qwc);
-            if (queue != null) {
-                queue.setDelay(request.getDelayRequestable());
+        if (!isClosing()) {
+            if (request.getKey().isEmpty()) {
+                setDefaultDelayForQueues(request.getDelayRequestable());
+            } else {
+                QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+                QueueInterface queue = queues.get(qwc);
+                if (queue != null) {
+                    queue.setDelay(request.getDelayRequestable());
+                }
             }
         }
         responseObserver.onNext(Empty.getDefaultInstance());
@@ -335,7 +352,7 @@ public abstract class AbstractFrontierService
      *
      *
      * <pre>
-     * * Delete  the queue based on the key in parameter *
+     * * Delete the queue based on the key in parameter *
      * </pre>
      */
     @Override
@@ -343,11 +360,15 @@ public abstract class AbstractFrontierService
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                     responseObserver) {
-        QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
-        QueueInterface q = queues.remove(qwc);
+        long countActive = -1;
+        if (!isClosing()) {
+            QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+            QueueInterface q = queues.remove(qwc);
+            countActive = q.countActive();
+        }
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
-                        .setValue(q.countActive())
+                        .setValue(countActive)
                         .build());
         responseObserver.onCompleted();
     }
@@ -435,8 +456,8 @@ public abstract class AbstractFrontierService
 
     @Override
     public void getURLs(GetParams request, StreamObserver<URLInfo> responseObserver) {
-        // on hold
-        if (!isActive()) {
+        // on hold or shutting down
+        if (!isActive() || isClosing()) {
             responseObserver.onCompleted();
             return;
         }
@@ -491,7 +512,7 @@ public abstract class AbstractFrontierService
             // even the default one
 
             if (crawlID == null) {
-                // TODO log error
+                LOG.error("Want URLs from a specific queue but the crawlID is not set");
                 responseObserver.onCompleted();
                 return;
             }
@@ -655,11 +676,57 @@ public abstract class AbstractFrontierService
 
     @Override
     public void listNodes(Empty request, StreamObserver<StringList> responseObserver) {
+
+        if (nodes == null) {
+            nodes = new ArrayList<>();
+        }
+
         // by default return only this node.
-        if (nodes == null || nodes.isEmpty()) {
+        if (nodes.isEmpty()) {
             nodes.add(this.getHostAndPort());
         }
         responseObserver.onNext(StringList.newBuilder().addAllValues(nodes).build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public StreamObserver<URLItem> putURLs(
+            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
+
+        putURLs_calls.inc();
+
+        return new StreamObserver<URLItem>() {
+
+            @Override
+            public void onNext(URLItem value) {
+                // do not add new stuff if we are in the process of closing
+                if (!isClosing()) {
+                    String url = putURLItem(value);
+                    responseObserver.onNext(
+                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
+                                    .setValue(url)
+                                    .build());
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                LOG.error("Throwable caught", t);
+            }
+
+            @Override
+            public void onCompleted() {
+                // will this ever get called if the client is constantly streaming?
+                responseObserver.onCompleted();
+            }
+        };
+    }
+
+    /** logic for handling an individual item * */
+    protected abstract String putURLItem(URLItem value);
+
+    @Override
+    public void close() throws IOException {
+        closing = true;
     }
 }
