@@ -39,7 +39,8 @@ public class ShardedRocksDBService extends DistributedFrontierService {
         // take coordinates of the nodes + able to identify itself in the list
         final String snodes = configuration.get("nodes");
         if (snodes == null) {
-            throw new RuntimeException("ShardedRocksDBService requires ignite.nodes to be set");
+            throw new RuntimeException(
+                    "ShardedRocksDBService requires configuration 'nodes' to be set");
         }
         // comma separated
         final List<String> lnodes = new ArrayList<>();

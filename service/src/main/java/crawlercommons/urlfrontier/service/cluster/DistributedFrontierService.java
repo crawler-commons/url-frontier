@@ -14,6 +14,7 @@
  */
 package crawlercommons.urlfrontier.service.cluster;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -51,7 +52,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.LoggerFactory;
 
 public abstract class DistributedFrontierService extends AbstractFrontierService {
@@ -86,6 +86,64 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
     private URLFrontierBlockingStub getFrontier(String target) {
         return URLFrontierGrpc.newBlockingStub(cache.getUnchecked(target));
     }
+
+    private final CacheLoader<Integer, StreamObserver<URLItem>> observerloader =
+            new CacheLoader<>() {
+                @Override
+                public StreamObserver<URLItem> load(Integer index) {
+                    // get the stream observer for that node
+                    final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
+                            observer;
+
+                    final URLFrontierStub stub =
+                            URLFrontierGrpc.newStub(cache.getUnchecked(getNodes().get(index)));
+
+                    observer =
+                            new StreamObserver<>() {
+
+                                @Override
+                                public void onNext(
+                                        crawlercommons.urlfrontier.Urlfrontier.AckMessage value) {
+                                    // go back to the client
+                                    // and notify that it has worked
+                                    StreamObserver<AckMessage> stream =
+                                            inprocesscache.getIfPresent(value.getID());
+                                    if (stream != null) {
+                                        stream.onNext(value);
+                                        inprocesscache.invalidate(value.getID());
+                                    }
+                                }
+
+                                @Override
+                                public void onError(Throwable t) {
+                                    LOG.error("Caught throwable when forwardng request ", t);
+                                }
+
+                                @Override
+                                public void onCompleted() {}
+                            };
+
+                    return stub.putURLs(observer);
+                }
+            };
+
+    private final RemovalListener<String, StreamObserver<URLItem>> observerlistener =
+            new RemovalListener<>() {
+                @Override
+                public void onRemoval(RemovalNotification<String, StreamObserver<URLItem>> n) {
+                    // TODO
+                }
+            };
+
+    private LoadingCache<Integer, StreamObserver<URLItem>> observercache =
+            CacheBuilder.newBuilder()
+                    .removalListener(observerlistener)
+                    .expireAfterAccess(10, TimeUnit.MINUTES)
+                    .build((CacheLoader) observerloader);
+
+    private Cache<String, StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>>
+            inprocesscache =
+                    CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build();
 
     /** Delete the queue based on the key in parameter */
     @Override
@@ -356,57 +414,19 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 if (partition == index) {
                     Status s = putURLItem(value);
                     responseObserver.onNext(ack.setStatus(s).build());
-                } else {
-                    // forward to non-local node
-                    // should not happen very frequently unless a crawler
-                    // allows outlinks to go outside the hostname
-
-                    final AtomicBoolean completed = new AtomicBoolean(false);
-
-                    final URLFrontierStub stub =
-                            URLFrontierGrpc.newStub(cache.getUnchecked(getNodes().get(index)));
-
-                    final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
-                            observer =
-                                    new StreamObserver<>() {
-
-                                        @Override
-                                        public void onNext(
-                                                crawlercommons.urlfrontier.Urlfrontier.AckMessage
-                                                        value) {
-                                            // forwards confirmation that the value has been
-                                            // received
-                                            responseObserver.onNext(value);
-                                        }
-
-                                        @Override
-                                        public void onError(Throwable t) {
-                                            completed.set(true);
-                                            LOG.error(
-                                                    "Caught throwable when forwardng request ", t);
-                                        }
-
-                                        @Override
-                                        public void onCompleted() {
-                                            completed.set(true);
-                                        }
-                                    };
-
-                    final StreamObserver<URLItem> streamObserver = stub.putURLs(observer);
-
-                    streamObserver.onNext(value);
-
-                    streamObserver.onCompleted();
-
-                    // wait for completion
-                    while (!completed.get()) {
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                    }
+                    return;
                 }
+                // forward to non-local node
+                // should not happen very frequently unless a crawler
+                // allows outlinks to go outside the hostname
+
+                // get the stream observer for that node
+                final StreamObserver<URLItem> observer = observercache.getUnchecked(partition);
+                // store the stuff in a temporary cache
+                inprocesscache.put(ack.getID(), responseObserver);
+
+                // give it the thing to process
+                observer.onNext(value);
             }
 
             @Override

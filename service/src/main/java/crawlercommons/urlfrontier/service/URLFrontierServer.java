@@ -181,9 +181,10 @@ public class URLFrontierServer implements Callable<Integer> {
         this.server = ServerBuilder.forPort(port).addService(service).build();
         server.start();
         LOG.info(
-                "Started URLFrontierServer [{}] on port {}",
+                "Started URLFrontierServer [{}] on port {} as {}",
                 service.getClass().getSimpleName(),
-                server.getPort());
+                server.getPort(),
+                service.getHostAndPort());
 
         registerShutdownHook();
 
