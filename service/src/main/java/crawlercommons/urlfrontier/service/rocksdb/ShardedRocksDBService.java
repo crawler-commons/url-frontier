@@ -14,6 +14,7 @@
  */
 package crawlercommons.urlfrontier.service.rocksdb;
 
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.QueueInterface;
@@ -80,7 +81,7 @@ public class ShardedRocksDBService extends DistributedFrontierService {
     }
 
     @Override
-    protected String putURLItem(URLItem item) {
+    protected Status putURLItem(URLItem item) {
         return instance.putURLItem(item);
     }
 }

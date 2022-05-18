@@ -368,11 +368,11 @@ public class URLFrontierServiceTest {
         final AtomicBoolean completed = new AtomicBoolean(false);
         final AtomicInteger acked = new AtomicInteger(0);
 
-        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver =
-                new StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>() {
+        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> responseObserver =
+                new StreamObserver<>() {
 
                     @Override
-                    public void onNext(crawlercommons.urlfrontier.Urlfrontier.String value) {
+                    public void onNext(crawlercommons.urlfrontier.Urlfrontier.AckMessage value) {
                         acked.addAndGet(1);
                     }
 

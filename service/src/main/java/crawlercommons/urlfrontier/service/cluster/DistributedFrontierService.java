@@ -23,6 +23,8 @@ import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
@@ -295,7 +297,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     /** Sends the incoming items to a node based on the queue hash * */
     public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
-            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
                     responseObserver) {
 
         putURLs_calls.inc();
@@ -318,16 +320,21 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 String url = info.getUrl();
                 String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
 
+                crawlercommons.urlfrontier.Urlfrontier.AckMessage.Builder ack =
+                        AckMessage.newBuilder();
+                if (value.getID() == null || value.getID().isEmpty()) {
+                    ack.setID(url);
+                } else {
+                    ack.setID(value.getID());
+                }
+
                 // has a queue key been defined? if not use the hostname
                 if (Qkey.equals("")) {
                     LOG.debug("key missing for {}", url);
                     Qkey = provideMissingKey(url);
                     if (Qkey == null) {
                         LOG.error("Malformed URL {}", url);
-                        responseObserver.onNext(
-                                crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                        .setValue(url)
-                                        .build());
+                        responseObserver.onNext(ack.setStatus(Status.SKIPPED).build());
                         return;
                     }
                     // make a new info object ready to return
@@ -347,11 +354,8 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 }
 
                 if (partition == index) {
-                    putURLItem(value);
-                    responseObserver.onNext(
-                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                    .setValue(url)
-                                    .build());
+                    Status s = putURLItem(value);
+                    responseObserver.onNext(ack.setStatus(s).build());
                 } else {
                     // forward to non-local node
                     // should not happen very frequently unless a crawler
@@ -362,27 +366,31 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     final URLFrontierStub stub =
                             URLFrontierGrpc.newStub(cache.getUnchecked(getNodes().get(index)));
 
-                    final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> observer =
-                            new StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>() {
+                    final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
+                            observer =
+                                    new StreamObserver<>() {
 
-                                @Override
-                                public void onNext(
-                                        crawlercommons.urlfrontier.Urlfrontier.String value) {
-                                    // forwards confirmation that the value has been received
-                                    responseObserver.onNext(value);
-                                }
+                                        @Override
+                                        public void onNext(
+                                                crawlercommons.urlfrontier.Urlfrontier.AckMessage
+                                                        value) {
+                                            // forwards confirmation that the value has been
+                                            // received
+                                            responseObserver.onNext(value);
+                                        }
 
-                                @Override
-                                public void onError(Throwable t) {
-                                    completed.set(true);
-                                    LOG.error("Caught throwable when forwardng request ", t);
-                                }
+                                        @Override
+                                        public void onError(Throwable t) {
+                                            completed.set(true);
+                                            LOG.error(
+                                                    "Caught throwable when forwardng request ", t);
+                                        }
 
-                                @Override
-                                public void onCompleted() {
-                                    completed.set(true);
-                                }
-                            };
+                                        @Override
+                                        public void onCompleted() {
+                                            completed.set(true);
+                                        }
+                                    };
 
                     final StreamObserver<URLItem> streamObserver = stub.putURLs(observer);
 
@@ -414,5 +422,5 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         };
     }
 
-    protected abstract String putURLItem(URLItem item);
+    protected abstract Status putURLItem(URLItem item);
 }

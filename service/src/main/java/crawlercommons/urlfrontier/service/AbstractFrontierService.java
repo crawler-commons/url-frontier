@@ -17,6 +17,9 @@ package crawlercommons.urlfrontier.service;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import crawlercommons.urlfrontier.CrawlID;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Builder;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
@@ -691,7 +694,7 @@ public abstract class AbstractFrontierService
 
     @Override
     public StreamObserver<URLItem> putURLs(
-            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
+            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> responseObserver) {
 
         putURLs_calls.inc();
 
@@ -699,14 +702,37 @@ public abstract class AbstractFrontierService
 
             @Override
             public void onNext(URLItem value) {
+                String url;
+                if (value.hasDiscovered()) {
+                    url = value.getDiscovered().getInfo().getUrl();
+                } else {
+                    url = value.getKnown().getInfo().getUrl();
+                }
+
+                crawlercommons.urlfrontier.Urlfrontier.AckMessage.Builder ack =
+                        AckMessage.newBuilder();
+                if (value.getID() == null || value.getID().isEmpty()) {
+                    ack.setID(url);
+                } else {
+                    ack.setID(value.getID());
+                }
+
+                Builder ackBuilder = AckMessage.newBuilder();
+
+                if (value.getID() == null || value.getID().isEmpty()) {
+                    ack.setID(url);
+                } else {
+                    ack.setID(value.getID());
+                }
+
+                Status status = Status.FAIL;
+
                 // do not add new stuff if we are in the process of closing
                 if (!isClosing()) {
-                    String url = putURLItem(value);
-                    responseObserver.onNext(
-                            crawlercommons.urlfrontier.Urlfrontier.String.newBuilder()
-                                    .setValue(url)
-                                    .build());
+                    status = putURLItem(value);
                 }
+
+                responseObserver.onNext(ackBuilder.setStatus(status).build());
             }
 
             @Override
@@ -722,8 +748,11 @@ public abstract class AbstractFrontierService
         };
     }
 
-    /** logic for handling an individual item * */
-    protected abstract String putURLItem(URLItem value);
+    /**
+     * logic for handling an individual item, returns a status indicating whether the addition has
+     * succeeded
+     */
+    protected abstract AckMessage.Status putURLItem(URLItem value);
 
     @Override
     public void close() throws IOException {

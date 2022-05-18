@@ -69,11 +69,11 @@ public class PutURLs implements Runnable {
 
         int sent = 0;
 
-        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver =
-                new StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String>() {
+        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> responseObserver =
+                new StreamObserver<>() {
 
                     @Override
-                    public void onNext(crawlercommons.urlfrontier.Urlfrontier.String value) {
+                    public void onNext(crawlercommons.urlfrontier.Urlfrontier.AckMessage value) {
                         // receives confirmation that the value has been received
                         acked.addAndGet(1);
                     }

@@ -15,6 +15,8 @@
 package crawlercommons.urlfrontier.service.memory;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
@@ -79,7 +81,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
     }
 
     @Override
-    protected String putURLItem(URLItem value) {
+    protected AckMessage.Status putURLItem(URLItem value) {
 
         Object[] parsed = InternalURL.from(value);
 
@@ -97,14 +99,14 @@ public class MemoryFrontierService extends AbstractFrontierService {
             key = provideMissingKey(iu.url);
             if (key == null) {
                 LOG.error("Malformed URL {}", iu.url);
-                return iu.url;
+                return Status.SKIPPED;
             }
         }
 
         // check that the key is not too long
         if (key.length() > 255) {
             LOG.error("Key too long: {}", key);
-            return iu.url;
+            return Status.SKIPPED;
         }
 
         QueueWithinCrawl qk = QueueWithinCrawl.get(key, iu.crawlID);
@@ -114,7 +116,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
             URLQueue queue = (URLQueue) queues.get(qk);
             if (queue == null) {
                 queues.put(qk, new URLQueue(iu));
-                return iu.url;
+                return Status.OK;
             }
 
             // check whether the URL already exists
@@ -122,7 +124,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 if (discovered) {
                     putURLs_alreadyknown_count.inc();
                     // we already discovered it - so no need for it
-                    return iu.url;
+                    return Status.SKIPPED;
                 } else {
                     // overwrite the existing version
                     queue.remove(iu);
@@ -138,6 +140,6 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 queue.add(iu);
             }
         }
-        return iu.url;
+        return Status.OK;
     }
 }
