@@ -109,7 +109,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                     StreamObserver<AckMessage> stream =
                                             inprocesscache.getIfPresent(value.getID());
                                     if (stream != null) {
-                                        stream.onNext(value);
+                                        synchronized (stream) {
+                                            stream.onNext(value);
+                                        }
                                         inprocesscache.invalidate(value.getID());
                                     }
                                 }
@@ -120,7 +122,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                 }
 
                                 @Override
-                                public void onCompleted() {}
+                                public void onCompleted() {
+                                    LOG.info("On completed");
+                                }
                             };
 
                     return stub.putURLs(observer);
@@ -307,9 +311,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             }
         }
 
-        synchronized (queues) {
+        synchronized (getQueues()) {
             Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    queues.entrySet().iterator();
+                    getQueues().entrySet().iterator();
             while (iterator.hasNext()) {
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 crawlIDs.add(e.getKey().getCrawlid());
@@ -392,7 +396,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     Qkey = provideMissingKey(url);
                     if (Qkey == null) {
                         LOG.error("Malformed URL {}", url);
-                        responseObserver.onNext(ack.setStatus(Status.SKIPPED).build());
+                        synchronized (responseObserver) {
+                            responseObserver.onNext(ack.setStatus(Status.SKIPPED).build());
+                        }
                         return;
                     }
                     // make a new info object ready to return
@@ -413,7 +419,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
                 if (partition == index) {
                     Status s = putURLItem(value);
-                    responseObserver.onNext(ack.setStatus(s).build());
+                    synchronized (responseObserver) {
+                        responseObserver.onNext(ack.setStatus(s).build());
+                    }
                     return;
                 }
                 // forward to non-local node

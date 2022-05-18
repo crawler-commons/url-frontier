@@ -85,4 +85,9 @@ public class ShardedRocksDBService extends DistributedFrontierService {
     protected Status putURLItem(URLItem item) {
         return instance.putURLItem(item);
     }
+
+    @Override
+    public Map<QueueWithinCrawl, QueueInterface> getQueues() {
+        return instance.getQueues();
+    }
 }

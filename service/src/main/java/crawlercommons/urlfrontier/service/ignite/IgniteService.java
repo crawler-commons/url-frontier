@@ -358,7 +358,7 @@ public class IgniteService extends DistributedFrontierService
 
         long end2 = System.currentTimeMillis();
 
-        LOG.info("{} queues discovered in {} msec", queues.size(), (end2 - end));
+        LOG.info("{} queues discovered in {} msec", getQueues().size(), (end2 - end));
 
         // all the queues across the frontier instances
         CacheConfiguration cacheCfgQueues = new CacheConfiguration("queues");
@@ -434,7 +434,8 @@ public class IgniteService extends DistributedFrontierService
                     final QueueWithinCrawl qk =
                             QueueWithinCrawl.parseAndDeNormalise(entry.getKey().crawlQueueID);
                     QueueMetadata queueMD =
-                            (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
+                            (QueueMetadata)
+                                    getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
                     // active if it has a scheduling value
                     boolean done = entry.getValue().nextFetchDate == 0;
                     if (done) {
@@ -489,7 +490,7 @@ public class IgniteService extends DistributedFrontierService
                 lastQuery = Instant.now();
 
                 Set<QueueWithinCrawl> existingQueues =
-                        new HashSet<QueueWithinCrawl>(queues.keySet());
+                        new HashSet<QueueWithinCrawl>(getQueues().keySet());
 
                 int queuesFound = 0;
                 int queuesRemoved = 0;
@@ -501,14 +502,14 @@ public class IgniteService extends DistributedFrontierService
                         final QueueWithinCrawl qk =
                                 QueueWithinCrawl.parseAndDeNormalise(entry.getKey());
                         existingQueues.remove(qk);
-                        queues.computeIfAbsent(qk, s -> new QueueMetadata());
+                        getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
                         queuesFound++;
                     }
                 }
 
                 // delete anything that would have been removed
                 for (QueueWithinCrawl remaining : existingQueues) {
-                    queues.remove(remaining);
+                    getQueues().remove(remaining);
                     queuesRemoved++;
                 }
 
@@ -518,7 +519,7 @@ public class IgniteService extends DistributedFrontierService
                         "Found {} queues, removed {}, total {} in {}",
                         queuesFound,
                         queuesRemoved,
-                        queues.size(),
+                        getQueues().size(),
                         time);
             }
         }
@@ -628,10 +629,10 @@ public class IgniteService extends DistributedFrontierService
 
         final Set<QueueWithinCrawl> toDelete = new HashSet<>();
 
-        synchronized (queues) {
+        synchronized (getQueues()) {
 
             // find the crawlIDs
-            QueueWithinCrawl[] array = queues.keySet().toArray(new QueueWithinCrawl[0]);
+            QueueWithinCrawl[] array = getQueues().keySet().toArray(new QueueWithinCrawl[0]);
             Arrays.sort(array);
 
             for (QueueWithinCrawl prefixed_queue : array) {
@@ -650,7 +651,7 @@ public class IgniteService extends DistributedFrontierService
                     queuesBeingDeleted.put(quid, quid);
                 }
 
-                QueueInterface q = queues.remove(quid);
+                QueueInterface q = getQueues().remove(quid);
                 total += q.countActive();
                 total += q.getCountCompleted();
 
@@ -678,7 +679,7 @@ public class IgniteService extends DistributedFrontierService
         int sizeQueue = 0;
 
         // if the queue is unknown or already being deleted
-        if (!queues.containsKey(qc) || queuesBeingDeleted.contains(qc)) {
+        if (!getQueues().containsKey(qc) || queuesBeingDeleted.contains(qc)) {
             return sizeQueue;
         }
 
@@ -696,7 +697,7 @@ public class IgniteService extends DistributedFrontierService
             }
         }
 
-        QueueInterface q = queues.remove(qc);
+        QueueInterface q = getQueues().remove(qc);
         sizeQueue += q.countActive();
         sizeQueue += q.getCountCompleted();
 
@@ -714,9 +715,9 @@ public class IgniteService extends DistributedFrontierService
 
         long total = 0;
 
-        synchronized (queues) {
+        synchronized (getQueues()) {
             // find the crawlIDs
-            QueueWithinCrawl[] array = queues.keySet().toArray(new QueueWithinCrawl[0]);
+            QueueWithinCrawl[] array = getQueues().keySet().toArray(new QueueWithinCrawl[0]);
             Arrays.sort(array);
 
             for (QueueWithinCrawl prefixed_queue : array) {
@@ -735,7 +736,7 @@ public class IgniteService extends DistributedFrontierService
                     queuesBeingDeleted.put(quid, quid);
                 }
 
-                QueueInterface q = queues.remove(quid);
+                QueueInterface q = getQueues().remove(quid);
                 total += q.countActive();
                 total += q.getCountCompleted();
 
@@ -829,9 +830,9 @@ public class IgniteService extends DistributedFrontierService
         QueueMetadata queueMD = null;
 
         if (clusterMode) {
-            queueMD = (QueueMetadata) queues.getOrDefault(qk, new QueueMetadata());
+            queueMD = (QueueMetadata) getQueues().getOrDefault(qk, new QueueMetadata());
         } else {
-            queueMD = (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
+            queueMD = (QueueMetadata) getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
         }
 
         // but make sure it exists globally anyway

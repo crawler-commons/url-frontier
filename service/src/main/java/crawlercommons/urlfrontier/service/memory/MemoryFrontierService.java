@@ -112,10 +112,10 @@ public class MemoryFrontierService extends AbstractFrontierService {
         QueueWithinCrawl qk = QueueWithinCrawl.get(key, iu.crawlID);
 
         // get the priority queue or create one
-        synchronized (queues) {
-            URLQueue queue = (URLQueue) queues.get(qk);
+        synchronized (getQueues()) {
+            URLQueue queue = (URLQueue) getQueues().get(qk);
             if (queue == null) {
-                queues.put(qk, new URLQueue(iu));
+                getQueues().put(qk, new URLQueue(iu));
                 return Status.OK;
             }
 
