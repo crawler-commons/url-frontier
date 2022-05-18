@@ -40,7 +40,7 @@ service URLFrontier {
      rpc GetURLs(GetParams) returns (stream URLInfo) {}
 
      /** Push URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems **/
-     rpc PutURLs(stream URLItem) returns (stream String) {}
+     rpc PutURLs(stream URLItem) returns (stream AckMessage) {}
 
      /** Return stats for a specific queue or an entire crawl. Does not aggregate the stats across different crawlids. **/
      rpc GetStats(QueueWithinCrawlParams) returns (Stats) {}
@@ -119,10 +119,6 @@ message Active {
 
 message Boolean {
   bool state = 1;
-}
-
-message String {
-  string value = 1;
 }
 
 message Long {
@@ -205,7 +201,28 @@ oneof item {
     DiscoveredURLItem discovered = 1;
     KnownURLItem known = 2;
   }
+  /** Identifier specified by the client, if missing, the URL is returned **/
+  string ID = 3;
 }
+
+message AckMessage {
+  /** ID which had been specified by the client **/
+  string ID = 1;
+  
+  /** Status indicating whether the input was successfully processed or not. SKIPPED means that 
+  the URL should not be resent e.g. there is something inherently wrong with it (too long? invalid?)
+  whereas FAIL means that the input could be resent.
+  **/
+  
+  enum Status{
+      OK = 0;
+      SKIPPED = 1;
+      FAIL = 2;
+   }
+   
+   Status status = 2;
+}
+
 
 message URLInfo {
   /** URL **/

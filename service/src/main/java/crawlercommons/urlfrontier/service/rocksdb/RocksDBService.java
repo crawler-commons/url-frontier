@@ -16,6 +16,7 @@ package crawlercommons.urlfrontier.service.rocksdb;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.CrawlID;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
@@ -305,7 +306,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     }
 
     @Override
-    protected String putURLItem(URLItem value) {
+    protected Status putURLItem(URLItem value) {
 
         long nextFetchDate;
         boolean discovered = true;
@@ -335,7 +336,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             Qkey = provideMissingKey(url);
             if (Qkey == null) {
                 LOG.error("Malformed URL {}", url);
-                return url;
+                return Status.SKIPPED;
             }
             // make a new info object ready to return
             info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
@@ -344,7 +345,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         // check that the key is not too long
         if (Qkey.length() > 255) {
             LOG.error("Key too long: {}", Qkey);
-            return url;
+            return Status.SKIPPED;
         }
 
         QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
@@ -352,7 +353,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         // ignore this url if the queue is being deleted
         if (queuesBeingDeleted.containsKey(qk)) {
             LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
-            return url;
+            return Status.SKIPPED;
         }
 
         byte[] schedulingKey = null;
@@ -364,14 +365,13 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             schedulingKey = rocksDB.get(existenceKey);
         } catch (RocksDBException e) {
             LOG.error("RocksDB exception", e);
-            // TODO notify the client
-            return url;
+            return Status.FAIL;
         }
 
         // already known? ignore if discovered
         if (schedulingKey != null && discovered) {
             putURLs_alreadyknown_count.inc();
-            return url;
+            return Status.SKIPPED;
         }
 
         // get the priority queue or create one
@@ -413,7 +413,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             LOG.error("RocksDB exception", e);
         }
 
-        return url;
+        return Status.OK;
     }
 
     /**

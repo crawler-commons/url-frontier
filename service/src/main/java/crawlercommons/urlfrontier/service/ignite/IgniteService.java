@@ -16,6 +16,7 @@ package crawlercommons.urlfrontier.service.ignite;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.CrawlID;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
@@ -524,7 +525,7 @@ public class IgniteService extends DistributedFrontierService
 
     @Override
     public StreamObserver<URLItem> putURLs(
-            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> responseObserver) {
+            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> responseObserver) {
 
         // throttle the flow of incoming changes to give Lucene
         // a chance of keeping up
@@ -756,7 +757,7 @@ public class IgniteService extends DistributedFrontierService
         super.getURLs(request, responseObserver);
     }
 
-    protected String putURLItem(URLItem value) {
+    protected AckMessage.Status putURLItem(URLItem value) {
 
         long nextFetchDate;
         boolean discovered = true;
@@ -786,7 +787,7 @@ public class IgniteService extends DistributedFrontierService
             Qkey = provideMissingKey(url);
             if (Qkey == null) {
                 LOG.error("Malformed URL {}", url);
-                return url;
+                return AckMessage.Status.SKIPPED;
             }
             // make a new info object ready to return
             info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
@@ -795,7 +796,7 @@ public class IgniteService extends DistributedFrontierService
         // check that the key is not too long
         if (Qkey.length() > 255) {
             LOG.error("Key too long: {}", Qkey);
-            return url;
+            return AckMessage.Status.SKIPPED;
         }
 
         QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
@@ -803,7 +804,7 @@ public class IgniteService extends DistributedFrontierService
         // ignore this url if the queue is being deleted
         if (queuesBeingDeleted.containsKey(qk)) {
             LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
-            return url;
+            return AckMessage.Status.SKIPPED;
         }
 
         IgniteCache<Key, Payload> _cache = createOrGetCacheForCrawlID(crawlID);
@@ -816,7 +817,7 @@ public class IgniteService extends DistributedFrontierService
         // already known? ignore if discovered
         if (known && discovered) {
             putURLs_alreadyknown_count.inc();
-            return url;
+            return AckMessage.Status.SKIPPED;
         }
 
         // get the priority queue - if it is a local one
@@ -856,6 +857,6 @@ public class IgniteService extends DistributedFrontierService
             queueMD.incrementActive();
         }
 
-        return url;
+        return AckMessage.Status.OK;
     }
 }
