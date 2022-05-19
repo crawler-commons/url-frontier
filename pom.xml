@@ -13,6 +13,13 @@
 
 	<inceptionYear>2020</inceptionYear>
 
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
 	<scm>
 		<url>https://github.com/crawler-commons/url-frontier</url>
 		<connection>scm:git:git://github.com/crawler-commons/url-frontier.git</connection>
@@ -48,6 +55,15 @@
 		<url>http://github.com/crawler-commons</url>
 	</organization>
 
+	<developers>
+		<developer>
+			<name>Julien Nioche</name>
+			<email>julien@digitalpebble.com</email>
+			<organization>DigitalPebble</organization>
+			<organizationUrl>http://www.digitalpebble.com</organizationUrl>
+		</developer>
+	</developers>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- needed to build within Docker -->
@@ -62,8 +78,7 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.9.0</version>
 					<configuration>
-						<source>11</source>
-						<target>11</target>
+                                               <release>11</release>
 					</configuration>
 				</plugin>
 				<plugin>
