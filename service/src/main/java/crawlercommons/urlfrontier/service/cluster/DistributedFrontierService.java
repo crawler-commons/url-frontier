@@ -118,7 +118,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
                                 @Override
                                 public void onError(Throwable t) {
-                                    LOG.error("Caught throwable when forwardng request ", t);
+                                    LOG.error("Caught throwable when forwarding request ", t);
                                 }
 
                                 @Override
@@ -159,7 +159,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         int sizeQueue = 0;
 
-        if (!request.getLocal() || !clusterMode) {
+        if (!request.getLocal() && clusterMode) {
             for (String node : getNodes()) {
                 if (node.equals(address)) continue;
                 // call the delete endpoint in the target node
@@ -276,7 +276,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     @Override
     public void setLogLevel(LogLevelParams request, StreamObserver<Empty> responseObserver) {
-        if (!request.getLocal() || clusterMode) {
+        if (!request.getLocal() && clusterMode) {
             // force to local so that remote node don't go recursive
             LogLevelParams local = LogLevelParams.newBuilder(request).setLocal(true).build();
             for (String node : getNodes()) {
@@ -297,7 +297,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         Set<String> crawlIDs = new HashSet<>();
 
-        if (!request.getLocal() || clusterMode) {
+        if (!request.getLocal() && clusterMode) {
             // force to local so that remote node don't go recursive
             Local local = Local.newBuilder().setLocal(true).build();
             for (String node : getNodes()) {
