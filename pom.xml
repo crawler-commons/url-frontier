@@ -78,7 +78,7 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.9.0</version>
 					<configuration>
-                                               <release>11</release>
+						<release>11</release>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -154,8 +154,21 @@
 		<profile>
 			<id>release</id>
 			<build>
-				<pluginManagement>
-					<plugins>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 						<plugin>
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-source-plugin</artifactId>
@@ -197,25 +210,6 @@
 								</execution>
 							</executions>
 						</plugin>
-
-					</plugins>
-				</pluginManagement>
-
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>3.0.1</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
 				</plugins>
 			</build>
 		</profile>
