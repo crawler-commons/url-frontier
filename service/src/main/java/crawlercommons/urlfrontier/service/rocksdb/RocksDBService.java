@@ -427,35 +427,46 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     public void deleteQueue(
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long> responseObserver) {
-
         final QueueWithinCrawl qc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+
+        int sizeQueue = deleteLocalQueue(qc);
+        responseObserver.onNext(
+                crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
+                        .setValue(sizeQueue)
+                        .build());
+        responseObserver.onCompleted();
+    }
+
+    protected int deleteLocalQueue(QueueWithinCrawl qc) {
 
         int sizeQueue = 0;
 
+        // don't have that queue?
         // is this queue already being deleted?
         // no need to do it again
-        if (queuesBeingDeleted.contains(qc)) {
-            responseObserver.onNext(
-                    crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
-                            .setValue(sizeQueue)
-                            .build());
-            responseObserver.onCompleted();
-            return;
+        if (queues.containsKey(qc) || queuesBeingDeleted.contains(qc)) {
+            return 0;
         }
 
         queuesBeingDeleted.put(qc, qc);
 
-        // find the next key by alphabetical order
+        String prefixed_queue = qc.toString() + "_";
+
+        // find the next key by alphabetical order, taking the separator into account
         QueueWithinCrawl[] array = queues.keySet().toArray(new QueueWithinCrawl[0]);
-        Arrays.sort(array);
+        String[] prefixed_queues = new String[array.length];
+        for (int i = 0; i < array.length; i++) {
+            prefixed_queues[i] = array[i] + "_";
+        }
+        Arrays.sort(prefixed_queues);
         byte[] startKey = null;
         byte[] endKey = null;
-        for (QueueWithinCrawl prefixed_queue : array) {
+        for (String p_queue : prefixed_queues) {
             if (startKey != null) {
-                endKey = (prefixed_queue.toString() + "_").getBytes(StandardCharsets.UTF_8);
+                endKey = p_queue.getBytes(StandardCharsets.UTF_8);
                 break;
-            } else if (prefixed_queue.equals(qc)) {
-                startKey = (qc.toString() + "_").getBytes(StandardCharsets.UTF_8);
+            } else if (prefixed_queue.equals(p_queue)) {
+                startKey = prefixed_queue.getBytes(StandardCharsets.UTF_8);
             }
         }
 
@@ -465,20 +476,15 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             LOG.error(
                     "Exception caught when deleting ranges - {} - {}",
                     new String(startKey),
-                    new String(endKey));
+                    new String(endKey),
+                    e);
         }
 
         QueueInterface q = queues.remove(qc);
         sizeQueue += q.countActive();
         sizeQueue += q.getCountCompleted();
 
-        queuesBeingDeleted.remove(qc);
-
-        responseObserver.onNext(
-                crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
-                        .setValue(sizeQueue)
-                        .build());
-        responseObserver.onCompleted();
+        return sizeQueue;
     }
 
     @Override
