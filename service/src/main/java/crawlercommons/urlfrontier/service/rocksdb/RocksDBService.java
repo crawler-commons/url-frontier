@@ -25,7 +25,6 @@ import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.stub.StreamObserver;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -56,7 +55,7 @@ import org.rocksdb.Statistics;
 import org.rocksdb.StatsLevel;
 import org.slf4j.LoggerFactory;
 
-public class RocksDBService extends AbstractFrontierService implements Closeable {
+public class RocksDBService extends AbstractFrontierService {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBService.class);
 
@@ -252,6 +251,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             long now,
             StreamObserver<URLInfo> responseObserver) {
 
+        // stop sending if we are closing
+        if (isClosing()) {
+            return 0;
+        }
+
         int alreadySent = 0;
         final byte[] prefixKey = (queueID.toString() + "_").getBytes(StandardCharsets.UTF_8);
         // scan the scheduling table
@@ -435,6 +439,10 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     protected int deleteLocalQueue(QueueWithinCrawl qc) {
         int sizeQueue = 0;
 
+        if (isClosing()) {
+            return 0;
+        }
+
         // don't have that queue?
         if (!getQueues().containsKey(qc)) {
             return sizeQueue;
@@ -513,7 +521,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
         if (rocksDB != null) {
             try {
-                rocksDB.close();
+                rocksDB.syncWal();
+                rocksDB.closeE();
             } catch (Exception e) {
                 LOG.error("Closing ", e);
             }
@@ -533,6 +542,10 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
     protected long deleteLocalCrawl(String crawlID) {
         long total = 0;
+
+        if (isClosing()) {
+            return 0;
+        }
 
         final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID);
 
