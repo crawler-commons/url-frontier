@@ -19,6 +19,7 @@ import com.google.protobuf.util.JsonFormat;
 import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
@@ -66,6 +67,9 @@ public class PutURLs implements Runnable {
 
         final AtomicBoolean completed = new AtomicBoolean(false);
         final AtomicInteger acked = new AtomicInteger(0);
+        final AtomicInteger failed = new AtomicInteger(0);
+        final AtomicInteger skipped = new AtomicInteger(0);
+        final AtomicInteger ok = new AtomicInteger(0);
 
         int sent = 0;
 
@@ -76,6 +80,13 @@ public class PutURLs implements Runnable {
                     public void onNext(crawlercommons.urlfrontier.Urlfrontier.AckMessage value) {
                         // receives confirmation that the value has been received
                         acked.addAndGet(1);
+                        if (value.getStatus().equals(AckMessage.Status.SKIPPED)) {
+                            skipped.getAndIncrement();
+                        } else if (value.getStatus().equals(AckMessage.Status.FAIL)) {
+                            failed.getAndIncrement();
+                        } else if (value.getStatus().equals(AckMessage.Status.OK)) {
+                            ok.getAndIncrement();
+                        }
                     }
 
                     @Override
@@ -132,7 +143,11 @@ public class PutURLs implements Runnable {
             }
         }
 
-        System.out.println("Items sent " + sent + " / acked " + acked.get());
+        System.out.println("Sent " + sent);
+        System.out.println("Acked " + acked.get());
+        System.out.println("OK " + ok.get());
+        System.out.println("Skipped " + skipped.get());
+        System.out.println("Failed " + failed.get());
 
         channel.shutdownNow();
     }
