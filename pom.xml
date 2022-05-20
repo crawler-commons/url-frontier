@@ -4,7 +4,7 @@
 	<groupId>com.github.crawler-commons</groupId>
 	<artifactId>urlfrontier</artifactId>
 	<packaging>pom</packaging>
-	<version>2.1-SNAPSHOT</version>
+	<version>2.2-SNAPSHOT</version>
 	<name>urlfrontier</name>
 
 	<url>https://github.com/crawler-commons/url-frontier</url>
@@ -12,6 +12,13 @@
 	<description>API definition, resources and reference implementation of URL Frontiers</description>
 
 	<inceptionYear>2020</inceptionYear>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
 
 	<scm>
 		<url>https://github.com/crawler-commons/url-frontier</url>
@@ -48,6 +55,15 @@
 		<url>http://github.com/crawler-commons</url>
 	</organization>
 
+	<developers>
+		<developer>
+			<name>Julien Nioche</name>
+			<email>julien@digitalpebble.com</email>
+			<organization>DigitalPebble</organization>
+			<organizationUrl>http://www.digitalpebble.com</organizationUrl>
+		</developer>
+	</developers>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- needed to build within Docker -->
@@ -62,8 +78,7 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.9.0</version>
 					<configuration>
-						<source>11</source>
-						<target>11</target>
+						<release>11</release>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -139,8 +154,21 @@
 		<profile>
 			<id>release</id>
 			<build>
-				<pluginManagement>
-					<plugins>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 						<plugin>
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-source-plugin</artifactId>
@@ -182,25 +210,6 @@
 								</execution>
 							</executions>
 						</plugin>
-
-					</plugins>
-				</pluginManagement>
-
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>3.0.1</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
 				</plugins>
 			</build>
 		</profile>
