@@ -307,7 +307,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     }
 
     @Override
-    protected Status putURLItem(URLItem value) {
+    protected Status putURLItem(final URLItem value) {
 
         long nextFetchDate;
         boolean discovered = true;
@@ -328,8 +328,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         }
 
         String Qkey = info.getKey();
-        String url = info.getUrl();
-        String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
+        final String url = info.getUrl();
+        final String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
 
         // has a queue key been defined? if not use the hostname
         if (Qkey.equals("")) {
@@ -349,7 +349,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             return Status.SKIPPED;
         }
 
-        QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
+        final QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
 
         // ignore this url if the queue is being deleted
         if (queuesBeingDeleted.containsKey(qk)) {
@@ -357,28 +357,22 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             return Status.SKIPPED;
         }
 
-        byte[] schedulingKey = null;
-
         final byte[] existenceKey = (qk.toString() + "_" + url).getBytes(StandardCharsets.UTF_8);
 
         // is this URL already known?
         try {
-            schedulingKey = rocksDB.get(existenceKey);
-        } catch (RocksDBException e) {
-            LOG.error("RocksDB exception", e);
-            return Status.FAIL;
-        }
+            byte[] schedulingKey = rocksDB.get(existenceKey);
 
-        // already known? ignore if discovered
-        if (schedulingKey != null && discovered) {
-            putURLs_alreadyknown_count.inc();
-            return Status.SKIPPED;
-        }
+            // already known? ignore if discovered
+            if (schedulingKey != null && discovered) {
+                putURLs_alreadyknown_count.inc();
+                return Status.SKIPPED;
+            }
 
-        // get the priority queue or create one
-        QueueMetadata queueMD =
-                (QueueMetadata) getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
-        try {
+            // get the priority queue or create one
+            QueueMetadata queueMD =
+                    (QueueMetadata) getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
+
             // known - remove from queues
             // its key in the queues was stored in the default cf
             if (schedulingKey != null) {
@@ -412,6 +406,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
         } catch (RocksDBException e) {
             LOG.error("RocksDB exception", e);
+            return Status.FAIL;
         }
 
         return Status.OK;
