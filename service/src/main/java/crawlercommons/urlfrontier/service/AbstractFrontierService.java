@@ -119,8 +119,12 @@ public abstract class AbstractFrontierService
     private List<String> nodes;
 
     // in memory map of metadata for each queue
-    protected final Map<QueueWithinCrawl, QueueInterface> queues =
+    private final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
+
+    public Map<QueueWithinCrawl, QueueInterface> getQueues() {
+        return queues;
+    }
 
     private boolean closing = false;
 
@@ -165,9 +169,9 @@ public abstract class AbstractFrontierService
 
         Set<String> crawlIDs = new HashSet<>();
 
-        synchronized (queues) {
+        synchronized (getQueues()) {
             Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    queues.entrySet().iterator();
+                    getQueues().entrySet().iterator();
             while (iterator.hasNext()) {
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 crawlIDs.add(e.getKey().getCrawlid());
@@ -190,9 +194,9 @@ public abstract class AbstractFrontierService
 
             final Set<QueueWithinCrawl> toDelete = new HashSet<>();
 
-            synchronized (queues) {
+            synchronized (getQueues()) {
                 Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                        queues.entrySet().iterator();
+                        getQueues().entrySet().iterator();
                 while (iterator.hasNext()) {
                     Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                     QueueWithinCrawl qwc = e.getKey();
@@ -202,7 +206,7 @@ public abstract class AbstractFrontierService
                 }
 
                 for (QueueWithinCrawl quid : toDelete) {
-                    QueueInterface q = queues.remove(quid);
+                    QueueInterface q = getQueues().remove(quid);
                     total += q.countActive();
                 }
             }
@@ -290,9 +294,9 @@ public abstract class AbstractFrontierService
 
         crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder list = QueueList.newBuilder();
 
-        synchronized (queues) {
+        synchronized (getQueues()) {
             Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    queues.entrySet().iterator();
+                    getQueues().entrySet().iterator();
 
             while (iterator.hasNext() && sent <= maxQueues) {
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
@@ -325,7 +329,7 @@ public abstract class AbstractFrontierService
     public void blockQueueUntil(BlockQueueParams request, StreamObserver<Empty> responseObserver) {
         if (!isClosing()) {
             QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
-            QueueInterface queue = queues.get(qwc);
+            QueueInterface queue = getQueues().get(qwc);
             if (queue != null) {
                 queue.setBlockedUntil(request.getTime());
             }
@@ -341,7 +345,7 @@ public abstract class AbstractFrontierService
                 setDefaultDelayForQueues(request.getDelayRequestable());
             } else {
                 QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
-                QueueInterface queue = queues.get(qwc);
+                QueueInterface queue = getQueues().get(qwc);
                 if (queue != null) {
                     queue.setDelay(request.getDelayRequestable());
                 }
@@ -366,7 +370,7 @@ public abstract class AbstractFrontierService
         long countActive = -1;
         if (!isClosing()) {
             QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
-            QueueInterface q = queues.remove(qwc);
+            QueueInterface q = getQueues().remove(qwc);
             countActive = q.countActive();
         }
         responseObserver.onNext(
@@ -397,7 +401,7 @@ public abstract class AbstractFrontierService
         // specific queue?
         if (!request.getKey().isEmpty()) {
             QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
-            QueueInterface q = queues.get(qwc);
+            QueueInterface q = getQueues().get(qwc);
             if (q != null) {
                 _queues.add(q);
             } else {
@@ -407,10 +411,10 @@ public abstract class AbstractFrontierService
         // all the queues within the crawlID
         else {
 
-            synchronized (queues) {
+            synchronized (getQueues()) {
                 // check that the queues belong to the crawlid specified
                 Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                        queues.entrySet().iterator();
+                        getQueues().entrySet().iterator();
                 while (iterator.hasNext()) {
                     Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                     QueueWithinCrawl qwc = e.getKey();
@@ -425,7 +429,7 @@ public abstract class AbstractFrontierService
 
         long now = Instant.now().getEpochSecond();
 
-        synchronized (queues) {
+        synchronized (getQueues()) {
             for (QueueInterface q : _queues) {
                 final int inProcForQ = q.getInProcess(now);
                 final int activeForQ = q.countActive();
@@ -521,7 +525,7 @@ public abstract class AbstractFrontierService
             }
 
             QueueWithinCrawl qwc = QueueWithinCrawl.get(key, crawlID);
-            QueueInterface queue = queues.get(qwc);
+            QueueInterface queue = getQueues().get(qwc);
 
             // the queue does not exist
             if (queue == null) {
@@ -576,7 +580,7 @@ public abstract class AbstractFrontierService
         int totalSent = 0;
         QueueWithinCrawl firstCrawlQueue = null;
 
-        if (queues.isEmpty()) {
+        if (getQueues().isEmpty()) {
             LOG.info("No queues to get URLs from! {}", requestID.toString());
             responseObserver.onCompleted();
             return;
@@ -587,9 +591,9 @@ public abstract class AbstractFrontierService
             QueueInterface currentQueue = null;
             QueueWithinCrawl currentCrawlQueue = null;
 
-            synchronized (queues) {
+            synchronized (getQueues()) {
                 Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                        queues.entrySet().iterator();
+                        getQueues().entrySet().iterator();
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 currentQueue = e.getValue();
                 currentCrawlQueue = e.getKey();
@@ -602,7 +606,7 @@ public abstract class AbstractFrontierService
                 }
                 // We remove the entry and put it at the end of the map
                 iterator.remove();
-                queues.put(currentCrawlQueue, currentQueue);
+                getQueues().put(currentCrawlQueue, currentQueue);
             }
 
             // if a crawlID has been specified make sure it matches

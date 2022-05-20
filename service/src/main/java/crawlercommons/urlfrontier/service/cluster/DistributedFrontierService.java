@@ -14,6 +14,7 @@
  */
 package crawlercommons.urlfrontier.service.cluster;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -22,8 +23,12 @@ import com.google.common.cache.RemovalNotification;
 import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
+import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
+import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Local;
 import crawlercommons.urlfrontier.Urlfrontier.LogLevelParams;
 import crawlercommons.urlfrontier.Urlfrontier.Pagination;
@@ -31,6 +36,8 @@ import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
+import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
+import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
@@ -80,6 +87,68 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         return URLFrontierGrpc.newBlockingStub(cache.getUnchecked(target));
     }
 
+    private final CacheLoader<Integer, StreamObserver<URLItem>> observerloader =
+            new CacheLoader<>() {
+                @Override
+                public StreamObserver<URLItem> load(Integer index) {
+                    // get the stream observer for that node
+                    final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
+                            observer;
+
+                    final URLFrontierStub stub =
+                            URLFrontierGrpc.newStub(cache.getUnchecked(getNodes().get(index)));
+
+                    observer =
+                            new StreamObserver<>() {
+
+                                @Override
+                                public void onNext(
+                                        crawlercommons.urlfrontier.Urlfrontier.AckMessage value) {
+                                    // go back to the client
+                                    // and notify that it has worked
+                                    StreamObserver<AckMessage> stream =
+                                            inprocesscache.getIfPresent(value.getID());
+                                    if (stream != null) {
+                                        synchronized (stream) {
+                                            stream.onNext(value);
+                                        }
+                                        inprocesscache.invalidate(value.getID());
+                                    }
+                                }
+
+                                @Override
+                                public void onError(Throwable t) {
+                                    LOG.error("Caught throwable when forwarding request ", t);
+                                }
+
+                                @Override
+                                public void onCompleted() {
+                                    LOG.info("On completed");
+                                }
+                            };
+
+                    return stub.putURLs(observer);
+                }
+            };
+
+    private final RemovalListener<String, StreamObserver<URLItem>> observerlistener =
+            new RemovalListener<>() {
+                @Override
+                public void onRemoval(RemovalNotification<String, StreamObserver<URLItem>> n) {
+                    // TODO
+                }
+            };
+
+    private LoadingCache<Integer, StreamObserver<URLItem>> observercache =
+            CacheBuilder.newBuilder()
+                    .removalListener(observerlistener)
+                    .expireAfterAccess(10, TimeUnit.MINUTES)
+                    .build((CacheLoader) observerloader);
+
+    private Cache<String, StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>>
+            inprocesscache =
+                    CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build();
+
     /** Delete the queue based on the key in parameter */
     @Override
     public void deleteQueue(
@@ -90,7 +159,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         int sizeQueue = 0;
 
-        if (!request.getLocal() || !clusterMode) {
+        if (!request.getLocal() && clusterMode) {
             for (String node : getNodes()) {
                 if (node.equals(address)) continue;
                 // call the delete endpoint in the target node
@@ -207,7 +276,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     @Override
     public void setLogLevel(LogLevelParams request, StreamObserver<Empty> responseObserver) {
-        if (!request.getLocal() || clusterMode) {
+        if (!request.getLocal() && clusterMode) {
             // force to local so that remote node don't go recursive
             LogLevelParams local = LogLevelParams.newBuilder(request).setLocal(true).build();
             for (String node : getNodes()) {
@@ -228,7 +297,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         Set<String> crawlIDs = new HashSet<>();
 
-        if (!request.getLocal() || clusterMode) {
+        if (!request.getLocal() && clusterMode) {
             // force to local so that remote node don't go recursive
             Local local = Local.newBuilder().setLocal(true).build();
             for (String node : getNodes()) {
@@ -242,9 +311,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             }
         }
 
-        synchronized (queues) {
+        synchronized (getQueues()) {
             Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    queues.entrySet().iterator();
+                    getQueues().entrySet().iterator();
             while (iterator.hasNext()) {
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 crawlIDs.add(e.getKey().getCrawlid());
@@ -287,4 +356,99 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         // close all the connections
         cache.invalidateAll();
     }
+
+    /** Sends the incoming items to a node based on the queue hash * */
+    public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
+                    responseObserver) {
+
+        putURLs_calls.inc();
+
+        return new StreamObserver<URLItem>() {
+
+            @Override
+            public void onNext(URLItem value) {
+
+                URLInfo info;
+
+                if (value.hasDiscovered()) {
+                    info = value.getDiscovered().getInfo();
+                } else {
+                    KnownURLItem known = value.getKnown();
+                    info = known.getInfo();
+                }
+
+                String Qkey = info.getKey();
+                String url = info.getUrl();
+                String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
+
+                crawlercommons.urlfrontier.Urlfrontier.AckMessage.Builder ack =
+                        AckMessage.newBuilder();
+                if (value.getID() == null || value.getID().isEmpty()) {
+                    ack.setID(url);
+                } else {
+                    ack.setID(value.getID());
+                }
+
+                // has a queue key been defined? if not use the hostname
+                if (Qkey.equals("")) {
+                    LOG.debug("key missing for {}", url);
+                    Qkey = provideMissingKey(url);
+                    if (Qkey == null) {
+                        LOG.error("Malformed URL {}", url);
+                        synchronized (responseObserver) {
+                            responseObserver.onNext(ack.setStatus(Status.SKIPPED).build());
+                        }
+                        return;
+                    }
+                    // make a new info object ready to return
+                    info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
+                }
+
+                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
+
+                // work out which node should receive the item
+                int partition = Math.abs(qk.toString().hashCode() % getNodes().size());
+
+                // is it the local node?
+                int index = getNodes().indexOf(address);
+                if (index == -1) {
+                    throw new RuntimeException(
+                            "ShardedRocksDBService found conf 'nodes' but current node's address not set");
+                }
+
+                if (partition == index) {
+                    Status s = putURLItem(value);
+                    synchronized (responseObserver) {
+                        responseObserver.onNext(ack.setStatus(s).build());
+                    }
+                    return;
+                }
+                // forward to non-local node
+                // should not happen very frequently unless a crawler
+                // allows outlinks to go outside the hostname
+
+                // get the stream observer for that node
+                final StreamObserver<URLItem> observer = observercache.getUnchecked(partition);
+                // store the stuff in a temporary cache
+                inprocesscache.put(ack.getID(), responseObserver);
+
+                // give it the thing to process
+                observer.onNext(value);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                LOG.error("Throwable caught", t);
+            }
+
+            @Override
+            public void onCompleted() {
+                // will this ever get called if the client is constantly streaming?
+                responseObserver.onCompleted();
+            }
+        };
+    }
+
+    protected abstract Status putURLItem(URLItem item);
 }

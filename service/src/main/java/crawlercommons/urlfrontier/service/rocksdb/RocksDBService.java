@@ -25,7 +25,6 @@ import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.stub.StreamObserver;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -56,7 +55,7 @@ import org.rocksdb.Statistics;
 import org.rocksdb.StatsLevel;
 import org.slf4j.LoggerFactory;
 
-public class RocksDBService extends AbstractFrontierService implements Closeable {
+public class RocksDBService extends AbstractFrontierService {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBService.class);
 
@@ -168,7 +167,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
             long end2 = System.currentTimeMillis();
 
-            LOG.info("{} queues discovered in {} msec", queues.size(), (end2 - end));
+            LOG.info("{} queues discovered in {} msec", getQueues().size(), (end2 - end));
         }
     }
 
@@ -185,7 +184,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                             new String(rocksIterator.key(), StandardCharsets.UTF_8);
                     final QueueWithinCrawl qk = QueueWithinCrawl.parseAndDeNormalise(currentKey);
                     QueueMetadata queueMD =
-                            (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
+                            (QueueMetadata)
+                                    getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
                     queueMD.incrementActive();
                 }
             }
@@ -205,7 +205,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 if (previousQueueID == null) {
                     previousQueueID = Qkey;
                 } else if (check && !previousQueueID.equals(Qkey)) {
-                    if (queues.get(previousQueueID).countActive() != numScheduled)
+                    if (getQueues().get(previousQueueID).countActive() != numScheduled)
                         throw new RuntimeException(
                                 "Incorrect number of active URLs for queue " + previousQueueID);
                     previousQueueID = Qkey;
@@ -215,7 +215,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                 // queue might not exist if it had nothing scheduled for it
                 // i.e. all done
                 QueueMetadata queueMD =
-                        (QueueMetadata) queues.computeIfAbsent(Qkey, s -> new QueueMetadata());
+                        (QueueMetadata) getQueues().computeIfAbsent(Qkey, s -> new QueueMetadata());
 
                 // check the value - if it is an empty byte array it means that the URL has been
                 // processed and is not scheduled
@@ -236,7 +236,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         // check the last key
         if (check
                 && previousQueueID != null
-                && queues.get(previousQueueID).countActive() != numScheduled) {
+                && getQueues().get(previousQueueID).countActive() != numScheduled) {
             throw new RuntimeException(
                     "Incorrect number of active URLs for queue " + previousQueueID);
         }
@@ -250,6 +250,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             int secsUntilRequestable,
             long now,
             StreamObserver<URLInfo> responseObserver) {
+
+        // stop sending if we are closing
+        if (isClosing()) {
+            return 0;
+        }
 
         int alreadySent = 0;
         final byte[] prefixKey = (queueID.toString() + "_").getBytes(StandardCharsets.UTF_8);
@@ -306,7 +311,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     }
 
     @Override
-    protected Status putURLItem(URLItem value) {
+    protected Status putURLItem(final URLItem value) {
 
         long nextFetchDate;
         boolean discovered = true;
@@ -327,8 +332,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         }
 
         String Qkey = info.getKey();
-        String url = info.getUrl();
-        String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
+        final String url = info.getUrl();
+        final String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
 
         // has a queue key been defined? if not use the hostname
         if (Qkey.equals("")) {
@@ -348,7 +353,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             return Status.SKIPPED;
         }
 
-        QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
+        final QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
 
         // ignore this url if the queue is being deleted
         if (queuesBeingDeleted.containsKey(qk)) {
@@ -356,28 +361,22 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             return Status.SKIPPED;
         }
 
-        byte[] schedulingKey = null;
-
         final byte[] existenceKey = (qk.toString() + "_" + url).getBytes(StandardCharsets.UTF_8);
 
         // is this URL already known?
         try {
-            schedulingKey = rocksDB.get(existenceKey);
-        } catch (RocksDBException e) {
-            LOG.error("RocksDB exception", e);
-            return Status.FAIL;
-        }
+            byte[] schedulingKey = rocksDB.get(existenceKey);
 
-        // already known? ignore if discovered
-        if (schedulingKey != null && discovered) {
-            putURLs_alreadyknown_count.inc();
-            return Status.SKIPPED;
-        }
+            // already known? ignore if discovered
+            if (schedulingKey != null && discovered) {
+                putURLs_alreadyknown_count.inc();
+                return Status.SKIPPED;
+            }
 
-        // get the priority queue or create one
-        QueueMetadata queueMD =
-                (QueueMetadata) queues.computeIfAbsent(qk, s -> new QueueMetadata());
-        try {
+            // get the priority queue or create one
+            QueueMetadata queueMD =
+                    (QueueMetadata) getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
+
             // known - remove from queues
             // its key in the queues was stored in the default cf
             if (schedulingKey != null) {
@@ -411,6 +410,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
         } catch (RocksDBException e) {
             LOG.error("RocksDB exception", e);
+            return Status.FAIL;
         }
 
         return Status.OK;
@@ -428,7 +428,6 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long> responseObserver) {
         final QueueWithinCrawl qc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
-
         int sizeQueue = deleteLocalQueue(qc);
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
@@ -438,14 +437,21 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
     }
 
     protected int deleteLocalQueue(QueueWithinCrawl qc) {
-
         int sizeQueue = 0;
 
+        if (isClosing()) {
+            return 0;
+        }
+
         // don't have that queue?
+        if (!getQueues().containsKey(qc)) {
+            return sizeQueue;
+        }
+
         // is this queue already being deleted?
         // no need to do it again
-        if (queues.containsKey(qc) || queuesBeingDeleted.contains(qc)) {
-            return 0;
+        if (queuesBeingDeleted.contains(qc)) {
+            return sizeQueue;
         }
 
         queuesBeingDeleted.put(qc, qc);
@@ -453,7 +459,7 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
         String prefixed_queue = qc.toString() + "_";
 
         // find the next key by alphabetical order, taking the separator into account
-        QueueWithinCrawl[] array = queues.keySet().toArray(new QueueWithinCrawl[0]);
+        QueueWithinCrawl[] array = getQueues().keySet().toArray(new QueueWithinCrawl[0]);
         String[] prefixed_queues = new String[array.length];
         for (int i = 0; i < array.length; i++) {
             prefixed_queues[i] = array[i] + "_";
@@ -480,10 +486,11 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                     e);
         }
 
-        QueueInterface q = queues.remove(qc);
+        QueueInterface q = getQueues().remove(qc);
         sizeQueue += q.countActive();
         sizeQueue += q.getCountCompleted();
 
+        queuesBeingDeleted.remove(qc);
         return sizeQueue;
     }
 
@@ -514,7 +521,8 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
 
         if (rocksDB != null) {
             try {
-                rocksDB.close();
+                rocksDB.syncWal();
+                rocksDB.closeE();
             } catch (Exception e) {
                 LOG.error("Closing ", e);
             }
@@ -526,17 +534,27 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
             crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage crawlID,
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                     responseObserver) {
+        long total = deleteLocalCrawl(crawlID.getValue());
+        responseObserver.onNext(
+                crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder().setValue(total).build());
+        responseObserver.onCompleted();
+    }
 
+    protected long deleteLocalCrawl(String crawlID) {
         long total = 0;
 
-        final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID.getValue());
+        if (isClosing()) {
+            return 0;
+        }
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(crawlID);
 
         final Set<QueueWithinCrawl> toDelete = new HashSet<>();
 
-        synchronized (queues) {
+        synchronized (getQueues()) {
 
             // find the crawlIDs
-            QueueWithinCrawl[] array = queues.keySet().toArray(new QueueWithinCrawl[0]);
+            QueueWithinCrawl[] array = getQueues().keySet().toArray(new QueueWithinCrawl[0]);
             Arrays.sort(array);
 
             byte[] startKey = null;
@@ -574,16 +592,14 @@ public class RocksDBService extends AbstractFrontierService implements Closeable
                     queuesBeingDeleted.put(quid, quid);
                 }
 
-                QueueInterface q = queues.remove(quid);
+                QueueInterface q = getQueues().remove(quid);
                 total += q.countActive();
                 total += q.getCountCompleted();
 
                 queuesBeingDeleted.remove(quid);
             }
         }
-        responseObserver.onNext(
-                crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder().setValue(total).build());
-        responseObserver.onCompleted();
+        return total;
     }
 
     private void deleteRanges(final byte[] prefix, byte[] endKey) throws RocksDBException {
