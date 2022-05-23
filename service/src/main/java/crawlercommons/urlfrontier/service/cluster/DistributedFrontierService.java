@@ -405,7 +405,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
                 }
 
-                QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
+                LOG.debug("Received {} with queue {} and crawlid {}", url, Qkey, crawlID);
+
+                final QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
 
                 // work out which node should receive the item
                 int partition = Math.abs(qk.toString().hashCode() % getNodes().size());
@@ -419,6 +421,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
                 if (partition == index) {
                     Status s = putURLItem(value);
+                    LOG.debug("Local putURL -> {} got status {}", url, s);
                     synchronized (responseObserver) {
                         responseObserver.onNext(ack.setStatus(s).build());
                     }
@@ -432,6 +435,8 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 final StreamObserver<URLItem> observer = observercache.getUnchecked(partition);
                 // store the stuff in a temporary cache
                 inprocesscache.put(ack.getID(), responseObserver);
+
+                LOG.debug("Sending {} to partition {}", url, partition);
 
                 // give it the thing to process
                 observer.onNext(value);
