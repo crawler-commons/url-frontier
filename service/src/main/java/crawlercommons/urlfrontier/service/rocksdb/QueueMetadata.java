@@ -127,6 +127,14 @@ public class QueueMetadata implements QueueInterface {
         active.incrementAndGet();
     }
 
+    public void setActiveCount(int value) {
+        active.set(value);
+    }
+
+    public void setCompletedCount(int value) {
+        completed.set(value);
+    }
+
     public void incrementCompleted() {
         completed.incrementAndGet();
     }
