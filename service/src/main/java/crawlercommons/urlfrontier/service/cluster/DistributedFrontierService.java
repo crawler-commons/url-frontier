@@ -413,13 +413,15 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 int partition = Math.abs(qk.toString().hashCode() % getNodes().size());
 
                 // is it the local node?
-                int index = getNodes().indexOf(address);
-                if (index == -1) {
+                int localNodeIndex = getNodes().indexOf(address);
+                if (localNodeIndex == -1) {
                     throw new RuntimeException(
                             "ShardedRocksDBService found conf 'nodes' but current node's address not set");
                 }
 
-                if (partition == index) {
+                LOG.trace("LocalNodeIndex {}", localNodeIndex);
+
+                if (partition == localNodeIndex) {
                     Status s = putURLItem(value);
                     LOG.debug("Local putURL -> {} got status {}", url, s);
                     synchronized (responseObserver) {
@@ -428,15 +430,17 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     return;
                 }
                 // forward to non-local node
-                // should not happen very frequently unless a crawler
-                // allows outlinks to go outside the hostname
 
                 // get the stream observer for that node
                 final StreamObserver<URLItem> observer = observercache.getUnchecked(partition);
                 // store the stuff in a temporary cache
                 inprocesscache.put(ack.getID(), responseObserver);
 
-                LOG.debug("Sending {} to partition {}", url, partition);
+                LOG.debug(
+                        "Sending {} to partition {} -> {}",
+                        url,
+                        partition,
+                        getNodes().get(partition));
 
                 // give it the thing to process
                 observer.onNext(value);

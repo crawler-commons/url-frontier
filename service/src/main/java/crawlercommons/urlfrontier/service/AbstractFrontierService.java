@@ -159,6 +159,12 @@ public abstract class AbstractFrontierService
     public void setNodes(List<String> n) {
         nodes = n;
         Collections.sort(nodes);
+        LOG.debug(address);
+        int pos = 0;
+        for (String node : nodes) {
+            LOG.info("Node {}: {}", pos, node);
+            pos++;
+        }
     }
 
     @Override
