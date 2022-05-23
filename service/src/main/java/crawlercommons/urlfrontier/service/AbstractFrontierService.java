@@ -736,6 +736,8 @@ public abstract class AbstractFrontierService
                     status = putURLItem(value);
                 }
 
+                LOG.debug("putURL -> {} got status {}", url, status);
+
                 responseObserver.onNext(ackBuilder.setStatus(status).build());
             }
 

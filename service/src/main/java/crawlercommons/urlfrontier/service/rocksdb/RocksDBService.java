@@ -347,6 +347,8 @@ public class RocksDBService extends AbstractFrontierService {
             info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
         }
 
+        LOG.debug("putURLItem -> {} with key {} in crawl {}", url, Qkey, crawlID);
+
         // check that the key is not too long
         if (Qkey.length() > 255) {
             LOG.error("Key too long: {}", Qkey);
