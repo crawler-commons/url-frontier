@@ -30,7 +30,7 @@ public class DeleteCrawl implements Runnable {
 
     @Option(
             names = {"-c", "--crawlID"},
-            defaultValue = "DEFAULT",
+            required = true,
             paramLabel = "STRING",
             description = "crawl to delete")
     private String crawl;
