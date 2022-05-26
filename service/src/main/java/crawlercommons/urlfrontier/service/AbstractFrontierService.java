@@ -32,6 +32,7 @@ import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Summary;
@@ -719,16 +720,7 @@ public abstract class AbstractFrontierService
                     url = value.getKnown().getInfo().getUrl();
                 }
 
-                crawlercommons.urlfrontier.Urlfrontier.AckMessage.Builder ack =
-                        AckMessage.newBuilder();
-                if (value.getID() == null || value.getID().isEmpty()) {
-                    ack.setID(url);
-                } else {
-                    ack.setID(value.getID());
-                }
-
-                Builder ackBuilder = AckMessage.newBuilder();
-
+                Builder ack = AckMessage.newBuilder();
                 if (value.getID() == null || value.getID().isEmpty()) {
                     ack.setID(url);
                 } else {
@@ -744,12 +736,19 @@ public abstract class AbstractFrontierService
 
                 LOG.debug("putURL -> {} got status {}", url, status);
 
-                responseObserver.onNext(ackBuilder.setStatus(status).build());
+                responseObserver.onNext(ack.setStatus(status).build());
             }
 
             @Override
             public void onError(Throwable t) {
-                LOG.error("Throwable caught", t);
+                if (t instanceof StatusRuntimeException) {
+                    // ignore messages about the client having cancelled
+                    if (((StatusRuntimeException) t)
+                            .getStatus()
+                            .equals(io.grpc.Status.Code.CANCELLED)) {
+                        return;
+                    }
+                }
             }
 
             @Override
