@@ -43,6 +43,8 @@ import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.HashMap;
@@ -95,8 +97,10 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
                             observer;
 
+                    final String nodeAddress = getNodes().get(index);
+
                     final URLFrontierStub stub =
-                            URLFrontierGrpc.newStub(cache.getUnchecked(getNodes().get(index)));
+                            URLFrontierGrpc.newStub(cache.getUnchecked(nodeAddress));
 
                     observer =
                             new StreamObserver<>() {
@@ -109,22 +113,43 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                     StreamObserver<AckMessage> stream =
                                             inprocesscache.getIfPresent(value.getID());
                                     if (stream != null) {
-                                        synchronized (stream) {
-                                            stream.onNext(value);
+                                        try {
+                                            synchronized (stream) {
+                                                stream.onNext(value);
+                                            }
+                                        } catch (Exception e) {
+                                            LOG.error(
+                                                    "Error while communicating back with the client: {} ",
+                                                    e.getLocalizedMessage());
                                         }
-                                        inprocesscache.invalidate(value.getID());
                                     }
+                                    // remove it whether we have been able to return the value or
+                                    // not
+                                    inprocesscache.invalidate(value.getID());
                                 }
 
                                 @Override
                                 public void onError(Throwable t) {
-                                    LOG.error("Caught throwable when forwarding request ", t);
+                                    observercache.invalidate(index.toString());
+                                    if (t instanceof StatusRuntimeException) {
+                                        // ignore messages about the client having cancelled
+                                        if (((StatusRuntimeException) t)
+                                                .getStatus()
+                                                .getCode()
+                                                .equals(io.grpc.Status.Code.CANCELLED)) {
+                                            return;
+                                        }
+                                    }
+                                    LOG.error(
+                                            "Caught throwable when forwarding request to shard {}: {}",
+                                            index,
+                                            t.getLocalizedMessage());
+                                    // remove the channel?
+                                    cache.invalidate(nodeAddress);
                                 }
 
                                 @Override
-                                public void onCompleted() {
-                                    LOG.info("On completed");
-                                }
+                                public void onCompleted() {}
                             };
 
                     return stub.putURLs(observer);
@@ -135,7 +160,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             new RemovalListener<>() {
                 @Override
                 public void onRemoval(RemovalNotification<String, StreamObserver<URLItem>> n) {
-                    // TODO
+                    LOG.info("Removed StreamObserver { } with key {}", n.getValue(), n.getKey());
                 }
             };
 
@@ -364,6 +389,13 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         putURLs_calls.inc();
 
+        ServerCallStreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> serverObserver =
+                (ServerCallStreamObserver<AckMessage>) responseObserver;
+        serverObserver.setOnCancelHandler(
+                () -> {
+                    LOG.error("Client cancelled");
+                });
+
         return new StreamObserver<URLItem>() {
 
             @Override
@@ -448,7 +480,16 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
             @Override
             public void onError(Throwable t) {
-                LOG.error("Throwable caught", t);
+                if (t instanceof StatusRuntimeException) {
+                    // ignore messages about the client having cancelled
+                    if (((StatusRuntimeException) t)
+                            .getStatus()
+                            .getCode()
+                            .equals(io.grpc.Status.Code.CANCELLED)) {
+                        return;
+                    }
+                }
+                LOG.error("Throwable caught", t.getLocalizedMessage());
             }
 
             @Override

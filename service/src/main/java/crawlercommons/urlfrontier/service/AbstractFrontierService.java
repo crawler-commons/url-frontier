@@ -745,6 +745,7 @@ public abstract class AbstractFrontierService
                     // ignore messages about the client having cancelled
                     if (((StatusRuntimeException) t)
                             .getStatus()
+                            .getCode()
                             .equals(io.grpc.Status.Code.CANCELLED)) {
                         return;
                     }
