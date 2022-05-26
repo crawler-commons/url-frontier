@@ -176,6 +176,7 @@ public class PutURLs implements Runnable {
             URLInfo info = URLInfo.newBuilder().setUrl(url).setCrawlID(crawl).build();
             DiscoveredURLItem value = DiscoveredURLItem.newBuilder().setInfo(info).build();
             builder.setDiscovered(value);
+            builder.setID(crawl + "_" + url);
         }
         return builder.build();
     }
