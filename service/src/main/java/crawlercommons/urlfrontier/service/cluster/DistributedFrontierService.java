@@ -63,7 +63,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     protected boolean clusterMode = false;
 
-    private final CacheLoader<String, ManagedChannel> loader =
+    private final CacheLoader<String, ManagedChannel> channelLoader =
             new CacheLoader<String, ManagedChannel>() {
                 @Override
                 public ManagedChannel load(String target) {
@@ -71,7 +71,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 }
             };
 
-    private final RemovalListener<String, ManagedChannel> listener =
+    private final RemovalListener<String, ManagedChannel> channelRemovalListener =
             new RemovalListener<String, ManagedChannel>() {
                 @Override
                 public void onRemoval(RemovalNotification<String, ManagedChannel> n) {
@@ -79,14 +79,11 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 }
             };
 
-    private LoadingCache<String, ManagedChannel> cache =
-            CacheBuilder.newBuilder()
-                    .removalListener(listener)
-                    .expireAfterAccess(1, TimeUnit.MINUTES)
-                    .build(loader);
+    private LoadingCache<String, ManagedChannel> channelCache =
+            CacheBuilder.newBuilder().removalListener(channelRemovalListener).build(channelLoader);
 
     private URLFrontierBlockingStub getFrontier(String target) {
-        return URLFrontierGrpc.newBlockingStub(cache.getUnchecked(target));
+        return URLFrontierGrpc.newBlockingStub(channelCache.getUnchecked(target));
     }
 
     private final CacheLoader<Integer, StreamObserver<URLItem>> observerloader =
@@ -100,7 +97,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     final String nodeAddress = getNodes().get(index);
 
                     final URLFrontierStub stub =
-                            URLFrontierGrpc.newStub(cache.getUnchecked(nodeAddress));
+                            URLFrontierGrpc.newStub(channelCache.getUnchecked(nodeAddress));
 
                     observer =
                             new StreamObserver<>() {
@@ -130,7 +127,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
                                 @Override
                                 public void onError(Throwable t) {
-                                    observercache.invalidate(index.toString());
+                                    observercache.invalidate(index);
                                     if (t instanceof StatusRuntimeException) {
                                         // ignore messages about the client having cancelled
                                         if (((StatusRuntimeException) t)
@@ -144,12 +141,13 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                             "Caught throwable when forwarding request to shard {}: {}",
                                             index,
                                             t.getLocalizedMessage());
-                                    // remove the channel?
-                                    cache.invalidate(nodeAddress);
                                 }
 
                                 @Override
-                                public void onCompleted() {}
+                                public void onCompleted() {
+                                    // finished?
+                                    observercache.invalidate(index);
+                                }
                             };
 
                     return stub.putURLs(observer);
@@ -160,19 +158,55 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             new RemovalListener<>() {
                 @Override
                 public void onRemoval(RemovalNotification<String, StreamObserver<URLItem>> n) {
-                    LOG.info("Removed StreamObserver { } with key {}", n.getValue(), n.getKey());
+                    LOG.info("Removed StreamObserver {} with key {}", n.getValue(), n.getKey());
                 }
             };
 
     private LoadingCache<Integer, StreamObserver<URLItem>> observercache =
             CacheBuilder.newBuilder()
                     .removalListener(observerlistener)
-                    .expireAfterAccess(10, TimeUnit.MINUTES)
+                    .expireAfterAccess(1, TimeUnit.MINUTES)
                     .build((CacheLoader) observerloader);
+
+    private final RemovalListener<
+                    String, StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>>
+            inProcessRemovalListener =
+                    new RemovalListener<>() {
+                        @Override
+                        public void onRemoval(
+                                RemovalNotification<String, StreamObserver<AckMessage>>
+                                        notification) {
+                            // try to notify the client if something was sent to another instance
+                            // but never
+                            // came back?
+                            if (notification.wasEvicted()) {
+                                String ID = notification.getKey();
+                                StreamObserver<AckMessage> stream = notification.getValue();
+                                if (stream != null) {
+                                    try {
+                                        synchronized (stream) {
+                                            stream.onNext(
+                                                    AckMessage.newBuilder()
+                                                            .setID(ID)
+                                                            .setStatus(Status.FAIL)
+                                                            .build());
+                                        }
+                                    } catch (Exception e) {
+                                        LOG.error(
+                                                "Error while communicating back with the client: {} ",
+                                                e.getLocalizedMessage());
+                                    }
+                                }
+                            }
+                        }
+                    };
 
     private Cache<String, StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>>
             inprocesscache =
-                    CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build();
+                    CacheBuilder.newBuilder()
+                            .expireAfterAccess(1, TimeUnit.MINUTES)
+                            .removalListener(inProcessRemovalListener)
+                            .build();
 
     /** Delete the queue based on the key in parameter */
     @Override
@@ -379,7 +413,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
     public void close() throws IOException {
         super.close();
         // close all the connections
-        cache.invalidateAll();
+        channelCache.invalidateAll();
     }
 
     /** Sends the incoming items to a node based on the queue hash * */
