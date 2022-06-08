@@ -404,6 +404,9 @@ public class RocksDBService extends AbstractFrontierService {
             // known - remove from queues
             // its key in the queues was stored in the default cf
             if (schedulingKey != null) {
+                if (isClosing()) {
+                    return Status.FAIL;
+                }
                 rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
                 // remove from queue metadata
                 queueMD.removeFromProcessed(url);
@@ -425,11 +428,17 @@ public class RocksDBService extends AbstractFrontierService {
                         (qk.toString() + "_" + DF.format(nextFetchDate) + "_" + url)
                                 .getBytes(StandardCharsets.UTF_8);
                 // add to the scheduling
+                if (isClosing()) {
+                    return Status.FAIL;
+                }
                 rocksDB.put(columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
                 queueMD.incrementActive();
             }
             // update the link to its queue
             // TODO put in a batch? rocksDB.write(new WriteOptions(), writeBatch);
+            if (isClosing()) {
+                return Status.FAIL;
+            }
             rocksDB.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
 
         } catch (RocksDBException e) {
@@ -705,6 +714,10 @@ public class RocksDBService extends AbstractFrontierService {
     }
 
     private void deleteRanges(final byte[] prefix, byte[] endKey) throws RocksDBException {
+
+        if (isClosing()) {
+            return;
+        }
 
         // if endKey is null it means that there is no other crawlID after this one
         boolean includeEndKey = false;
