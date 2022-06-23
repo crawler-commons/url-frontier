@@ -105,11 +105,16 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                 @Override
                                 public void onNext(
                                         crawlercommons.urlfrontier.Urlfrontier.AckMessage value) {
+
                                     // go back to the client
                                     // and notify that it has worked
                                     StreamObserver<AckMessage> stream =
                                             inprocesscache.getIfPresent(value.getID());
                                     if (stream != null) {
+                                        LOG.debug(
+                                                "Got stream to ack back for {} with status {}",
+                                                value.getID(),
+                                                value.getStatus());
                                         try {
                                             synchronized (stream) {
                                                 stream.onNext(value);
@@ -119,6 +124,11 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                                     "Error while communicating back with the client: {} ",
                                                     e.getLocalizedMessage());
                                         }
+                                    } else {
+                                        LOG.error(
+                                                "No stream found to ack back for {} with status {}",
+                                                value.getID(),
+                                                value.getStatus());
                                     }
                                     // remove it whether we have been able to return the value or
                                     // not
@@ -181,6 +191,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                             // came back?
                             if (notification.wasEvicted()) {
                                 String ID = notification.getKey();
+                                LOG.debug(
+                                        "Trying to notify original stream about eviction of {}",
+                                        ID);
                                 StreamObserver<AckMessage> stream = notification.getValue();
                                 if (stream != null) {
                                     try {
