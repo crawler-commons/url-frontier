@@ -335,6 +335,10 @@ public class RocksDBService extends AbstractFrontierService {
     @Override
     protected Status putURLItem(final URLItem value) {
 
+        if (isClosing()) {
+            return Status.FAIL;
+        }
+
         long nextFetchDate;
         boolean discovered = true;
         URLInfo info;
@@ -389,6 +393,9 @@ public class RocksDBService extends AbstractFrontierService {
 
         // is this URL already known?
         try {
+            if (isClosing()) {
+                return Status.FAIL;
+            }
             byte[] schedulingKey = rocksDB.get(existenceKey);
 
             // already known? ignore if discovered
