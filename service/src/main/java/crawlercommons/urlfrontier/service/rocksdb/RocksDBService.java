@@ -55,6 +55,8 @@ import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
 import org.rocksdb.Statistics;
 import org.rocksdb.StatsLevel;
+import org.rocksdb.WriteBatch;
+import org.rocksdb.WriteOptions;
 import org.slf4j.LoggerFactory;
 
 public class RocksDBService extends AbstractFrontierService {
@@ -211,6 +213,7 @@ public class RocksDBService extends AbstractFrontierService {
                     queueMD.incrementActive();
                 }
             }
+            LOG.info("Found {} queues from scheduled table", getQueues().size());
         }
 
         QueueWithinCrawl previousQueueID = null;
@@ -227,9 +230,16 @@ public class RocksDBService extends AbstractFrontierService {
                 if (previousQueueID == null) {
                     previousQueueID = Qkey;
                 } else if (check && !previousQueueID.equals(Qkey)) {
-                    if (getQueues().get(previousQueueID).countActive() != numScheduled)
+                    int activeinQueues = getQueues().get(previousQueueID).countActive();
+                    if (activeinQueues != numScheduled) {
+                        LOG.error(
+                                "Incorrect number of active URLs for queue: {}. {} vs {}",
+                                previousQueueID,
+                                activeinQueues,
+                                numScheduled);
                         throw new RuntimeException(
-                                "Incorrect number of active URLs for queue " + previousQueueID);
+                                "Incorrect number of active URLs for queue: " + previousQueueID);
+                    }
                     previousQueueID = Qkey;
                     numScheduled = 0;
                 }
@@ -392,7 +402,9 @@ public class RocksDBService extends AbstractFrontierService {
         final byte[] existenceKey = (qk.toString() + "_" + url).getBytes(StandardCharsets.UTF_8);
 
         // is this URL already known?
-        try {
+        try (WriteBatch writeBatch = new WriteBatch();
+                WriteOptions writeOps = new WriteOptions()) {
+
             if (isClosing()) {
                 return Status.FAIL;
             }
@@ -414,7 +426,7 @@ public class RocksDBService extends AbstractFrontierService {
                 if (isClosing()) {
                     return Status.FAIL;
                 }
-                rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
+                writeBatch.delete(columnFamilyHandleList.get(1), schedulingKey);
                 // remove from queue metadata
                 queueMD.removeFromProcessed(url);
                 queueMD.decrementActive();
@@ -438,15 +450,19 @@ public class RocksDBService extends AbstractFrontierService {
                 if (isClosing()) {
                     return Status.FAIL;
                 }
-                rocksDB.put(columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
+                writeBatch.put(columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
                 queueMD.incrementActive();
             }
-            // update the link to its queue
-            // TODO put in a batch? rocksDB.write(new WriteOptions(), writeBatch);
+
             if (isClosing()) {
                 return Status.FAIL;
             }
-            rocksDB.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
+
+            // update the link to its queue
+            writeBatch.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
+
+            // batch the updates - this way the scheduling and main tables will always be in sync
+            rocksDB.write(writeOps, writeBatch);
 
         } catch (RocksDBException e) {
             LOG.error("RocksDB exception", e);
