@@ -29,6 +29,7 @@ import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -105,6 +106,8 @@ public class PutURLs implements Runnable {
 
         int linenum = 0;
 
+        Instant start = Instant.now();
+
         List<String> allLines;
         try {
             allLines = Files.readAllLines(Paths.get(file));
@@ -143,11 +146,15 @@ public class PutURLs implements Runnable {
             }
         }
 
-        System.out.println("Sent " + sent);
-        System.out.println("Acked " + acked.get());
-        System.out.println("OK " + ok.get());
-        System.out.println("Skipped " + skipped.get());
-        System.out.println("Failed " + failed.get());
+        long timetaken = Instant.now().toEpochMilli() - start.toEpochMilli();
+
+        System.out.println("Sent: " + sent);
+        System.out.println("Acked: " + acked.get());
+        System.out.println("OK: " + ok.get());
+        System.out.println("Skipped: " + skipped.get());
+        System.out.println("Failed: " + failed.get());
+        System.out.println("Total time: " + timetaken + " msec");
+        System.out.println("Average OPS: " + acked.get() / (timetaken / 1000));
 
         channel.shutdownNow();
     }
