@@ -127,11 +127,16 @@ public abstract class AbstractFrontierService
     private final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
 
-    /**
-     * Find a better way of setting the number of threads + do not use an unbounded queue See
-     * suggestions in https://dev.to/playtomic/linkedblockingqueue-and-executorservice-1pc5
-     */
-    private final ExecutorService executorService = Executors.newFixedThreadPool(3);
+    private final ExecutorService executorService;
+
+    protected AbstractFrontierService() {
+        executorService = Executors.newSingleThreadExecutor();
+    }
+
+    protected AbstractFrontierService(final Map<String, String> configuration) {
+        int threadNum = Integer.parseInt(configuration.getOrDefault("put.thread.num", "1"));
+        executorService = Executors.newFixedThreadPool(threadNum);
+    }
 
     public Map<QueueWithinCrawl, QueueInterface> getQueues() {
         return queues;
@@ -751,8 +756,9 @@ public abstract class AbstractFrontierService
                         () -> {
                             final Status status = putURLItem(value);
                             LOG.debug("putURL -> {} got status {}", url, status);
+                            final AckMessage ackedMessage = ack.setStatus(status).build();
                             synchronized (responseObserver) {
-                                responseObserver.onNext(ack.setStatus(status).build());
+                                responseObserver.onNext(ackedMessage);
                             }
                             unacked.decrementAndGet();
                         });

@@ -87,6 +87,9 @@ public class RocksDBService extends AbstractFrontierService {
 
     public RocksDBService(final Map<String, String> configuration) {
 
+        // configure the number of threads for puts
+        super(configuration);
+
         // where to store it?
         String path = configuration.getOrDefault("rocksdb.path", "./rocksdb");
 
