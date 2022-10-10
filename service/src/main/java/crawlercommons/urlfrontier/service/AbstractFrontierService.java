@@ -51,6 +51,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
@@ -122,6 +125,17 @@ public abstract class AbstractFrontierService
     // in memory map of metadata for each queue
     private final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
+
+    private final ExecutorService readExecutorService;
+
+    protected AbstractFrontierService() {
+        readExecutorService = Executors.newSingleThreadExecutor();
+    }
+
+    protected AbstractFrontierService(final Map<String, String> configuration) {
+        int threadNum = Integer.parseInt(configuration.getOrDefault("read.thread.num", "1"));
+        readExecutorService = Executors.newFixedThreadPool(threadNum);
+    }
 
     public Map<QueueWithinCrawl, QueueInterface> getQueues() {
         return queues;
@@ -482,21 +496,29 @@ public abstract class AbstractFrontierService
 
         Summary.Timer requestTimer = getURLs_Latency.startTimer();
 
-        int maxQueues = request.getMaxQueues();
-        int maxURLsPerQueue = request.getMaxUrlsPerQueue();
-        int secsUntilRequestable = request.getDelayRequestable();
+        final int maxQueues;
 
         // 0 by default
-        if (maxQueues == 0) {
+        if (request.getMaxQueues() == 0) {
             maxQueues = Integer.MAX_VALUE;
+        } else {
+            maxQueues = request.getMaxQueues();
         }
 
-        if (maxURLsPerQueue == 0) {
+        final int maxURLsPerQueue;
+
+        if (request.getMaxUrlsPerQueue() == 0) {
             maxURLsPerQueue = Integer.MAX_VALUE;
+        } else {
+            maxURLsPerQueue = request.getMaxUrlsPerQueue();
         }
 
-        if (secsUntilRequestable == 0) {
+        final int secsUntilRequestable;
+
+        if (request.getDelayRequestable() == 0) {
             secsUntilRequestable = 30;
+        } else {
+            secsUntilRequestable = request.getDelayRequestable();
         }
 
         LOG.info(
@@ -582,10 +604,15 @@ public abstract class AbstractFrontierService
             return;
         }
 
-        int numQueuesTried = 0;
-        int numQueuesSent = 0;
-        int totalSent = 0;
+        final AtomicInteger numQueuesTried = new AtomicInteger();
+        final AtomicInteger numQueuesSent = new AtomicInteger();
+        final AtomicInteger totalSent = new AtomicInteger();
+        final AtomicInteger inProcess = new AtomicInteger();
+
         QueueWithinCrawl firstCrawlQueue = null;
+
+        SynchronizedStreamObserver<URLInfo> synchStreamObs =
+                new SynchronizedStreamObserver<>(responseObserver);
 
         if (getQueues().isEmpty()) {
             LOG.info("No queues to get URLs from! {}", requestID.toString());
@@ -593,10 +620,10 @@ public abstract class AbstractFrontierService
             return;
         }
 
-        while (numQueuesSent < maxQueues) {
+        while (numQueuesSent.get() + inProcess.get() < maxQueues) {
 
-            QueueInterface currentQueue = null;
-            QueueWithinCrawl currentCrawlQueue = null;
+            final QueueInterface currentQueue;
+            final QueueWithinCrawl currentCrawlQueue;
 
             synchronized (getQueues()) {
                 Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
@@ -638,21 +665,26 @@ public abstract class AbstractFrontierService
                 continue;
             }
 
-            int sentForQ =
-                    sendURLsForQueue(
-                            currentQueue,
-                            currentCrawlQueue,
-                            maxURLsPerQueue,
-                            secsUntilRequestable,
-                            now,
-                            responseObserver);
-            numQueuesTried++;
+            readExecutorService.execute(
+                    () -> {
+                        inProcess.incrementAndGet();
+                        final int sentForQ =
+                                sendURLsForQueue(
+                                        currentQueue,
+                                        currentCrawlQueue,
+                                        maxURLsPerQueue,
+                                        secsUntilRequestable,
+                                        now,
+                                        synchStreamObs);
+                        inProcess.decrementAndGet();
+                        numQueuesTried.incrementAndGet();
 
-            if (sentForQ > 0) {
-                currentQueue.setLastProduced(now);
-                totalSent += sentForQ;
-                numQueuesSent++;
-            }
+                        if (sentForQ > 0) {
+                            currentQueue.setLastProduced(now);
+                            totalSent.addAndGet(sentForQ);
+                            numQueuesSent.incrementAndGet();
+                        }
+                    });
         }
 
         LOG.info(
@@ -663,11 +695,19 @@ public abstract class AbstractFrontierService
                 numQueuesTried,
                 requestID.toString());
 
-        getURLs_urls_count.inc(totalSent);
+        getURLs_urls_count.inc(totalSent.get());
 
         requestTimer.observeDuration();
 
-        responseObserver.onCompleted();
+        // wait for all threads to have finished
+        while (inProcess.get() != 0) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        synchStreamObs.onCompleted();
     }
 
     protected abstract int sendURLsForQueue(
