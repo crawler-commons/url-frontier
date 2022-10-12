@@ -834,12 +834,17 @@ public abstract class AbstractFrontierService
     public void close() throws IOException {
         closing = true;
         writeExecutorService.shutdown();
+        readExecutorService.shutdown();
         try {
             if (!writeExecutorService.awaitTermination(500, TimeUnit.MILLISECONDS)) {
                 writeExecutorService.shutdownNow();
             }
+            if (!readExecutorService.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+                readExecutorService.shutdownNow();
+            }
         } catch (InterruptedException e) {
             writeExecutorService.shutdownNow();
+            readExecutorService.shutdown();
         }
     }
 }
