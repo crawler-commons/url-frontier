@@ -724,6 +724,9 @@ public abstract class AbstractFrontierService
 
         putURLs_calls.inc();
 
+        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> sso =
+                SynchronizedStreamObserver.wrapping(responseObserver);
+
         return new StreamObserver<URLItem>() {
 
             final AtomicInteger unacked = new AtomicInteger();
@@ -746,7 +749,7 @@ public abstract class AbstractFrontierService
 
                 // do not add new stuff if we are in the process of closing
                 if (isClosing()) {
-                    responseObserver.onNext(ack.setStatus(Status.FAIL).build());
+                    sso.onNext(ack.setStatus(Status.FAIL).build());
                     return;
                 }
 
@@ -757,9 +760,7 @@ public abstract class AbstractFrontierService
                             final Status status = putURLItem(value);
                             LOG.debug("putURL -> {} got status {}", url, status);
                             final AckMessage ackedMessage = ack.setStatus(status).build();
-                            synchronized (responseObserver) {
-                                responseObserver.onNext(ackedMessage);
-                            }
+                            sso.onNext(ackedMessage);
                             unacked.decrementAndGet();
                         });
             }
@@ -788,9 +789,7 @@ public abstract class AbstractFrontierService
                         Thread.currentThread().interrupt();
                     }
                 }
-                synchronized (responseObserver) {
-                    responseObserver.onCompleted();
-                }
+                sso.onCompleted();
             }
         };
     }
