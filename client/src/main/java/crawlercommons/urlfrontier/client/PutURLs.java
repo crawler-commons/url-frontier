@@ -140,7 +140,7 @@ public class PutURLs implements Runnable {
         // wait for completion
         while (!completed.get() && sent != acked.get()) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -154,7 +154,7 @@ public class PutURLs implements Runnable {
         System.out.println("Skipped: " + skipped.get());
         System.out.println("Failed: " + failed.get());
         System.out.println("Total time: " + timetaken + " msec");
-        System.out.println("Average OPS: " + acked.get() / (timetaken / 1000));
+        System.out.println("Average OPS: " + acked.get() / Math.max(1, timetaken / 1000));
 
         channel.shutdownNow();
     }

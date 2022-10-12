@@ -53,6 +53,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.LoggerFactory;
 
@@ -127,14 +128,18 @@ public abstract class AbstractFrontierService
             Collections.synchronizedMap(new LinkedHashMap<>());
 
     private final ExecutorService readExecutorService;
+    private final ExecutorService writeExecutorService;
 
     protected AbstractFrontierService() {
         readExecutorService = Executors.newSingleThreadExecutor();
+        writeExecutorService = Executors.newSingleThreadExecutor();
     }
 
     protected AbstractFrontierService(final Map<String, String> configuration) {
-        int threadNum = Integer.parseInt(configuration.getOrDefault("read.thread.num", "1"));
-        readExecutorService = Executors.newFixedThreadPool(threadNum);
+        int rthreadNum = Integer.parseInt(configuration.getOrDefault("read.thread.num", "1"));
+        readExecutorService = Executors.newFixedThreadPool(rthreadNum);
+        int wthreadNum = Integer.parseInt(configuration.getOrDefault("put.thread.num", "1"));
+        writeExecutorService = Executors.newFixedThreadPool(wthreadNum);
     }
 
     public Map<QueueWithinCrawl, QueueInterface> getQueues() {
@@ -611,8 +616,8 @@ public abstract class AbstractFrontierService
 
         QueueWithinCrawl firstCrawlQueue = null;
 
-        SynchronizedStreamObserver<URLInfo> synchStreamObs =
-                new SynchronizedStreamObserver<>(responseObserver);
+        StreamObserver<URLInfo> synchStreamObs =
+                SynchronizedStreamObserver.wrapping(responseObserver);
 
         if (getQueues().isEmpty()) {
             LOG.info("No queues to get URLs from! {}", requestID.toString());
@@ -749,7 +754,12 @@ public abstract class AbstractFrontierService
 
         putURLs_calls.inc();
 
+        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> sso =
+                SynchronizedStreamObserver.wrapping(responseObserver);
+
         return new StreamObserver<URLItem>() {
+
+            final AtomicInteger unacked = new AtomicInteger();
 
             @Override
             public void onNext(URLItem value) {
@@ -760,23 +770,29 @@ public abstract class AbstractFrontierService
                     url = value.getKnown().getInfo().getUrl();
                 }
 
-                Builder ack = AckMessage.newBuilder();
+                final Builder ack = AckMessage.newBuilder();
                 if (value.getID() == null || value.getID().isEmpty()) {
                     ack.setID(url);
                 } else {
                     ack.setID(value.getID());
                 }
 
-                Status status = Status.FAIL;
-
                 // do not add new stuff if we are in the process of closing
-                if (!isClosing()) {
-                    status = putURLItem(value);
+                if (isClosing()) {
+                    sso.onNext(ack.setStatus(Status.FAIL).build());
+                    return;
                 }
 
-                LOG.debug("putURL -> {} got status {}", url, status);
+                unacked.incrementAndGet();
 
-                responseObserver.onNext(ack.setStatus(status).build());
+                writeExecutorService.execute(
+                        () -> {
+                            final Status status = putURLItem(value);
+                            LOG.debug("putURL -> {} got status {}", url, status);
+                            final AckMessage ackedMessage = ack.setStatus(status).build();
+                            sso.onNext(ackedMessage);
+                            unacked.decrementAndGet();
+                        });
             }
 
             @Override
@@ -795,7 +811,15 @@ public abstract class AbstractFrontierService
             @Override
             public void onCompleted() {
                 // will this ever get called if the client is constantly streaming?
-                responseObserver.onCompleted();
+                // check that all the work for this stream has ended
+                while (unacked.get() != 0) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                sso.onCompleted();
             }
         };
     }
@@ -809,5 +833,13 @@ public abstract class AbstractFrontierService
     @Override
     public void close() throws IOException {
         closing = true;
+        writeExecutorService.shutdown();
+        try {
+            if (!writeExecutorService.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+                writeExecutorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            writeExecutorService.shutdownNow();
+        }
     }
 }
