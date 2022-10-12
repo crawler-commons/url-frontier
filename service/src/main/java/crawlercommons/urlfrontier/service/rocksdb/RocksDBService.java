@@ -87,6 +87,9 @@ public class RocksDBService extends AbstractFrontierService {
 
     public RocksDBService(final Map<String, String> configuration) {
 
+        // configure the number of threads for puts
+        super(configuration);
+
         // where to store it?
         String path = configuration.getOrDefault("rocksdb.path", "./rocksdb");
 
@@ -399,74 +402,84 @@ public class RocksDBService extends AbstractFrontierService {
             return Status.SKIPPED;
         }
 
-        final byte[] existenceKey = (qk.toString() + "_" + url).getBytes(StandardCharsets.UTF_8);
+        // make it intern so that all threads accessing this method
+        // share the same instance of the String, this way we can synchronize
+        // on it and make sure that 2 threads working on the same URL won't
+        // both be considered non-existant
+        final String existenceKeyString = (qk.toString() + "_" + url).intern();
+        final byte[] existenceKey = existenceKeyString.getBytes(StandardCharsets.UTF_8);
 
-        // is this URL already known?
-        try (WriteBatch writeBatch = new WriteBatch();
-                WriteOptions writeOps = new WriteOptions()) {
+        synchronized (existenceKeyString) {
 
-            if (isClosing()) {
-                return Status.FAIL;
-            }
-            byte[] schedulingKey = rocksDB.get(existenceKey);
+            // is this URL already known?
+            try (WriteBatch writeBatch = new WriteBatch();
+                    WriteOptions writeOps = new WriteOptions()) {
 
-            // already known? ignore if discovered
-            if (schedulingKey != null && discovered) {
-                putURLs_alreadyknown_count.inc();
-                return Status.SKIPPED;
-            }
-
-            // get the priority queue or create one
-            QueueMetadata queueMD =
-                    (QueueMetadata) getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
-
-            // known - remove from queues
-            // its key in the queues was stored in the default cf
-            if (schedulingKey != null) {
                 if (isClosing()) {
                     return Status.FAIL;
                 }
-                writeBatch.delete(columnFamilyHandleList.get(1), schedulingKey);
-                // remove from queue metadata
-                queueMD.removeFromProcessed(url);
-                queueMD.decrementActive();
-            }
+                byte[] schedulingKey = rocksDB.get(existenceKey);
 
-            // add the new item
-            // unless it is an update and it's nextFetchDate is 0 == NEVER
-            if (!discovered && nextFetchDate == 0) {
-                // does not need scheduling
-                // remove any scheduling key from its value
-                schedulingKey = new byte[] {};
-                queueMD.incrementCompleted();
-                putURLs_completed_count.inc();
-            } else {
-                // it is either brand new or already known
-                // create a scheduling key for it
-                schedulingKey =
-                        (qk.toString() + "_" + DF.format(nextFetchDate) + "_" + url)
-                                .getBytes(StandardCharsets.UTF_8);
-                // add to the scheduling
+                // already known? ignore if discovered
+                if (schedulingKey != null && discovered) {
+                    putURLs_alreadyknown_count.inc();
+                    return Status.SKIPPED;
+                }
+
+                // get the priority queue or create one
+                QueueMetadata queueMD =
+                        (QueueMetadata) getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
+
+                // known - remove from queues
+                // its key in the queues was stored in the default cf
+                if (schedulingKey != null) {
+                    if (isClosing()) {
+                        return Status.FAIL;
+                    }
+                    writeBatch.delete(columnFamilyHandleList.get(1), schedulingKey);
+                    // remove from queue metadata
+                    queueMD.removeFromProcessed(url);
+                    queueMD.decrementActive();
+                }
+
+                // add the new item
+                // unless it is an update and it's nextFetchDate is 0 == NEVER
+                if (!discovered && nextFetchDate == 0) {
+                    // does not need scheduling
+                    // remove any scheduling key from its value
+                    schedulingKey = new byte[] {};
+                    queueMD.incrementCompleted();
+                    putURLs_completed_count.inc();
+                } else {
+                    // it is either brand new or already known
+                    // create a scheduling key for it
+                    schedulingKey =
+                            (qk.toString() + "_" + DF.format(nextFetchDate) + "_" + url)
+                                    .getBytes(StandardCharsets.UTF_8);
+                    // add to the scheduling
+                    if (isClosing()) {
+                        return Status.FAIL;
+                    }
+                    writeBatch.put(
+                            columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
+                    queueMD.incrementActive();
+                }
+
                 if (isClosing()) {
                     return Status.FAIL;
                 }
-                writeBatch.put(columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
-                queueMD.incrementActive();
-            }
 
-            if (isClosing()) {
+                // update the link to its queue
+                writeBatch.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
+
+                // batch the updates - this way the scheduling and main tables will always be in
+                // sync
+                rocksDB.write(writeOps, writeBatch);
+
+            } catch (RocksDBException e) {
+                LOG.error("RocksDB exception", e);
                 return Status.FAIL;
             }
-
-            // update the link to its queue
-            writeBatch.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
-
-            // batch the updates - this way the scheduling and main tables will always be in sync
-            rocksDB.write(writeOps, writeBatch);
-
-        } catch (RocksDBException e) {
-            LOG.error("RocksDB exception", e);
-            return Status.FAIL;
         }
 
         return Status.OK;

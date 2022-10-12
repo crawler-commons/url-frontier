@@ -812,52 +812,56 @@ public class IgniteService extends DistributedFrontierService
 
         IgniteCache<Key, Payload> _cache = createOrGetCacheForCrawlID(crawlID);
 
-        final Key key = new Key(qk.toString(), url);
+        final String existenceKeyString = (qk.toString() + "_" + url).intern();
 
-        // is this URL already known?
-        boolean known = _cache.containsKey(key);
+        synchronized (existenceKeyString) {
+            final Key key = new Key(qk.toString(), url);
 
-        // already known? ignore if discovered
-        if (known && discovered) {
-            putURLs_alreadyknown_count.inc();
-            return AckMessage.Status.SKIPPED;
-        }
+            // is this URL already known?
+            boolean known = _cache.containsKey(key);
 
-        // get the priority queue - if it is a local one
-        // or create a dummy one
-        // but do not create it in the queues unless we are in a non distributed
-        // environment
-        QueueMetadata queueMD = null;
+            // already known? ignore if discovered
+            if (known && discovered) {
+                putURLs_alreadyknown_count.inc();
+                return AckMessage.Status.SKIPPED;
+            }
 
-        if (clusterMode) {
-            queueMD = (QueueMetadata) getQueues().getOrDefault(qk, new QueueMetadata());
-        } else {
-            queueMD = (QueueMetadata) getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
-        }
+            // get the priority queue - if it is a local one
+            // or create a dummy one
+            // but do not create it in the queues unless we are in a non distributed
+            // environment
+            QueueMetadata queueMD = null;
 
-        // but make sure it exists globally anyway
-        globalQueueCache.putIfAbsent(qk.toString(), qk.toString());
+            if (clusterMode) {
+                queueMD = (QueueMetadata) getQueues().getOrDefault(qk, new QueueMetadata());
+            } else {
+                queueMD = (QueueMetadata) getQueues().computeIfAbsent(qk, s -> new QueueMetadata());
+            }
 
-        Payload newpayload = new Payload(nextFetchDate, info.toByteArray());
+            // but make sure it exists globally anyway
+            globalQueueCache.putIfAbsent(qk.toString(), qk.toString());
 
-        _cache.put(key, newpayload);
+            Payload newpayload = new Payload(nextFetchDate, info.toByteArray());
 
-        // known - remove from queues
-        // its key in the queues was stored in the default cf
-        if (known) {
-            // remove from queue metadata
-            queueMD.removeFromProcessed(url);
-            queueMD.decrementActive();
-        }
+            _cache.put(key, newpayload);
 
-        // add the new item
-        // unless it is an update and it's nextFetchDate is 0 == NEVER
-        if (!discovered && nextFetchDate == 0) {
-            queueMD.incrementCompleted();
-            putURLs_completed_count.inc();
-        } else {
-            // it is either brand new or already known
-            queueMD.incrementActive();
+            // known - remove from queues
+            // its key in the queues was stored in the default cf
+            if (known) {
+                // remove from queue metadata
+                queueMD.removeFromProcessed(url);
+                queueMD.decrementActive();
+            }
+
+            // add the new item
+            // unless it is an update and it's nextFetchDate is 0 == NEVER
+            if (!discovered && nextFetchDate == 0) {
+                queueMD.incrementCompleted();
+                putURLs_completed_count.inc();
+            } else {
+                // it is either brand new or already known
+                queueMD.incrementActive();
+            }
         }
 
         return AckMessage.Status.OK;

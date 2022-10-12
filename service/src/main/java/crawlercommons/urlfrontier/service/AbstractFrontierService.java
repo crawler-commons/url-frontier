@@ -51,6 +51,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
@@ -122,6 +126,17 @@ public abstract class AbstractFrontierService
     // in memory map of metadata for each queue
     private final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
+
+    private final ExecutorService executorService;
+
+    protected AbstractFrontierService() {
+        executorService = Executors.newSingleThreadExecutor();
+    }
+
+    protected AbstractFrontierService(final Map<String, String> configuration) {
+        int threadNum = Integer.parseInt(configuration.getOrDefault("put.thread.num", "1"));
+        executorService = Executors.newFixedThreadPool(threadNum);
+    }
 
     public Map<QueueWithinCrawl, QueueInterface> getQueues() {
         return queues;
@@ -709,7 +724,12 @@ public abstract class AbstractFrontierService
 
         putURLs_calls.inc();
 
+        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> sso =
+                SynchronizedStreamObserver.wrapping(responseObserver);
+
         return new StreamObserver<URLItem>() {
+
+            final AtomicInteger unacked = new AtomicInteger();
 
             @Override
             public void onNext(URLItem value) {
@@ -720,23 +740,29 @@ public abstract class AbstractFrontierService
                     url = value.getKnown().getInfo().getUrl();
                 }
 
-                Builder ack = AckMessage.newBuilder();
+                final Builder ack = AckMessage.newBuilder();
                 if (value.getID() == null || value.getID().isEmpty()) {
                     ack.setID(url);
                 } else {
                     ack.setID(value.getID());
                 }
 
-                Status status = Status.FAIL;
-
                 // do not add new stuff if we are in the process of closing
-                if (!isClosing()) {
-                    status = putURLItem(value);
+                if (isClosing()) {
+                    sso.onNext(ack.setStatus(Status.FAIL).build());
+                    return;
                 }
 
-                LOG.debug("putURL -> {} got status {}", url, status);
+                unacked.incrementAndGet();
 
-                responseObserver.onNext(ack.setStatus(status).build());
+                executorService.execute(
+                        () -> {
+                            final Status status = putURLItem(value);
+                            LOG.debug("putURL -> {} got status {}", url, status);
+                            final AckMessage ackedMessage = ack.setStatus(status).build();
+                            sso.onNext(ackedMessage);
+                            unacked.decrementAndGet();
+                        });
             }
 
             @Override
@@ -755,7 +781,15 @@ public abstract class AbstractFrontierService
             @Override
             public void onCompleted() {
                 // will this ever get called if the client is constantly streaming?
-                responseObserver.onCompleted();
+                // check that all the work for this stream has ended
+                while (unacked.get() != 0) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                sso.onCompleted();
             }
         };
     }
@@ -769,5 +803,13 @@ public abstract class AbstractFrontierService
     @Override
     public void close() throws IOException {
         closing = true;
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+        }
     }
 }
