@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.LoggerFactory;
 
 public abstract class DistributedFrontierService extends AbstractFrontierService {
@@ -446,6 +447,8 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         return new StreamObserver<URLItem>() {
 
+            final AtomicInteger unacked = new AtomicInteger();
+
             @Override
             public void onNext(URLItem value) {
 
@@ -500,11 +503,17 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 LOG.trace("LocalNodeIndex {}", localNodeIndex);
 
                 if (partition == localNodeIndex) {
-                    Status s = putURLItem(value);
-                    LOG.debug("Local putURL -> {} got status {}", url, s);
-                    sso.onNext(ack.setStatus(s).build());
+                    unacked.incrementAndGet();
+                    executorService.execute(
+                            () -> {
+                                Status s = putURLItem(value);
+                                LOG.debug("Local putURL -> {} got status {}", url, s);
+                                sso.onNext(ack.setStatus(s).build());
+                                unacked.decrementAndGet();
+                            });
                     return;
                 }
+
                 // forward to non-local node
 
                 // get the stream observer for that node
@@ -538,7 +547,14 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
             @Override
             public void onCompleted() {
-                // will this ever get called if the client is constantly streaming?
+                // check that all the work for this stream has ended
+                while (unacked.get() != 0) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
                 sso.onCompleted();
             }
         };

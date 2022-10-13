@@ -127,7 +127,7 @@ public abstract class AbstractFrontierService
     private final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
 
-    private final ExecutorService executorService;
+    protected final ExecutorService executorService;
 
     protected AbstractFrontierService() {
         executorService = Executors.newSingleThreadExecutor();
