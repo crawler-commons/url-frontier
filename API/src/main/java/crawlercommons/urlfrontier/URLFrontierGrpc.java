@@ -4,8 +4,9 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /** */
 @javax.annotation.Generated(
-        value = "by gRPC proto compiler (version 1.39.0)",
+        value = "by gRPC proto compiler (version 1.50.0)",
         comments = "Source: urlfrontier.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class URLFrontierGrpc {
 
     private URLFrontierGrpc() {}
