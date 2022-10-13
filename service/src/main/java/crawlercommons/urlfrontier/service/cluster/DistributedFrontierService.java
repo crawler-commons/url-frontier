@@ -41,6 +41,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
+import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -54,6 +55,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.LoggerFactory;
 
 public abstract class DistributedFrontierService extends AbstractFrontierService {
@@ -108,6 +110,8 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
                                     // go back to the client
                                     // and notify that it has worked
+                                    // we know that the observer in the cache
+                                    // is a synchronized one
                                     StreamObserver<AckMessage> stream =
                                             inprocesscache.getIfPresent(value.getID());
                                     if (stream != null) {
@@ -116,9 +120,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                                 value.getID(),
                                                 value.getStatus());
                                         try {
-                                            synchronized (stream) {
-                                                stream.onNext(value);
-                                            }
+                                            stream.onNext(value);
                                         } catch (Exception e) {
                                             LOG.error(
                                                     "Error while communicating back with the client: {} ",
@@ -197,13 +199,11 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                 StreamObserver<AckMessage> stream = notification.getValue();
                                 if (stream != null) {
                                     try {
-                                        synchronized (stream) {
-                                            stream.onNext(
-                                                    AckMessage.newBuilder()
-                                                            .setID(ID)
-                                                            .setStatus(Status.FAIL)
-                                                            .build());
-                                        }
+                                        stream.onNext(
+                                                AckMessage.newBuilder()
+                                                        .setID(ID)
+                                                        .setStatus(Status.FAIL)
+                                                        .build());
                                     } catch (Exception e) {
                                         LOG.error(
                                                 "Error while communicating back with the client: {} ",
@@ -436,14 +436,18 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         putURLs_calls.inc();
 
-        ServerCallStreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> serverObserver =
-                (ServerCallStreamObserver<AckMessage>) responseObserver;
-        serverObserver.setOnCancelHandler(
-                () -> {
-                    LOG.error("Client cancelled");
-                });
+        ((ServerCallStreamObserver<AckMessage>) responseObserver)
+                .setOnCancelHandler(
+                        () -> {
+                            LOG.error("Client cancelled");
+                        });
+
+        // wrap the response observer as a synchronized one
+        StreamObserver<AckMessage> sso = SynchronizedStreamObserver.wrapping(responseObserver);
 
         return new StreamObserver<URLItem>() {
+
+            final AtomicInteger unacked = new AtomicInteger();
 
             @Override
             public void onNext(URLItem value) {
@@ -475,9 +479,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     Qkey = provideMissingKey(url);
                     if (Qkey == null) {
                         LOG.error("Malformed URL {}", url);
-                        synchronized (responseObserver) {
-                            responseObserver.onNext(ack.setStatus(Status.SKIPPED).build());
-                        }
+                        sso.onNext(ack.setStatus(Status.SKIPPED).build());
                         return;
                     }
                     // make a new info object ready to return
@@ -501,19 +503,23 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 LOG.trace("LocalNodeIndex {}", localNodeIndex);
 
                 if (partition == localNodeIndex) {
-                    Status s = putURLItem(value);
-                    LOG.debug("Local putURL -> {} got status {}", url, s);
-                    synchronized (responseObserver) {
-                        responseObserver.onNext(ack.setStatus(s).build());
-                    }
+                    unacked.incrementAndGet();
+                    writeExecutorService.execute(
+                            () -> {
+                                Status s = putURLItem(value);
+                                LOG.debug("Local putURL -> {} got status {}", url, s);
+                                sso.onNext(ack.setStatus(s).build());
+                                unacked.decrementAndGet();
+                            });
                     return;
                 }
+
                 // forward to non-local node
 
                 // get the stream observer for that node
                 final StreamObserver<URLItem> observer = observercache.getUnchecked(partition);
                 // store the stuff in a temporary cache
-                inprocesscache.put(ack.getID(), responseObserver);
+                inprocesscache.put(ack.getID(), sso);
 
                 LOG.debug(
                         "Sending {} to partition {} -> {}",
@@ -541,8 +547,15 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
             @Override
             public void onCompleted() {
-                // will this ever get called if the client is constantly streaming?
-                responseObserver.onCompleted();
+                // check that all the work for this stream has ended
+                while (unacked.get() != 0) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                sso.onCompleted();
             }
         };
     }
