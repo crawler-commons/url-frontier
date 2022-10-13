@@ -29,6 +29,7 @@
 						<configuration>
 							<createDependencyReducedPom>false</createDependencyReducedPom>
 							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>crawlercommons.urlfrontier.client.Client</mainClass>
 								</transformer>
@@ -57,7 +58,7 @@
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java-util</artifactId>
-			<version>3.19.4</version>
+			<version>3.20.3</version>
 		</dependency>
 
 	</dependencies>
