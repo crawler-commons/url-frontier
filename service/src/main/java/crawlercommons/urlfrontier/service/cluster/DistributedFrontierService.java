@@ -443,7 +443,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                         });
 
         // wrap the response observer as a synchronized one
-        StreamObserver<AckMessage> sso = SynchronizedStreamObserver.wrapping(responseObserver);
+        StreamObserver<AckMessage> sso = SynchronizedStreamObserver.wrapping(responseObserver, -1);
 
         return new StreamObserver<URLItem>() {
 

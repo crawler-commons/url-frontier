@@ -24,6 +24,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
+import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.io.File;
 import java.io.IOException;
@@ -284,7 +285,7 @@ public class RocksDBService extends AbstractFrontierService {
             int maxURLsPerQueue,
             int secsUntilRequestable,
             long now,
-            StreamObserver<URLInfo> responseObserver) {
+            SynchronizedStreamObserver<URLInfo> responseObserver) {
 
         // stop sending if we are closing
         if (isClosing()) {
@@ -330,6 +331,11 @@ public class RocksDBService extends AbstractFrontierService {
 
                 // this one is good to go
                 try {
+                    // check that we haven't already reached the number of queues
+                    if (alreadySent == 0 && !responseObserver.tryTakingToken()) {
+                        return 0;
+                    }
+
                     responseObserver.onNext(URLInfo.parseFrom(rocksIterator.value()));
 
                     // mark it as not processable for N secs

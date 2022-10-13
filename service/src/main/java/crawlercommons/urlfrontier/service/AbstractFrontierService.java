@@ -545,6 +545,10 @@ public abstract class AbstractFrontierService
 
         long now = Instant.now().getEpochSecond();
 
+        final SynchronizedStreamObserver<URLInfo> synchStreamObs =
+                (SynchronizedStreamObserver<URLInfo>)
+                        SynchronizedStreamObserver.wrapping(responseObserver, maxQueues);
+
         // want a specific key only?
         // default is an empty string so should never be null
         if (key != null && key.length() >= 1) {
@@ -554,7 +558,7 @@ public abstract class AbstractFrontierService
 
             if (crawlID == null) {
                 LOG.error("Want URLs from a specific queue but the crawlID is not set");
-                responseObserver.onCompleted();
+                synchStreamObs.onCompleted();
                 return;
             }
 
@@ -563,13 +567,13 @@ public abstract class AbstractFrontierService
 
             // the queue does not exist
             if (queue == null) {
-                responseObserver.onCompleted();
+                synchStreamObs.onCompleted();
                 return;
             }
 
             // it is locked
             if (queue.getBlockedUntil() >= now) {
-                responseObserver.onCompleted();
+                synchStreamObs.onCompleted();
                 return;
             }
 
@@ -583,12 +587,7 @@ public abstract class AbstractFrontierService
 
             int totalSent =
                     sendURLsForQueue(
-                            queue,
-                            qwc,
-                            maxURLsPerQueue,
-                            secsUntilRequestable,
-                            now,
-                            responseObserver);
+                            queue, qwc, maxURLsPerQueue, secsUntilRequestable, now, synchStreamObs);
             responseObserver.onCompleted();
 
             getURLs_urls_count.inc(totalSent);
@@ -616,16 +615,13 @@ public abstract class AbstractFrontierService
 
         QueueWithinCrawl firstCrawlQueue = null;
 
-        StreamObserver<URLInfo> synchStreamObs =
-                SynchronizedStreamObserver.wrapping(responseObserver);
-
         if (getQueues().isEmpty()) {
             LOG.info("No queues to get URLs from! {}", requestID.toString());
             responseObserver.onCompleted();
             return;
         }
 
-        while (numQueuesSent.get() + inProcess.get() < maxQueues) {
+        while (numQueuesSent.get() < maxQueues) {
 
             final QueueInterface currentQueue;
             final QueueWithinCrawl currentCrawlQueue;
@@ -721,7 +717,7 @@ public abstract class AbstractFrontierService
             int maxURLsPerQueue,
             int secsUntilRequestable,
             long now,
-            StreamObserver<URLInfo> responseObserver);
+            SynchronizedStreamObserver<URLInfo> responseObserver);
 
     @Override
     public void setLogLevel(LogLevelParams request, StreamObserver<Empty> responseObserver) {
@@ -755,7 +751,7 @@ public abstract class AbstractFrontierService
         putURLs_calls.inc();
 
         StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> sso =
-                SynchronizedStreamObserver.wrapping(responseObserver);
+                SynchronizedStreamObserver.wrapping(responseObserver, -1);
 
         return new StreamObserver<URLItem>() {
 

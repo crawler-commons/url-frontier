@@ -19,8 +19,8 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
+import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import crawlercommons.urlfrontier.service.cluster.DistributedFrontierService;
-import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +70,7 @@ public class ShardedRocksDBService extends DistributedFrontierService {
             int maxURLsPerQueue,
             int secsUntilRequestable,
             long now,
-            StreamObserver<URLInfo> responseObserver) {
+            SynchronizedStreamObserver<URLInfo> responseObserver) {
         return instance.sendURLsForQueue(
                 queue, key, maxURLsPerQueue, secsUntilRequestable, now, responseObserver);
     }
