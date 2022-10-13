@@ -22,7 +22,7 @@ import io.grpc.stub.StreamObserver;
  *
  * <p>The underlying {@link StreamObserver} must not be used by any other clients.
  */
-class SynchronizedStreamObserver<V> implements StreamObserver<V> {
+public class SynchronizedStreamObserver<V> implements StreamObserver<V> {
     private final StreamObserver<V> underlying;
 
     SynchronizedStreamObserver(StreamObserver<V> underlying) {
