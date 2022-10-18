@@ -17,7 +17,7 @@ package crawlercommons.urlfrontier.service;
 import io.grpc.stub.StreamObserver;
 
 /**
- * A {@link StreamObserver} which provides synchronous access access to an underlying {@link
+ * A {@link StreamObserver} which provides synchronous access to an underlying {@link
  * StreamObserver}.
  *
  * <p>The underlying {@link StreamObserver} must not be used by any other clients.

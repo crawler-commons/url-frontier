@@ -840,7 +840,7 @@ public abstract class AbstractFrontierService
             }
         } catch (InterruptedException e) {
             writeExecutorService.shutdownNow();
-            readExecutorService.shutdown();
+            readExecutorService.shutdownNow();
         }
     }
 }
