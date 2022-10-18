@@ -131,15 +131,22 @@ public abstract class AbstractFrontierService
     protected final ExecutorService writeExecutorService;
 
     protected AbstractFrontierService() {
-        readExecutorService = Executors.newSingleThreadExecutor();
-        writeExecutorService = Executors.newSingleThreadExecutor();
+        this(Collections.emptyMap());
     }
 
     protected AbstractFrontierService(final Map<String, String> configuration) {
-        int rthreadNum = Integer.parseInt(configuration.getOrDefault("read.thread.num", "1"));
+        final int availableProcessor = Runtime.getRuntime().availableProcessors();
+        LOG.info("Available processor(s) {}", availableProcessor);
+        // by default uses 1/4 of the available processors
+        final String defaultParallelism = Integer.toString(Math.max(availableProcessor / 4, 1));
+        final int rthreadNum =
+                Integer.parseInt(configuration.getOrDefault("read.thread.num", defaultParallelism));
+        LOG.info("Using {} threads for reading from queues", rthreadNum);
         readExecutorService = Executors.newFixedThreadPool(rthreadNum);
-        int wthreadNum = Integer.parseInt(configuration.getOrDefault("put.thread.num", "1"));
+        final int wthreadNum =
+                Integer.parseInt(configuration.getOrDefault("put.thread.num", defaultParallelism));
         writeExecutorService = Executors.newFixedThreadPool(wthreadNum);
+        LOG.info("Using {} threads for writing to queues", wthreadNum);
     }
 
     public Map<QueueWithinCrawl, QueueInterface> getQueues() {
