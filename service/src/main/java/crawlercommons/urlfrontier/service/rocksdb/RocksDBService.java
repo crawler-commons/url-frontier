@@ -14,7 +14,6 @@
  */
 package crawlercommons.urlfrontier.service.rocksdb;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
@@ -342,7 +341,7 @@ public class RocksDBService extends AbstractFrontierService {
                     ((QueueMetadata) queue).holdUntil(urlPart, now + secsUntilRequestable);
 
                     alreadySent++;
-                } catch (InvalidProtocolBufferException e) {
+                } catch (Throwable e) {
                     LOG.error("Caught unlikely error ", e);
                 }
             }

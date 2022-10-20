@@ -144,7 +144,8 @@ public abstract class AbstractFrontierService
         LOG.info("Using {} threads for reading from queues", rthreadNum);
         readExecutorService = Executors.newFixedThreadPool(rthreadNum);
         final int wthreadNum =
-                Integer.parseInt(configuration.getOrDefault("put.thread.num", defaultParallelism));
+                Integer.parseInt(
+                        configuration.getOrDefault("write.thread.num", defaultParallelism));
         writeExecutorService = Executors.newFixedThreadPool(wthreadNum);
         LOG.info("Using {} threads for writing to queues", wthreadNum);
     }
