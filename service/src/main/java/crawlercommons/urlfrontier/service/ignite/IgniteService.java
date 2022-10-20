@@ -24,6 +24,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
+import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import crawlercommons.urlfrontier.service.cluster.DistributedFrontierService;
 import crawlercommons.urlfrontier.service.cluster.HeartbeatListener;
 import crawlercommons.urlfrontier.service.rocksdb.QueueMetadata;
@@ -548,7 +549,7 @@ public class IgniteService extends DistributedFrontierService
             int maxURLsPerQueue,
             int secsUntilRequestable,
             long now,
-            StreamObserver<URLInfo> responseObserver) {
+            SynchronizedStreamObserver<URLInfo> responseObserver) {
 
         int alreadySent = 0;
 
@@ -591,11 +592,14 @@ public class IgniteService extends DistributedFrontierService
 
                 // this one is good to go
                 try {
-                    responseObserver.onNext(URLInfo.parseFrom(payload.payload));
+                    // check that we haven't already reached the number of queues
+                    if (alreadySent == 0 && !responseObserver.tryTakingToken()) {
+                        return 0;
+                    }
 
+                    responseObserver.onNext(URLInfo.parseFrom(payload.payload));
                     // mark it as not processable for N secs
                     ((QueueMetadata) queue).holdUntil(url, now + secsUntilRequestable);
-
                     alreadySent++;
                 } catch (InvalidProtocolBufferException e) {
                     LOG.error("Caught unlikely error ", e);

@@ -17,7 +17,7 @@ package crawlercommons.urlfrontier.service;
 import io.grpc.stub.StreamObserver;
 
 /**
- * A {@link StreamObserver} which provides synchronous access access to an underlying {@link
+ * A {@link StreamObserver} which provides synchronous access to an underlying {@link
  * StreamObserver}.
  *
  * <p>The underlying {@link StreamObserver} must not be used by any other clients.
@@ -25,16 +25,29 @@ import io.grpc.stub.StreamObserver;
 public class SynchronizedStreamObserver<V> implements StreamObserver<V> {
     private final StreamObserver<V> underlying;
 
-    SynchronizedStreamObserver(StreamObserver<V> underlying) {
+    private int tokens;
+
+    SynchronizedStreamObserver(StreamObserver<V> underlying, int startTokens) {
         this.underlying = underlying;
+        this.tokens = startTokens;
     }
 
     /**
      * Create a new {@link SynchronizedStreamObserver} which will delegate all calls to the
      * underlying {@link StreamObserver}, synchronizing access to that observer.
      */
-    public static <V> StreamObserver<V> wrapping(StreamObserver<V> underlying) {
-        return new SynchronizedStreamObserver<>(underlying);
+    public static <V> StreamObserver<V> wrapping(StreamObserver<V> underlying, int startTokens) {
+        return new SynchronizedStreamObserver<>(underlying, startTokens);
+    }
+
+    public boolean tryTakingToken() {
+        synchronized (this) {
+            if (tokens > 0) {
+                tokens--;
+                return true;
+            }
+            return false;
+        }
     }
 
     @Override

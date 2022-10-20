@@ -127,15 +127,27 @@ public abstract class AbstractFrontierService
     private final Map<QueueWithinCrawl, QueueInterface> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
 
-    protected final ExecutorService executorService;
+    protected final ExecutorService readExecutorService;
+    protected final ExecutorService writeExecutorService;
 
     protected AbstractFrontierService() {
-        executorService = Executors.newSingleThreadExecutor();
+        this(Collections.emptyMap());
     }
 
     protected AbstractFrontierService(final Map<String, String> configuration) {
-        int threadNum = Integer.parseInt(configuration.getOrDefault("put.thread.num", "1"));
-        executorService = Executors.newFixedThreadPool(threadNum);
+        final int availableProcessor = Runtime.getRuntime().availableProcessors();
+        LOG.info("Available processor(s) {}", availableProcessor);
+        // by default uses 1/4 of the available processors
+        final String defaultParallelism = Integer.toString(Math.max(availableProcessor / 4, 1));
+        final int rthreadNum =
+                Integer.parseInt(configuration.getOrDefault("read.thread.num", defaultParallelism));
+        LOG.info("Using {} threads for reading from queues", rthreadNum);
+        readExecutorService = Executors.newFixedThreadPool(rthreadNum);
+        final int wthreadNum =
+                Integer.parseInt(
+                        configuration.getOrDefault("write.thread.num", defaultParallelism));
+        writeExecutorService = Executors.newFixedThreadPool(wthreadNum);
+        LOG.info("Using {} threads for writing to queues", wthreadNum);
     }
 
     public Map<QueueWithinCrawl, QueueInterface> getQueues() {
@@ -497,21 +509,29 @@ public abstract class AbstractFrontierService
 
         Summary.Timer requestTimer = getURLs_Latency.startTimer();
 
-        int maxQueues = request.getMaxQueues();
-        int maxURLsPerQueue = request.getMaxUrlsPerQueue();
-        int secsUntilRequestable = request.getDelayRequestable();
+        final int maxQueues;
 
         // 0 by default
-        if (maxQueues == 0) {
+        if (request.getMaxQueues() == 0) {
             maxQueues = Integer.MAX_VALUE;
+        } else {
+            maxQueues = request.getMaxQueues();
         }
 
-        if (maxURLsPerQueue == 0) {
+        final int maxURLsPerQueue;
+
+        if (request.getMaxUrlsPerQueue() == 0) {
             maxURLsPerQueue = Integer.MAX_VALUE;
+        } else {
+            maxURLsPerQueue = request.getMaxUrlsPerQueue();
         }
 
-        if (secsUntilRequestable == 0) {
+        final int secsUntilRequestable;
+
+        if (request.getDelayRequestable() == 0) {
             secsUntilRequestable = 30;
+        } else {
+            secsUntilRequestable = request.getDelayRequestable();
         }
 
         LOG.info(
@@ -533,6 +553,10 @@ public abstract class AbstractFrontierService
 
         long now = Instant.now().getEpochSecond();
 
+        final SynchronizedStreamObserver<URLInfo> synchStreamObs =
+                (SynchronizedStreamObserver<URLInfo>)
+                        SynchronizedStreamObserver.wrapping(responseObserver, maxQueues);
+
         // want a specific key only?
         // default is an empty string so should never be null
         if (key != null && key.length() >= 1) {
@@ -542,7 +566,7 @@ public abstract class AbstractFrontierService
 
             if (crawlID == null) {
                 LOG.error("Want URLs from a specific queue but the crawlID is not set");
-                responseObserver.onCompleted();
+                synchStreamObs.onCompleted();
                 return;
             }
 
@@ -551,13 +575,13 @@ public abstract class AbstractFrontierService
 
             // the queue does not exist
             if (queue == null) {
-                responseObserver.onCompleted();
+                synchStreamObs.onCompleted();
                 return;
             }
 
             // it is locked
             if (queue.getBlockedUntil() >= now) {
-                responseObserver.onCompleted();
+                synchStreamObs.onCompleted();
                 return;
             }
 
@@ -571,12 +595,7 @@ public abstract class AbstractFrontierService
 
             int totalSent =
                     sendURLsForQueue(
-                            queue,
-                            qwc,
-                            maxURLsPerQueue,
-                            secsUntilRequestable,
-                            now,
-                            responseObserver);
+                            queue, qwc, maxURLsPerQueue, secsUntilRequestable, now, synchStreamObs);
             responseObserver.onCompleted();
 
             getURLs_urls_count.inc(totalSent);
@@ -597,9 +616,11 @@ public abstract class AbstractFrontierService
             return;
         }
 
-        int numQueuesTried = 0;
-        int numQueuesSent = 0;
-        int totalSent = 0;
+        final AtomicInteger numQueuesTried = new AtomicInteger();
+        final AtomicInteger numQueuesSent = new AtomicInteger();
+        final AtomicInteger totalSent = new AtomicInteger();
+        final AtomicInteger inProcess = new AtomicInteger();
+
         QueueWithinCrawl firstCrawlQueue = null;
 
         if (getQueues().isEmpty()) {
@@ -608,10 +629,10 @@ public abstract class AbstractFrontierService
             return;
         }
 
-        while (numQueuesSent < maxQueues) {
+        while (numQueuesSent.get() < maxQueues) {
 
-            QueueInterface currentQueue = null;
-            QueueWithinCrawl currentCrawlQueue = null;
+            final QueueInterface currentQueue;
+            final QueueWithinCrawl currentCrawlQueue;
 
             synchronized (getQueues()) {
                 Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
@@ -653,21 +674,26 @@ public abstract class AbstractFrontierService
                 continue;
             }
 
-            int sentForQ =
-                    sendURLsForQueue(
-                            currentQueue,
-                            currentCrawlQueue,
-                            maxURLsPerQueue,
-                            secsUntilRequestable,
-                            now,
-                            responseObserver);
-            numQueuesTried++;
+            readExecutorService.execute(
+                    () -> {
+                        inProcess.incrementAndGet();
+                        final int sentForQ =
+                                sendURLsForQueue(
+                                        currentQueue,
+                                        currentCrawlQueue,
+                                        maxURLsPerQueue,
+                                        secsUntilRequestable,
+                                        now,
+                                        synchStreamObs);
+                        inProcess.decrementAndGet();
+                        numQueuesTried.incrementAndGet();
 
-            if (sentForQ > 0) {
-                currentQueue.setLastProduced(now);
-                totalSent += sentForQ;
-                numQueuesSent++;
-            }
+                        if (sentForQ > 0) {
+                            currentQueue.setLastProduced(now);
+                            totalSent.addAndGet(sentForQ);
+                            numQueuesSent.incrementAndGet();
+                        }
+                    });
         }
 
         LOG.info(
@@ -678,11 +704,19 @@ public abstract class AbstractFrontierService
                 numQueuesTried,
                 requestID.toString());
 
-        getURLs_urls_count.inc(totalSent);
+        getURLs_urls_count.inc(totalSent.get());
 
         requestTimer.observeDuration();
 
-        responseObserver.onCompleted();
+        // wait for all threads to have finished
+        while (inProcess.get() != 0) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        synchStreamObs.onCompleted();
     }
 
     protected abstract int sendURLsForQueue(
@@ -691,7 +725,7 @@ public abstract class AbstractFrontierService
             int maxURLsPerQueue,
             int secsUntilRequestable,
             long now,
-            StreamObserver<URLInfo> responseObserver);
+            SynchronizedStreamObserver<URLInfo> responseObserver);
 
     @Override
     public void setLogLevel(LogLevelParams request, StreamObserver<Empty> responseObserver) {
@@ -725,7 +759,7 @@ public abstract class AbstractFrontierService
         putURLs_calls.inc();
 
         StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> sso =
-                SynchronizedStreamObserver.wrapping(responseObserver);
+                SynchronizedStreamObserver.wrapping(responseObserver, -1);
 
         return new StreamObserver<URLItem>() {
 
@@ -755,7 +789,7 @@ public abstract class AbstractFrontierService
 
                 unacked.incrementAndGet();
 
-                executorService.execute(
+                writeExecutorService.execute(
                         () -> {
                             final Status status = putURLItem(value);
                             LOG.debug("putURL -> {} got status {}", url, status);
@@ -803,13 +837,18 @@ public abstract class AbstractFrontierService
     @Override
     public void close() throws IOException {
         closing = true;
-        executorService.shutdown();
+        writeExecutorService.shutdown();
+        readExecutorService.shutdown();
         try {
-            if (!executorService.awaitTermination(500, TimeUnit.MILLISECONDS)) {
-                executorService.shutdownNow();
+            if (!writeExecutorService.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+                writeExecutorService.shutdownNow();
+            }
+            if (!readExecutorService.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+                readExecutorService.shutdownNow();
             }
         } catch (InterruptedException e) {
-            executorService.shutdownNow();
+            writeExecutorService.shutdownNow();
+            readExecutorService.shutdownNow();
         }
     }
 }

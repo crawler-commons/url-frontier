@@ -22,6 +22,7 @@ import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import java.time.Instant;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
@@ -101,11 +102,17 @@ public class GetURLs implements Runnable {
             }
         }
 
+        final Instant start = Instant.now();
+
         stub.getURLs(request.build())
                 .forEachRemaining(
                         info -> {
                             System.out.println(info);
                         });
+
+        final long timetaken = Instant.now().toEpochMilli() - start.toEpochMilli();
+
+        System.out.println("Total time: " + timetaken + " msec");
 
         channel.shutdownNow();
     }
