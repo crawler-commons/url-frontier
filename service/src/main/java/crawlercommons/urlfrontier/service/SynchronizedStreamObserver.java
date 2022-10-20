@@ -42,7 +42,10 @@ public class SynchronizedStreamObserver<V> implements StreamObserver<V> {
 
     public boolean tryTakingToken() {
         synchronized (this) {
-            if (tokens > 0) {
+            // deactivated
+            if (tokens < 0) {
+                return true;
+            } else if (tokens > 0) {
                 tokens--;
                 return true;
             }
