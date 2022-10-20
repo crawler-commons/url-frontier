@@ -138,7 +138,7 @@ public class PutURLs implements Runnable {
         streamObserver.onCompleted();
 
         // wait for completion
-        while (!completed.get() && sent != acked.get()) {
+        while (!completed.get() || sent != acked.get()) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
