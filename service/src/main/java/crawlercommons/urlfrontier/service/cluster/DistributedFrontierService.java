@@ -88,79 +88,83 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         return URLFrontierGrpc.newBlockingStub(channelCache.getUnchecked(target));
     }
 
+    /** Create or return an existing stream to an external Frontier * */
     private final CacheLoader<Integer, StreamObserver<URLItem>> observerloader =
             new CacheLoader<>() {
                 @Override
                 public StreamObserver<URLItem> load(Integer index) {
-                    // get the stream observer for that node
-                    final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
-                            observer;
 
                     final String nodeAddress = getNodes().get(index);
 
                     final URLFrontierStub stub =
                             URLFrontierGrpc.newStub(channelCache.getUnchecked(nodeAddress));
 
-                    observer =
-                            new StreamObserver<>() {
+                    // pass an observer for the results coming back from that node
+                    final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
+                            observer =
+                                    new StreamObserver<>() {
 
-                                @Override
-                                public void onNext(
-                                        crawlercommons.urlfrontier.Urlfrontier.AckMessage value) {
+                                        @Override
+                                        public void onNext(
+                                                crawlercommons.urlfrontier.Urlfrontier.AckMessage
+                                                        value) {
 
-                                    // go back to the client
-                                    // and notify that it has worked
-                                    // we know that the observer in the cache
-                                    // is a synchronized one
-                                    StreamObserver<AckMessage> stream =
-                                            inprocesscache.getIfPresent(value.getID());
-                                    if (stream != null) {
-                                        LOG.debug(
-                                                "Got stream to ack back for {} with status {}",
-                                                value.getID(),
-                                                value.getStatus());
-                                        try {
-                                            stream.onNext(value);
-                                        } catch (Exception e) {
+                                            // go back to the client
+                                            // and notify that it has worked
+                                            // we know that the observer in the cache
+                                            // is a synchronized one
+                                            StreamObserver<AckMessage> stream =
+                                                    inprocesscache.getIfPresent(value.getID());
+                                            if (stream != null) {
+                                                LOG.debug(
+                                                        "Got stream to ack back for {} with status {}",
+                                                        value.getID(),
+                                                        value.getStatus());
+                                                try {
+                                                    stream.onNext(value);
+                                                } catch (Exception e) {
+                                                    LOG.error(
+                                                            "Error while communicating back with the client: {} ",
+                                                            e.getLocalizedMessage());
+                                                }
+                                            } else {
+                                                LOG.error(
+                                                        "No stream found to ack back for {} with status {}",
+                                                        value.getID(),
+                                                        value.getStatus());
+                                            }
+                                            // remove it whether we have been able to return the
+                                            // value or not
+                                            // this is an issue if 2 or more instances of the same
+                                            // URL
+                                            // are sent within a short period of time
+                                            inprocesscache.invalidate(value.getID());
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable t) {
+                                            observercache.invalidate(index);
+                                            if (t instanceof StatusRuntimeException) {
+                                                // ignore messages about the client having cancelled
+                                                if (((StatusRuntimeException) t)
+                                                        .getStatus()
+                                                        .getCode()
+                                                        .equals(io.grpc.Status.Code.CANCELLED)) {
+                                                    return;
+                                                }
+                                            }
                                             LOG.error(
-                                                    "Error while communicating back with the client: {} ",
-                                                    e.getLocalizedMessage());
+                                                    "Caught throwable when forwarding request to shard {}: {}",
+                                                    index,
+                                                    t.getLocalizedMessage());
                                         }
-                                    } else {
-                                        LOG.error(
-                                                "No stream found to ack back for {} with status {}",
-                                                value.getID(),
-                                                value.getStatus());
-                                    }
-                                    // remove it whether we have been able to return the value or
-                                    // not
-                                    inprocesscache.invalidate(value.getID());
-                                }
 
-                                @Override
-                                public void onError(Throwable t) {
-                                    observercache.invalidate(index);
-                                    if (t instanceof StatusRuntimeException) {
-                                        // ignore messages about the client having cancelled
-                                        if (((StatusRuntimeException) t)
-                                                .getStatus()
-                                                .getCode()
-                                                .equals(io.grpc.Status.Code.CANCELLED)) {
-                                            return;
+                                        @Override
+                                        public void onCompleted() {
+                                            // finished?
+                                            observercache.invalidate(index);
                                         }
-                                    }
-                                    LOG.error(
-                                            "Caught throwable when forwarding request to shard {}: {}",
-                                            index,
-                                            t.getLocalizedMessage());
-                                }
-
-                                @Override
-                                public void onCompleted() {
-                                    // finished?
-                                    observercache.invalidate(index);
-                                }
-                            };
+                                    };
 
                     return stub.putURLs(observer);
                 }
@@ -503,9 +507,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 LOG.trace("LocalNodeIndex {}", localNodeIndex);
 
                 if (partition == localNodeIndex) {
-                    unacked.incrementAndGet();
                     writeExecutorService.execute(
                             () -> {
+                                unacked.incrementAndGet();
                                 Status s = putURLItem(value);
                                 LOG.debug("Local putURL -> {} got status {}", url, s);
                                 sso.onNext(ack.setStatus(s).build());
@@ -516,19 +520,18 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
                 // forward to non-local node
 
-                // get the stream observer for that node
-                final StreamObserver<URLItem> observer = observercache.getUnchecked(partition);
-                // store the stuff in a temporary cache
-                inprocesscache.put(ack.getID(), sso);
-
                 LOG.debug(
                         "Sending {} to partition {} -> {}",
                         url,
                         partition,
                         getNodes().get(partition));
 
-                // give it the thing to process
-                observer.onNext(value);
+                // store the tuple to return in a temporary cache
+                inprocesscache.put(ack.getID(), sso);
+
+                // get the stream observer for the node in charge of the partition
+                // and give it the value to process
+                observercache.getUnchecked(partition).onNext(value);
             }
 
             @Override
