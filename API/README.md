@@ -85,9 +85,9 @@ wget https://github.com/protocolbuffers/protobuf/releases/download/v3.20.3/proto
 unzip -p protoc-3.20.3-$osproc.zip bin/protoc > protoc
 rm protoc-3.20.3-$osproc.zip
 chmod a+x protoc
-wget https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.50.0/protoc-gen-grpc-java-1.50.0-$osproc.exe
-chmod a+x protoc-gen-grpc-java-1.50.0-$osproc.exe
-./protoc --plugin=protoc-gen-grpc-java=./protoc-gen-grpc-java-1.50.0-$osproc.exe --proto_path=. --java_out=src/main/java --grpc-java_out=src/main/java urlfrontier.proto
+wget https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.50.2/protoc-gen-grpc-java-1.50.2-$osproc.exe
+chmod a+x protoc-gen-grpc-java-1.50.2-$osproc.exe
+./protoc --plugin=protoc-gen-grpc-java=./protoc-gen-grpc-java-1.50.2-$osproc.exe --proto_path=. --java_out=src/main/java --grpc-java_out=src/main/java urlfrontier.proto
 ```
 
 Since the Java code is provided here and the corresponding JARs will be available from Maven, regenerating from the schema is not necessary.

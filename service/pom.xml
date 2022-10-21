@@ -15,10 +15,10 @@
 	<description>Implementation of the URLFrontier Service</description>
 
 	<properties>
-		<prometheus.version>0.15.0</prometheus.version>
-		<ignite.version>2.13.0</ignite.version>
-		<lucene.version>9.1.0</lucene.version>
-		<rocksdb.version>7.2.2</rocksdb.version>
+		<prometheus.version>0.16.0</prometheus.version>
+		<ignite.version>2.14.0</ignite.version>
+		<lucene.version>9.4.0</lucene.version>
+		<rocksdb.version>7.6.0</rocksdb.version>
 	</properties>
 
 	<build>
@@ -65,7 +65,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.10</version>
+			<version>1.4.4</version>
 		</dependency>
 
 		<dependency>

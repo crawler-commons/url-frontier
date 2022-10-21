@@ -25,6 +25,7 @@
 		<urlfrontier.host>localhost</urlfrontier.host>
 		<urlfrontier.port>7071</urlfrontier.port>
 		<maven.test.skip>true</maven.test.skip>
+		<slf4j.version>2.0.3</slf4j.version>
 	</properties>
 
 	<build>
@@ -70,14 +71,14 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.35</version>
+			<version>${slf4j.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.35</version>
+			<version>${slf4j.version}</version>
 			<scope>test</scope>
 		</dependency>
 
