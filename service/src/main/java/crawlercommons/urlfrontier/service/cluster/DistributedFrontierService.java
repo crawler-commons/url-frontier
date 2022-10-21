@@ -515,23 +515,31 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                 sso.onNext(ack.setStatus(s).build());
                                 unacked.decrementAndGet();
                             });
-                    return;
+                } else {
+                    // forward to non-local node
+                    LOG.debug(
+                            "Sending {} to partition {} -> {}",
+                            url,
+                            partition,
+                            getNodes().get(partition));
+
+                    // if the same ID is already being processed by
+                    // a remote Frontier, just wait until it has been completed
+                    while (inprocesscache.getIfPresent(ack.getID()) != null) {
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt(); // set the flag back to <code>true
+                        }
+                    }
+
+                    // store the tuple to return in a temporary cache
+                    inprocesscache.put(ack.getID(), sso);
+
+                    // get the stream observer for the node in charge of the partition
+                    // and give it the value to process
+                    observercache.getUnchecked(partition).onNext(value);
                 }
-
-                // forward to non-local node
-
-                LOG.debug(
-                        "Sending {} to partition {} -> {}",
-                        url,
-                        partition,
-                        getNodes().get(partition));
-
-                // store the tuple to return in a temporary cache
-                inprocesscache.put(ack.getID(), sso);
-
-                // get the stream observer for the node in charge of the partition
-                // and give it the value to process
-                observercache.getUnchecked(partition).onNext(value);
             }
 
             @Override
@@ -551,7 +559,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             @Override
             public void onCompleted() {
                 // check that all the work for this stream has ended
-                while (unacked.get() != 0) {
+                while (unacked.get() != 0 || inprocesscache.asMap().containsValue(sso)) {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {
