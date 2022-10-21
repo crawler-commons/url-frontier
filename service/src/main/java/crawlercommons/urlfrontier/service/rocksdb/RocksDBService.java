@@ -728,6 +728,11 @@ public class RocksDBService extends AbstractFrontierService {
                 }
             }
 
+            // no queues found - nothing to delete
+            if (startKey == null) {
+                return 0;
+            }
+
             try {
                 deleteRanges(startKey, endKey);
             } catch (RocksDBException e) {
