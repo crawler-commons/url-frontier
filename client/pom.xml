@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.github.crawler-commons</groupId>
 		<artifactId>urlfrontier</artifactId>
-		<version>2.3-SNAPSHOT</version>
+		<version>2.3</version>
 	</parent>
 
 	<name>urlfrontier-client</name>
@@ -29,7 +29,7 @@
 						<configuration>
 							<createDependencyReducedPom>false</createDependencyReducedPom>
 							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>crawlercommons.urlfrontier.client.Client</mainClass>
 								</transformer>
