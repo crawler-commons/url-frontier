@@ -21,7 +21,7 @@ import picocli.CommandLine.Option;
 @Command(
         name = "Client",
         mixinStandardHelpOptions = true,
-        version = "2.2",
+        version = "2.3",
         subcommands = {
             ListNodes.class,
             ListQueues.class,
