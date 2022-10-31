@@ -653,7 +653,7 @@ public abstract class AbstractFrontierService
             }
 
             // if a crawlID has been specified make sure it matches
-            if (crawlID != null && !currentCrawlQueue.equals(crawlID)) {
+            if (crawlID != null && !currentCrawlQueue.getCrawlid().equals(crawlID)) {
                 continue;
             }
 
@@ -810,6 +810,7 @@ public abstract class AbstractFrontierService
                         return;
                     }
                 }
+                LOG.error("Error reported {}", t.getMessage());
             }
 
             @Override
