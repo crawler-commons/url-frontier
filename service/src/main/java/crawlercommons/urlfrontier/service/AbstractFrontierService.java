@@ -674,9 +674,10 @@ public abstract class AbstractFrontierService
                 continue;
             }
 
+            inProcess.incrementAndGet();
+
             readExecutorService.execute(
                     () -> {
-                        inProcess.incrementAndGet();
                         final int sentForQ =
                                 sendURLsForQueue(
                                         currentQueue,
@@ -685,15 +686,25 @@ public abstract class AbstractFrontierService
                                         secsUntilRequestable,
                                         now,
                                         synchStreamObs);
-                        inProcess.decrementAndGet();
-                        numQueuesTried.incrementAndGet();
 
                         if (sentForQ > 0) {
                             currentQueue.setLastProduced(now);
                             totalSent.addAndGet(sentForQ);
                             numQueuesSent.incrementAndGet();
                         }
+
+                        inProcess.decrementAndGet();
+                        numQueuesTried.incrementAndGet();
                     });
+        }
+
+        // wait for all threads to have finished
+        while (inProcess.get() != 0) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
 
         LOG.info(
@@ -708,14 +719,6 @@ public abstract class AbstractFrontierService
 
         requestTimer.observeDuration();
 
-        // wait for all threads to have finished
-        while (inProcess.get() != 0) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
         synchStreamObs.onCompleted();
     }
 
