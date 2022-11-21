@@ -3,7 +3,7 @@ version: '3.1'
 services:
  
   frontier:
-    image: crawlercommons/url-frontier:2.3
+    image: crawlercommons/url-frontier
     container_name: frontier
     ports:
       - 127.0.0.1:7071:7071
