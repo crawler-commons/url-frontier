@@ -128,6 +128,7 @@ public class IgniteService extends DistributedFrontierService
     }
 
     public IgniteService(final Map<String, String> configuration) {
+        super(configuration);
 
         IgniteConfiguration cfg = new IgniteConfiguration();
 
