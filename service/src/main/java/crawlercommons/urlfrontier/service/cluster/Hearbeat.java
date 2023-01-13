@@ -16,6 +16,7 @@ package crawlercommons.urlfrontier.service.cluster;
 
 import java.time.Instant;
 import org.slf4j.LoggerFactory;
+import crawlercommons.urlfrontier.service.AbstractFrontierService;
 
 /**
  * Started by Frontiers instances to send a heartbeat to a backend and as a result to be able to
@@ -32,6 +33,8 @@ public class Hearbeat extends Thread {
     Instant lastQuery = Instant.EPOCH;
 
     protected HeartbeatListener listener;
+
+    private AbstractFrontierService service;
 
     protected Hearbeat(int delay) {
         super("Hearbeat");
@@ -51,8 +54,17 @@ public class Hearbeat extends Thread {
         this.listener = listener;
     }
 
+    public void setService(AbstractFrontierService service) {
+        this.service = service;
+    }
+
     @Override
     public void run() {
+
+        // wait until the service is set up to prevent a race condition
+        if(service != null) {
+            while(service.getHostAndPort() == null) continue;
+        }
 
         while (!closed) {
 

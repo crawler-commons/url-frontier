@@ -389,6 +389,7 @@ public class IgniteService extends DistributedFrontierService
         // start the heartbeat
         ihb = new IgniteHeartbeat(heartbeatdelay, ignite);
         ihb.setListener(this);
+        ihb.setService(this);
         ihb.start();
     }
 
