@@ -89,6 +89,7 @@ import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
@@ -154,10 +155,12 @@ public class IgniteService extends DistributedFrontierService
 
         if (purgeData) {
             try {
-                Files.walk(Paths.get(path))
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
+                File path_file = new File(path);
+                if(path_file.isDirectory()) {
+                    FileUtils.cleanDirectory(path_file);
+                } else {
+                    FileUtils.forceMkdir(path_file);
+                }
             } catch (IOException e) {
                 LOG.error("Couldn't delete path {}", path);
             }
@@ -167,10 +170,12 @@ public class IgniteService extends DistributedFrontierService
         String workdir = configuration.getOrDefault("ignite.workdir", path);
         if (purgeData) {
             try {
-                Files.walk(Paths.get(workdir))
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
+                File workdir_file = new File(workdir);
+                if(workdir_file.isDirectory()) {
+                    FileUtils.cleanDirectory(workdir_file);
+                } else {
+                    FileUtils.forceMkdir(workdir_file);
+                }
             } catch (IOException e) {
                 LOG.error("Couldn't delete workdir {}", workdir);
             }
@@ -189,7 +194,7 @@ public class IgniteService extends DistributedFrontierService
                         .map(Path::toFile)
                         .forEach(File::delete);
             } catch (IOException e) {
-                LOG.error("Couldn't delete workdir {}", workdir);
+                LOG.error("Couldn't delete index path {}", index_path);
             }
         }
 
