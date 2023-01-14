@@ -507,12 +507,14 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 LOG.trace("LocalNodeIndex {}", localNodeIndex);
 
                 if (partition == localNodeIndex) {
+                    unacked.incrementAndGet();
+
                     writeExecutorService.execute(
                             () -> {
-                                unacked.incrementAndGet();
-                                Status s = putURLItem(value);
+                                final Status s = putURLItem(value);
                                 LOG.debug("Local putURL -> {} got status {}", url, s);
-                                sso.onNext(ack.setStatus(s).build());
+                                final AckMessage ackedMessage = ack.setStatus(s).build();
+                                sso.onNext(ackedMessage);
                                 unacked.decrementAndGet();
                             });
                 } else {
