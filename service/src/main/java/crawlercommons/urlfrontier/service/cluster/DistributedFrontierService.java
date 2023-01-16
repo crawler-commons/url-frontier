@@ -60,6 +60,15 @@ import org.slf4j.LoggerFactory;
 
 public abstract class DistributedFrontierService extends AbstractFrontierService {
 
+    public DistributedFrontierService(final Map<String, String> configuration) {
+        super(configuration);
+    }
+
+    // no explicit config
+    public DistributedFrontierService() {
+        this(new HashMap<String, String>());
+    }
+
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(DistributedFrontierService.class);
 
