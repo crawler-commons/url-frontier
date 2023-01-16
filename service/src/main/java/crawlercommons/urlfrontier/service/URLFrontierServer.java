@@ -169,7 +169,9 @@ public class URLFrontierServer implements Callable<Integer> {
 
         if (service == null) {
             try {
-                service = (AbstractFrontierService) implementationClass.newInstance();
+                service =
+                        (AbstractFrontierService)
+                                implementationClass.getDeclaredConstructor().newInstance();
             } catch (Exception e) {
                 LOG.error("Exception caught when initialising the service", e);
                 System.exit(-1);
@@ -185,6 +187,8 @@ public class URLFrontierServer implements Callable<Integer> {
                 service.getClass().getSimpleName(),
                 server.getPort(),
                 service.getHostAndPort());
+
+        service.setReady(true);
 
         registerShutdownHook();
 
