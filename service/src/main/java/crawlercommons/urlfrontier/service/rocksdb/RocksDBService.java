@@ -25,18 +25,13 @@ import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import io.grpc.stub.StreamObserver;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -96,14 +91,8 @@ public class RocksDBService extends AbstractFrontierService {
         LOG.info("RocksDB data stored in {} ", path);
 
         if (configuration.containsKey("rocksdb.purge")) {
-            try {
-                Files.walk(Paths.get(path))
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            } catch (IOException e) {
-                LOG.error("Couldn't delete path {}", path);
-            }
+            createOrCleanDirectory(path);
+            LOG.info("Purged storage path {}", path);
         }
 
         if (configuration.containsKey("rocksdb.stats")) {
