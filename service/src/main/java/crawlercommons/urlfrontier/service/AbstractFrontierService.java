@@ -37,6 +37,7 @@ import io.grpc.stub.StreamObserver;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Summary;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
@@ -192,6 +194,19 @@ public abstract class AbstractFrontierService
         for (String node : nodes) {
             LOG.info("Node {}: {}", pos, node);
             pos++;
+        }
+    }
+
+    public void createOrCleanDirectory(String path) {
+        try {
+            File file = new File(path);
+            if (file.isDirectory()) {
+                FileUtils.cleanDirectory(file);
+            } else {
+                FileUtils.forceMkdir(file);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

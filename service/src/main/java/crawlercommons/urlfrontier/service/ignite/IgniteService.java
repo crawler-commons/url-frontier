@@ -32,14 +32,11 @@ import io.grpc.stub.StreamObserver;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -146,54 +143,33 @@ public class IgniteService extends DistributedFrontierService
 
         boolean purgeData = configuration.containsKey("ignite.purge");
 
-        DataStorageConfiguration storageCfg = new DataStorageConfiguration();
         // specify where the data should be kept
-        String path = configuration.getOrDefault("ignite.path", "ignite");
-        storageCfg.setStoragePath(path);
-
+        String path =
+                new File(configuration.getOrDefault("ignite.path", "ignite")).getAbsolutePath();
         if (purgeData) {
-            try {
-                Files.walk(Paths.get(path))
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            } catch (IOException e) {
-                LOG.error("Couldn't delete path {}", path);
-            }
+            createOrCleanDirectory(path);
+            LOG.info("Purged storage path {}", path);
         }
 
         // set the work directory to the same location unless overridden
-        String workdir = configuration.getOrDefault("ignite.workdir", path);
-        if (purgeData) {
-            try {
-                Files.walk(Paths.get(workdir))
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            } catch (IOException e) {
-                LOG.error("Couldn't delete workdir {}", workdir);
-            }
+        String workdir =
+                new File(configuration.getOrDefault("ignite.workdir", path)).getAbsolutePath();
+        if (purgeData && !path.equals(workdir)) {
+            createOrCleanDirectory(workdir);
+            LOG.info("Purged work directory {}", workdir);
         }
         cfg.setWorkDirectory(workdir);
 
-        // set persistence
-        storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
-        cfg.setDataStorageConfiguration(storageCfg);
-
-        Path index_path = Paths.get(configuration.getOrDefault("ignite.index", "index"));
+        // specify and initialize the index directory
+        String index =
+                new File(configuration.getOrDefault("ignite.index", "index")).getAbsolutePath();
         if (purgeData) {
-            try {
-                Files.walk(index_path)
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            } catch (IOException e) {
-                LOG.error("Couldn't delete workdir {}", workdir);
-            }
+            createOrCleanDirectory(index);
+            LOG.info("Purged index directory {}", index);
         }
 
         try {
-            Directory directory = FSDirectory.open(index_path);
+            Directory directory = FSDirectory.open(Paths.get(index));
             IndexWriterConfig config = new IndexWriterConfig();
             iwriter = new IndexWriter(directory, config);
             searcherManager = new SearcherManager(iwriter, null);
@@ -214,6 +190,12 @@ public class IgniteService extends DistributedFrontierService
                 EventType.EVT_CACHE_OBJECT_PUT,
                 EventType.EVT_CACHE_OBJECT_REMOVED,
                 EventType.EVT_CACHE_STOPPED);
+
+        // set persistence
+        DataStorageConfiguration storageCfg = new DataStorageConfiguration();
+        storageCfg.setStoragePath(path);
+        storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
+        cfg.setDataStorageConfiguration(storageCfg);
 
         // Starting the node
         ignite = Ignition.start(cfg);
