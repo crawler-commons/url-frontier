@@ -37,7 +37,7 @@ public class IgniteHeartbeat extends Hearbeat {
     @Override
     protected void sendHeartBeat() {
         IgniteCache<String, String> frontiers = ignite.cache(IgniteService.frontiersCacheName);
-        frontiers.put(listener.getHostAndPort(), Instant.now().toString());
+        frontiers.put(listener.getAddress(), Instant.now().toString());
 
         List<String> activeFrontiers = new ArrayList<>();
 

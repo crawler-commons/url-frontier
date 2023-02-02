@@ -23,7 +23,9 @@ import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.PriorityQueue;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +38,14 @@ public class MemoryFrontierService extends AbstractFrontierService {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(MemoryFrontierService.class);
 
-    public MemoryFrontierService() {}
+    public MemoryFrontierService(final Map<String, String> configuration, String host, int port) {
+        super(configuration, host, port);
+    }
 
-    @Override
-    public void start() {}
+    // no explicit config
+    public MemoryFrontierService(String host, int port) {
+        this(new HashMap<String, String>(), host, port);
+    }
 
     /** @return true if at least one URL has been sent for this queue, false otherwise */
     @Override

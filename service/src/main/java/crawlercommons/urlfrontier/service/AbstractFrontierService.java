@@ -118,7 +118,7 @@ public abstract class AbstractFrontierService
     private int defaultDelayForQueues = 1;
 
     // used for reporting itself in a cluster setup
-    protected String address;
+    protected final String address;
 
     // known nodes in a cluster setup
     private List<String> nodes;
@@ -130,13 +130,13 @@ public abstract class AbstractFrontierService
     protected final ExecutorService readExecutorService;
     protected final ExecutorService writeExecutorService;
 
-    public abstract void start();
-
-    protected AbstractFrontierService() {
-        this(Collections.emptyMap());
+    protected AbstractFrontierService(String host, int port) {
+        this(Collections.emptyMap(), host, port);
     }
 
-    protected AbstractFrontierService(final Map<String, String> configuration) {
+    protected AbstractFrontierService(
+            final Map<String, String> configuration, String host, int port) {
+        address = host + ":" + port;
         final int availableProcessor = Runtime.getRuntime().availableProcessors();
         LOG.info("Available processor(s) {}", availableProcessor);
         // by default uses 1/4 of the available processors
@@ -178,11 +178,7 @@ public abstract class AbstractFrontierService
         return active;
     }
 
-    void setHostAndPort(String hostname, int port) {
-        address = hostname + ":" + port;
-    }
-
-    public String getHostAndPort() {
+    public String getAddress() {
         return address;
     }
 
@@ -751,7 +747,7 @@ public abstract class AbstractFrontierService
 
         // by default return only this node.
         if (nodes.isEmpty()) {
-            nodes.add(this.getHostAndPort());
+            nodes.add(this.getAddress());
         }
         responseObserver.onNext(StringList.newBuilder().addAllValues(nodes).build());
         responseObserver.onCompleted();

@@ -122,16 +122,13 @@ public class IgniteService extends DistributedFrontierService
 
     private final int maxUncommittedAdditions = 2000;
 
-    private final int heartbeatdelay;
-
-    private final int ttlFrontiers;
-
     // no explicit config
-    public IgniteService() {
-        this(new HashMap<String, String>());
+    public IgniteService(String host, int port) {
+        this(new HashMap<String, String>(), host, port);
     }
 
-    public IgniteService(final Map<String, String> configuration) {
+    public IgniteService(final Map<String, String> configuration, String host, int port) {
+        super(configuration, host, port);
 
         IgniteConfiguration cfg = new IgniteConfiguration();
 
@@ -371,9 +368,9 @@ public class IgniteService extends DistributedFrontierService
         cacheCfgQueues.setCacheMode(CacheMode.PARTITIONED);
         globalQueueCache = ignite.getOrCreateCache(cacheCfgQueues);
 
-        heartbeatdelay =
+        int heartbeatdelay =
                 Integer.parseInt(configuration.getOrDefault("ignite.frontiers.heartbeat", "60"));
-        ttlFrontiers =
+        int ttlFrontiers =
                 Integer.parseInt(
                         configuration.getOrDefault(
                                 "ignite.frontiers.ttl", Integer.toString(heartbeatdelay * 2)));
@@ -388,10 +385,7 @@ public class IgniteService extends DistributedFrontierService
         // check the global queue list
         // every minute
         new QueueCheck(60).start();
-    }
 
-    @Override
-    public void start() {
         // start the heartbeat
         ihb = new IgniteHeartbeat(heartbeatdelay, ignite);
         ihb.setListener(this);
