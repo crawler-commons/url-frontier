@@ -54,6 +54,9 @@ public class ShardedRocksDBService extends DistributedFrontierService {
     }
 
     @Override
+    public void start() {}
+
+    @Override
     protected int deleteLocalQueue(QueueWithinCrawl qc) {
         return instance.deleteLocalQueue(qc);
     }

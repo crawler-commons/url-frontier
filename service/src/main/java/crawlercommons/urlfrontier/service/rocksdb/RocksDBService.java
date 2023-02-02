@@ -183,6 +183,9 @@ public class RocksDBService extends AbstractFrontierService {
         }
     }
 
+    @Override
+    public void start() {}
+
     private void recovery() {
         // if a table containing the queues info exists use it,
         // otherwise just rebuild from the content of the tables

@@ -188,7 +188,7 @@ public class URLFrontierServer implements Callable<Integer> {
                 server.getPort(),
                 service.getHostAndPort());
 
-        service.setReady(true);
+        service.start();
 
         registerShutdownHook();
 

@@ -115,9 +115,6 @@ public abstract class AbstractFrontierService
 
     private boolean active = true;
 
-    // used for indicating when the start up of the service is finished
-    private boolean ready = false;
-
     private int defaultDelayForQueues = 1;
 
     // used for reporting itself in a cluster setup
@@ -132,6 +129,8 @@ public abstract class AbstractFrontierService
 
     protected final ExecutorService readExecutorService;
     protected final ExecutorService writeExecutorService;
+
+    public abstract void start();
 
     protected AbstractFrontierService() {
         this(Collections.emptyMap());
@@ -177,14 +176,6 @@ public abstract class AbstractFrontierService
 
     protected boolean isActive() {
         return active;
-    }
-
-    public boolean isReady() {
-        return ready;
-    }
-
-    public void setReady(boolean ready) {
-        this.ready = ready;
     }
 
     void setHostAndPort(String hostname, int port) {

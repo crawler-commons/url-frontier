@@ -38,6 +38,9 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
     public MemoryFrontierService() {}
 
+    @Override
+    public void start() {}
+
     /** @return true if at least one URL has been sent for this queue, false otherwise */
     @Override
     protected int sendURLsForQueue(

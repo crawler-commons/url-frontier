@@ -14,7 +14,6 @@
  */
 package crawlercommons.urlfrontier.service.cluster;
 
-import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import java.time.Instant;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +33,6 @@ public class Hearbeat extends Thread {
 
     protected HeartbeatListener listener;
 
-    private AbstractFrontierService service;
-
     protected Hearbeat(int delay) {
         super("Hearbeat");
         this.delaySec = delay;
@@ -54,24 +51,8 @@ public class Hearbeat extends Thread {
         this.listener = listener;
     }
 
-    public void setService(AbstractFrontierService service) {
-        this.service = service;
-    }
-
     @Override
     public void run() {
-
-        // wait until the service is set up to prevent a race condition
-        if (service != null) {
-            while (!service.isReady()) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-            ;
-        }
 
         while (!closed) {
 
