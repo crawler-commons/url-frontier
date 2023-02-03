@@ -105,7 +105,7 @@ public class IgniteService extends DistributedFrontierService
 
     private final IgniteCache<String, String> globalQueueCache;
 
-    private final IgniteHeartbeat ihb;
+    private IgniteHeartbeat ihb;
 
     private final IndexWriter iwriter;
 
@@ -120,11 +120,12 @@ public class IgniteService extends DistributedFrontierService
     private final int maxUncommittedAdditions = 2000;
 
     // no explicit config
-    public IgniteService() {
-        this(new HashMap<String, String>());
+    public IgniteService(String host, int port) {
+        this(new HashMap<String, String>(), host, port);
     }
 
-    public IgniteService(final Map<String, String> configuration) {
+    public IgniteService(final Map<String, String> configuration, String host, int port) {
+        super(configuration, host, port);
 
         IgniteConfiguration cfg = new IgniteConfiguration();
 
@@ -355,7 +356,6 @@ public class IgniteService extends DistributedFrontierService
                 Integer.parseInt(
                         configuration.getOrDefault(
                                 "ignite.frontiers.ttl", Integer.toString(heartbeatdelay * 2)));
-
         // heartbeats of Frontiers
         CacheConfiguration cacheCfgFrontiers = new CacheConfiguration(frontiersCacheName);
         cacheCfgFrontiers.setBackups(backups);

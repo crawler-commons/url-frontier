@@ -154,9 +154,10 @@ public class URLFrontierServer implements Callable<Integer> {
         // can it take a Map as constructor?
         if (configuration.size() > 0) {
             try {
-                Constructor<?> c = implementationClass.getConstructor(Map.class);
+                Constructor<?> c =
+                        implementationClass.getConstructor(Map.class, String.class, int.class);
                 c.setAccessible(true);
-                service = (AbstractFrontierService) c.newInstance(configuration);
+                service = (AbstractFrontierService) c.newInstance(configuration, host, port);
             } catch (NoSuchMethodException e) {
                 LOG.info(
                         "Implementation {} does not have a constructor taking a Map as argument",
@@ -169,14 +170,16 @@ public class URLFrontierServer implements Callable<Integer> {
 
         if (service == null) {
             try {
-                service = (AbstractFrontierService) implementationClass.newInstance();
+                service =
+                        (AbstractFrontierService)
+                                implementationClass
+                                        .getDeclaredConstructor(String.class, int.class)
+                                        .newInstance(host, port);
             } catch (Exception e) {
                 LOG.error("Exception caught when initialising the service", e);
                 System.exit(-1);
             }
         }
-
-        service.setHostAndPort(host, port);
 
         this.server = ServerBuilder.forPort(port).addService(service).build();
         server.start();
@@ -184,7 +187,7 @@ public class URLFrontierServer implements Callable<Integer> {
                 "Started URLFrontierServer [{}] on port {} as {}",
                 service.getClass().getSimpleName(),
                 server.getPort(),
-                service.getHostAndPort());
+                service.getAddress());
 
         registerShutdownHook();
 

@@ -73,17 +73,17 @@ public class RocksDBService extends AbstractFrontierService {
     private Statistics statistics;
 
     // no explicit config
-    public RocksDBService() {
-        this(new HashMap<String, String>());
+    public RocksDBService(String host, int port) {
+        this(new HashMap<String, String>(), host, port);
     }
 
     private final ConcurrentHashMap<QueueWithinCrawl, QueueWithinCrawl> queuesBeingDeleted =
             new ConcurrentHashMap<>();
 
-    public RocksDBService(final Map<String, String> configuration) {
+    public RocksDBService(final Map<String, String> configuration, String host, int port) {
 
         // configure the number of threads for puts
-        super(configuration);
+        super(configuration, host, port);
 
         // where to store it?
         String path = configuration.getOrDefault("rocksdb.path", "./rocksdb");

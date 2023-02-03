@@ -34,8 +34,10 @@ public class ShardedRocksDBService extends DistributedFrontierService {
 
     private final RocksDBService instance;
 
-    public ShardedRocksDBService(final Map<String, String> configuration) {
-        instance = new RocksDBService(configuration);
+    public ShardedRocksDBService(final Map<String, String> configuration, String host, int port) {
+        super(host, port);
+
+        instance = new RocksDBService(configuration, host, port);
         // take coordinates of the nodes + able to identify itself in the list
         final String snodes = configuration.get("nodes");
         if (snodes == null) {
