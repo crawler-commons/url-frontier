@@ -62,7 +62,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     public DistributedFrontierService(
             final Map<String, String> configuration, String host, int port) {
-        super(host, port);
+        super(configuration, host, port);
     }
 
     // no explicit config
