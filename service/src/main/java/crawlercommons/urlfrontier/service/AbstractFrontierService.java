@@ -66,19 +66,19 @@ public abstract class AbstractFrontierService
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(AbstractFrontierService.class);
 
-    private static final Counter getURLs_calls =
+    protected static final Counter getURLs_calls =
             Counter.build()
                     .name("frontier_getURLs_calls_total")
                     .help("Number of times getURLs has been called.")
                     .register();
 
-    private static final Counter getURLs_urls_count =
+    protected static final Counter getURLs_urls_count =
             Counter.build()
                     .name("frontier_getURLs_total")
                     .help("Number of URLs returned.")
                     .register();
 
-    private static final Summary getURLs_Latency =
+    protected static final Summary getURLs_Latency =
             Summary.build()
                     .name("frontier_getURLs_latency_seconds")
                     .help("getURLs latency in seconds.")
