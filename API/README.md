@@ -16,7 +16,7 @@ Underpinning them is the concept of *queue(s)* and *crawl(s)*.
 
 ## Queues and keys
 
-What the queues should be based on is determined by the client, through the setting of a string value (_key_) associated with the messages sent with the PutURLs method. The value could be the hostname of a URL, its paid level domain, it's IP or anything else. An empty value leaves the service to route the messages into a queue - the hostname being the default behaviour. It is up the the client code to be consistent in the use of the keys.
+What the queues should be based on is determined by the client, through the setting of a string value (_key_) associated with the messages sent with the PutURLs method. The value could be the hostname of a URL, its domain, IP or anything else. An empty value leaves the service to route the messages into a queue - the hostname being the default behaviour. It is up to the client code to be consistent in the use of the keys.
 
 The keys are used in several functions: _GetStats_, _DeleteQueue_ and _GetURLs_.
 
