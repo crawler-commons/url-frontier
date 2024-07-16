@@ -15,7 +15,9 @@ import java.time.Instant;
  * simpler than the objects from gRPC + sortable and have equals based on URL only. The metadata key
  * values are compressed into a single byte array.
  */
-class InternalURL implements Comparable<InternalURL>, Serializable {
+public class InternalURL implements Comparable<InternalURL>, Serializable {
+
+    private static final long serialVersionUID = 2578536737173056843L;
 
     public long nextFetchDate;
     public String url;
@@ -26,7 +28,7 @@ class InternalURL implements Comparable<InternalURL>, Serializable {
     // so that a subsequent call to getURLs does not send it again
     public long heldUntil = -1;
 
-    private InternalURL() {}
+    public InternalURL() {}
 
     /*
      * Returns the key if any, whether it is a discovered URL or not and an internal

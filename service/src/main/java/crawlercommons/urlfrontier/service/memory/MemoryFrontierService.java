@@ -6,15 +6,17 @@ package crawlercommons.urlfrontier.service.memory;
 import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
+import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
-import java.util.HashMap;
+import io.grpc.stub.StreamObserver;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.PriorityQueue;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +29,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(MemoryFrontierService.class);
 
-    public MemoryFrontierService(final Map<String, String> configuration, String host, int port) {
-        super(configuration, host, port);
-    }
-
-    // no explicit config
     public MemoryFrontierService(String host, int port) {
-        this(new HashMap<String, String>(), host, port);
+        super(host, port);
     }
 
     /** @return true if at least one URL has been sent for this queue, false otherwise */
@@ -144,5 +141,69 @@ public class MemoryFrontierService extends AbstractFrontierService {
             }
         }
         return Status.OK;
+    }
+
+    @Override
+    public void getURLStatus(URLStatusRequest request, StreamObserver<URLItem> responseObserver) {
+
+        String crawlId = request.getCrawlID();
+        String url = request.getUrl();
+        String key = request.getKey();
+        boolean found = false;
+        
+        LOG.info("getURLStatus crawlId={} key={} url={}", crawlId, key, url);
+
+        QueueWithinCrawl qwc = QueueWithinCrawl.get(key, crawlId);
+        URLQueue queue = (URLQueue) getQueues().get(qwc);
+        if (queue == null) {
+            LOG.error("Could not find queue for Crawl={}, queue={}", crawlId, key);
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.asException());
+            return;
+        }
+
+        URLInfo.Builder infoBuilder = URLInfo.newBuilder();
+        URLInfo info = infoBuilder.setCrawlID(crawlId).setKey(key).setUrl(url).build();
+
+        URLItem.Builder builder = URLItem.newBuilder();
+
+        KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
+        
+        if (queue.isCompleted(url)) {
+        	knownBuilder.setInfo(info);
+        	knownBuilder.setRefetchableFromDate(0);
+            builder.setKnown(knownBuilder.build());
+
+            found = true;
+            responseObserver.onNext(builder.build());
+        } else {
+            Iterator<InternalURL> iter = queue.iterator();
+
+            while (iter.hasNext()) {
+                InternalURL item = iter.next();
+
+                if (url.equals(item.url)) {
+
+                    try {
+                    	knownBuilder.setInfo(item.toURLInfo(qwc));
+                    	knownBuilder.setRefetchableFromDate(item.nextFetchDate);
+                    } catch (InvalidProtocolBufferException e) {
+                        LOG.error(e.getMessage(), e);
+                        responseObserver.onError(io.grpc.Status.fromThrowable(e).asException());
+                        return;
+                    }
+
+                    builder.setKnown(knownBuilder.build());
+                    found = true;
+                    responseObserver.onNext(builder.build());
+                    break;
+                }
+            }
+        }
+
+        if (found) {
+            responseObserver.onCompleted();
+        } else {
+        	responseObserver.onError(io.grpc.Status.NOT_FOUND.asException());
+        }
     }
 }
