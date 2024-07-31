@@ -23,4 +23,8 @@ public interface QueueInterface {
     public int getCountCompleted();
 
     public int countActive();
+
+    public void setCrawlLimit(int crawlLimit);
+
+    public Boolean IsLimitReached();
 }

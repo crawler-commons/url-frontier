@@ -664,6 +664,11 @@ public abstract class AbstractFrontierService
                 continue;
             }
 
+            // Max urls reached
+            if (currentQueue.IsLimitReached()) {
+                continue;
+            }
+
             // too early?
             int delay = currentQueue.getDelay();
             if (delay == -1) delay = getDefaultDelayForQueues();

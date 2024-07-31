@@ -69,6 +69,9 @@ service URLFrontier {
           
      /** Overrides the log level for a given package **/
      rpc SetLogLevel(LogLevelParams) returns (Empty) {}
+
+     /** Sets crawl limit for domain **/
+     rpc SetCrawlLimit(CrawlLimitParams) returns (Empty) {}
 }
 
 /** 
@@ -278,3 +281,12 @@ message LogLevelParams {
   bool local = 3;
 }
 
+
+/** Parameter message for SetCrawlLimit **/
+message CrawlLimitParams {
+  /** ID for the queue **/
+  string key = 1;
+  uint32 limit = 2;
+  // crawl ID
+  string crawlID = 3;
+}

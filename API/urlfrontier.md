@@ -3,47 +3,65 @@
 
 ## Table of Contents
 
-- [urlfrontier.proto](#urlfrontier.proto)
-    - [Active](#urlfrontier.Active)
-    - [AnyCrawlID](#urlfrontier.AnyCrawlID)
-    - [BlockQueueParams](#urlfrontier.BlockQueueParams)
-    - [Boolean](#urlfrontier.Boolean)
-    - [DeleteCrawlMessage](#urlfrontier.DeleteCrawlMessage)
-    - [DiscoveredURLItem](#urlfrontier.DiscoveredURLItem)
-    - [Empty](#urlfrontier.Empty)
-    - [GetParams](#urlfrontier.GetParams)
-    - [KnownURLItem](#urlfrontier.KnownURLItem)
-    - [Local](#urlfrontier.Local)
-    - [LogLevelParams](#urlfrontier.LogLevelParams)
-    - [Long](#urlfrontier.Long)
-    - [Pagination](#urlfrontier.Pagination)
-    - [QueueDelayParams](#urlfrontier.QueueDelayParams)
-    - [QueueList](#urlfrontier.QueueList)
-    - [QueueWithinCrawlParams](#urlfrontier.QueueWithinCrawlParams)
-    - [Stats](#urlfrontier.Stats)
-    - [Stats.CountsEntry](#urlfrontier.Stats.CountsEntry)
-    - [String](#urlfrontier.String)
-    - [StringList](#urlfrontier.StringList)
-    - [URLInfo](#urlfrontier.URLInfo)
-    - [URLInfo.MetadataEntry](#urlfrontier.URLInfo.MetadataEntry)
-    - [URLItem](#urlfrontier.URLItem)
+- [urlfrontier.proto](#urlfrontier-proto)
+    - [AckMessage](#urlfrontier-AckMessage)
+    - [Active](#urlfrontier-Active)
+    - [AnyCrawlID](#urlfrontier-AnyCrawlID)
+    - [BlockQueueParams](#urlfrontier-BlockQueueParams)
+    - [Boolean](#urlfrontier-Boolean)
+    - [CrawlLimitParams](#urlfrontier-CrawlLimitParams)
+    - [DeleteCrawlMessage](#urlfrontier-DeleteCrawlMessage)
+    - [DiscoveredURLItem](#urlfrontier-DiscoveredURLItem)
+    - [Empty](#urlfrontier-Empty)
+    - [GetParams](#urlfrontier-GetParams)
+    - [KnownURLItem](#urlfrontier-KnownURLItem)
+    - [Local](#urlfrontier-Local)
+    - [LogLevelParams](#urlfrontier-LogLevelParams)
+    - [Long](#urlfrontier-Long)
+    - [Pagination](#urlfrontier-Pagination)
+    - [QueueDelayParams](#urlfrontier-QueueDelayParams)
+    - [QueueList](#urlfrontier-QueueList)
+    - [QueueWithinCrawlParams](#urlfrontier-QueueWithinCrawlParams)
+    - [Stats](#urlfrontier-Stats)
+    - [Stats.CountsEntry](#urlfrontier-Stats-CountsEntry)
+    - [StringList](#urlfrontier-StringList)
+    - [URLInfo](#urlfrontier-URLInfo)
+    - [URLInfo.MetadataEntry](#urlfrontier-URLInfo-MetadataEntry)
+    - [URLItem](#urlfrontier-URLItem)
   
-    - [LogLevelParams.Level](#urlfrontier.LogLevelParams.Level)
+    - [AckMessage.Status](#urlfrontier-AckMessage-Status)
+    - [LogLevelParams.Level](#urlfrontier-LogLevelParams-Level)
   
-    - [URLFrontier](#urlfrontier.URLFrontier)
+    - [URLFrontier](#urlfrontier-URLFrontier)
   
 - [Scalar Value Types](#scalar-value-types)
 
 
 
-<a name="urlfrontier.proto"></a>
+<a name="urlfrontier-proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
 ## urlfrontier.proto
 
 
 
-<a name="urlfrontier.Active"></a>
+<a name="urlfrontier-AckMessage"></a>
+
+### AckMessage
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  | ID which had been specified by the client * |
+| status | [AckMessage.Status](#urlfrontier-AckMessage-Status) |  |  |
+
+
+
+
+
+
+<a name="urlfrontier-Active"></a>
 
 ### Active
 
@@ -59,7 +77,7 @@
 
 
 
-<a name="urlfrontier.AnyCrawlID"></a>
+<a name="urlfrontier-AnyCrawlID"></a>
 
 ### AnyCrawlID
 
@@ -69,7 +87,7 @@
 
 
 
-<a name="urlfrontier.BlockQueueParams"></a>
+<a name="urlfrontier-BlockQueueParams"></a>
 
 ### BlockQueueParams
 Parameter message for BlockQueueUntil *
@@ -87,7 +105,7 @@ Parameter message for BlockQueueUntil *
 
 
 
-<a name="urlfrontier.Boolean"></a>
+<a name="urlfrontier-Boolean"></a>
 
 ### Boolean
 
@@ -102,7 +120,24 @@ Parameter message for BlockQueueUntil *
 
 
 
-<a name="urlfrontier.DeleteCrawlMessage"></a>
+<a name="urlfrontier-CrawlLimitParams"></a>
+
+### CrawlLimitParams
+Parameter message for SetCrawlLimit *
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  | ID for the queue * |
+| limit | [uint32](#uint32) |  |  |
+| crawlID | [string](#string) |  | crawl ID |
+
+
+
+
+
+
+<a name="urlfrontier-DeleteCrawlMessage"></a>
 
 ### DeleteCrawlMessage
 
@@ -118,7 +153,7 @@ Parameter message for BlockQueueUntil *
 
 
 
-<a name="urlfrontier.DiscoveredURLItem"></a>
+<a name="urlfrontier-DiscoveredURLItem"></a>
 
 ### DiscoveredURLItem
 URL discovered during the crawl, might already be known in the URL Frontier or not.
@@ -126,14 +161,14 @@ URL discovered during the crawl, might already be known in the URL Frontier or n
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| info | [URLInfo](#urlfrontier.URLInfo) |  |  |
+| info | [URLInfo](#urlfrontier-URLInfo) |  |  |
 
 
 
 
 
 
-<a name="urlfrontier.Empty"></a>
+<a name="urlfrontier-Empty"></a>
 
 ### Empty
 
@@ -143,7 +178,7 @@ URL discovered during the crawl, might already be known in the URL Frontier or n
 
 
 
-<a name="urlfrontier.GetParams"></a>
+<a name="urlfrontier-GetParams"></a>
 
 ### GetParams
 Parameter message for GetURLs *
@@ -155,7 +190,7 @@ Parameter message for GetURLs *
 | max_queues | [uint32](#uint32) |  | maximum number of queues to get URLs from, the default value of 0 means no limit |
 | key | [string](#string) |  | queue id if restricting to a specific queue |
 | delay_requestable | [uint32](#uint32) |  | delay in seconds before a URL can be unlocked and sent again for fetching |
-| anyCrawlID | [AnyCrawlID](#urlfrontier.AnyCrawlID) |  |  |
+| anyCrawlID | [AnyCrawlID](#urlfrontier-AnyCrawlID) |  |  |
 | crawlID | [string](#string) |  |  |
 
 
@@ -163,7 +198,7 @@ Parameter message for GetURLs *
 
 
 
-<a name="urlfrontier.KnownURLItem"></a>
+<a name="urlfrontier-KnownURLItem"></a>
 
 ### KnownURLItem
 URL which was already known in the frontier, was returned by GetURLs() and processed by the crawler. Used for updating the information 
@@ -173,7 +208,7 @@ it will be elligible for fetching after the delay has elapsed.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| info | [URLInfo](#urlfrontier.URLInfo) |  |  |
+| info | [URLInfo](#urlfrontier-URLInfo) |  |  |
 | refetchable_from_date | [uint64](#uint64) |  | Expressed in seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. Optional, the default value of 0 indicates that a URL should not be refetched. |
 
 
@@ -181,7 +216,7 @@ it will be elligible for fetching after the delay has elapsed.
 
 
 
-<a name="urlfrontier.Local"></a>
+<a name="urlfrontier-Local"></a>
 
 ### Local
 
@@ -196,7 +231,7 @@ it will be elligible for fetching after the delay has elapsed.
 
 
 
-<a name="urlfrontier.LogLevelParams"></a>
+<a name="urlfrontier-LogLevelParams"></a>
 
 ### LogLevelParams
 Configuration of the log level for a particular package, e.g.
@@ -206,7 +241,7 @@ crawlercommons.urlfrontier.service.rocksdb DEBUG
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | package | [string](#string) |  |  |
-| level | [LogLevelParams.Level](#urlfrontier.LogLevelParams.Level) |  |  |
+| level | [LogLevelParams.Level](#urlfrontier-LogLevelParams-Level) |  |  |
 | local | [bool](#bool) |  | only for this instance |
 
 
@@ -214,7 +249,7 @@ crawlercommons.urlfrontier.service.rocksdb DEBUG
 
 
 
-<a name="urlfrontier.Long"></a>
+<a name="urlfrontier-Long"></a>
 
 ### Long
 
@@ -229,7 +264,7 @@ crawlercommons.urlfrontier.service.rocksdb DEBUG
 
 
 
-<a name="urlfrontier.Pagination"></a>
+<a name="urlfrontier-Pagination"></a>
 
 ### Pagination
 
@@ -248,7 +283,7 @@ crawlercommons.urlfrontier.service.rocksdb DEBUG
 
 
 
-<a name="urlfrontier.QueueDelayParams"></a>
+<a name="urlfrontier-QueueDelayParams"></a>
 
 ### QueueDelayParams
 Parameter message for SetDelay *
@@ -266,7 +301,7 @@ Parameter message for SetDelay *
 
 
 
-<a name="urlfrontier.QueueList"></a>
+<a name="urlfrontier-QueueList"></a>
 
 ### QueueList
 Returned by ListQueues *
@@ -285,7 +320,7 @@ Returned by ListQueues *
 
 
 
-<a name="urlfrontier.QueueWithinCrawlParams"></a>
+<a name="urlfrontier-QueueWithinCrawlParams"></a>
 
 ### QueueWithinCrawlParams
 
@@ -302,7 +337,7 @@ Returned by ListQueues *
 
 
 
-<a name="urlfrontier.Stats"></a>
+<a name="urlfrontier-Stats"></a>
 
 ### Stats
 Message returned by the GetStats method
@@ -312,7 +347,7 @@ Message returned by the GetStats method
 | ----- | ---- | ----- | ----------- |
 | size | [uint64](#uint64) |  | number of active URLs in queues |
 | inProcess | [uint32](#uint32) |  | number of URLs currently in flight |
-| counts | [Stats.CountsEntry](#urlfrontier.Stats.CountsEntry) | repeated | custom counts |
+| counts | [Stats.CountsEntry](#urlfrontier-Stats-CountsEntry) | repeated | custom counts |
 | numberOfQueues | [uint64](#uint64) |  | number of active queues in the frontier |
 | crawlID | [string](#string) |  | crawl ID |
 
@@ -321,7 +356,7 @@ Message returned by the GetStats method
 
 
 
-<a name="urlfrontier.Stats.CountsEntry"></a>
+<a name="urlfrontier-Stats-CountsEntry"></a>
 
 ### Stats.CountsEntry
 
@@ -337,22 +372,7 @@ Message returned by the GetStats method
 
 
 
-<a name="urlfrontier.String"></a>
-
-### String
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| value | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="urlfrontier.StringList"></a>
+<a name="urlfrontier-StringList"></a>
 
 ### StringList
 
@@ -367,7 +387,7 @@ Message returned by the GetStats method
 
 
 
-<a name="urlfrontier.URLInfo"></a>
+<a name="urlfrontier-URLInfo"></a>
 
 ### URLInfo
 
@@ -377,7 +397,7 @@ Message returned by the GetStats method
 | ----- | ---- | ----- | ----------- |
 | url | [string](#string) |  | URL * |
 | key | [string](#string) |  | The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname, domain name or IP or the URL. If not set, the service will use a sensible default like hostname. |
-| metadata | [URLInfo.MetadataEntry](#urlfrontier.URLInfo.MetadataEntry) | repeated | Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc... |
+| metadata | [URLInfo.MetadataEntry](#urlfrontier-URLInfo-MetadataEntry) | repeated | Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc... |
 | crawlID | [string](#string) |  | crawl ID * |
 
 
@@ -385,7 +405,7 @@ Message returned by the GetStats method
 
 
 
-<a name="urlfrontier.URLInfo.MetadataEntry"></a>
+<a name="urlfrontier-URLInfo-MetadataEntry"></a>
 
 ### URLInfo.MetadataEntry
 
@@ -394,14 +414,14 @@ Message returned by the GetStats method
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | key | [string](#string) |  |  |
-| value | [StringList](#urlfrontier.StringList) |  |  |
+| value | [StringList](#urlfrontier-StringList) |  |  |
 
 
 
 
 
 
-<a name="urlfrontier.URLItem"></a>
+<a name="urlfrontier-URLItem"></a>
 
 ### URLItem
 Wrapper for a KnownURLItem or DiscoveredURLItem *
@@ -409,8 +429,9 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| discovered | [DiscoveredURLItem](#urlfrontier.DiscoveredURLItem) |  |  |
-| known | [KnownURLItem](#urlfrontier.KnownURLItem) |  |  |
+| discovered | [DiscoveredURLItem](#urlfrontier-DiscoveredURLItem) |  |  |
+| known | [KnownURLItem](#urlfrontier-KnownURLItem) |  |  |
+| ID | [string](#string) |  | Identifier specified by the client, if missing, the URL is returned * |
 
 
 
@@ -419,7 +440,20 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
  
 
 
-<a name="urlfrontier.LogLevelParams.Level"></a>
+<a name="urlfrontier-AckMessage-Status"></a>
+
+### AckMessage.Status
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| OK | 0 |  |
+| SKIPPED | 1 |  |
+| FAIL | 2 |  |
+
+
+
+<a name="urlfrontier-LogLevelParams-Level"></a>
 
 ### LogLevelParams.Level
 
@@ -438,26 +472,27 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
  
 
 
-<a name="urlfrontier.URLFrontier"></a>
+<a name="urlfrontier-URLFrontier"></a>
 
 ### URLFrontier
 
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| ListNodes | [Empty](#urlfrontier.Empty) | [StringList](#urlfrontier.StringList) | Return the list of nodes forming the cluster the current node belongs to * |
-| ListCrawls | [Local](#urlfrontier.Local) | [StringList](#urlfrontier.StringList) | Return the list of crawls handled by the frontier(s) * |
-| DeleteCrawl | [DeleteCrawlMessage](#urlfrontier.DeleteCrawlMessage) | [Long](#urlfrontier.Long) | Delete an entire crawl, returns the number of URLs removed this way * |
-| ListQueues | [Pagination](#urlfrontier.Pagination) | [QueueList](#urlfrontier.QueueList) | Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching); by default the service will return up to 100 results from offset 0 and exclude inactive queues.* |
-| GetURLs | [GetParams](#urlfrontier.GetParams) | [URLInfo](#urlfrontier.URLInfo) stream | Stream URLs due for fetching from M queues with up to N items per queue * |
-| PutURLs | [URLItem](#urlfrontier.URLItem) stream | [String](#urlfrontier.String) stream | Push URL items to the server; they get created (if they don&#39;t already exist) in case of DiscoveredURLItems or updated if KnownURLItems * |
-| GetStats | [QueueWithinCrawlParams](#urlfrontier.QueueWithinCrawlParams) | [Stats](#urlfrontier.Stats) | Return stats for a specific queue or an entire crawl. Does not aggregate the stats across different crawlids. * |
-| DeleteQueue | [QueueWithinCrawlParams](#urlfrontier.QueueWithinCrawlParams) | [Long](#urlfrontier.Long) | Delete the queue based on the key in parameter, returns the number of URLs removed this way * |
-| BlockQueueUntil | [BlockQueueParams](#urlfrontier.BlockQueueParams) | [Empty](#urlfrontier.Empty) | Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. |
-| SetActive | [Active](#urlfrontier.Active) | [Empty](#urlfrontier.Empty) | De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. * |
-| GetActive | [Local](#urlfrontier.Local) | [Boolean](#urlfrontier.Boolean) | Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) * |
-| SetDelay | [QueueDelayParams](#urlfrontier.QueueDelayParams) | [Empty](#urlfrontier.Empty) | Set a delay from a given queue. No URLs will be obtained via GetURLs for this queue until the number of seconds specified has elapsed since the last time URLs were retrieved. Usually informed by the delay setting of robots.txt. |
-| SetLogLevel | [LogLevelParams](#urlfrontier.LogLevelParams) | [Empty](#urlfrontier.Empty) | Overrides the log level for a given package * |
+| ListNodes | [Empty](#urlfrontier-Empty) | [StringList](#urlfrontier-StringList) | Return the list of nodes forming the cluster the current node belongs to * |
+| ListCrawls | [Local](#urlfrontier-Local) | [StringList](#urlfrontier-StringList) | Return the list of crawls handled by the frontier(s) * |
+| DeleteCrawl | [DeleteCrawlMessage](#urlfrontier-DeleteCrawlMessage) | [Long](#urlfrontier-Long) | Delete an entire crawl, returns the number of URLs removed this way * |
+| ListQueues | [Pagination](#urlfrontier-Pagination) | [QueueList](#urlfrontier-QueueList) | Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching); by default the service will return up to 100 results from offset 0 and exclude inactive queues.* |
+| GetURLs | [GetParams](#urlfrontier-GetParams) | [URLInfo](#urlfrontier-URLInfo) stream | Stream URLs due for fetching from M queues with up to N items per queue * |
+| PutURLs | [URLItem](#urlfrontier-URLItem) stream | [AckMessage](#urlfrontier-AckMessage) stream | Push URL items to the server; they get created (if they don&#39;t already exist) in case of DiscoveredURLItems or updated if KnownURLItems * |
+| GetStats | [QueueWithinCrawlParams](#urlfrontier-QueueWithinCrawlParams) | [Stats](#urlfrontier-Stats) | Return stats for a specific queue or an entire crawl. Does not aggregate the stats across different crawlids. * |
+| DeleteQueue | [QueueWithinCrawlParams](#urlfrontier-QueueWithinCrawlParams) | [Long](#urlfrontier-Long) | Delete the queue based on the key in parameter, returns the number of URLs removed this way * |
+| BlockQueueUntil | [BlockQueueParams](#urlfrontier-BlockQueueParams) | [Empty](#urlfrontier-Empty) | Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. |
+| SetActive | [Active](#urlfrontier-Active) | [Empty](#urlfrontier-Empty) | De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. * |
+| GetActive | [Local](#urlfrontier-Local) | [Boolean](#urlfrontier-Boolean) | Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) * |
+| SetDelay | [QueueDelayParams](#urlfrontier-QueueDelayParams) | [Empty](#urlfrontier-Empty) | Set a delay from a given queue. No URLs will be obtained via GetURLs for this queue until the number of seconds specified has elapsed since the last time URLs were retrieved. Usually informed by the delay setting of robots.txt. |
+| SetLogLevel | [LogLevelParams](#urlfrontier-LogLevelParams) | [Empty](#urlfrontier-Empty) | Overrides the log level for a given package * |
+| SetCrawlLimit | [CrawlLimitParams](#urlfrontier-CrawlLimitParams) | [Empty](#urlfrontier-Empty) | Sets crawl limit for domain * |
 
  
 
