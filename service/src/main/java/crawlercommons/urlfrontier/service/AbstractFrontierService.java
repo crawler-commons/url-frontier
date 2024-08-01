@@ -665,7 +665,7 @@ public abstract class AbstractFrontierService
             }
 
             // Max urls reached
-            if (currentQueue.IsLimitReached()) {
+            if (currentQueue.isLimitReached()) {
                 continue;
             }
 

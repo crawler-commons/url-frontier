@@ -146,7 +146,7 @@ public class QueueMetadata implements QueueInterface {
     }
 
     @Override
-    public Boolean IsLimitReached() {
+    public Boolean isLimitReached() {
         if (limit.isEmpty()) {
             return false;
         }

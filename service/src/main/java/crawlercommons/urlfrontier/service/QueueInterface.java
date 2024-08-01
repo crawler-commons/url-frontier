@@ -26,5 +26,5 @@ public interface QueueInterface {
 
     public void setCrawlLimit(int crawlLimit);
 
-    public Boolean IsLimitReached();
+    public Boolean isLimitReached();
 }

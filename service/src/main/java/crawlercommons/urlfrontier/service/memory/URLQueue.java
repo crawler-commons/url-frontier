@@ -104,7 +104,7 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
     }
 
     @Override
-    public Boolean IsLimitReached() {
+    public Boolean isLimitReached() {
         if (limit.isEmpty()) {
             return false;
         }
