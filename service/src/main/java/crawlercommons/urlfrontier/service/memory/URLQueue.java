@@ -6,6 +6,7 @@ package crawlercommons.urlfrontier.service.memory;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.PriorityQueue;
 
 public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterface {
@@ -16,8 +17,9 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
 
     // keep a hash of the completed URLs
     // these won't be refetched
-
     private HashSet<String> completed = new HashSet<>();
+
+    private Optional<Integer> limit = Optional.empty();
 
     private long blockedUntil = -1;
 
@@ -90,5 +92,23 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
     @Override
     public int countActive() {
         return this.size();
+    }
+
+    @Override
+    public void setCrawlLimit(int crawlLimit) {
+        if (crawlLimit == 0) {
+            limit = Optional.empty();
+        } else {
+            limit = Optional.of(crawlLimit);
+        }
+    }
+
+    @Override
+    public Boolean isLimitReached() {
+        if (limit.isEmpty()) {
+            return false;
+        }
+
+        return getCountCompleted() >= limit.get();
     }
 }

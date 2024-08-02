@@ -4,7 +4,7 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /** */
 @javax.annotation.Generated(
-        value = "by gRPC proto compiler (version 1.50.0)",
+        value = "by gRPC proto compiler (version 1.50.2)",
         comments = "Source: urlfrontier.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class URLFrontierGrpc {
@@ -687,6 +687,58 @@ public final class URLFrontierGrpc {
         return getSetLogLevelMethod;
     }
 
+    private static volatile io.grpc.MethodDescriptor<
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams,
+                    crawlercommons.urlfrontier.Urlfrontier.Empty>
+            getSetCrawlLimitMethod;
+
+    @io.grpc.stub.annotations.RpcMethod(
+            fullMethodName = SERVICE_NAME + '/' + "SetCrawlLimit",
+            requestType = crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams.class,
+            responseType = crawlercommons.urlfrontier.Urlfrontier.Empty.class,
+            methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+    public static io.grpc.MethodDescriptor<
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams,
+                    crawlercommons.urlfrontier.Urlfrontier.Empty>
+            getSetCrawlLimitMethod() {
+        io.grpc.MethodDescriptor<
+                        crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams,
+                        crawlercommons.urlfrontier.Urlfrontier.Empty>
+                getSetCrawlLimitMethod;
+        if ((getSetCrawlLimitMethod = URLFrontierGrpc.getSetCrawlLimitMethod) == null) {
+            synchronized (URLFrontierGrpc.class) {
+                if ((getSetCrawlLimitMethod = URLFrontierGrpc.getSetCrawlLimitMethod) == null) {
+                    URLFrontierGrpc.getSetCrawlLimitMethod =
+                            getSetCrawlLimitMethod =
+                                    io.grpc.MethodDescriptor
+                                            .<crawlercommons.urlfrontier.Urlfrontier
+                                                            .CrawlLimitParams,
+                                                    crawlercommons.urlfrontier.Urlfrontier.Empty>
+                                                    newBuilder()
+                                            .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                                            .setFullMethodName(
+                                                    generateFullMethodName(
+                                                            SERVICE_NAME, "SetCrawlLimit"))
+                                            .setSampledToLocalTracing(true)
+                                            .setRequestMarshaller(
+                                                    io.grpc.protobuf.ProtoUtils.marshaller(
+                                                            crawlercommons.urlfrontier.Urlfrontier
+                                                                    .CrawlLimitParams
+                                                                    .getDefaultInstance()))
+                                            .setResponseMarshaller(
+                                                    io.grpc.protobuf.ProtoUtils.marshaller(
+                                                            crawlercommons.urlfrontier.Urlfrontier
+                                                                    .Empty.getDefaultInstance()))
+                                            .setSchemaDescriptor(
+                                                    new URLFrontierMethodDescriptorSupplier(
+                                                            "SetCrawlLimit"))
+                                            .build();
+                }
+            }
+        }
+        return getSetCrawlLimitMethod;
+    }
+
     /** Creates a new async stub that supports all call types for the service */
     public static URLFrontierStub newStub(io.grpc.Channel channel) {
         io.grpc.stub.AbstractStub.StubFactory<URLFrontierStub> factory =
@@ -932,6 +984,21 @@ public final class URLFrontierGrpc {
                     getSetLogLevelMethod(), responseObserver);
         }
 
+        /**
+         *
+         *
+         * <pre>
+         * * Sets crawl limit for domain *
+         * </pre>
+         */
+        public void setCrawlLimit(
+                crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams request,
+                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
+                        responseObserver) {
+            io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+                    getSetCrawlLimitMethod(), responseObserver);
+        }
+
         @java.lang.Override
         public final io.grpc.ServerServiceDefinition bindService() {
             return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
@@ -1029,6 +1096,13 @@ public final class URLFrontierGrpc {
                                             crawlercommons.urlfrontier.Urlfrontier.LogLevelParams,
                                             crawlercommons.urlfrontier.Urlfrontier.Empty>(
                                             this, METHODID_SET_LOG_LEVEL)))
+                    .addMethod(
+                            getSetCrawlLimitMethod(),
+                            io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                    new MethodHandlers<
+                                            crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams,
+                                            crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                                            this, METHODID_SET_CRAWL_LIMIT)))
                     .build();
         }
     }
@@ -1268,6 +1342,23 @@ public final class URLFrontierGrpc {
                     request,
                     responseObserver);
         }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Sets crawl limit for domain *
+         * </pre>
+         */
+        public void setCrawlLimit(
+                crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams request,
+                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
+                        responseObserver) {
+            io.grpc.stub.ClientCalls.asyncUnaryCall(
+                    getChannel().newCall(getSetCrawlLimitMethod(), getCallOptions()),
+                    request,
+                    responseObserver);
+        }
     }
 
     /** */
@@ -1444,6 +1535,19 @@ public final class URLFrontierGrpc {
             return io.grpc.stub.ClientCalls.blockingUnaryCall(
                     getChannel(), getSetLogLevelMethod(), getCallOptions(), request);
         }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Sets crawl limit for domain *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Empty setCrawlLimit(
+                crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams request) {
+            return io.grpc.stub.ClientCalls.blockingUnaryCall(
+                    getChannel(), getSetCrawlLimitMethod(), getCallOptions(), request);
+        }
     }
 
     /** */
@@ -1618,6 +1722,20 @@ public final class URLFrontierGrpc {
             return io.grpc.stub.ClientCalls.futureUnaryCall(
                     getChannel().newCall(getSetLogLevelMethod(), getCallOptions()), request);
         }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Sets crawl limit for domain *
+         * </pre>
+         */
+        public com.google.common.util.concurrent.ListenableFuture<
+                        crawlercommons.urlfrontier.Urlfrontier.Empty>
+                setCrawlLimit(crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams request) {
+            return io.grpc.stub.ClientCalls.futureUnaryCall(
+                    getChannel().newCall(getSetCrawlLimitMethod(), getCallOptions()), request);
+        }
     }
 
     private static final int METHODID_LIST_NODES = 0;
@@ -1632,7 +1750,8 @@ public final class URLFrontierGrpc {
     private static final int METHODID_GET_ACTIVE = 9;
     private static final int METHODID_SET_DELAY = 10;
     private static final int METHODID_SET_LOG_LEVEL = 11;
-    private static final int METHODID_PUT_URLS = 12;
+    private static final int METHODID_SET_CRAWL_LIMIT = 12;
+    private static final int METHODID_PUT_URLS = 13;
 
     private static final class MethodHandlers<Req, Resp>
             implements io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1735,6 +1854,13 @@ public final class URLFrontierGrpc {
                                             crawlercommons.urlfrontier.Urlfrontier.Empty>)
                                     responseObserver);
                     break;
+                case METHODID_SET_CRAWL_LIMIT:
+                    serviceImpl.setCrawlLimit(
+                            (crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams) request,
+                            (io.grpc.stub.StreamObserver<
+                                            crawlercommons.urlfrontier.Urlfrontier.Empty>)
+                                    responseObserver);
+                    break;
                 default:
                     throw new AssertionError();
             }
@@ -1820,6 +1946,7 @@ public final class URLFrontierGrpc {
                                             .addMethod(getGetActiveMethod())
                                             .addMethod(getSetDelayMethod())
                                             .addMethod(getSetLogLevelMethod())
+                                            .addMethod(getSetCrawlLimitMethod())
                                             .build();
                 }
             }

@@ -18136,6 +18136,928 @@ public final class Urlfrontier {
         }
     }
 
+    public interface CrawlLimitParamsOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.CrawlLimitParams)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The key.
+         */
+        java.lang.String getKey();
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The bytes for key.
+         */
+        com.google.protobuf.ByteString getKeyBytes();
+
+        /**
+         * <code>uint32 limit = 2;</code>
+         *
+         * @return The limit.
+         */
+        int getLimit();
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>string crawlID = 3;</code>
+         *
+         * @return The crawlID.
+         */
+        java.lang.String getCrawlID();
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>string crawlID = 3;</code>
+         *
+         * @return The bytes for crawlID.
+         */
+        com.google.protobuf.ByteString getCrawlIDBytes();
+    }
+    /**
+     *
+     *
+     * <pre>
+     * * Parameter message for SetCrawlLimit *
+     * </pre>
+     *
+     * Protobuf type {@code urlfrontier.CrawlLimitParams}
+     */
+    public static final class CrawlLimitParams extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.CrawlLimitParams)
+            CrawlLimitParamsOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use CrawlLimitParams.newBuilder() to construct.
+        private CrawlLimitParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private CrawlLimitParams() {
+            key_ = "";
+            crawlID_ = "";
+        }
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new CrawlLimitParams();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
+            return this.unknownFields;
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_CrawlLimitParams_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_CrawlLimitParams_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams.class,
+                            crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams.Builder.class);
+        }
+
+        public static final int KEY_FIELD_NUMBER = 1;
+        private volatile java.lang.Object key_;
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The key.
+         */
+        @java.lang.Override
+        public java.lang.String getKey() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                key_ = s;
+                return s;
+            }
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The bytes for key.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getKeyBytes() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                key_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int LIMIT_FIELD_NUMBER = 2;
+        private int limit_;
+        /**
+         * <code>uint32 limit = 2;</code>
+         *
+         * @return The limit.
+         */
+        @java.lang.Override
+        public int getLimit() {
+            return limit_;
+        }
+
+        public static final int CRAWLID_FIELD_NUMBER = 3;
+        private volatile java.lang.Object crawlID_;
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>string crawlID = 3;</code>
+         *
+         * @return The crawlID.
+         */
+        @java.lang.Override
+        public java.lang.String getCrawlID() {
+            java.lang.Object ref = crawlID_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                crawlID_ = s;
+                return s;
+            }
+        }
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>string crawlID = 3;</code>
+         *
+         * @return The bytes for crawlID.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getCrawlIDBytes() {
+            java.lang.Object ref = crawlID_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                crawlID_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(key_)) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
+            }
+            if (limit_ != 0) {
+                output.writeUInt32(2, limit_);
+            }
+            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crawlID_)) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 3, crawlID_);
+            }
+            getUnknownFields().writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(key_)) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
+            }
+            if (limit_ != 0) {
+                size += com.google.protobuf.CodedOutputStream.computeUInt32Size(2, limit_);
+            }
+            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crawlID_)) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, crawlID_);
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams other =
+                    (crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams) obj;
+
+            if (!getKey().equals(other.getKey())) return false;
+            if (getLimit() != other.getLimit()) return false;
+            if (!getCrawlID().equals(other.getCrawlID())) return false;
+            if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + KEY_FIELD_NUMBER;
+            hash = (53 * hash) + getKey().hashCode();
+            hash = (37 * hash) + LIMIT_FIELD_NUMBER;
+            hash = (53 * hash) + getLimit();
+            hash = (37 * hash) + CRAWLID_FIELD_NUMBER;
+            hash = (53 * hash) + getCrawlID().hashCode();
+            hash = (29 * hash) + getUnknownFields().hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         *
+         *
+         * <pre>
+         * * Parameter message for SetCrawlLimit *
+         * </pre>
+         *
+         * Protobuf type {@code urlfrontier.CrawlLimitParams}
+         */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.CrawlLimitParams)
+                crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParamsOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_CrawlLimitParams_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_CrawlLimitParams_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams.class,
+                                crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams.Builder
+                                        .class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams.newBuilder()
+            private Builder() {}
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                key_ = "";
+
+                limit_ = 0;
+
+                crawlID_ = "";
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_CrawlLimitParams_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams
+                    getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams build() {
+                crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams result =
+                        new crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams(this);
+                result.key_ = key_;
+                result.limit_ = limit_;
+                result.crawlID_ = crawlID_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams) {
+                    return mergeFrom(
+                            (crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(
+                    crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams other) {
+                if (other
+                        == crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams
+                                .getDefaultInstance()) return this;
+                if (!other.getKey().isEmpty()) {
+                    key_ = other.key_;
+                    onChanged();
+                }
+                if (other.getLimit() != 0) {
+                    setLimit(other.getLimit());
+                }
+                if (!other.getCrawlID().isEmpty()) {
+                    crawlID_ = other.crawlID_;
+                    onChanged();
+                }
+                this.mergeUnknownFields(other.getUnknownFields());
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                if (extensionRegistry == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                try {
+                    boolean done = false;
+                    while (!done) {
+                        int tag = input.readTag();
+                        switch (tag) {
+                            case 0:
+                                done = true;
+                                break;
+                            case 10:
+                                {
+                                    key_ = input.readStringRequireUtf8();
+
+                                    break;
+                                } // case 10
+                            case 16:
+                                {
+                                    limit_ = input.readUInt32();
+
+                                    break;
+                                } // case 16
+                            case 26:
+                                {
+                                    crawlID_ = input.readStringRequireUtf8();
+
+                                    break;
+                                } // case 26
+                            default:
+                                {
+                                    if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                                        done = true; // was an endgroup tag
+                                    }
+                                    break;
+                                } // default:
+                        } // switch (tag)
+                    } // while (!done)
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    throw e.unwrapIOException();
+                } finally {
+                    onChanged();
+                } // finally
+                return this;
+            }
+
+            private java.lang.Object key_ = "";
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return The key.
+             */
+            public java.lang.String getKey() {
+                java.lang.Object ref = key_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    key_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return The bytes for key.
+             */
+            public com.google.protobuf.ByteString getKeyBytes() {
+                java.lang.Object ref = key_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    key_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @param value The key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKey(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearKey() {
+
+                key_ = getDefaultInstance().getKey();
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @param value The bytes for key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKeyBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+
+                key_ = value;
+                onChanged();
+                return this;
+            }
+
+            private int limit_;
+            /**
+             * <code>uint32 limit = 2;</code>
+             *
+             * @return The limit.
+             */
+            @java.lang.Override
+            public int getLimit() {
+                return limit_;
+            }
+            /**
+             * <code>uint32 limit = 2;</code>
+             *
+             * @param value The limit to set.
+             * @return This builder for chaining.
+             */
+            public Builder setLimit(int value) {
+
+                limit_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>uint32 limit = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearLimit() {
+
+                limit_ = 0;
+                onChanged();
+                return this;
+            }
+
+            private java.lang.Object crawlID_ = "";
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>string crawlID = 3;</code>
+             *
+             * @return The crawlID.
+             */
+            public java.lang.String getCrawlID() {
+                java.lang.Object ref = crawlID_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    crawlID_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>string crawlID = 3;</code>
+             *
+             * @return The bytes for crawlID.
+             */
+            public com.google.protobuf.ByteString getCrawlIDBytes() {
+                java.lang.Object ref = crawlID_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    crawlID_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>string crawlID = 3;</code>
+             *
+             * @param value The crawlID to set.
+             * @return This builder for chaining.
+             */
+            public Builder setCrawlID(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+
+                crawlID_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>string crawlID = 3;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearCrawlID() {
+
+                crawlID_ = getDefaultInstance().getCrawlID();
+                onChanged();
+                return this;
+            }
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>string crawlID = 3;</code>
+             *
+             * @param value The bytes for crawlID to set.
+             * @return This builder for chaining.
+             */
+            public Builder setCrawlIDBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+
+                crawlID_ = value;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.CrawlLimitParams)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.CrawlLimitParams)
+        private static final crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams
+                DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<CrawlLimitParams> PARSER =
+                new com.google.protobuf.AbstractParser<CrawlLimitParams>() {
+                    @java.lang.Override
+                    public CrawlLimitParams parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        Builder builder = newBuilder();
+                        try {
+                            builder.mergeFrom(input, extensionRegistry);
+                        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                            throw e.setUnfinishedMessage(builder.buildPartial());
+                        } catch (com.google.protobuf.UninitializedMessageException e) {
+                            throw e.asInvalidProtocolBufferException()
+                                    .setUnfinishedMessage(builder.buildPartial());
+                        } catch (java.io.IOException e) {
+                            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                                    .setUnfinishedMessage(builder.buildPartial());
+                        }
+                        return builder.buildPartial();
+                    }
+                };
+
+        public static com.google.protobuf.Parser<CrawlLimitParams> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<CrawlLimitParams> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
+    }
+
     private static final com.google.protobuf.Descriptors.Descriptor
             internal_static_urlfrontier_Stats_descriptor;
     private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -18228,6 +19150,10 @@ public final class Urlfrontier {
             internal_static_urlfrontier_LogLevelParams_descriptor;
     private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internal_static_urlfrontier_LogLevelParams_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_CrawlLimitParams_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_CrawlLimitParams_fieldAccessorTable;
 
     public static com.google.protobuf.Descriptors.FileDescriptor getDescriptor() {
         return descriptor;
@@ -18281,29 +19207,32 @@ public final class Urlfrontier {
                     + "\t\0220\n\005level\030\002 \001(\0162!.urlfrontier.LogLevelP"
                     + "arams.Level\022\r\n\005local\030\003 \001(\010\"<\n\005Level\022\t\n\005T"
                     + "RACE\020\000\022\t\n\005DEBUG\020\001\022\010\n\004INFO\020\002\022\010\n\004WARN\020\003\022\t\n"
-                    + "\005ERROR\020\0042\325\006\n\013URLFrontier\022:\n\tListNodes\022\022."
-                    + "urlfrontier.Empty\032\027.urlfrontier.StringLi"
-                    + "st\"\000\022;\n\nListCrawls\022\022.urlfrontier.Local\032\027"
-                    + ".urlfrontier.StringList\"\000\022C\n\013DeleteCrawl"
-                    + "\022\037.urlfrontier.DeleteCrawlMessage\032\021.urlf"
-                    + "rontier.Long\"\000\022?\n\nListQueues\022\027.urlfronti"
-                    + "er.Pagination\032\026.urlfrontier.QueueList\"\000\022"
-                    + ";\n\007GetURLs\022\026.urlfrontier.GetParams\032\024.url"
-                    + "frontier.URLInfo\"\0000\001\022>\n\007PutURLs\022\024.urlfro"
-                    + "ntier.URLItem\032\027.urlfrontier.AckMessage\"\000"
-                    + "(\0010\001\022E\n\010GetStats\022#.urlfrontier.QueueWith"
-                    + "inCrawlParams\032\022.urlfrontier.Stats\"\000\022G\n\013D"
-                    + "eleteQueue\022#.urlfrontier.QueueWithinCraw"
-                    + "lParams\032\021.urlfrontier.Long\"\000\022F\n\017BlockQue"
-                    + "ueUntil\022\035.urlfrontier.BlockQueueParams\032\022"
-                    + ".urlfrontier.Empty\"\000\0226\n\tSetActive\022\023.urlf"
-                    + "rontier.Active\032\022.urlfrontier.Empty\"\000\0227\n\t"
-                    + "GetActive\022\022.urlfrontier.Local\032\024.urlfront"
-                    + "ier.Boolean\"\000\022?\n\010SetDelay\022\035.urlfrontier."
-                    + "QueueDelayParams\032\022.urlfrontier.Empty\"\000\022@"
-                    + "\n\013SetLogLevel\022\033.urlfrontier.LogLevelPara"
-                    + "ms\032\022.urlfrontier.Empty\"\000B\034\n\032crawlercommo"
-                    + "ns.urlfrontierb\006proto3"
+                    + "\005ERROR\020\004\"?\n\020CrawlLimitParams\022\013\n\003key\030\001 \001("
+                    + "\t\022\r\n\005limit\030\002 \001(\r\022\017\n\007crawlID\030\003 \001(\t2\233\007\n\013UR"
+                    + "LFrontier\022:\n\tListNodes\022\022.urlfrontier.Emp"
+                    + "ty\032\027.urlfrontier.StringList\"\000\022;\n\nListCra"
+                    + "wls\022\022.urlfrontier.Local\032\027.urlfrontier.St"
+                    + "ringList\"\000\022C\n\013DeleteCrawl\022\037.urlfrontier."
+                    + "DeleteCrawlMessage\032\021.urlfrontier.Long\"\000\022"
+                    + "?\n\nListQueues\022\027.urlfrontier.Pagination\032\026"
+                    + ".urlfrontier.QueueList\"\000\022;\n\007GetURLs\022\026.ur"
+                    + "lfrontier.GetParams\032\024.urlfrontier.URLInf"
+                    + "o\"\0000\001\022>\n\007PutURLs\022\024.urlfrontier.URLItem\032\027"
+                    + ".urlfrontier.AckMessage\"\000(\0010\001\022E\n\010GetStat"
+                    + "s\022#.urlfrontier.QueueWithinCrawlParams\032\022"
+                    + ".urlfrontier.Stats\"\000\022G\n\013DeleteQueue\022#.ur"
+                    + "lfrontier.QueueWithinCrawlParams\032\021.urlfr"
+                    + "ontier.Long\"\000\022F\n\017BlockQueueUntil\022\035.urlfr"
+                    + "ontier.BlockQueueParams\032\022.urlfrontier.Em"
+                    + "pty\"\000\0226\n\tSetActive\022\023.urlfrontier.Active\032"
+                    + "\022.urlfrontier.Empty\"\000\0227\n\tGetActive\022\022.url"
+                    + "frontier.Local\032\024.urlfrontier.Boolean\"\000\022?"
+                    + "\n\010SetDelay\022\035.urlfrontier.QueueDelayParam"
+                    + "s\032\022.urlfrontier.Empty\"\000\022@\n\013SetLogLevel\022\033"
+                    + ".urlfrontier.LogLevelParams\032\022.urlfrontie"
+                    + "r.Empty\"\000\022D\n\rSetCrawlLimit\022\035.urlfrontier"
+                    + ".CrawlLimitParams\032\022.urlfrontier.Empty\"\000B"
+                    + "\034\n\032crawlercommons.urlfrontierb\006proto3"
         };
         descriptor =
                 com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
@@ -18483,6 +19412,14 @@ public final class Urlfrontier {
                         internal_static_urlfrontier_LogLevelParams_descriptor,
                         new java.lang.String[] {
                             "Package", "Level", "Local",
+                        });
+        internal_static_urlfrontier_CrawlLimitParams_descriptor =
+                getDescriptor().getMessageTypes().get(21);
+        internal_static_urlfrontier_CrawlLimitParams_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_CrawlLimitParams_descriptor,
+                        new java.lang.String[] {
+                            "Key", "Limit", "CrawlID",
                         });
     }
 

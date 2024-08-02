@@ -6,6 +6,7 @@ package crawlercommons.urlfrontier.service.rocksdb;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueueMetadata implements QueueInterface {
@@ -17,6 +18,8 @@ public class QueueMetadata implements QueueInterface {
 
     /** number of URLs scheduled in the queue * */
     private AtomicInteger active = new AtomicInteger(0);
+
+    private Optional<Integer> limit = Optional.empty();
 
     private long blockedUntil = -1;
 
@@ -131,5 +134,22 @@ public class QueueMetadata implements QueueInterface {
     @Override
     public int countActive() {
         return active.get();
+    }
+
+    @Override
+    public void setCrawlLimit(int crawlLimit) {
+        if (crawlLimit == 0) {
+            limit = Optional.empty();
+        } else {
+            limit = Optional.of(crawlLimit);
+        }
+    }
+
+    @Override
+    public Boolean isLimitReached() {
+        if (limit.isEmpty()) {
+            return false;
+        }
+        return getCountCompleted() >= limit.get();
     }
 }
