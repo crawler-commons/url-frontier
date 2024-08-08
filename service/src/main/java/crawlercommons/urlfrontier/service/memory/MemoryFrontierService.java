@@ -4,10 +4,11 @@
 package crawlercommons.urlfrontier.service.memory;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
-import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.Pagination;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
@@ -16,7 +17,9 @@ import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import io.grpc.stub.StreamObserver;
+import java.time.Instant;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +153,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
         String url = request.getUrl();
         String key = request.getKey();
         boolean found = false;
-        
+
         LOG.info("getURLStatus crawlId={} key={} url={}", crawlId, key, url);
 
         QueueWithinCrawl qwc = QueueWithinCrawl.get(key, crawlId);
@@ -167,10 +170,10 @@ public class MemoryFrontierService extends AbstractFrontierService {
         URLItem.Builder builder = URLItem.newBuilder();
 
         KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
-        
+
         if (queue.isCompleted(url)) {
-        	knownBuilder.setInfo(info);
-        	knownBuilder.setRefetchableFromDate(0);
+            knownBuilder.setInfo(info);
+            knownBuilder.setRefetchableFromDate(0);
             builder.setKnown(knownBuilder.build());
 
             found = true;
@@ -184,8 +187,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 if (url.equals(item.url)) {
 
                     try {
-                    	knownBuilder.setInfo(item.toURLInfo(qwc));
-                    	knownBuilder.setRefetchableFromDate(item.nextFetchDate);
+                        knownBuilder.setInfo(item.toURLInfo(qwc));
+                        knownBuilder.setRefetchableFromDate(item.nextFetchDate);
                     } catch (InvalidProtocolBufferException e) {
                         LOG.error(e.getMessage(), e);
                         responseObserver.onError(io.grpc.Status.fromThrowable(e).asException());
@@ -203,7 +206,101 @@ public class MemoryFrontierService extends AbstractFrontierService {
         if (found) {
             responseObserver.onCompleted();
         } else {
-        	responseObserver.onError(io.grpc.Status.NOT_FOUND.asException());
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.asException());
         }
+    }
+
+    @Override
+    public void listURLs(Pagination request, StreamObserver<URLItem> responseObserver) {
+
+        long maxURLs = request.getSize();
+        long start = request.getStart();
+
+        boolean include_inactive = request.getIncludeInactive();
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+
+        // 100 by default
+        if (maxURLs == 0) {
+            maxURLs = 100;
+        }
+
+        LOG.info(
+                "Received request to list URLs [size {}; start {}; inactive {}]",
+                maxURLs,
+                start,
+                include_inactive);
+
+        long now = Instant.now().getEpochSecond();
+        int pos = -1;
+        int sent = 0;
+
+        synchronized (getQueues()) {
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                    getQueues().entrySet().iterator();
+
+            while (iterator.hasNext()) {
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                URLQueue queue = (URLQueue) getQueues().get(e.getKey());
+
+                // check that it is within the right crawlID
+                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                    continue;
+                }
+
+                URLItem.Builder builder = URLItem.newBuilder();
+                KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
+
+                // First iterate over completed items
+                for (String curcomplete : queue.completed) {
+                    builder.clear();
+                    knownBuilder.clear();
+
+                    pos++;
+                    URLInfo info =
+                            URLInfo.newBuilder()
+                                    .setCrawlID(e.getKey().getCrawlid())
+                                    .setKey(e.getKey().getQueue())
+                                    .setUrl(curcomplete)
+                                    .build();
+
+                    knownBuilder.setInfo(info);
+                    knownBuilder.setRefetchableFromDate(0);
+                    builder.setKnown(knownBuilder.build());
+
+                    if (pos >= start) {
+                        responseObserver.onNext(builder.build());
+                        sent++;
+                    }
+                }
+
+                // Iterate over scheduled items
+                Iterator<InternalURL> iter = queue.iterator();
+
+                while (iter.hasNext() && sent <= maxURLs) {
+                    InternalURL item = iter.next();
+                    pos++;
+
+                    builder.clear();
+                    knownBuilder.clear();
+
+                    try {
+                        knownBuilder.setInfo(item.toURLInfo(e.getKey()));
+                    } catch (InvalidProtocolBufferException e1) {
+                        LOG.error(e1.getMessage(), e1);
+                    }
+                    knownBuilder.setRefetchableFromDate(item.nextFetchDate);
+
+                    builder.setKnown(knownBuilder.build());
+
+                    if (pos >= start) {
+                        responseObserver.onNext(builder.build());
+                        sent++;
+                    }
+                }
+            }
+        }
+
+        responseObserver.onCompleted();
     }
 }

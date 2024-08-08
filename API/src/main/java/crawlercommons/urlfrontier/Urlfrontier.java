@@ -6237,7 +6237,7 @@ public final class Urlfrontier {
                 }
                 if (other.getSize() != 0) {
                     setSize(other.getSize());
-        }
+                }
                 if (!other.getCrawlID().isEmpty()) {
                     crawlID_ = other.crawlID_;
                     bitField0_ |= 0x00000010;
@@ -9020,7 +9020,7 @@ public final class Urlfrontier {
                     throws java.io.IOException {
                 if (extensionRegistry == null) {
                     throw new java.lang.NullPointerException();
-        }
+                }
                 try {
                     boolean done = false;
                     while (!done) {
@@ -9115,7 +9115,7 @@ public final class Urlfrontier {
                     return b;
                 } else {
                     return (com.google.protobuf.ByteString) ref;
-        }
+                }
             }
             /**
              *
@@ -10353,7 +10353,7 @@ public final class Urlfrontier {
                     return b;
                 } else {
                     return (com.google.protobuf.ByteString) ref;
-        }
+                }
             }
             /**
              *
@@ -10643,7 +10643,7 @@ public final class Urlfrontier {
      *
      *
      * <pre>
-     * * Parameter message for GetURLs *
+     * * Parameter message for GetURLs and ListURLs *
      * </pre>
      *
      * Protobuf type {@code urlfrontier.GetParams}
@@ -11159,7 +11159,7 @@ public final class Urlfrontier {
          *
          *
          * <pre>
-         * * Parameter message for GetURLs *
+         * * Parameter message for GetURLs and ListURLs *
          * </pre>
          *
          * Protobuf type {@code urlfrontier.GetParams}
@@ -11391,7 +11391,7 @@ public final class Urlfrontier {
                             case 32:
                                 {
                                     delayRequestable_ = input.readUInt32();
-                bitField0_ |= 0x00000008;
+                                    bitField0_ |= 0x00000008;
                                     break;
                                 } // case 32
                             case 42:
@@ -11405,7 +11405,7 @@ public final class Urlfrontier {
                             case 50:
                                 {
                                     java.lang.String s = input.readStringRequireUtf8();
-                itemCase_ = 6;
+                                    itemCase_ = 6;
                                     item_ = s;
                                     break;
                                 } // case 50
@@ -19030,7 +19030,7 @@ public final class Urlfrontier {
                     crawlID_ = other.crawlID_;
                     bitField0_ |= 0x00000004;
                     onChanged();
-        }
+                }
                 this.mergeUnknownFields(other.getUnknownFields());
                 onChanged();
                 return this;
@@ -19256,7 +19256,7 @@ public final class Urlfrontier {
                     return s;
                 } else {
                     return (java.lang.String) ref;
-        }
+                }
             }
             /**
              *
@@ -20721,7 +20721,7 @@ public final class Urlfrontier {
                     + "\005ERROR\020\004\"?\n\020CrawlLimitParams\022\013\n\003key\030\001 \001("
                     + "\t\022\r\n\005limit\030\002 \001(\r\022\017\n\007crawlID\030\003 \001(\t\"L\n\020URL"
                     + "StatusRequest\022\013\n\003url\030\001 \001(\t\022\013\n\003key\030\002 \001(\t\022"
-                    + "\017\n\007crawlID\030\003 \001(\t\022\r\n\005local\030\004 \001(\0102\342\007\n\013URLF"
+                    + "\017\n\007crawlID\030\003 \001(\t\022\r\n\005local\030\004 \001(\0102\241\010\n\013URLF"
                     + "rontier\022:\n\tListNodes\022\022.urlfrontier.Empty"
                     + "\032\027.urlfrontier.StringList\"\000\022;\n\nListCrawl"
                     + "s\022\022.urlfrontier.Local\032\027.urlfrontier.Stri"
@@ -20746,8 +20746,10 @@ public final class Urlfrontier {
                     + "Empty\"\000\022D\n\rSetCrawlLimit\022\035.urlfrontier.C"
                     + "rawlLimitParams\032\022.urlfrontier.Empty\"\000\022E\n"
                     + "\014GetURLStatus\022\035.urlfrontier.URLStatusReq"
-                    + "uest\032\024.urlfrontier.URLItem\"\000B\034\n\032crawlerc"
-                    + "ommons.urlfrontierb\006proto3"
+                    + "uest\032\024.urlfrontier.URLItem\"\000\022=\n\010ListURLs"
+                    + "\022\027.urlfrontier.Pagination\032\024.urlfrontier."
+                    + "URLItem\"\0000\001B\034\n\032crawlercommons.urlfrontie"
+                    + "rb\006proto3"
         };
         descriptor =
                 com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
