@@ -9,8 +9,10 @@ import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.Pagination;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
@@ -840,5 +842,17 @@ public class IgniteService extends DistributedFrontierService
         }
 
         return AckMessage.Status.OK;
+    }
+
+    @Override
+    // TODO Implementation of getURLStatus for Ignite
+    public void getURLStatus(URLStatusRequest request, StreamObserver<URLItem> responseObserver) {
+        responseObserver.onError(io.grpc.Status.UNIMPLEMENTED.asException());
+    }
+
+    @Override
+    // TODO Implementation of listURLs for Ignite
+    public void listURLs(Pagination request, StreamObserver<URLItem> responseObserver) {
+        responseObserver.onError(io.grpc.Status.UNIMPLEMENTED.asException());
     }
 }

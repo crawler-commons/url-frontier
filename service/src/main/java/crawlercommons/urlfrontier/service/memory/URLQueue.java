@@ -17,7 +17,7 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
 
     // keep a hash of the completed URLs
     // these won't be refetched
-    private HashSet<String> completed = new HashSet<>();
+    protected HashSet<String> completed = new HashSet<>();
 
     private Optional<Integer> limit = Optional.empty();
 
@@ -92,6 +92,10 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
     @Override
     public int countActive() {
         return this.size();
+    }
+
+    public boolean isCompleted(String url) {
+        return completed.contains(url);
     }
 
     @Override
