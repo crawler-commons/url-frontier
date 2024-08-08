@@ -862,4 +862,8 @@ public abstract class AbstractFrontierService
             readExecutorService.shutdownNow();
         }
     }
+
+    public abstract void getURLStatus(
+            crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest request,
+            io.grpc.stub.StreamObserver<URLItem> responseObserver);
 }

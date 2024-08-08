@@ -72,6 +72,12 @@ service URLFrontier {
 
      /** Sets crawl limit for domain **/
      rpc SetCrawlLimit(CrawlLimitParams) returns (Empty) {}
+
+     /** Get status of a particular URL 
+         This does not take into account URL scheduling.
+         Used to check current status of an URL within the frontier
+     **/
+     rpc GetURLStatus(URLStatusRequest) returns (URLItem) {}
 }
 
 /** 
@@ -290,3 +296,15 @@ message CrawlLimitParams {
   // crawl ID
   string crawlID = 3;
 }
+
+message URLStatusRequest {
+    /** URL for which we request info */
+    string url = 1;
+    /** ID for the queue **/
+    string key = 2;
+    // crawl ID - empty string for default
+    string crawlID = 3;
+    // only for this instance
+    bool local = 4;
+}
+
