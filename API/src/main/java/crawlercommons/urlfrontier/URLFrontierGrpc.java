@@ -480,6 +480,37 @@ public final class URLFrontierGrpc {
     return getGetURLStatusMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Pagination,
+      crawlercommons.urlfrontier.Urlfrontier.URLItem> getListURLsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListURLs",
+      requestType = crawlercommons.urlfrontier.Urlfrontier.Pagination.class,
+      responseType = crawlercommons.urlfrontier.Urlfrontier.URLItem.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+  public static io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Pagination,
+      crawlercommons.urlfrontier.Urlfrontier.URLItem> getListURLsMethod() {
+    io.grpc.MethodDescriptor<crawlercommons.urlfrontier.Urlfrontier.Pagination, crawlercommons.urlfrontier.Urlfrontier.URLItem> getListURLsMethod;
+    if ((getListURLsMethod = URLFrontierGrpc.getListURLsMethod) == null) {
+      synchronized (URLFrontierGrpc.class) {
+        if ((getListURLsMethod = URLFrontierGrpc.getListURLsMethod) == null) {
+          URLFrontierGrpc.getListURLsMethod = getListURLsMethod =
+              io.grpc.MethodDescriptor.<crawlercommons.urlfrontier.Urlfrontier.Pagination, crawlercommons.urlfrontier.Urlfrontier.URLItem>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListURLs"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.Pagination.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  crawlercommons.urlfrontier.Urlfrontier.URLItem.getDefaultInstance()))
+              .setSchemaDescriptor(new URLFrontierMethodDescriptorSupplier("ListURLs"))
+              .build();
+        }
+      }
+    }
+    return getListURLsMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -686,6 +717,18 @@ public final class URLFrontierGrpc {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetURLStatusMethod(), responseObserver);
     }
 
+    /**
+     * <pre>
+     ** List all URLs currently in the frontier 
+     *This does not take into account URL scheduling.
+     *Used to check current status of all URLs within the frontier
+     * </pre>
+     */
+    public void listURLs(crawlercommons.urlfrontier.Urlfrontier.Pagination request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListURLsMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -793,6 +836,13 @@ public final class URLFrontierGrpc {
                 crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest,
                 crawlercommons.urlfrontier.Urlfrontier.URLItem>(
                   this, METHODID_GET_URLSTATUS)))
+          .addMethod(
+            getListURLsMethod(),
+            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
+              new MethodHandlers<
+                crawlercommons.urlfrontier.Urlfrontier.Pagination,
+                crawlercommons.urlfrontier.Urlfrontier.URLItem>(
+                  this, METHODID_LIST_URLS)))
           .build();
     }
   }
@@ -983,6 +1033,19 @@ public final class URLFrontierGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetURLStatusMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     ** List all URLs currently in the frontier 
+     *This does not take into account URL scheduling.
+     *Used to check current status of all URLs within the frontier
+     * </pre>
+     */
+    public void listURLs(crawlercommons.urlfrontier.Urlfrontier.Pagination request,
+        io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncServerStreamingCall(
+          getChannel().newCall(getListURLsMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -1146,6 +1209,19 @@ public final class URLFrontierGrpc {
     public crawlercommons.urlfrontier.Urlfrontier.URLItem getURLStatus(crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetURLStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     ** List all URLs currently in the frontier 
+     *This does not take into account URL scheduling.
+     *Used to check current status of all URLs within the frontier
+     * </pre>
+     */
+    public java.util.Iterator<crawlercommons.urlfrontier.Urlfrontier.URLItem> listURLs(
+        crawlercommons.urlfrontier.Urlfrontier.Pagination request) {
+      return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
+          getChannel(), getListURLsMethod(), getCallOptions(), request);
     }
   }
 
@@ -1329,7 +1405,8 @@ public final class URLFrontierGrpc {
   private static final int METHODID_SET_LOG_LEVEL = 11;
   private static final int METHODID_SET_CRAWL_LIMIT = 12;
   private static final int METHODID_GET_URLSTATUS = 13;
-  private static final int METHODID_PUT_URLS = 14;
+  private static final int METHODID_LIST_URLS = 14;
+  private static final int METHODID_PUT_URLS = 15;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1402,6 +1479,10 @@ public final class URLFrontierGrpc {
           break;
         case METHODID_GET_URLSTATUS:
           serviceImpl.getURLStatus((crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest) request,
+              (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem>) responseObserver);
+          break;
+        case METHODID_LIST_URLS:
+          serviceImpl.listURLs((crawlercommons.urlfrontier.Urlfrontier.Pagination) request,
               (io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem>) responseObserver);
           break;
         default:
@@ -1483,6 +1564,7 @@ public final class URLFrontierGrpc {
               .addMethod(getSetLogLevelMethod())
               .addMethod(getSetCrawlLimitMethod())
               .addMethod(getGetURLStatusMethod())
+              .addMethod(getListURLsMethod())
               .build();
         }
       }

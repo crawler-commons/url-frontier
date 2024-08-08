@@ -9746,7 +9746,7 @@ public final class Urlfrontier {
   }
   /**
    * <pre>
-   ** Parameter message for GetURLs *
+   ** Parameter message for GetURLs and ListURLs *
    * </pre>
    *
    * Protobuf type {@code urlfrontier.GetParams}
@@ -10231,7 +10231,7 @@ public final class Urlfrontier {
     }
     /**
      * <pre>
-     ** Parameter message for GetURLs *
+     ** Parameter message for GetURLs and ListURLs *
      * </pre>
      *
      * Protobuf type {@code urlfrontier.GetParams}
@@ -18896,7 +18896,7 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
       "\005ERROR\020\004\"?\n\020CrawlLimitParams\022\013\n\003key\030\001 \001(" +
       "\t\022\r\n\005limit\030\002 \001(\r\022\017\n\007crawlID\030\003 \001(\t\"=\n\020URL" +
       "StatusRequest\022\013\n\003url\030\001 \001(\t\022\013\n\003key\030\002 \001(\t\022" +
-      "\017\n\007crawlID\030\003 \001(\t2\342\007\n\013URLFrontier\022:\n\tList" +
+      "\017\n\007crawlID\030\003 \001(\t2\241\010\n\013URLFrontier\022:\n\tList" +
       "Nodes\022\022.urlfrontier.Empty\032\027.urlfrontier." +
       "StringList\"\000\022;\n\nListCrawls\022\022.urlfrontier" +
       ".Local\032\027.urlfrontier.StringList\"\000\022C\n\013Del" +
@@ -18921,8 +18921,9 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
       "rawlLimit\022\035.urlfrontier.CrawlLimitParams" +
       "\032\022.urlfrontier.Empty\"\000\022E\n\014GetURLStatus\022\035" +
       ".urlfrontier.URLStatusRequest\032\024.urlfront" +
-      "ier.URLItem\"\000B\034\n\032crawlercommons.urlfront" +
-      "ierb\006proto3"
+      "ier.URLItem\"\000\022=\n\010ListURLs\022\027.urlfrontier." +
+      "Pagination\032\024.urlfrontier.URLItem\"\0000\001B\034\n\032" +
+      "crawlercommons.urlfrontierb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -872,4 +872,9 @@ public abstract class AbstractFrontierService
     public abstract void getURLStatus(
             crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest request,
             io.grpc.stub.StreamObserver<URLItem> responseObserver);
+
+    public abstract void listURLs(
+            crawlercommons.urlfrontier.Urlfrontier.Pagination request,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem>
+                    responseObserver);
 }

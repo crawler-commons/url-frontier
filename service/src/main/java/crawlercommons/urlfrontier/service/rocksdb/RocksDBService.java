@@ -7,6 +7,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.Pagination;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
@@ -861,5 +862,110 @@ public class RocksDBService extends AbstractFrontierService {
         } else {
             responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
         }
+    }
+
+    @Override
+    public void listURLs(Pagination request, StreamObserver<URLItem> responseObserver) {
+        long maxURLs = request.getSize();
+        long start = request.getStart();
+
+        boolean include_inactive = request.getIncludeInactive();
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+
+        // 100 by default
+        if (maxURLs == 0) {
+            maxURLs = 100;
+        }
+
+        LOG.info(
+                "Received request to list URLs [size {}; start {}; inactive {}]",
+                maxURLs,
+                start,
+                include_inactive);
+
+        int pos = -1;
+        int sent = 0;
+
+        try (RocksIterator rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(0))) {
+            URLItem.Builder builder = URLItem.newBuilder();
+            KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
+
+            for (rocksIterator.seekToFirst();
+                    rocksIterator.isValid() && sent <= maxURLs;
+                    rocksIterator.next()) {
+                String existenceKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+                QueueWithinCrawl Qkey = QueueWithinCrawl.parseAndDeNormalise(existenceKey);
+                LOG.debug("Qkey crawlId={} queue={}", Qkey.getCrawlid(), Qkey.getQueue());
+
+                // check that it is within the right crawlID
+                if (!Qkey.getCrawlid().equals(normalisedCrawlID)) {
+                    continue;
+                }
+
+                final String schedulingKey =
+                        new String(rocksIterator.value(), StandardCharsets.UTF_8);
+
+                LOG.debug("current key {}, schedulingKey={}", existenceKey, schedulingKey);
+                pos++;
+
+                builder.clear();
+                knownBuilder.clear();
+
+                byte[] scheduled = null;
+                try {
+                    scheduled = rocksDB.get(columnFamilyHandleList.get(1), rocksIterator.value());
+                } catch (RocksDBException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+
+                if (!StringUtil.isNullOrEmpty(schedulingKey)) {
+                    URLInfo info = null;
+                    try {
+                        info = URLInfo.parseFrom(scheduled);
+
+                        knownBuilder.setInfo(info);
+
+                        final int pos1 = schedulingKey.indexOf('_');
+                        final int pos2 = schedulingKey.indexOf('_', pos1 + 1);
+                        final int pos3 = schedulingKey.indexOf('_', pos2 + 1);
+
+                        long scheduleDate = Long.parseLong(schedulingKey.substring(pos2 + 1, pos3));
+                        knownBuilder.setRefetchableFromDate(scheduleDate);
+
+                        builder.setKnown(knownBuilder.build());
+                        if (pos >= start) {
+                            responseObserver.onNext(builder.build());
+                            sent++;
+                        }
+                    } catch (InvalidProtocolBufferException | NumberFormatException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                } else {
+                    LOG.debug("no schedule for {}", existenceKey);
+
+                    final int pos1 = existenceKey.indexOf('_');
+                    final int pos2 = existenceKey.indexOf('_', pos1 + 1);
+
+                    URLInfo info =
+                            URLInfo.newBuilder()
+                                    .setCrawlID(Qkey.getCrawlid())
+                                    .setKey(Qkey.getQueue())
+                                    .setUrl(existenceKey.substring(pos2 + 1))
+                                    .build();
+
+                    LOG.debug("current value {}", info);
+                    knownBuilder.setRefetchableFromDate(0).setInfo(info).build();
+                    builder.setKnown(knownBuilder.build());
+
+                    if (pos >= start) {
+                        responseObserver.onNext(builder.build());
+                        sent++;
+                    }
+                }
+            }
+        }
+
+        responseObserver.onCompleted();
     }
 }

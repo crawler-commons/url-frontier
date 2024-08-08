@@ -15,6 +15,7 @@ import picocli.CommandLine.Option;
             ListNodes.class,
             ListQueues.class,
             ListCrawls.class,
+            ListURLs.class,
             GetStats.class,
             PutURLs.class,
             GetURLs.class,

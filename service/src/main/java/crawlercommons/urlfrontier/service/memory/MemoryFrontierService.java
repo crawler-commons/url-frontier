@@ -4,9 +4,11 @@
 package crawlercommons.urlfrontier.service.memory;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.Pagination;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
@@ -18,6 +20,7 @@ import io.grpc.stub.StreamObserver;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import org.slf4j.LoggerFactory;
 
@@ -223,5 +226,98 @@ public class MemoryFrontierService extends AbstractFrontierService {
         } else {
             responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
         }
+    }
+
+    @Override
+    public void listURLs(Pagination request, StreamObserver<URLItem> responseObserver) {
+
+        long maxURLs = request.getSize();
+        long start = request.getStart();
+
+        boolean include_inactive = request.getIncludeInactive();
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+
+        // 100 by default
+        if (maxURLs == 0) {
+            maxURLs = 100;
+        }
+
+        LOG.info(
+                "Received request to list URLs [size {}; start {}; inactive {}]",
+                maxURLs,
+                start,
+                include_inactive);
+
+        int pos = -1;
+        int sent = 0;
+
+        synchronized (getQueues()) {
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                    getQueues().entrySet().iterator();
+
+            while (iterator.hasNext()) {
+                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+                URLQueue queue = (URLQueue) getQueues().get(e.getKey());
+
+                // check that it is within the right crawlID
+                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                    continue;
+                }
+
+                URLItem.Builder builder = URLItem.newBuilder();
+                KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
+
+                // First iterate over completed items
+                for (String curcomplete : queue.getCompleted()) {
+                    builder.clear();
+                    knownBuilder.clear();
+
+                    pos++;
+                    URLInfo info =
+                            URLInfo.newBuilder()
+                                    .setCrawlID(e.getKey().getCrawlid())
+                                    .setKey(e.getKey().getQueue())
+                                    .setUrl(curcomplete)
+                                    .build();
+
+                    knownBuilder.setInfo(info);
+                    knownBuilder.setRefetchableFromDate(0);
+                    builder.setKnown(knownBuilder.build());
+
+                    if (pos >= start) {
+                        responseObserver.onNext(builder.build());
+                        sent++;
+                    }
+                }
+
+                // Iterate over scheduled items
+                Iterator<InternalURL> iter = queue.iterator();
+
+                while (iter.hasNext() && sent <= maxURLs) {
+                    InternalURL item = iter.next();
+                    pos++;
+
+                    builder.clear();
+                    knownBuilder.clear();
+
+                    try {
+                        knownBuilder.setInfo(item.toURLInfo(e.getKey()));
+                    } catch (InvalidProtocolBufferException e1) {
+                        LOG.error(e1.getMessage(), e1);
+                    }
+                    knownBuilder.setRefetchableFromDate(item.nextFetchDate);
+
+                    builder.setKnown(knownBuilder.build());
+
+                    if (pos >= start) {
+                        responseObserver.onNext(builder.build());
+                        sent++;
+                    }
+                }
+            }
+        }
+
+        responseObserver.onCompleted();
     }
 }
