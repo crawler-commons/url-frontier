@@ -6,7 +6,6 @@ package crawlercommons.urlfrontier.service.rocksdb;
 import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
-import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
@@ -57,7 +56,7 @@ public class RocksDBService extends AbstractFrontierService {
         RocksDB.loadLibrary();
     }
 
-    protected RocksDB rocksDB;
+    private RocksDB rocksDB;
 
     // a list which will hold the handles for the column families once the db is
     // opened
@@ -791,10 +790,10 @@ public class RocksDBService extends AbstractFrontierService {
         byte[] schedulingKey = null;
 
         boolean found = false;
-        
+
         URLItem.Builder builder = URLItem.newBuilder();
         KnownURLItem.Builder kb = KnownURLItem.newBuilder();
-        
+
         try {
             schedulingKey = rocksDB.get(columnFamilyHandleList.get(0), existenceKey);
             if (schedulingKey != null) {
@@ -820,21 +819,23 @@ public class RocksDBService extends AbstractFrontierService {
 
                     URLInfo info = null;
                     try {
-                        info = URLInfo.parseFrom(
+                        info =
+                                URLInfo.parseFrom(
                                         rocksDB.get(columnFamilyHandleList.get(1), schedulingKey));
                         kb.setInfo(info);
                         kb.setRefetchableFromDate(scheduled);
                         builder.setKnown(kb.build());
                     } catch (InvalidProtocolBufferException e) {
                         LOG.error(e.getMessage(), e);
-                        responseObserver.onError(io.grpc.Status.fromThrowable(e).asRuntimeException());
+                        responseObserver.onError(
+                                io.grpc.Status.fromThrowable(e).asRuntimeException());
                     }
-                    
+
                     found = true;
                 }
             } else {
                 // Key is unknown
-            	found = false;
+                found = false;
             }
 
         } catch (RocksDBException e) {
@@ -844,10 +845,10 @@ public class RocksDBService extends AbstractFrontierService {
         }
 
         if (found) {
-        	responseObserver.onNext(builder.build());
+            responseObserver.onNext(builder.build());
             responseObserver.onCompleted();
         } else {
-        	responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
         }
     }
 }
