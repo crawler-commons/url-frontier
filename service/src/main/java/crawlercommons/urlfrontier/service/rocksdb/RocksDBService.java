@@ -60,7 +60,7 @@ public class RocksDBService extends AbstractFrontierService {
 
     // a list which will hold the handles for the column families once the db is
     // opened
-    protected final List<ColumnFamilyHandle> columnFamilyHandleList = new ArrayList<>();
+    private final List<ColumnFamilyHandle> columnFamilyHandleList = new ArrayList<>();
 
     private Statistics statistics;
 
