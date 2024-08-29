@@ -17823,16 +17823,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
      */
     com.google.protobuf.ByteString
         getCrawlIDBytes();
-
-    /**
-     * <pre>
-     * only for this instance
-     * </pre>
-     *
-     * <code>bool local = 4;</code>
-     * @return The local.
-     */
-    boolean getLocal();
   }
   /**
    * Protobuf type {@code urlfrontier.URLStatusRequest}
@@ -18015,21 +18005,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
       }
     }
 
-    public static final int LOCAL_FIELD_NUMBER = 4;
-    private boolean local_;
-    /**
-     * <pre>
-     * only for this instance
-     * </pre>
-     *
-     * <code>bool local = 4;</code>
-     * @return The local.
-     */
-    @java.lang.Override
-    public boolean getLocal() {
-      return local_;
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -18053,9 +18028,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crawlID_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, crawlID_);
       }
-      if (local_ != false) {
-        output.writeBool(4, local_);
-      }
       getUnknownFields().writeTo(output);
     }
 
@@ -18073,10 +18045,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crawlID_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, crawlID_);
-      }
-      if (local_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(4, local_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -18099,8 +18067,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
           .equals(other.getKey())) return false;
       if (!getCrawlID()
           .equals(other.getCrawlID())) return false;
-      if (getLocal()
-          != other.getLocal()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -18118,9 +18084,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
       hash = (53 * hash) + getKey().hashCode();
       hash = (37 * hash) + CRAWLID_FIELD_NUMBER;
       hash = (53 * hash) + getCrawlID().hashCode();
-      hash = (37 * hash) + LOCAL_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getLocal());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -18255,8 +18218,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
 
         crawlID_ = "";
 
-        local_ = false;
-
         return this;
       }
 
@@ -18286,7 +18247,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
         result.url_ = url_;
         result.key_ = key_;
         result.crawlID_ = crawlID_;
-        result.local_ = local_;
         onBuilt();
         return result;
       }
@@ -18347,9 +18307,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
           crawlID_ = other.crawlID_;
           onChanged();
         }
-        if (other.getLocal() != false) {
-          setLocal(other.getLocal());
-        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -18391,11 +18348,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
 
                 break;
               } // case 26
-              case 32: {
-                local_ = input.readBool();
-
-                break;
-              } // case 32
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -18699,49 +18651,6 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
         onChanged();
         return this;
       }
-
-      private boolean local_ ;
-      /**
-       * <pre>
-       * only for this instance
-       * </pre>
-       *
-       * <code>bool local = 4;</code>
-       * @return The local.
-       */
-      @java.lang.Override
-      public boolean getLocal() {
-        return local_;
-      }
-      /**
-       * <pre>
-       * only for this instance
-       * </pre>
-       *
-       * <code>bool local = 4;</code>
-       * @param value The local to set.
-       * @return This builder for chaining.
-       */
-      public Builder setLocal(boolean value) {
-        
-        local_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * only for this instance
-       * </pre>
-       *
-       * <code>bool local = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearLocal() {
-        
-        local_ = false;
-        onChanged();
-        return this;
-      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -18985,35 +18894,35 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
       "arams.Level\022\r\n\005local\030\003 \001(\010\"<\n\005Level\022\t\n\005T" +
       "RACE\020\000\022\t\n\005DEBUG\020\001\022\010\n\004INFO\020\002\022\010\n\004WARN\020\003\022\t\n" +
       "\005ERROR\020\004\"?\n\020CrawlLimitParams\022\013\n\003key\030\001 \001(" +
-      "\t\022\r\n\005limit\030\002 \001(\r\022\017\n\007crawlID\030\003 \001(\t\"L\n\020URL" +
+      "\t\022\r\n\005limit\030\002 \001(\r\022\017\n\007crawlID\030\003 \001(\t\"=\n\020URL" +
       "StatusRequest\022\013\n\003url\030\001 \001(\t\022\013\n\003key\030\002 \001(\t\022" +
-      "\017\n\007crawlID\030\003 \001(\t\022\r\n\005local\030\004 \001(\0102\342\007\n\013URLF" +
-      "rontier\022:\n\tListNodes\022\022.urlfrontier.Empty" +
-      "\032\027.urlfrontier.StringList\"\000\022;\n\nListCrawl" +
-      "s\022\022.urlfrontier.Local\032\027.urlfrontier.Stri" +
-      "ngList\"\000\022C\n\013DeleteCrawl\022\037.urlfrontier.De" +
-      "leteCrawlMessage\032\021.urlfrontier.Long\"\000\022?\n" +
-      "\nListQueues\022\027.urlfrontier.Pagination\032\026.u" +
-      "rlfrontier.QueueList\"\000\022;\n\007GetURLs\022\026.urlf" +
-      "rontier.GetParams\032\024.urlfrontier.URLInfo\"" +
-      "\0000\001\022>\n\007PutURLs\022\024.urlfrontier.URLItem\032\027.u" +
-      "rlfrontier.AckMessage\"\000(\0010\001\022E\n\010GetStats\022" +
-      "#.urlfrontier.QueueWithinCrawlParams\032\022.u" +
-      "rlfrontier.Stats\"\000\022G\n\013DeleteQueue\022#.urlf" +
-      "rontier.QueueWithinCrawlParams\032\021.urlfron" +
-      "tier.Long\"\000\022F\n\017BlockQueueUntil\022\035.urlfron" +
-      "tier.BlockQueueParams\032\022.urlfrontier.Empt" +
-      "y\"\000\0226\n\tSetActive\022\023.urlfrontier.Active\032\022." +
-      "urlfrontier.Empty\"\000\0227\n\tGetActive\022\022.urlfr" +
-      "ontier.Local\032\024.urlfrontier.Boolean\"\000\022?\n\010" +
-      "SetDelay\022\035.urlfrontier.QueueDelayParams\032" +
-      "\022.urlfrontier.Empty\"\000\022@\n\013SetLogLevel\022\033.u" +
-      "rlfrontier.LogLevelParams\032\022.urlfrontier." +
-      "Empty\"\000\022D\n\rSetCrawlLimit\022\035.urlfrontier.C" +
-      "rawlLimitParams\032\022.urlfrontier.Empty\"\000\022E\n" +
-      "\014GetURLStatus\022\035.urlfrontier.URLStatusReq" +
-      "uest\032\024.urlfrontier.URLItem\"\000B\034\n\032crawlerc" +
-      "ommons.urlfrontierb\006proto3"
+      "\017\n\007crawlID\030\003 \001(\t2\342\007\n\013URLFrontier\022:\n\tList" +
+      "Nodes\022\022.urlfrontier.Empty\032\027.urlfrontier." +
+      "StringList\"\000\022;\n\nListCrawls\022\022.urlfrontier" +
+      ".Local\032\027.urlfrontier.StringList\"\000\022C\n\013Del" +
+      "eteCrawl\022\037.urlfrontier.DeleteCrawlMessag" +
+      "e\032\021.urlfrontier.Long\"\000\022?\n\nListQueues\022\027.u" +
+      "rlfrontier.Pagination\032\026.urlfrontier.Queu" +
+      "eList\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetPara" +
+      "ms\032\024.urlfrontier.URLInfo\"\0000\001\022>\n\007PutURLs\022" +
+      "\024.urlfrontier.URLItem\032\027.urlfrontier.AckM" +
+      "essage\"\000(\0010\001\022E\n\010GetStats\022#.urlfrontier.Q" +
+      "ueueWithinCrawlParams\032\022.urlfrontier.Stat" +
+      "s\"\000\022G\n\013DeleteQueue\022#.urlfrontier.QueueWi" +
+      "thinCrawlParams\032\021.urlfrontier.Long\"\000\022F\n\017" +
+      "BlockQueueUntil\022\035.urlfrontier.BlockQueue" +
+      "Params\032\022.urlfrontier.Empty\"\000\0226\n\tSetActiv" +
+      "e\022\023.urlfrontier.Active\032\022.urlfrontier.Emp" +
+      "ty\"\000\0227\n\tGetActive\022\022.urlfrontier.Local\032\024." +
+      "urlfrontier.Boolean\"\000\022?\n\010SetDelay\022\035.urlf" +
+      "rontier.QueueDelayParams\032\022.urlfrontier.E" +
+      "mpty\"\000\022@\n\013SetLogLevel\022\033.urlfrontier.LogL" +
+      "evelParams\032\022.urlfrontier.Empty\"\000\022D\n\rSetC" +
+      "rawlLimit\022\035.urlfrontier.CrawlLimitParams" +
+      "\032\022.urlfrontier.Empty\"\000\022E\n\014GetURLStatus\022\035" +
+      ".urlfrontier.URLStatusRequest\032\024.urlfront" +
+      "ier.URLItem\"\000B\034\n\032crawlercommons.urlfront" +
+      "ierb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -19168,7 +19077,7 @@ crawlercommons.urlfrontier.Urlfrontier.StringList defaultValue);
     internal_static_urlfrontier_URLStatusRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_urlfrontier_URLStatusRequest_descriptor,
-        new java.lang.String[] { "Url", "Key", "CrawlID", "Local", });
+        new java.lang.String[] { "Url", "Key", "CrawlID", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

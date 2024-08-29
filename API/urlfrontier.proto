@@ -304,7 +304,5 @@ message URLStatusRequest {
     string key = 2;
     // crawl ID - empty string for default
     string crawlID = 3;
-    // only for this instance
-    bool local = 4;
 }
 
