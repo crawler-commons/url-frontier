@@ -7,8 +7,13 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
 import io.grpc.stub.StreamObserver;
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +23,8 @@ class RocksDBServiceTest {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBServiceTest.class);
 
+    private static final String ROCKSDB_PATH = "./target/rocksdb";
+
     RocksDBService rocksDBService;
 
     @AfterEach
@@ -25,10 +32,18 @@ class RocksDBServiceTest {
         rocksDBService.close();
     }
 
+    @AfterAll
+    static void cleanup() {
+        LOG.info("Cleaning up directory {}", ROCKSDB_PATH);
+        FileUtils.deleteQuietly(new File(ROCKSDB_PATH));
+    }
+
     @BeforeEach
     void setup() {
 
-        rocksDBService = new RocksDBService("localhost", 7071);
+        Map<String, String> conf = new HashMap<>();
+        conf.put("rocksdb.path", ROCKSDB_PATH);
+        rocksDBService = new RocksDBService(conf, "localhost", 7071);
         ServiceTestUtil.initURLs(rocksDBService);
     }
 
