@@ -157,13 +157,24 @@ public class MemoryFrontierService extends AbstractFrontierService {
         String key = request.getKey();
         boolean found = false;
 
+        // has a queue key been defined? if not use the hostname
+        if (key == null || key.equals("")) {
+            LOG.debug("key missing for {}", url);
+            key = provideMissingKey(url);
+            if (key == null) {
+                LOG.error("Malformed URL {}", url);
+                responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.asRuntimeException());
+                return;
+            }
+        }
+
         LOG.info("getURLStatus crawlId={} key={} url={}", crawlId, key, url);
 
         QueueWithinCrawl qwc = QueueWithinCrawl.get(key, crawlId);
         URLQueue queue = (URLQueue) getQueues().get(qwc);
         if (queue == null) {
             LOG.error("Could not find queue for Crawl={}, queue={}", crawlId, key);
-            responseObserver.onError(io.grpc.Status.NOT_FOUND.asException());
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
             return;
         }
 
@@ -194,7 +205,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
                         knownBuilder.setRefetchableFromDate(item.nextFetchDate);
                     } catch (InvalidProtocolBufferException e) {
                         LOG.error(e.getMessage(), e);
-                        responseObserver.onError(io.grpc.Status.fromThrowable(e).asException());
+                        responseObserver.onError(
+                                io.grpc.Status.fromThrowable(e).asRuntimeException());
                         return;
                     }
 
@@ -209,7 +221,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
         if (found) {
             responseObserver.onCompleted();
         } else {
-            responseObserver.onError(io.grpc.Status.NOT_FOUND.asException());
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
         }
     }
 }

@@ -780,10 +780,21 @@ public class RocksDBService extends AbstractFrontierService {
     public void getURLStatus(URLStatusRequest request, StreamObserver<URLItem> responseObserver) {
 
         String crawlId = request.getCrawlID();
-        String queueId = request.getKey();
+        String key = request.getKey();
         String url = request.getUrl();
 
-        final QueueWithinCrawl qk = QueueWithinCrawl.get(queueId, crawlId);
+        // has a queue key been defined? if not use the hostname
+        if (key == null || key.equals("")) {
+            LOG.debug("key missing for {}", url);
+            key = provideMissingKey(url);
+            if (key == null) {
+                LOG.error("Malformed URL {}", url);
+                responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.asRuntimeException());
+                return;
+            }
+        }
+
+        final QueueWithinCrawl qk = QueueWithinCrawl.get(key, crawlId);
         final String existenceKeyString = (qk.toString() + "_" + url).intern();
         final byte[] existenceKey = existenceKeyString.getBytes(StandardCharsets.UTF_8);
 
@@ -803,7 +814,7 @@ public class RocksDBService extends AbstractFrontierService {
                     URLInfo info =
                             URLInfo.newBuilder()
                                     .setCrawlID(crawlId)
-                                    .setKey(queueId)
+                                    .setKey(key)
                                     .setUrl(url)
                                     .build();
 
