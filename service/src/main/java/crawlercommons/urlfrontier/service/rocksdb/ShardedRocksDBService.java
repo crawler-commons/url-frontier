@@ -6,10 +6,12 @@ package crawlercommons.urlfrontier.service.rocksdb;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import crawlercommons.urlfrontier.service.cluster.DistributedFrontierService;
+import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,5 +82,11 @@ public class ShardedRocksDBService extends DistributedFrontierService {
     @Override
     public Map<QueueWithinCrawl, QueueInterface> getQueues() {
         return instance.getQueues();
+    }
+
+    @Override
+    // TODO Implementation of getURLStatus for ShardedRocksDB
+    public void getURLStatus(URLStatusRequest request, StreamObserver<URLItem> responseObserver) {
+        responseObserver.onError(io.grpc.Status.UNIMPLEMENTED.asException());
     }
 }

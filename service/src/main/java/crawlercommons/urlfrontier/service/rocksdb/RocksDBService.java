@@ -3,16 +3,19 @@
 
 package crawlercommons.urlfrontier.service.rocksdb;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -770,6 +773,93 @@ public class RocksDBService extends AbstractFrontierService {
         if (includeEndKey) {
             rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
             rocksDB.delete(columnFamilyHandleList.get(0), endKey);
+        }
+    }
+
+    @Override
+    public void getURLStatus(URLStatusRequest request, StreamObserver<URLItem> responseObserver) {
+
+        String crawlId = request.getCrawlID();
+        String key = request.getKey();
+        String url = request.getUrl();
+
+        // has a queue key been defined? if not use the hostname
+        if (key == null || key.equals("")) {
+            LOG.debug("key missing for {}", url);
+            key = provideMissingKey(url);
+            if (key == null) {
+                LOG.error("Malformed URL {}", url);
+                responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.asRuntimeException());
+                return;
+            }
+        }
+
+        final QueueWithinCrawl qk = QueueWithinCrawl.get(key, crawlId);
+        final String existenceKeyString = (qk.toString() + "_" + url).intern();
+        final byte[] existenceKey = existenceKeyString.getBytes(StandardCharsets.UTF_8);
+
+        byte[] schedulingKey = null;
+
+        boolean found = false;
+
+        URLItem.Builder builder = URLItem.newBuilder();
+        KnownURLItem.Builder kb = KnownURLItem.newBuilder();
+
+        try {
+            schedulingKey = rocksDB.get(columnFamilyHandleList.get(0), existenceKey);
+            if (schedulingKey != null) {
+                final String currentKey = new String(schedulingKey, StandardCharsets.UTF_8);
+
+                if (StringUtil.isNullOrEmpty(currentKey)) {
+                    URLInfo info =
+                            URLInfo.newBuilder()
+                                    .setCrawlID(crawlId)
+                                    .setKey(key)
+                                    .setUrl(url)
+                                    .build();
+
+                    kb.setRefetchableFromDate(0).setInfo(info).build();
+                    builder.setKnown(kb.build());
+                    found = true;
+                } else {
+                    final int pos = currentKey.indexOf('_');
+                    final int pos2 = currentKey.indexOf('_', pos + 1);
+                    final int pos3 = currentKey.indexOf('_', pos2 + 1);
+
+                    long scheduled = Long.parseLong(currentKey.substring(pos2 + 1, pos3));
+
+                    URLInfo info = null;
+                    try {
+                        info =
+                                URLInfo.parseFrom(
+                                        rocksDB.get(columnFamilyHandleList.get(1), schedulingKey));
+                        kb.setInfo(info);
+                        kb.setRefetchableFromDate(scheduled);
+                        builder.setKnown(kb.build());
+                    } catch (InvalidProtocolBufferException e) {
+                        LOG.error(e.getMessage(), e);
+                        responseObserver.onError(
+                                io.grpc.Status.fromThrowable(e).asRuntimeException());
+                    }
+
+                    found = true;
+                }
+            } else {
+                // Key is unknown
+                found = false;
+            }
+
+        } catch (RocksDBException e) {
+            LOG.error("Caught unlikely error ", e);
+            responseObserver.onError(io.grpc.Status.fromThrowable(e).asRuntimeException());
+            return;
+        }
+
+        if (found) {
+            responseObserver.onNext(builder.build());
+            responseObserver.onCompleted();
+        } else {
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
         }
     }
 }

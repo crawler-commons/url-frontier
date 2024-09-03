@@ -6,12 +6,15 @@ package crawlercommons.urlfrontier.service.memory;
 import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
+import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
+import io.grpc.stub.StreamObserver;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -144,5 +147,81 @@ public class MemoryFrontierService extends AbstractFrontierService {
             }
         }
         return Status.OK;
+    }
+
+    @Override
+    public void getURLStatus(URLStatusRequest request, StreamObserver<URLItem> responseObserver) {
+
+        String crawlId = request.getCrawlID();
+        String url = request.getUrl();
+        String key = request.getKey();
+        boolean found = false;
+
+        // has a queue key been defined? if not use the hostname
+        if (key == null || key.equals("")) {
+            LOG.debug("key missing for {}", url);
+            key = provideMissingKey(url);
+            if (key == null) {
+                LOG.error("Malformed URL {}", url);
+                responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.asRuntimeException());
+                return;
+            }
+        }
+
+        LOG.info("getURLStatus crawlId={} key={} url={}", crawlId, key, url);
+
+        QueueWithinCrawl qwc = QueueWithinCrawl.get(key, crawlId);
+        URLQueue queue = (URLQueue) getQueues().get(qwc);
+        if (queue == null) {
+            LOG.error("Could not find queue for Crawl={}, queue={}", crawlId, key);
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
+            return;
+        }
+
+        URLInfo.Builder infoBuilder = URLInfo.newBuilder();
+        URLInfo info = infoBuilder.setCrawlID(crawlId).setKey(key).setUrl(url).build();
+
+        URLItem.Builder builder = URLItem.newBuilder();
+
+        KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
+
+        if (queue.isCompleted(url)) {
+            knownBuilder.setInfo(info);
+            knownBuilder.setRefetchableFromDate(0);
+            builder.setKnown(knownBuilder.build());
+
+            found = true;
+            responseObserver.onNext(builder.build());
+        } else {
+            Iterator<InternalURL> iter = queue.iterator();
+
+            while (iter.hasNext()) {
+                InternalURL item = iter.next();
+
+                if (url.equals(item.url)) {
+
+                    try {
+                        knownBuilder.setInfo(item.toURLInfo(qwc));
+                        knownBuilder.setRefetchableFromDate(item.nextFetchDate);
+                    } catch (InvalidProtocolBufferException e) {
+                        LOG.error(e.getMessage(), e);
+                        responseObserver.onError(
+                                io.grpc.Status.fromThrowable(e).asRuntimeException());
+                        return;
+                    }
+
+                    builder.setKnown(knownBuilder.build());
+                    found = true;
+                    responseObserver.onNext(builder.build());
+                    break;
+                }
+            }
+        }
+
+        if (found) {
+            responseObserver.onCompleted();
+        } else {
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
+        }
     }
 }
