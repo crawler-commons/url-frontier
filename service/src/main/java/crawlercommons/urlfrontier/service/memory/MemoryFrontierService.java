@@ -8,7 +8,7 @@ import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
-import crawlercommons.urlfrontier.Urlfrontier.Pagination;
+import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
@@ -229,12 +229,11 @@ public class MemoryFrontierService extends AbstractFrontierService {
     }
 
     @Override
-    public void listURLs(Pagination request, StreamObserver<URLItem> responseObserver) {
+    public void listURLs(ListUrlParams request, StreamObserver<URLItem> responseObserver) {
 
         long maxURLs = request.getSize();
         long start = request.getStart();
-
-        boolean include_inactive = request.getIncludeInactive();
+        String key = request.getKey();
 
         final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
 
@@ -244,10 +243,11 @@ public class MemoryFrontierService extends AbstractFrontierService {
         }
 
         LOG.info(
-                "Received request to list URLs [size {}; start {}; inactive {}]",
+                "Received request to list URLs [size {}; start {}; crawlId {}, key {}]",
                 maxURLs,
                 start,
-                include_inactive);
+                normalisedCrawlID,
+                key);
 
         int pos = -1;
         int sent = 0;
@@ -262,6 +262,11 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
                 // check that it is within the right crawlID
                 if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                    continue;
+                }
+
+                // check that it is within the right key/queue
+                if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
                     continue;
                 }
 

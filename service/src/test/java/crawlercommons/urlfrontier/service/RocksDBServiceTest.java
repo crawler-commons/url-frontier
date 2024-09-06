@@ -6,7 +6,7 @@ package crawlercommons.urlfrontier.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import crawlercommons.urlfrontier.Urlfrontier.Pagination;
+import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
@@ -245,9 +245,9 @@ class RocksDBServiceTest {
     }
 
     @Test
-    void testListURLs() {
+    void testListAllURLs() {
 
-        Pagination pagination = Pagination.newBuilder().setCrawlID("crawl_id").build();
+        ListUrlParams params = ListUrlParams.newBuilder().setCrawlID("crawl_id").build();
 
         final AtomicInteger fetched = new AtomicInteger(0);
         final AtomicInteger count = new AtomicInteger(0);
@@ -277,7 +277,45 @@ class RocksDBServiceTest {
                     }
                 };
 
-        rocksDBService.listURLs(pagination, statusObserver);
-        assertEquals(3, count.get());
+        rocksDBService.listURLs(params, statusObserver);
+        assertEquals(4, count.get());
+    }
+
+    @Test
+    void testListURLsinglequeue() {
+
+        ListUrlParams params =
+                ListUrlParams.newBuilder().setCrawlID("crawl_id").setKey("another_queue").build();
+
+        final AtomicInteger fetched = new AtomicInteger(0);
+        final AtomicInteger count = new AtomicInteger(0);
+
+        StreamObserver<URLItem> statusObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(URLItem value) {
+                        // receives confirmation that the value has been received
+                        logURLItem(value);
+
+                        if (value.hasKnown()) {
+                            fetched.incrementAndGet();
+                        }
+                        count.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testListURLs");
+                    }
+                };
+
+        rocksDBService.listURLs(params, statusObserver);
+        assertEquals(1, count.get());
     }
 }

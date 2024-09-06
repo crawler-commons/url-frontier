@@ -5,7 +5,7 @@ package crawlercommons.urlfrontier.client;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
-import crawlercommons.urlfrontier.Urlfrontier.Pagination.Builder;
+import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -44,6 +44,13 @@ public class ListURLs implements Runnable {
     private int start;
 
     @Option(
+            names = {"-k", "--key"},
+            required = false,
+            paramLabel = "STRING",
+            description = "key to use to target a specific queue")
+    private String key;
+
+    @Option(
             names = {"-o", "--output"},
             defaultValue = "",
             paramLabel = "STRING",
@@ -80,11 +87,11 @@ public class ListURLs implements Runnable {
     @Override
     public void run() {
 
-        Builder builder = crawlercommons.urlfrontier.Urlfrontier.Pagination.newBuilder();
+        Builder builder = crawlercommons.urlfrontier.Urlfrontier.ListUrlParams.newBuilder();
         builder.setLocal(local);
+        builder.setKey(key);
         builder.setSize(maxNumURLs);
         builder.setStart(start);
-        builder.setIncludeInactive(true);
         builder.setCrawlID(crawl);
 
         PrintStream outstream = null;

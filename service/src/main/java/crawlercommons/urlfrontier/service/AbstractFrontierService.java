@@ -874,7 +874,7 @@ public abstract class AbstractFrontierService
             io.grpc.stub.StreamObserver<URLItem> responseObserver);
 
     public abstract void listURLs(
-            crawlercommons.urlfrontier.Urlfrontier.Pagination request,
+            crawlercommons.urlfrontier.Urlfrontier.ListUrlParams request,
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem>
                     responseObserver);
 }

@@ -83,7 +83,7 @@ service URLFrontier {
          This does not take into account URL scheduling.
          Used to check current status of all URLs within the frontier
      **/
-     rpc ListURLs(Pagination) returns (stream URLItem) {}
+     rpc ListURLs(ListUrlParams) returns (stream URLItem) {}
 }
 
 /** 
@@ -192,7 +192,7 @@ message BlockQueueParams {
   bool local = 4;
 }
 
-/** Parameter message for GetURLs and ListURLs **/
+/** Parameter message for GetURLs **/
 message GetParams {
   // maximum number of URLs per queue, the default value of 0 means no limit
   uint32 max_urls_per_queue = 1;
@@ -312,3 +312,15 @@ message URLStatusRequest {
     string crawlID = 3;
 }
 
+message ListUrlParams {
+  // position of the first result in the list; defaults to 0
+  uint32 start = 1;
+  // max number of values; defaults to 100
+  uint32 size = 2;
+  /** ID for the queue **/
+  string key = 3;
+  // crawl ID
+  string crawlID = 4;
+  // only for the current local instance
+  bool local = 5;
+}
