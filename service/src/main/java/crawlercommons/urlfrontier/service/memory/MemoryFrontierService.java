@@ -4,11 +4,9 @@
 package crawlercommons.urlfrontier.service.memory;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
-import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
@@ -189,12 +187,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
         KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
 
         if (queue.isCompleted(url)) {
-            knownBuilder.setInfo(info);
-            knownBuilder.setRefetchableFromDate(0);
-            builder.setKnown(knownBuilder.build());
-
             found = true;
-            responseObserver.onNext(builder.build());
+            responseObserver.onNext(buildURLItem(builder, knownBuilder, info, 0));
         } else {
             Iterator<InternalURL> iter = queue.iterator();
 
@@ -228,101 +222,79 @@ public class MemoryFrontierService extends AbstractFrontierService {
         }
     }
 
-    @Override
-    public void listURLs(ListUrlParams request, StreamObserver<URLItem> responseObserver) {
+    public Iterator<URLItem> urlIterator(
+            Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long maxURLs) {
+        return new MemoryURLItemIterator(qentry, start, maxURLs);
+    }
 
-        long maxURLs = request.getSize();
-        long start = request.getStart();
-        String key = request.getKey();
+    class MemoryURLItemIterator implements Iterator<URLItem> {
 
-        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+        private final org.slf4j.Logger LOG = LoggerFactory.getLogger(MemoryURLItemIterator.class);
 
-        // 100 by default
-        if (maxURLs == 0) {
-            maxURLs = 100;
+        private final Entry<QueueWithinCrawl, QueueInterface> qentry;
+        private final long start;
+        private final long maxURLs;
+        private int pos = 0;
+        private int sent = 0;
+        private URLItem.Builder builder = URLItem.newBuilder();
+        private KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
+        private Iterator<InternalURL> iter;
+        private Iterator<String> iterCompleted;
+
+        public MemoryURLItemIterator(
+                Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long maxURLs) {
+            this.qentry = qentry;
+            this.start = start;
+            this.maxURLs = maxURLs;
+            iter = ((URLQueue) qentry.getValue()).iterator();
+            iterCompleted = ((URLQueue) qentry.getValue()).getCompleted().iterator();
         }
 
-        LOG.info(
-                "Received request to list URLs [size {}; start {}; crawlId {}, key {}]",
-                maxURLs,
-                start,
-                normalisedCrawlID,
-                key);
+        @Override
+        public boolean hasNext() {
+            return sent < maxURLs && (iterCompleted.hasNext() || iter.hasNext());
+        }
 
-        int pos = -1;
-        int sent = 0;
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
 
-        synchronized (getQueues()) {
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    getQueues().entrySet().iterator();
-
-            while (iterator.hasNext()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
-                URLQueue queue = (URLQueue) getQueues().get(e.getKey());
-
-                // check that it is within the right crawlID
-                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
-                    continue;
+        @Override
+        public URLItem next() {
+            if (iterCompleted.hasNext()) {
+                String curcomplete = iterCompleted.next();
+                pos++;
+                URLInfo info =
+                        URLInfo.newBuilder()
+                                .setCrawlID(qentry.getKey().getCrawlid())
+                                .setKey(qentry.getKey().getQueue())
+                                .setUrl(curcomplete)
+                                .build();
+                if (pos >= start) {
+                    sent++;
+                    return buildURLItem(builder, knownBuilder, info, 0);
+                } else {
+                    return next();
                 }
-
-                // check that it is within the right key/queue
-                if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
-                    continue;
-                }
-
-                URLItem.Builder builder = URLItem.newBuilder();
-                KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
-
-                // First iterate over completed items
-                for (String curcomplete : queue.getCompleted()) {
-                    builder.clear();
-                    knownBuilder.clear();
-
-                    pos++;
-                    URLInfo info =
-                            URLInfo.newBuilder()
-                                    .setCrawlID(e.getKey().getCrawlid())
-                                    .setKey(e.getKey().getQueue())
-                                    .setUrl(curcomplete)
-                                    .build();
-
-                    knownBuilder.setInfo(info);
-                    knownBuilder.setRefetchableFromDate(0);
-                    builder.setKnown(knownBuilder.build());
-
-                    if (pos >= start) {
-                        responseObserver.onNext(builder.build());
-                        sent++;
-                    }
-                }
-
-                // Iterate over scheduled items
-                Iterator<InternalURL> iter = queue.iterator();
-
-                while (iter.hasNext() && sent <= maxURLs) {
-                    InternalURL item = iter.next();
-                    pos++;
-
-                    builder.clear();
-                    knownBuilder.clear();
-
+            } else {
+                if (sent < maxURLs && iter.hasNext()) {
                     try {
-                        knownBuilder.setInfo(item.toURLInfo(e.getKey()));
-                    } catch (InvalidProtocolBufferException e1) {
-                        LOG.error(e1.getMessage(), e1);
-                    }
-                    knownBuilder.setRefetchableFromDate(item.nextFetchDate);
-
-                    builder.setKnown(knownBuilder.build());
-
-                    if (pos >= start) {
-                        responseObserver.onNext(builder.build());
-                        sent++;
+                        InternalURL item = iter.next();
+                        pos++;
+                        URLInfo info = item.toURLInfo(qentry.getKey());
+                        if (pos >= start) {
+                            sent++;
+                            return buildURLItem(builder, knownBuilder, info, item.nextFetchDate);
+                        } else {
+                            return next();
+                        }
+                    } catch (InvalidProtocolBufferException e) {
+                        LOG.error(e.getMessage(), e);
                     }
                 }
             }
+            return null; // shouldn't happen
         }
-
-        responseObserver.onCompleted();
     }
 }

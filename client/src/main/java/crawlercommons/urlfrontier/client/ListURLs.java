@@ -3,6 +3,9 @@
 
 package crawlercommons.urlfrontier.client;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+import com.google.protobuf.util.JsonFormat.Printer;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams.Builder;
@@ -13,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -73,11 +77,19 @@ public class ListURLs implements Runnable {
     private Boolean local;
 
     @Option(
+            names = {"-j", "--json"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description = "Outputs in JSON format")
+    private Boolean json;
+
+    @Option(
             names = {"-p", "--parsedate"},
             defaultValue = "false",
             description = {
                 "Print the refetch date in local time zone",
-                "By default, time is in UTC seconds since the Unix epoch"
+                "By default, time is UTC seconds since the Unix epoch",
+                "Ignored if JSON output is selected"
             })
     private boolean parse;
 
@@ -89,7 +101,9 @@ public class ListURLs implements Runnable {
 
         Builder builder = crawlercommons.urlfrontier.Urlfrontier.ListUrlParams.newBuilder();
         builder.setLocal(local);
-        builder.setKey(key);
+        if (key != null) {
+            builder.setKey(key);
+        }
         builder.setSize(maxNumURLs);
         builder.setStart(start);
         builder.setCrawlID(crawl);
@@ -97,8 +111,8 @@ public class ListURLs implements Runnable {
         PrintStream outstream = null;
         if (output.length() > 0) {
             File f = new File(output);
-            f.delete();
             try {
+                Files.deleteIfExists(f.toPath());
                 outstream = new PrintStream(f, Charset.defaultCharset());
             } catch (IOException e) {
                 e.printStackTrace(System.err);
@@ -107,6 +121,8 @@ public class ListURLs implements Runnable {
         } else {
             outstream = System.out;
         }
+
+        Printer jprinter = JsonFormat.printer();
 
         ManagedChannel channel =
                 ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
@@ -128,7 +144,16 @@ public class ListURLs implements Runnable {
                 fetchDate = String.valueOf(item.getKnown().getRefetchableFromDate());
             }
 
-            outstream.println(item.getKnown().getInfo().getUrl() + ";" + fetchDate);
+            if (Boolean.TRUE.equals(json)) {
+                try {
+                    outstream.println(jprinter.print(item));
+                } catch (InvalidProtocolBufferException e) {
+                    e.printStackTrace(System.err);
+                    break;
+                }
+            } else {
+                outstream.println(item.getKnown().getInfo().getUrl() + ";" + fetchDate);
+            }
         }
 
         outstream.close();

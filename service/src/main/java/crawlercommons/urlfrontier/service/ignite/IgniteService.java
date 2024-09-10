@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -854,5 +855,12 @@ public class IgniteService extends DistributedFrontierService
     // TODO Implementation of listURLs for Ignite
     public void listURLs(ListUrlParams request, StreamObserver<URLItem> responseObserver) {
         responseObserver.onError(io.grpc.Status.UNIMPLEMENTED.asException());
+    }
+
+    @Override
+    // TODO Implementation of listURLs for Ignite
+    protected Iterator<URLItem> urlIterator(
+            java.util.Map.Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long max) {
+        throw new UnsupportedOperationException("Feature not implemented for Ignite backend");
     }
 }
