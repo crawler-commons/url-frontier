@@ -3,16 +3,14 @@ package crawlercommons.urlfrontier.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
-
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
 import io.grpc.stub.StreamObserver;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 class MemoryFrontierServiceTest {
 
@@ -139,7 +137,7 @@ class MemoryFrontierServiceTest {
 
                     @Override
                     public void onError(Throwable t) {
-                    	assertEquals(io.grpc.Status.NOT_FOUND, io.grpc.Status.fromThrowable(t));
+                        assertEquals(io.grpc.Status.NOT_FOUND, io.grpc.Status.fromThrowable(t));
                         LOG.error(t.getMessage());
                     }
 

@@ -93,6 +93,7 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
     public int countActive() {
         return this.size();
     }
+
     public boolean isCompleted(String url) {
         return completed.contains(url);
     }
