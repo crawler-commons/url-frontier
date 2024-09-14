@@ -595,6 +595,12 @@ public abstract class AbstractFrontierService
                 return;
             }
 
+            // already has its fill of URLs in process
+            if (queue.getInProcess(now) >= maxURLsPerQueue) {
+                responseObserver.onCompleted();
+                return;
+            }
+
             int totalSent =
                     sendURLsForQueue(
                             queue, qwc, maxURLsPerQueue, secsUntilRequestable, now, synchStreamObs);
