@@ -861,6 +861,10 @@ public class RocksDBService extends AbstractFrontierService {
         return new RocksDBURLItemIterator(qentry, start, maxURLs);
     }
 
+    public Iterator<URLItem> urlIterator(Entry<QueueWithinCrawl, QueueInterface> qentry) {
+        return new RocksDBURLItemIterator(qentry);
+    }
+
     class RocksDBURLItemIterator implements Iterator<URLItem> {
 
         private final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBURLItemIterator.class);
@@ -899,6 +903,28 @@ public class RocksDBService extends AbstractFrontierService {
                 }
                 rocksIterator.next();
                 pos++;
+            }
+        }
+
+        public RocksDBURLItemIterator(Entry<QueueWithinCrawl, QueueInterface> qentry) {
+
+            this.queueID = qentry.getKey();
+            this.prefixKey = (queueID.toString() + "_").getBytes(StandardCharsets.UTF_8);
+            this.maxURLs = Long.MAX_VALUE;
+            this.builder = URLItem.newBuilder();
+            this.knownBuilder = KnownURLItem.newBuilder();
+
+            this.rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(0));
+            this.rocksIterator.seek(prefixKey);
+
+            if (rocksIterator.isValid()) {
+                // Check if we're not past the seeked queue
+                final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+                final QueueWithinCrawl Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
+
+                if (!queueID.equals(Qkey.getCrawlid(), Qkey.getQueue())) {
+                    hasNext = false;
+                }
             }
         }
 

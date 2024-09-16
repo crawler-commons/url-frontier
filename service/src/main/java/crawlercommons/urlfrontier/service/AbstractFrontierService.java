@@ -897,12 +897,15 @@ public abstract class AbstractFrontierService
                 normalisedCrawlID,
                 key);
 
+        long totalCount = -1;
+        long sentCount = 0;
+
         synchronized (getQueues()) {
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
                     getQueues().entrySet().iterator();
 
-            while (iterator.hasNext()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+            while (qiterator.hasNext()) {
+                Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
 
                 // check that it is within the right crawlID
                 if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
@@ -913,15 +916,28 @@ public abstract class AbstractFrontierService
                 if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
                     continue;
                 }
-                Iterator<URLItem> iter = urlIterator(e, start, maxURLs);
-                while (iter.hasNext()) {
-                    responseObserver.onNext(iter.next());
+
+                Iterator<URLItem> urliter = urlIterator(e);
+
+                while (urliter.hasNext()) {
+                    totalCount++;
+                    if (totalCount < start) {
+                        urliter.next();
+                    } else if (sentCount < maxURLs) {
+                        responseObserver.onNext(urliter.next());
+                        sentCount++;
+                    } else {
+                        break;
+                    }
                 }
             }
         }
 
         responseObserver.onCompleted();
     }
+
+    protected abstract Iterator<URLItem> urlIterator(
+            Entry<QueueWithinCrawl, QueueInterface> qentry);
 
     protected abstract Iterator<URLItem> urlIterator(
             Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long max);

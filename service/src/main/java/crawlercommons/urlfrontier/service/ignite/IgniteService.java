@@ -863,4 +863,11 @@ public class IgniteService extends DistributedFrontierService
             java.util.Map.Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long max) {
         throw new UnsupportedOperationException("Feature not implemented for Ignite backend");
     }
+
+    @Override
+    // TODO Implementation of listURLs for Ignite
+    protected Iterator<URLItem> urlIterator(
+            java.util.Map.Entry<QueueWithinCrawl, QueueInterface> qentry) {
+        throw new UnsupportedOperationException("Feature not implemented for Ignite backend");
+    }
 }

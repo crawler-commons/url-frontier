@@ -219,7 +219,7 @@ class MemoryFrontierServiceTest {
     void testListAllURLs() {
 
         ListUrlParams params =
-                ListUrlParams.newBuilder().setCrawlID("crawl_id").setSize(100).build();
+                ListUrlParams.newBuilder().setCrawlID("crawl_id").setStart(0).setSize(100).build();
 
         final AtomicInteger fetched = new AtomicInteger(0);
         final AtomicInteger count = new AtomicInteger(0);

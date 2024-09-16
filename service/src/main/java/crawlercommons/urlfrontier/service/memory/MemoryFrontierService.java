@@ -227,6 +227,10 @@ public class MemoryFrontierService extends AbstractFrontierService {
         return new MemoryURLItemIterator(qentry, start, maxURLs);
     }
 
+    public Iterator<URLItem> urlIterator(Entry<QueueWithinCrawl, QueueInterface> qentry) {
+        return new MemoryURLItemIterator(qentry);
+    }
+
     class MemoryURLItemIterator implements Iterator<URLItem> {
 
         private final org.slf4j.Logger LOG = LoggerFactory.getLogger(MemoryURLItemIterator.class);
@@ -246,6 +250,14 @@ public class MemoryFrontierService extends AbstractFrontierService {
             this.qentry = qentry;
             this.start = start;
             this.maxURLs = maxURLs;
+            iter = ((URLQueue) qentry.getValue()).iterator();
+            iterCompleted = ((URLQueue) qentry.getValue()).getCompleted().iterator();
+        }
+
+        public MemoryURLItemIterator(Entry<QueueWithinCrawl, QueueInterface> qentry) {
+            this.qentry = qentry;
+            this.start = 0;
+            this.maxURLs = Long.MAX_VALUE;
             iter = ((URLQueue) qentry.getValue()).iterator();
             iterCompleted = ((URLQueue) qentry.getValue()).getCompleted().iterator();
         }
