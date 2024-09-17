@@ -904,7 +904,7 @@ public abstract class AbstractFrontierService
             Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
                     getQueues().entrySet().iterator();
 
-            while (qiterator.hasNext()) {
+            while (qiterator.hasNext() && sentCount < maxURLs) {
                 Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
 
                 // check that it is within the right crawlID
