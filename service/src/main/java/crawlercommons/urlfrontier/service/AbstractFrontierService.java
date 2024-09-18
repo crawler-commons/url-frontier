@@ -936,8 +936,9 @@ public abstract class AbstractFrontierService
         responseObserver.onCompleted();
     }
 
-    protected abstract Iterator<URLItem> urlIterator(
-            Entry<QueueWithinCrawl, QueueInterface> qentry);
+    protected Iterator<URLItem> urlIterator(Entry<QueueWithinCrawl, QueueInterface> qentry) {
+        return urlIterator(qentry, 0L, Long.MAX_VALUE);
+    }
 
     protected abstract Iterator<URLItem> urlIterator(
             Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long max);

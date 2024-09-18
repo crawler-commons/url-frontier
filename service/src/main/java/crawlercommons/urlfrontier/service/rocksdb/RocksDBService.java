@@ -861,17 +861,13 @@ public class RocksDBService extends AbstractFrontierService {
         return new RocksDBURLItemIterator(qentry, start, maxURLs);
     }
 
-    public Iterator<URLItem> urlIterator(Entry<QueueWithinCrawl, QueueInterface> qentry) {
-        return new RocksDBURLItemIterator(qentry);
-    }
-
     class RocksDBURLItemIterator implements Iterator<URLItem> {
 
         private final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBURLItemIterator.class);
 
         private final long maxURLs;
-        private int pos = 0;
-        private int sent = 0;
+        private long pos = 0;
+        private long sent = 0;
         private URLItem.Builder builder = URLItem.newBuilder();
         private KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
 
@@ -885,45 +881,35 @@ public class RocksDBService extends AbstractFrontierService {
 
             this.queueID = qentry.getKey();
             this.prefixKey = (queueID.toString() + "_").getBytes(StandardCharsets.UTF_8);
-            this.maxURLs = (int) maxURLs;
+            this.maxURLs = maxURLs;
             this.builder = URLItem.newBuilder();
             this.knownBuilder = KnownURLItem.newBuilder();
 
             this.rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(0));
             this.rocksIterator.seek(prefixKey);
 
-            // advance to the start position
-            while (rocksIterator.isValid() && pos < start) {
-                final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-                final QueueWithinCrawl Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
-
-                if (!queueID.equals(Qkey.getCrawlid(), Qkey.getQueue())) {
-                    hasNext = false;
-                    break;
-                }
-                rocksIterator.next();
-                pos++;
-            }
-        }
-
-        public RocksDBURLItemIterator(Entry<QueueWithinCrawl, QueueInterface> qentry) {
-
-            this.queueID = qentry.getKey();
-            this.prefixKey = (queueID.toString() + "_").getBytes(StandardCharsets.UTF_8);
-            this.maxURLs = Long.MAX_VALUE;
-            this.builder = URLItem.newBuilder();
-            this.knownBuilder = KnownURLItem.newBuilder();
-
-            this.rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(0));
-            this.rocksIterator.seek(prefixKey);
-
-            if (rocksIterator.isValid()) {
+            if (rocksIterator.isValid() && start == 0L) {
                 // Check if we're not past the seeked queue
                 final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
                 final QueueWithinCrawl Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
 
                 if (!queueID.equals(Qkey.getCrawlid(), Qkey.getQueue())) {
                     hasNext = false;
+                    return;
+                }
+            } else {
+                // advance to the start position
+                while (rocksIterator.isValid() && pos < start) {
+                    final String currentKey =
+                            new String(rocksIterator.key(), StandardCharsets.UTF_8);
+                    final QueueWithinCrawl Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
+
+                    if (!queueID.equals(Qkey.getCrawlid(), Qkey.getQueue())) {
+                        hasNext = false;
+                        break;
+                    }
+                    rocksIterator.next();
+                    pos++;
                 }
             }
         }

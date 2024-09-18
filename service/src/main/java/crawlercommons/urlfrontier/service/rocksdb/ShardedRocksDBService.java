@@ -106,11 +106,4 @@ public class ShardedRocksDBService extends DistributedFrontierService {
         throw new UnsupportedOperationException(
                 "Feature not implemented for ShardedRocksDB backend");
     }
-
-    @Override
-    // TODO Implementation of urlIterator for ShardedRocksDB
-    protected Iterator<URLItem> urlIterator(Entry<QueueWithinCrawl, QueueInterface> qentry) {
-        throw new UnsupportedOperationException(
-                "Feature not implemented for ShardedRocksDB backend");
-    }
 }
