@@ -4,6 +4,7 @@
 package crawlercommons.urlfrontier.service.rocksdb;
 
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
+import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
@@ -14,8 +15,10 @@ import crawlercommons.urlfrontier.service.cluster.DistributedFrontierService;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Started with a pre-set and definitive list of nodes, forwards incoming data to each node based on
@@ -88,5 +91,19 @@ public class ShardedRocksDBService extends DistributedFrontierService {
     // TODO Implementation of getURLStatus for ShardedRocksDB
     public void getURLStatus(URLStatusRequest request, StreamObserver<URLItem> responseObserver) {
         responseObserver.onError(io.grpc.Status.UNIMPLEMENTED.asException());
+    }
+
+    @Override
+    // TODO Implementation of listURLs for ShardedRocksDB
+    public void listURLs(ListUrlParams request, StreamObserver<URLItem> responseObserver) {
+        responseObserver.onError(io.grpc.Status.UNIMPLEMENTED.asException());
+    }
+
+    @Override
+    // TODO Implementation of urlIterator for ShardedRocksDB
+    protected Iterator<URLItem> urlIterator(
+            Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long max) {
+        throw new UnsupportedOperationException(
+                "Feature not implemented for ShardedRocksDB backend");
     }
 }

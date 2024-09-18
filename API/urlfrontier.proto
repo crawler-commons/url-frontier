@@ -78,6 +78,12 @@ service URLFrontier {
          Used to check current status of an URL within the frontier
      **/
      rpc GetURLStatus(URLStatusRequest) returns (URLItem) {}
+     
+     /** List all URLs currently in the frontier 
+         This does not take into account URL scheduling.
+         Used to check current status of all URLs within the frontier
+     **/
+     rpc ListURLs(ListUrlParams) returns (stream URLItem) {}
 }
 
 /** 
@@ -306,3 +312,15 @@ message URLStatusRequest {
     string crawlID = 3;
 }
 
+message ListUrlParams {
+  // position of the first result in the list; defaults to 0
+  uint32 start = 1;
+  // max number of values; defaults to 100
+  uint32 size = 2;
+  /** ID for the queue **/
+  string key = 3;
+  // crawl ID
+  string crawlID = 4;
+  // only for the current local instance
+  bool local = 5;
+}

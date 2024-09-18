@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2020 Crawler-commons
+// SPDX-License-Identifier: Apache-2.0
+
 package crawlercommons.urlfrontier.service;
 
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
@@ -22,6 +25,8 @@ public class ServiceTestUtil {
         String key2 = "queue_mysite";
         String url3 = "https://www.mysite.com/knowntorefetch";
         String key3 = "queue_mysite";
+        String url4 = "https://www.mysite.com/secondqueue";
+        String key4 = "another_queue";
 
         final AtomicBoolean completed = new AtomicBoolean(false);
         final AtomicInteger acked = new AtomicInteger(0);
@@ -64,6 +69,7 @@ public class ServiceTestUtil {
         StringList sl1 = StringList.newBuilder().addValues("md1").build();
         StringList sl2 = StringList.newBuilder().addValues("md2").build();
         StringList sl3 = StringList.newBuilder().addValues("md3").build();
+        StringList sl4 = StringList.newBuilder().addValues("md4").build();
 
         URLInfo info1 =
                 URLInfo.newBuilder()
@@ -125,6 +131,27 @@ public class ServiceTestUtil {
         builder3.setID(crawlId + "_" + url3);
 
         streamObserver.onNext(builder3.build());
+        sent++;
+
+        URLInfo info4 =
+                URLInfo.newBuilder()
+                        .setUrl(url4)
+                        .setCrawlID(crawlId)
+                        .setKey(key4)
+                        .putMetadata("meta4", sl4)
+                        .build();
+
+        crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder4 = URLItem.newBuilder();
+        KnownURLItem queuetwo =
+                KnownURLItem.newBuilder()
+                        .setInfo(info4)
+                        .setRefetchableFromDate(Instant.now().getEpochSecond() + 3600)
+                        .build();
+
+        builder4.setKnown(queuetwo);
+        builder4.setID(crawlId + "_" + url4);
+
+        streamObserver.onNext(builder4.build());
         sent++;
 
         streamObserver.onCompleted();

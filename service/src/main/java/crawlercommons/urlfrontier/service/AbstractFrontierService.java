@@ -13,6 +13,7 @@ import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
+import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Local;
 import crawlercommons.urlfrontier.Urlfrontier.LogLevelParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
@@ -872,4 +873,95 @@ public abstract class AbstractFrontierService
     public abstract void getURLStatus(
             crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest request,
             io.grpc.stub.StreamObserver<URLItem> responseObserver);
+
+    public void listURLs(
+            crawlercommons.urlfrontier.Urlfrontier.ListUrlParams request,
+            io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem>
+                    responseObserver) {
+
+        long maxURLs = request.getSize();
+        long start = request.getStart();
+        String key = request.getKey();
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+
+        // 100 by default
+        if (maxURLs == 0) {
+            maxURLs = 100;
+        }
+
+        LOG.info(
+                "Received request to list URLs [size {}; start {}; crawlId {}, key {}]",
+                maxURLs,
+                start,
+                normalisedCrawlID,
+                key);
+
+        long totalCount = -1;
+        long sentCount = 0;
+
+        synchronized (getQueues()) {
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
+                    getQueues().entrySet().iterator();
+
+            while (qiterator.hasNext() && sentCount < maxURLs) {
+                Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
+
+                // check that it is within the right crawlID
+                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                    continue;
+                }
+
+                // check that it is within the right key/queue
+                if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
+                    continue;
+                }
+
+                Iterator<URLItem> urliter = urlIterator(e);
+
+                while (urliter.hasNext()) {
+                    totalCount++;
+                    if (totalCount < start) {
+                        urliter.next();
+                    } else if (sentCount < maxURLs) {
+                        responseObserver.onNext(urliter.next());
+                        sentCount++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        responseObserver.onCompleted();
+    }
+
+    protected Iterator<URLItem> urlIterator(Entry<QueueWithinCrawl, QueueInterface> qentry) {
+        return urlIterator(qentry, 0L, Long.MAX_VALUE);
+    }
+
+    protected abstract Iterator<URLItem> urlIterator(
+            Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long max);
+
+    /**
+     * Builds an URLItem for listURLs (used by fetchURLItems, avoids builder instantiation for every
+     * URL)
+     *
+     * @param builder The URLItem builder
+     * @param kbuilder The KnownURLItem builder
+     * @param info URLInfo
+     * @param refetch refetch date from Epoch in seconds
+     * @return
+     */
+    public static URLItem buildURLItem(
+            URLItem.Builder builder, KnownURLItem.Builder kbuilder, URLInfo info, long refetch) {
+        builder.clear();
+        kbuilder.clear();
+
+        kbuilder.setInfo(info);
+        kbuilder.setRefetchableFromDate(refetch);
+        builder.setKnown(kbuilder.build());
+
+        return builder.build();
+    }
 }

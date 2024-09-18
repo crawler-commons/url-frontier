@@ -4,10 +4,12 @@
 package crawlercommons.urlfrontier.service.memory;
 
 import crawlercommons.urlfrontier.service.QueueInterface;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterface {
 
@@ -93,6 +95,7 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
     public int countActive() {
         return this.size();
     }
+
     public boolean isCompleted(String url) {
         return completed.contains(url);
     }
@@ -113,5 +116,10 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
         }
 
         return getCountCompleted() >= limit.get();
+    }
+
+    /** @return The unmodifiable set of completed URLs */
+    public Set<String> getCompleted() {
+        return Collections.unmodifiableSet(completed);
     }
 }

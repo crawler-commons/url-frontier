@@ -1,18 +1,22 @@
+// SPDX-FileCopyrightText: 2020 Crawler-commons
+// SPDX-License-Identifier: Apache-2.0
+
 package crawlercommons.urlfrontier.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
-
+import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
 import io.grpc.stub.StreamObserver;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 class MemoryFrontierServiceTest {
 
@@ -139,7 +143,7 @@ class MemoryFrontierServiceTest {
 
                     @Override
                     public void onError(Throwable t) {
-                    	assertEquals(io.grpc.Status.NOT_FOUND, io.grpc.Status.fromThrowable(t));
+                        assertEquals(io.grpc.Status.NOT_FOUND, io.grpc.Status.fromThrowable(t));
                         LOG.error(t.getMessage());
                     }
 
@@ -209,5 +213,131 @@ class MemoryFrontierServiceTest {
 
         assertEquals(1, count.get());
         assertEquals(1, fetched.get());
+    }
+
+    @Test
+    void testListAllURLs() {
+
+        ListUrlParams params =
+                ListUrlParams.newBuilder().setCrawlID("crawl_id").setStart(0).setSize(100).build();
+
+        final AtomicInteger fetched = new AtomicInteger(0);
+        final AtomicInteger count = new AtomicInteger(0);
+
+        StreamObserver<URLItem> statusObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(URLItem value) {
+                        // receives confirmation that the value has been received
+                        logURLItem(value);
+
+                        if (value.hasKnown()) {
+                            fetched.incrementAndGet();
+                        }
+                        count.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testListAllURLs");
+                    }
+                };
+
+        memoryFrontierService.listURLs(params, statusObserver);
+        assertEquals(4, count.get());
+    }
+
+    @Test
+    void testListURLsinglequeue() {
+
+        ListUrlParams params =
+                ListUrlParams.newBuilder()
+                        .setCrawlID("crawl_id")
+                        .setKey("another_queue")
+                        .setSize(100)
+                        .build();
+
+        final AtomicInteger fetched = new AtomicInteger(0);
+        final AtomicInteger count = new AtomicInteger(0);
+
+        StreamObserver<URLItem> statusObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(URLItem value) {
+                        // receives confirmation that the value has been received
+                        logURLItem(value);
+
+                        if (value.hasKnown()) {
+                            fetched.incrementAndGet();
+                        }
+                        count.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testListURLs");
+                    }
+                };
+
+        memoryFrontierService.listURLs(params, statusObserver);
+        assertEquals(1, count.get());
+    }
+
+    @Test
+    void testMemoryIterator() {
+        int nbQueues = 0;
+        int nbUrls = 0;
+
+        for (Entry<QueueWithinCrawl, QueueInterface> cur :
+                memoryFrontierService.getQueues().entrySet()) {
+            nbQueues++;
+            System.out.println("Queue: " + cur.getKey());
+            Iterator<URLItem> iter = memoryFrontierService.urlIterator(cur, 0, 100);
+            while (iter.hasNext()) {
+                URLItem item = iter.next();
+                System.out.println(item.toString());
+                nbUrls++;
+            }
+        }
+
+        assertEquals(2, nbQueues);
+        assertEquals(4, nbUrls);
+    }
+
+    @Test
+    void testMemoryIteratorSingleQueue() {
+        int nbQueues = 0;
+        int nbUrls = 0;
+
+        for (Entry<QueueWithinCrawl, QueueInterface> cur :
+                memoryFrontierService.getQueues().entrySet()) {
+            if (cur.getKey().getQueue().equals("another_queue")) {
+                continue;
+            }
+
+            nbQueues++;
+            System.out.println("Queue: " + cur.getKey());
+            Iterator<URLItem> iter = memoryFrontierService.urlIterator(cur, 0, 100);
+            while (iter.hasNext()) {
+                URLItem item = iter.next();
+                System.out.println(item.toString());
+                nbUrls++;
+            }
+        }
+
+        assertEquals(1, nbQueues);
+        assertEquals(3, nbUrls);
     }
 }

@@ -18,6 +18,7 @@ import io.grpc.stub.StreamObserver;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import org.slf4j.LoggerFactory;
 
@@ -186,12 +187,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
         KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
 
         if (queue.isCompleted(url)) {
-            knownBuilder.setInfo(info);
-            knownBuilder.setRefetchableFromDate(0);
-            builder.setKnown(knownBuilder.build());
-
             found = true;
-            responseObserver.onNext(builder.build());
+            responseObserver.onNext(buildURLItem(builder, knownBuilder, info, 0));
         } else {
             Iterator<InternalURL> iter = queue.iterator();
 
@@ -222,6 +219,82 @@ public class MemoryFrontierService extends AbstractFrontierService {
             responseObserver.onCompleted();
         } else {
             responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
+        }
+    }
+
+    public Iterator<URLItem> urlIterator(
+            Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long maxURLs) {
+        return new MemoryURLItemIterator(qentry, start, maxURLs);
+    }
+
+    class MemoryURLItemIterator implements Iterator<URLItem> {
+
+        private final org.slf4j.Logger LOG = LoggerFactory.getLogger(MemoryURLItemIterator.class);
+
+        private final Entry<QueueWithinCrawl, QueueInterface> qentry;
+        private final long start;
+        private final long maxURLs;
+        private long pos = 0;
+        private long sent = 0;
+        private URLItem.Builder builder = URLItem.newBuilder();
+        private KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
+        private Iterator<InternalURL> iter;
+        private Iterator<String> iterCompleted;
+
+        public MemoryURLItemIterator(
+                Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long maxURLs) {
+            this.qentry = qentry;
+            this.start = start;
+            this.maxURLs = maxURLs;
+            iter = ((URLQueue) qentry.getValue()).iterator();
+            iterCompleted = ((URLQueue) qentry.getValue()).getCompleted().iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return sent < maxURLs && (iterCompleted.hasNext() || iter.hasNext());
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public URLItem next() {
+            if (iterCompleted.hasNext()) {
+                String curcomplete = iterCompleted.next();
+                pos++;
+                URLInfo info =
+                        URLInfo.newBuilder()
+                                .setCrawlID(qentry.getKey().getCrawlid())
+                                .setKey(qentry.getKey().getQueue())
+                                .setUrl(curcomplete)
+                                .build();
+                if (pos >= start) {
+                    sent++;
+                    return buildURLItem(builder, knownBuilder, info, 0);
+                } else {
+                    return next();
+                }
+            } else {
+                if (sent < maxURLs && iter.hasNext()) {
+                    try {
+                        InternalURL item = iter.next();
+                        pos++;
+                        URLInfo info = item.toURLInfo(qentry.getKey());
+                        if (pos >= start) {
+                            sent++;
+                            return buildURLItem(builder, knownBuilder, info, item.nextFetchDate);
+                        } else {
+                            return next();
+                        }
+                    } catch (InvalidProtocolBufferException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            }
+            return null; // shouldn't happen
         }
     }
 }

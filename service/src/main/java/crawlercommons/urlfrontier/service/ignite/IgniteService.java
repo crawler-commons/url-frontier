@@ -9,6 +9,7 @@ import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
@@ -29,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -847,5 +849,18 @@ public class IgniteService extends DistributedFrontierService
     // TODO Implementation of getURLStatus for Ignite
     public void getURLStatus(URLStatusRequest request, StreamObserver<URLItem> responseObserver) {
         responseObserver.onError(io.grpc.Status.UNIMPLEMENTED.asException());
+    }
+
+    @Override
+    // TODO Implementation of listURLs for Ignite
+    public void listURLs(ListUrlParams request, StreamObserver<URLItem> responseObserver) {
+        responseObserver.onError(io.grpc.Status.UNIMPLEMENTED.asException());
+    }
+
+    @Override
+    // TODO Implementation of listURLs for Ignite
+    protected Iterator<URLItem> urlIterator(
+            java.util.Map.Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long max) {
+        throw new UnsupportedOperationException("Feature not implemented for Ignite backend");
     }
 }

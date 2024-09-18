@@ -26,9 +26,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.rocksdb.BlockBasedTableConfig;
@@ -803,7 +805,9 @@ public class RocksDBService extends AbstractFrontierService {
         boolean found = false;
 
         URLItem.Builder builder = URLItem.newBuilder();
-        KnownURLItem.Builder kb = KnownURLItem.newBuilder();
+        KnownURLItem.Builder knownbuilder = KnownURLItem.newBuilder();
+        URLInfo info = null;
+        long fromEpoch = 0;
 
         try {
             schedulingKey = rocksDB.get(columnFamilyHandleList.get(0), existenceKey);
@@ -811,31 +815,20 @@ public class RocksDBService extends AbstractFrontierService {
                 final String currentKey = new String(schedulingKey, StandardCharsets.UTF_8);
 
                 if (StringUtil.isNullOrEmpty(currentKey)) {
-                    URLInfo info =
-                            URLInfo.newBuilder()
-                                    .setCrawlID(crawlId)
-                                    .setKey(key)
-                                    .setUrl(url)
-                                    .build();
+                    info = URLInfo.newBuilder().setCrawlID(crawlId).setKey(key).setUrl(url).build();
 
-                    kb.setRefetchableFromDate(0).setInfo(info).build();
-                    builder.setKnown(kb.build());
                     found = true;
                 } else {
                     final int pos = currentKey.indexOf('_');
                     final int pos2 = currentKey.indexOf('_', pos + 1);
                     final int pos3 = currentKey.indexOf('_', pos2 + 1);
 
-                    long scheduled = Long.parseLong(currentKey.substring(pos2 + 1, pos3));
+                    fromEpoch = Long.parseLong(currentKey.substring(pos2 + 1, pos3));
 
-                    URLInfo info = null;
                     try {
                         info =
                                 URLInfo.parseFrom(
                                         rocksDB.get(columnFamilyHandleList.get(1), schedulingKey));
-                        kb.setInfo(info);
-                        kb.setRefetchableFromDate(scheduled);
-                        builder.setKnown(kb.build());
                     } catch (InvalidProtocolBufferException e) {
                         LOG.error(e.getMessage(), e);
                         responseObserver.onError(
@@ -856,10 +849,154 @@ public class RocksDBService extends AbstractFrontierService {
         }
 
         if (found) {
-            responseObserver.onNext(builder.build());
+            responseObserver.onNext(buildURLItem(builder, knownbuilder, info, fromEpoch));
             responseObserver.onCompleted();
         } else {
             responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
+        }
+    }
+
+    public Iterator<URLItem> urlIterator(
+            Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long maxURLs) {
+        return new RocksDBURLItemIterator(qentry, start, maxURLs);
+    }
+
+    class RocksDBURLItemIterator implements Iterator<URLItem> {
+
+        private final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBURLItemIterator.class);
+
+        private final long maxURLs;
+        private long pos = 0;
+        private long sent = 0;
+        private URLItem.Builder builder = URLItem.newBuilder();
+        private KnownURLItem.Builder knownBuilder = KnownURLItem.newBuilder();
+
+        private final QueueWithinCrawl queueID;
+        private final byte[] prefixKey;
+        private final RocksIterator rocksIterator;
+        private boolean hasNext = true;
+
+        public RocksDBURLItemIterator(
+                Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long maxURLs) {
+
+            this.queueID = qentry.getKey();
+            this.prefixKey = (queueID.toString() + "_").getBytes(StandardCharsets.UTF_8);
+            this.maxURLs = maxURLs;
+            this.builder = URLItem.newBuilder();
+            this.knownBuilder = KnownURLItem.newBuilder();
+
+            this.rocksIterator = rocksDB.newIterator(columnFamilyHandleList.get(0));
+            this.rocksIterator.seek(prefixKey);
+
+            if (rocksIterator.isValid() && start == 0L) {
+                // Check if we're not past the seeked queue
+                final String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+                final QueueWithinCrawl Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
+
+                if (!queueID.equals(Qkey.getCrawlid(), Qkey.getQueue())) {
+                    hasNext = false;
+                    return;
+                }
+            } else {
+                // advance to the start position
+                while (rocksIterator.isValid() && pos < start) {
+                    final String currentKey =
+                            new String(rocksIterator.key(), StandardCharsets.UTF_8);
+                    final QueueWithinCrawl Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
+
+                    if (!queueID.equals(Qkey.getCrawlid(), Qkey.getQueue())) {
+                        hasNext = false;
+                        break;
+                    }
+                    rocksIterator.next();
+                    pos++;
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return rocksIterator.isValid() && hasNext && sent < maxURLs;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public URLItem next() {
+
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+
+            while (rocksIterator.isValid() && sent < maxURLs) {
+                String currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+                QueueWithinCrawl Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
+
+                if (!queueID.equals(Qkey.getCrawlid(), Qkey.getQueue())) {
+                    hasNext = false;
+                    break;
+                }
+
+                final String schedulingKey =
+                        new String(rocksIterator.value(), StandardCharsets.UTF_8);
+
+                LOG.debug("current key {}, schedulingKey={}", currentKey, schedulingKey);
+
+                byte[] scheduled = null;
+                try {
+                    scheduled = rocksDB.get(columnFamilyHandleList.get(1), rocksIterator.value());
+                } catch (RocksDBException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+
+                long fromEpoch = 0;
+                URLInfo info = null;
+
+                if (!StringUtil.isNullOrEmpty(schedulingKey)) {
+                    final int pos1 = schedulingKey.indexOf('_');
+                    final int pos2 = schedulingKey.indexOf('_', pos1 + 1);
+                    final int pos3 = schedulingKey.indexOf('_', pos2 + 1);
+
+                    fromEpoch = Long.parseLong(schedulingKey.substring(pos2 + 1, pos3));
+
+                    try {
+                        info = URLInfo.parseFrom(scheduled);
+                    } catch (InvalidProtocolBufferException | NumberFormatException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                } else {
+                    LOG.debug("no schedule for {}", currentKey);
+
+                    final int pos1 = currentKey.indexOf('_');
+                    final int pos2 = currentKey.indexOf('_', pos1 + 1);
+
+                    info =
+                            URLInfo.newBuilder()
+                                    .setCrawlID(Qkey.getCrawlid())
+                                    .setKey(Qkey.getQueue())
+                                    .setUrl(currentKey.substring(pos2 + 1))
+                                    .build();
+                }
+
+                sent++;
+                rocksIterator.next();
+
+                currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+                Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
+
+                if (!queueID.equals(Qkey.getCrawlid(), Qkey.getQueue())) {
+                    hasNext = false;
+                } else {
+                    hasNext = rocksIterator.isValid();
+                }
+
+                return buildURLItem(builder, knownBuilder, info, fromEpoch);
+            }
+
+            return null; // Shouldn't happen
         }
     }
 }

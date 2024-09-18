@@ -1,8 +1,12 @@
+// SPDX-FileCopyrightText: 2020 Crawler-commons
+// SPDX-License-Identifier: Apache-2.0
+
 package crawlercommons.urlfrontier.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
@@ -10,7 +14,9 @@ import io.grpc.stub.StreamObserver;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -238,5 +244,129 @@ class RocksDBServiceTest {
 
         assertEquals(1, count.get());
         assertEquals(1, fetched.get());
+    }
+
+    @Test
+    void testListAllURLs() {
+
+        ListUrlParams params =
+                ListUrlParams.newBuilder().setCrawlID("crawl_id").setSize(100).build();
+
+        final AtomicInteger fetched = new AtomicInteger(0);
+        final AtomicInteger count = new AtomicInteger(0);
+
+        StreamObserver<URLItem> statusObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(URLItem value) {
+                        // receives confirmation that the value has been received
+                        logURLItem(value);
+
+                        if (value.hasKnown()) {
+                            fetched.incrementAndGet();
+                        }
+                        count.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testListURLs");
+                    }
+                };
+
+        rocksDBService.listURLs(params, statusObserver);
+        assertEquals(4, count.get());
+    }
+
+    @Test
+    void testListURLsinglequeue() {
+
+        ListUrlParams params =
+                ListUrlParams.newBuilder()
+                        .setCrawlID("crawl_id")
+                        .setKey("another_queue")
+                        .setSize(100)
+                        .build();
+
+        final AtomicInteger fetched = new AtomicInteger(0);
+        final AtomicInteger count = new AtomicInteger(0);
+
+        StreamObserver<URLItem> statusObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(URLItem value) {
+                        // receives confirmation that the value has been received
+                        logURLItem(value);
+
+                        if (value.hasKnown()) {
+                            fetched.incrementAndGet();
+                        }
+                        count.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testListURLs");
+                    }
+                };
+
+        rocksDBService.listURLs(params, statusObserver);
+        assertEquals(1, count.get());
+    }
+
+    @Test
+    void testMemoryIterator() {
+        int nbQueues = 0;
+        int nbUrls = 0;
+
+        for (Entry<QueueWithinCrawl, QueueInterface> cur : rocksDBService.getQueues().entrySet()) {
+            nbQueues++;
+            System.out.println("Queue: " + cur.getKey());
+            Iterator<URLItem> iter = rocksDBService.urlIterator(cur, 0, 100);
+            while (iter.hasNext()) {
+                URLItem item = iter.next();
+                System.out.println(item.toString());
+                nbUrls++;
+            }
+        }
+
+        assertEquals(2, nbQueues);
+        assertEquals(4, nbUrls);
+    }
+
+    @Test
+    void testMemoryIteratorSingleQueue() {
+        int nbQueues = 0;
+        int nbUrls = 0;
+
+        for (Entry<QueueWithinCrawl, QueueInterface> cur : rocksDBService.getQueues().entrySet()) {
+            if (cur.getKey().getQueue().equals("another_queue")) {
+                continue;
+            }
+
+            nbQueues++;
+            System.out.println("Queue: " + cur.getKey());
+            Iterator<URLItem> iter = rocksDBService.urlIterator(cur, 0, 100);
+            while (iter.hasNext()) {
+                URLItem item = iter.next();
+                System.out.println(item.toString());
+                nbUrls++;
+            }
+        }
+
+        assertEquals(1, nbQueues);
+        assertEquals(3, nbUrls);
     }
 }
