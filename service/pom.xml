@@ -16,8 +16,6 @@
 
 	<properties>
 		<prometheus.version>0.16.0</prometheus.version>
-		<ignite.version>2.14.0</ignite.version>
-		<lucene.version>9.4.0</lucene.version>
 		<rocksdb.version>7.6.0</rocksdb.version>
 	</properties>
 
@@ -92,18 +90,6 @@
 			<groupId>org.rocksdb</groupId>
 			<artifactId>rocksdbjni</artifactId>
 			<version>${rocksdb.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.ignite</groupId>
-			<artifactId>ignite-core</artifactId>
-			<version>${ignite.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-			<version>${lucene.version}</version>
 		</dependency>
 
 		<dependency>
