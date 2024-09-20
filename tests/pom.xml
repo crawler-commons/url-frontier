@@ -33,7 +33,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>3.0.0-M2</version>
+				<version>3.1.3</version>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
@@ -42,7 +42,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M6</version>
+				<version>3.5.0</version>
 				<configuration>
 					<systemPropertyVariables>
 						<urlfrontier.host>${urlfrontier.host}</urlfrontier.host>
