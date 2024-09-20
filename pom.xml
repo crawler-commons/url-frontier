@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.crawler-commons</groupId>
@@ -9,7 +11,8 @@
 
 	<url>https://github.com/crawler-commons/url-frontier</url>
 
-	<description>API definition, resources and reference implementation of URL Frontiers</description>
+	<description>API definition, resources and reference implementation of URL
+		Frontiers</description>
 
 	<inceptionYear>2020</inceptionYear>
 
@@ -23,7 +26,8 @@
 	<scm>
 		<url>https://github.com/crawler-commons/url-frontier</url>
 		<connection>scm:git:git://github.com/crawler-commons/url-frontier.git</connection>
-		<developerConnection>scm:git:git@github.com:crawler-commons/url-frontier.git</developerConnection>
+		<developerConnection>
+			scm:git:git@github.com:crawler-commons/url-frontier.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -74,6 +78,17 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- needed to build within Docker -->
 		<skipFormatCode>false</skipFormatCode>
+		<version.maven-enforcer-plugin>3.5.0</version.maven-enforcer-plugin>
+		<minimalMavenBuildVersion>3.6.3</minimalMavenBuildVersion>
+		<version.maven-compiler-plugin>3.13.0</version.maven-compiler-plugin>
+		<git-code-format-maven-plugin.version>5.3</git-code-format-maven-plugin.version>
+		<version.maven-gpg-plugin>3.2.6</version.maven-gpg-plugin>
+		<version.maven-source-plugin>3.3.1</version.maven-source-plugin>
+		<version.maven-jar-plugin>3.4.2</version.maven-jar-plugin>
+		<version.maven-javadoc-plugin>3.10.0</version.maven-javadoc-plugin>
+		<version.maven-release-plugin>3.1.1</version.maven-release-plugin>
+		<version.maven-shade-plugin>3.6.0</version.maven-shade-plugin>
+		<minimalJavaBuildVersion>11</minimalJavaBuildVersion>
 	</properties>
 
 	<build>
@@ -82,7 +97,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.9.0</version>
+					<version>${version.maven-compiler-plugin}</version>
 					<configuration>
 						<release>11</release>
 					</configuration>
@@ -90,13 +105,48 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>3.0.0-M5</version>
+					<version>${version.maven-release-plugin}</version>
 					<configuration>
 						<autoVersionSubmodules>true</autoVersionSubmodules>
 						<useReleaseProfile>false</useReleaseProfile>
 						<releaseProfiles>release</releaseProfiles>
 						<goals>deploy</goals>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>${version.maven-enforcer-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>${version.maven-gpg-plugin}</version>
+					<configuration>
+						<gpgArguments>
+							<arg>--digest-algo=SHA512</arg>
+						</gpgArguments>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${version.maven-source-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${version.maven-jar-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${version.maven-javadoc-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>${version.maven-shade-plugin}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -105,7 +155,7 @@
 			<plugin>
 				<groupId>com.cosium.code</groupId>
 				<artifactId>git-code-format-maven-plugin</artifactId>
-				<version>3.3</version>
+				<version>${git-code-format-maven-plugin.version}</version>
 				<executions>
 					<!-- On commit, format the modified java files -->
 					<execution>
@@ -114,7 +164,8 @@
 							<goal>install-hooks</goal>
 						</goals>
 					</execution>
-					<!-- On Maven verify phase, fail if any file (including unmodified) 
+					<!-- On Maven verify phase, fail if any file (including
+					unmodified) 
 						is badly formatted -->
 					<execution>
 						<id>validate-code-format</id>
@@ -123,31 +174,51 @@
 						</goals>
 					</execution>
 				</executions>
+				<dependencies>
+					<!-- Enable https://github.com/google/google-java-format -->
+					<dependency>
+						<groupId>com.cosium.code</groupId>
+						<artifactId>google-java-format</artifactId>
+						<version>${git-code-format-maven-plugin.version}</version>
+					</dependency>
+				</dependencies>
 				<configuration>
-					<skip>${skipFormatCode}</skip>
-					<googleJavaFormatOptions>
-						<aosp>true</aosp>
-						<fixImportsOnly>false</fixImportsOnly>
-						<skipSortingImports>false</skipSortingImports>
-						<skipRemovingUnusedImports>false</skipRemovingUnusedImports>
-					</googleJavaFormatOptions>
+					<skip>${skip.format.code}</skip>
+					<formatterOptions>
+						<googleJavaFormat.aosp>true</googleJavaFormat.aosp>
+						<googleJavaFormat.fixImportsOnly>false</googleJavaFormat.fixImportsOnly>
+						<googleJavaFormat.skipSortingImports>false</googleJavaFormat.skipSortingImports>
+						<googleJavaFormat.skipRemovingUnusedImports>false</googleJavaFormat.skipRemovingUnusedImports>
+					</formatterOptions>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0</version>
 				<executions>
 					<execution>
-						<id>enforce-maven</id>
+						<id>enforce-maven-version</id>
 						<goals>
 							<goal>enforce</goal>
 						</goals>
 						<configuration>
 							<rules>
 								<requireMavenVersion>
-									<version>(3.2.5,)</version>
+									<version>${minimalMavenBuildVersion}</version>
 								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+					<execution>
+						<id>enforce-java-version</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>${minimalJavaBuildVersion}</version>
+								</requireJavaVersion>
 							</rules>
 						</configuration>
 					</execution>
@@ -164,7 +235,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>3.0.1</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -175,47 +245,44 @@
 							</execution>
 						</executions>
 					</plugin>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-source-plugin</artifactId>
-							<version>3.2.1</version>
-							<executions>
-								<execution>
-									<id>attach-sources</id>
-									<goals>
-										<goal>jar-no-fork</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-jar-plugin</artifactId>
-							<version>3.2.2</version>
-							<executions>
-								<execution>
-									<id>attach-test</id>
-									<goals>
-										<goal>test-jar</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jar-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-test</id>
+								<goals>
+									<goal>test-jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-javadoc-plugin</artifactId>
-							<version>3.3.1</version>
-							<executions>
-								<execution>
-									<id>attach-javadocs</id>
-									<goals>
-										<goal>jar</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>

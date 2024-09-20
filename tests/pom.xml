@@ -26,6 +26,8 @@
 		<urlfrontier.port>7071</urlfrontier.port>
 		<maven.test.skip>true</maven.test.skip>
 		<slf4j.version>2.0.3</slf4j.version>
+		<version.maven-surefire-plugin>3.5.0</version.maven-surefire-plugin>
+		<version.maven-deploy-plugin>3.1.3</version.maven-deploy-plugin>
 	</properties>
 
 	<build>
@@ -33,7 +35,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>3.0.0-M2</version>
+				<version>${version.maven-deploy-plugin}</version>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
@@ -42,7 +44,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M6</version>
+				<version>${version.maven-surefire-plugin}</version>
 				<configuration>
 					<systemPropertyVariables>
 						<urlfrontier.host>${urlfrontier.host}</urlfrontier.host>
