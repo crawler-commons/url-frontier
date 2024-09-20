@@ -40,7 +40,9 @@ public class MemoryFrontierService extends AbstractFrontierService {
         this(new HashMap<String, String>(), host, port);
     }
 
-    /** @return true if at least one URL has been sent for this queue, false otherwise */
+    /**
+     * @return true if at least one URL has been sent for this queue, false otherwise
+     */
     @Override
     protected int sendURLsForQueue(
             QueueInterface queue,

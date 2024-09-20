@@ -118,7 +118,9 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
         return getCountCompleted() >= limit.get();
     }
 
-    /** @return The unmodifiable set of completed URLs */
+    /**
+     * @return The unmodifiable set of completed URLs
+     */
     public Set<String> getCompleted() {
         return Collections.unmodifiableSet(completed);
     }
