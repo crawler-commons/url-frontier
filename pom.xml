@@ -62,6 +62,12 @@
 			<organization>DigitalPebble</organization>
 			<organizationUrl>http://www.digitalpebble.com</organizationUrl>
 		</developer>
+		<developer>
+			<name>Laurent Klock</name>
+			<email>Laurent.Klock@arhs-cube.com</email>
+			<organization>ARHS Group</organization>
+			<organizationUrl>https://www.arhs-group.com</organizationUrl>
+		</developer>
 	</developers>
 
 	<properties>
