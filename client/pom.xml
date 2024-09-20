@@ -40,12 +40,14 @@
 		</plugins>
 	</build>
 
+	<properties>
+		<protobuf.java.util.version>4.28.2</protobuf.java.util.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli</artifactId>
-			<version>4.6.3</version>
 		</dependency>
 
 		<dependency>
@@ -57,7 +59,7 @@
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java-util</artifactId>
-			<version>3.23.3</version>
+			<version>${protobuf.java.util.version}</version>
 		</dependency>
 
 	</dependencies>
