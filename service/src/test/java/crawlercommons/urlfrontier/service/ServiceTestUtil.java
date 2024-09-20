@@ -35,7 +35,7 @@ public class ServiceTestUtil {
         final AtomicInteger ok = new AtomicInteger(0);
         int sent = 0;
 
-        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> responseObserver =
+        StreamObserver<AckMessage> responseObserver =
                 new StreamObserver<>() {
 
                     @Override
