@@ -89,6 +89,8 @@
 		<version.maven-release-plugin>3.1.1</version.maven-release-plugin>
 		<version.maven-shade-plugin>3.6.0</version.maven-shade-plugin>
 		<minimalJavaBuildVersion>11</minimalJavaBuildVersion>
+        <picocli.version>4.7.6</picocli.version>
+        <junit.version>5.11.0</junit.version>
 	</properties>
 
 	<build>
@@ -287,6 +289,32 @@
 			</build>
 		</profile>
 	</profiles>
+
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+		<dependency>
+			<groupId>info.picocli</groupId>
+			<artifactId>picocli</artifactId>
+			<version>${picocli.version}</version>
+		</dependency>
+
+		</dependencies>
+	</dependencyManagement>
 
 	<modules>
 		<module>API</module>
