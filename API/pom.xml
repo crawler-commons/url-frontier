@@ -15,8 +15,7 @@
 	<description>URLFrontier Java API</description>
 
 	<properties>
-		<grpc.version>1.68.0</grpc.version>
-		<protoc.version>3.20.3</protoc.version>
+		<grpc.version>1.66.0</grpc.version>
 	</properties>
 
 	<dependencies>
@@ -44,4 +43,13 @@
 		</dependency>
 
 	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>${protoc.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>

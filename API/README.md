@@ -81,13 +81,13 @@ The Java code can be (re)generated as follows; change the OS & processor values 
 
 ```
 osproc=linux-x86_64
-wget https://github.com/protocolbuffers/protobuf/releases/download/v3.20.3/protoc-3.20.3-$osproc.zip
-unzip -p protoc-3.20.3-$osproc.zip bin/protoc > protoc
-rm protoc-3.20.3-$osproc.zip
+wget https://github.com/protocolbuffers/protobuf/releases/download/v25.5/protoc-25.5-$osproc.zip
+unzip -p protoc-25.5-$osproc.zip bin/protoc > protoc
+rm protoc-25.5-$osproc.zip
 chmod a+x protoc
-wget https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.50.2/protoc-gen-grpc-java-1.50.2-$osproc.exe
-chmod a+x protoc-gen-grpc-java-1.50.2-$osproc.exe
-./protoc --plugin=protoc-gen-grpc-java=./protoc-gen-grpc-java-1.50.2-$osproc.exe --proto_path=. --java_out=src/main/java --grpc-java_out=src/main/java urlfrontier.proto
+wget https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.66.0/protoc-gen-grpc-java-1.66.0-$osproc.exe
+chmod a+x protoc-gen-grpc-java-1.66.0-$osproc.exe
+./protoc --plugin=protoc-gen-grpc-java=./protoc-gen-grpc-java-1.66.0-$osproc.exe --proto_path=. --java_out=src/main/java --grpc-java_out=src/main/java urlfrontier.proto
 ```
 
 Since the Java code is provided here and the corresponding JARs will be available from Maven, regenerating from the schema is not necessary.
