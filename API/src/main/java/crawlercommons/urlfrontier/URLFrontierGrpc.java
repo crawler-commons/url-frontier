@@ -4,14 +4,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /** */
 @javax.annotation.Generated(
-        value = "by gRPC proto compiler (version 1.50.2)",
+        value = "by gRPC proto compiler (version 1.66.0)",
         comments = "Source: urlfrontier.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class URLFrontierGrpc {
 
     private URLFrontierGrpc() {}
 
-    public static final String SERVICE_NAME = "urlfrontier.URLFrontier";
+    public static final java.lang.String SERVICE_NAME = "urlfrontier.URLFrontier";
 
     // Static method descriptors that strictly reflect the proto.
     private static volatile io.grpc.MethodDescriptor<
@@ -887,7 +887,7 @@ public final class URLFrontierGrpc {
     }
 
     /** */
-    public abstract static class URLFrontierImplBase implements io.grpc.BindableService {
+    public interface AsyncService {
 
         /**
          *
@@ -896,7 +896,7 @@ public final class URLFrontierGrpc {
          * * Return the list of nodes forming the cluster the current node belongs to *
          * </pre>
          */
-        public void listNodes(
+        default void listNodes(
                 crawlercommons.urlfrontier.Urlfrontier.Empty request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList>
                         responseObserver) {
@@ -911,7 +911,7 @@ public final class URLFrontierGrpc {
          * * Return the list of crawls handled by the frontier(s) *
          * </pre>
          */
-        public void listCrawls(
+        default void listCrawls(
                 crawlercommons.urlfrontier.Urlfrontier.Local request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.StringList>
                         responseObserver) {
@@ -926,7 +926,7 @@ public final class URLFrontierGrpc {
          * * Delete an entire crawl, returns the number of URLs removed this way *
          * </pre>
          */
-        public void deleteCrawl(
+        default void deleteCrawl(
                 crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                         responseObserver) {
@@ -942,7 +942,7 @@ public final class URLFrontierGrpc {
          * by default the service will return up to 100 results from offset 0 and exclude inactive queues.*
          * </pre>
          */
-        public void listQueues(
+        default void listQueues(
                 crawlercommons.urlfrontier.Urlfrontier.Pagination request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.QueueList>
                         responseObserver) {
@@ -957,7 +957,7 @@ public final class URLFrontierGrpc {
          * * Stream URLs due for fetching from M queues with up to N items per queue *
          * </pre>
          */
-        public void getURLs(
+        default void getURLs(
                 crawlercommons.urlfrontier.Urlfrontier.GetParams request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLInfo>
                         responseObserver) {
@@ -972,7 +972,7 @@ public final class URLFrontierGrpc {
          * * Push URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems *
          * </pre>
          */
-        public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
+        default io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem> putURLs(
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
                         responseObserver) {
             return io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall(
@@ -986,7 +986,7 @@ public final class URLFrontierGrpc {
          * * Return stats for a specific queue or an entire crawl. Does not aggregate the stats across different crawlids. *
          * </pre>
          */
-        public void getStats(
+        default void getStats(
                 crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Stats>
                         responseObserver) {
@@ -1001,7 +1001,7 @@ public final class URLFrontierGrpc {
          * * Delete the queue based on the key in parameter, returns the number of URLs removed this way *
          * </pre>
          */
-        public void deleteQueue(
+        default void deleteQueue(
                 crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                         responseObserver) {
@@ -1018,7 +1018,7 @@ public final class URLFrontierGrpc {
          * indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance.
          * </pre>
          */
-        public void blockQueueUntil(
+        default void blockQueueUntil(
                 crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
                         responseObserver) {
@@ -1033,7 +1033,7 @@ public final class URLFrontierGrpc {
          * * De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. *
          * </pre>
          */
-        public void setActive(
+        default void setActive(
                 crawlercommons.urlfrontier.Urlfrontier.Active request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
                         responseObserver) {
@@ -1048,7 +1048,7 @@ public final class URLFrontierGrpc {
          * * Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) *
          * </pre>
          */
-        public void getActive(
+        default void getActive(
                 crawlercommons.urlfrontier.Urlfrontier.Local request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Boolean>
                         responseObserver) {
@@ -1066,7 +1066,7 @@ public final class URLFrontierGrpc {
          * Usually informed by the delay setting of robots.txt.
          * </pre>
          */
-        public void setDelay(
+        default void setDelay(
                 crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
                         responseObserver) {
@@ -1081,7 +1081,7 @@ public final class URLFrontierGrpc {
          * * Overrides the log level for a given package *
          * </pre>
          */
-        public void setLogLevel(
+        default void setLogLevel(
                 crawlercommons.urlfrontier.Urlfrontier.LogLevelParams request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
                         responseObserver) {
@@ -1096,7 +1096,7 @@ public final class URLFrontierGrpc {
          * * Sets crawl limit for domain *
          * </pre>
          */
-        public void setCrawlLimit(
+        default void setCrawlLimit(
                 crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>
                         responseObserver) {
@@ -1113,7 +1113,7 @@ public final class URLFrontierGrpc {
          * Used to check current status of an URL within the frontier
          * </pre>
          */
-        public void getURLStatus(
+        default void getURLStatus(
                 crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem>
                         responseObserver) {
@@ -1130,137 +1130,26 @@ public final class URLFrontierGrpc {
          * Used to check current status of all URLs within the frontier
          * </pre>
          */
-        public void listURLs(
+        default void listURLs(
                 crawlercommons.urlfrontier.Urlfrontier.ListUrlParams request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.URLItem>
                         responseObserver) {
             io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
                     getListURLsMethod(), responseObserver);
         }
+    }
+
+    /** Base class for the server implementation of the service URLFrontier. */
+    public abstract static class URLFrontierImplBase
+            implements io.grpc.BindableService, AsyncService {
 
         @java.lang.Override
         public final io.grpc.ServerServiceDefinition bindService() {
-            return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-                    .addMethod(
-                            getListNodesMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.Empty,
-                                            crawlercommons.urlfrontier.Urlfrontier.StringList>(
-                                            this, METHODID_LIST_NODES)))
-                    .addMethod(
-                            getListCrawlsMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.Local,
-                                            crawlercommons.urlfrontier.Urlfrontier.StringList>(
-                                            this, METHODID_LIST_CRAWLS)))
-                    .addMethod(
-                            getDeleteCrawlMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier
-                                                    .DeleteCrawlMessage,
-                                            crawlercommons.urlfrontier.Urlfrontier.Long>(
-                                            this, METHODID_DELETE_CRAWL)))
-                    .addMethod(
-                            getListQueuesMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.Pagination,
-                                            crawlercommons.urlfrontier.Urlfrontier.QueueList>(
-                                            this, METHODID_LIST_QUEUES)))
-                    .addMethod(
-                            getGetURLsMethod(),
-                            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.GetParams,
-                                            crawlercommons.urlfrontier.Urlfrontier.URLInfo>(
-                                            this, METHODID_GET_URLS)))
-                    .addMethod(
-                            getPutURLsMethod(),
-                            io.grpc.stub.ServerCalls.asyncBidiStreamingCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.URLItem,
-                                            crawlercommons.urlfrontier.Urlfrontier.AckMessage>(
-                                            this, METHODID_PUT_URLS)))
-                    .addMethod(
-                            getGetStatsMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier
-                                                    .QueueWithinCrawlParams,
-                                            crawlercommons.urlfrontier.Urlfrontier.Stats>(
-                                            this, METHODID_GET_STATS)))
-                    .addMethod(
-                            getDeleteQueueMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier
-                                                    .QueueWithinCrawlParams,
-                                            crawlercommons.urlfrontier.Urlfrontier.Long>(
-                                            this, METHODID_DELETE_QUEUE)))
-                    .addMethod(
-                            getBlockQueueUntilMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams,
-                                            crawlercommons.urlfrontier.Urlfrontier.Empty>(
-                                            this, METHODID_BLOCK_QUEUE_UNTIL)))
-                    .addMethod(
-                            getSetActiveMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.Active,
-                                            crawlercommons.urlfrontier.Urlfrontier.Empty>(
-                                            this, METHODID_SET_ACTIVE)))
-                    .addMethod(
-                            getGetActiveMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.Local,
-                                            crawlercommons.urlfrontier.Urlfrontier.Boolean>(
-                                            this, METHODID_GET_ACTIVE)))
-                    .addMethod(
-                            getSetDelayMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams,
-                                            crawlercommons.urlfrontier.Urlfrontier.Empty>(
-                                            this, METHODID_SET_DELAY)))
-                    .addMethod(
-                            getSetLogLevelMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.LogLevelParams,
-                                            crawlercommons.urlfrontier.Urlfrontier.Empty>(
-                                            this, METHODID_SET_LOG_LEVEL)))
-                    .addMethod(
-                            getSetCrawlLimitMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams,
-                                            crawlercommons.urlfrontier.Urlfrontier.Empty>(
-                                            this, METHODID_SET_CRAWL_LIMIT)))
-                    .addMethod(
-                            getGetURLStatusMethod(),
-                            io.grpc.stub.ServerCalls.asyncUnaryCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest,
-                                            crawlercommons.urlfrontier.Urlfrontier.URLItem>(
-                                            this, METHODID_GET_URLSTATUS)))
-                    .addMethod(
-                            getListURLsMethod(),
-                            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
-                                    new MethodHandlers<
-                                            crawlercommons.urlfrontier.Urlfrontier.ListUrlParams,
-                                            crawlercommons.urlfrontier.Urlfrontier.URLItem>(
-                                            this, METHODID_LIST_URLS)))
-                    .build();
+            return URLFrontierGrpc.bindService(this);
         }
     }
 
-    /** */
+    /** A stub to allow clients to do asynchronous rpc calls to service URLFrontier. */
     public static final class URLFrontierStub
             extends io.grpc.stub.AbstractAsyncStub<URLFrontierStub> {
         private URLFrontierStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
@@ -1552,7 +1441,7 @@ public final class URLFrontierGrpc {
         }
     }
 
-    /** */
+    /** A stub to allow clients to do synchronous rpc calls to service URLFrontier. */
     public static final class URLFrontierBlockingStub
             extends io.grpc.stub.AbstractBlockingStub<URLFrontierBlockingStub> {
         private URLFrontierBlockingStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
@@ -1771,7 +1660,7 @@ public final class URLFrontierGrpc {
         }
     }
 
-    /** */
+    /** A stub to allow clients to do ListenableFuture-style rpc calls to service URLFrontier. */
     public static final class URLFrontierFutureStub
             extends io.grpc.stub.AbstractFutureStub<URLFrontierFutureStub> {
         private URLFrontierFutureStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
@@ -1997,10 +1886,10 @@ public final class URLFrontierGrpc {
                     io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
                     io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
                     io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-        private final URLFrontierImplBase serviceImpl;
+        private final AsyncService serviceImpl;
         private final int methodId;
 
-        MethodHandlers(URLFrontierImplBase serviceImpl, int methodId) {
+        MethodHandlers(AsyncService serviceImpl, int methodId) {
             this.serviceImpl = serviceImpl;
             this.methodId = methodId;
         }
@@ -2137,6 +2026,125 @@ public final class URLFrontierGrpc {
         }
     }
 
+    public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+        return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+                .addMethod(
+                        getListNodesMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.Empty,
+                                        crawlercommons.urlfrontier.Urlfrontier.StringList>(
+                                        service, METHODID_LIST_NODES)))
+                .addMethod(
+                        getListCrawlsMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.Local,
+                                        crawlercommons.urlfrontier.Urlfrontier.StringList>(
+                                        service, METHODID_LIST_CRAWLS)))
+                .addMethod(
+                        getDeleteCrawlMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage,
+                                        crawlercommons.urlfrontier.Urlfrontier.Long>(
+                                        service, METHODID_DELETE_CRAWL)))
+                .addMethod(
+                        getListQueuesMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.Pagination,
+                                        crawlercommons.urlfrontier.Urlfrontier.QueueList>(
+                                        service, METHODID_LIST_QUEUES)))
+                .addMethod(
+                        getGetURLsMethod(),
+                        io.grpc.stub.ServerCalls.asyncServerStreamingCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.GetParams,
+                                        crawlercommons.urlfrontier.Urlfrontier.URLInfo>(
+                                        service, METHODID_GET_URLS)))
+                .addMethod(
+                        getPutURLsMethod(),
+                        io.grpc.stub.ServerCalls.asyncBidiStreamingCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.URLItem,
+                                        crawlercommons.urlfrontier.Urlfrontier.AckMessage>(
+                                        service, METHODID_PUT_URLS)))
+                .addMethod(
+                        getGetStatsMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier
+                                                .QueueWithinCrawlParams,
+                                        crawlercommons.urlfrontier.Urlfrontier.Stats>(
+                                        service, METHODID_GET_STATS)))
+                .addMethod(
+                        getDeleteQueueMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier
+                                                .QueueWithinCrawlParams,
+                                        crawlercommons.urlfrontier.Urlfrontier.Long>(
+                                        service, METHODID_DELETE_QUEUE)))
+                .addMethod(
+                        getBlockQueueUntilMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams,
+                                        crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                                        service, METHODID_BLOCK_QUEUE_UNTIL)))
+                .addMethod(
+                        getSetActiveMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.Active,
+                                        crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                                        service, METHODID_SET_ACTIVE)))
+                .addMethod(
+                        getGetActiveMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.Local,
+                                        crawlercommons.urlfrontier.Urlfrontier.Boolean>(
+                                        service, METHODID_GET_ACTIVE)))
+                .addMethod(
+                        getSetDelayMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams,
+                                        crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                                        service, METHODID_SET_DELAY)))
+                .addMethod(
+                        getSetLogLevelMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.LogLevelParams,
+                                        crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                                        service, METHODID_SET_LOG_LEVEL)))
+                .addMethod(
+                        getSetCrawlLimitMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams,
+                                        crawlercommons.urlfrontier.Urlfrontier.Empty>(
+                                        service, METHODID_SET_CRAWL_LIMIT)))
+                .addMethod(
+                        getGetURLStatusMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest,
+                                        crawlercommons.urlfrontier.Urlfrontier.URLItem>(
+                                        service, METHODID_GET_URLSTATUS)))
+                .addMethod(
+                        getListURLsMethod(),
+                        io.grpc.stub.ServerCalls.asyncServerStreamingCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.ListUrlParams,
+                                        crawlercommons.urlfrontier.Urlfrontier.URLItem>(
+                                        service, METHODID_LIST_URLS)))
+                .build();
+    }
+
     private abstract static class URLFrontierBaseDescriptorSupplier
             implements io.grpc.protobuf.ProtoFileDescriptorSupplier,
                     io.grpc.protobuf.ProtoServiceDescriptorSupplier {
@@ -2161,9 +2169,9 @@ public final class URLFrontierGrpc {
     private static final class URLFrontierMethodDescriptorSupplier
             extends URLFrontierBaseDescriptorSupplier
             implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-        private final String methodName;
+        private final java.lang.String methodName;
 
-        URLFrontierMethodDescriptorSupplier(String methodName) {
+        URLFrontierMethodDescriptorSupplier(java.lang.String methodName) {
             this.methodName = methodName;
         }
 

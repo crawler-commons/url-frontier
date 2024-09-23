@@ -41,7 +41,7 @@
 	</build>
 
 	<properties>
-		<protobuf.java.util.version>4.28.2</protobuf.java.util.version>
+		<protobuf.java.util.version>${protoc.version}</protobuf.java.util.version>
 	</properties>
 
 	<dependencies>
@@ -59,6 +59,7 @@
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java-util</artifactId>
+			<!-- Version must match protoc version or must be newer -->
 			<version>${protobuf.java.util.version}</version>
 		</dependency>
 
