@@ -6,7 +6,7 @@
 	<groupId>com.github.crawler-commons</groupId>
 	<artifactId>urlfrontier</artifactId>
 	<packaging>pom</packaging>
-	<version>2.4-SNAPSHOT</version>
+	<version>3.4</version>
 	<name>urlfrontier</name>
 
 	<url>https://github.com/crawler-commons/url-frontier</url>
@@ -285,6 +285,17 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.7.0</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
