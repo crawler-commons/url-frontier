@@ -15,6 +15,7 @@
     - [Empty](#urlfrontier-Empty)
     - [GetParams](#urlfrontier-GetParams)
     - [KnownURLItem](#urlfrontier-KnownURLItem)
+    - [ListUrlParams](#urlfrontier-ListUrlParams)
     - [Local](#urlfrontier-Local)
     - [LogLevelParams](#urlfrontier-LogLevelParams)
     - [Long](#urlfrontier-Long)
@@ -28,6 +29,7 @@
     - [URLInfo](#urlfrontier-URLInfo)
     - [URLInfo.MetadataEntry](#urlfrontier-URLInfo-MetadataEntry)
     - [URLItem](#urlfrontier-URLItem)
+    - [URLStatusRequest](#urlfrontier-URLStatusRequest)
   
     - [AckMessage.Status](#urlfrontier-AckMessage-Status)
     - [LogLevelParams.Level](#urlfrontier-LogLevelParams-Level)
@@ -210,6 +212,25 @@ it will be elligible for fetching after the delay has elapsed.
 | ----- | ---- | ----- | ----------- |
 | info | [URLInfo](#urlfrontier-URLInfo) |  |  |
 | refetchable_from_date | [uint64](#uint64) |  | Expressed in seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. Optional, the default value of 0 indicates that a URL should not be refetched. |
+
+
+
+
+
+
+<a name="urlfrontier-ListUrlParams"></a>
+
+### ListUrlParams
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| start | [uint32](#uint32) |  | position of the first result in the list; defaults to 0 |
+| size | [uint32](#uint32) |  | max number of values; defaults to 100 |
+| key | [string](#string) |  | ID for the queue * |
+| crawlID | [string](#string) |  | crawl ID |
+| local | [bool](#bool) |  | only for the current local instance |
 
 
 
@@ -437,6 +458,23 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 
 
 
+
+<a name="urlfrontier-URLStatusRequest"></a>
+
+### URLStatusRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| url | [string](#string) |  | URL for which we request info |
+| key | [string](#string) |  | ID for the queue * |
+| crawlID | [string](#string) |  | crawl ID - empty string for default |
+
+
+
+
+
  
 
 
@@ -493,6 +531,8 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 | SetDelay | [QueueDelayParams](#urlfrontier-QueueDelayParams) | [Empty](#urlfrontier-Empty) | Set a delay from a given queue. No URLs will be obtained via GetURLs for this queue until the number of seconds specified has elapsed since the last time URLs were retrieved. Usually informed by the delay setting of robots.txt. |
 | SetLogLevel | [LogLevelParams](#urlfrontier-LogLevelParams) | [Empty](#urlfrontier-Empty) | Overrides the log level for a given package * |
 | SetCrawlLimit | [CrawlLimitParams](#urlfrontier-CrawlLimitParams) | [Empty](#urlfrontier-Empty) | Sets crawl limit for domain * |
+| GetURLStatus | [URLStatusRequest](#urlfrontier-URLStatusRequest) | [URLItem](#urlfrontier-URLItem) | Get status of a particular URL This does not take into account URL scheduling. Used to check current status of an URL within the frontier |
+| ListURLs | [ListUrlParams](#urlfrontier-ListUrlParams) | [URLItem](#urlfrontier-URLItem) stream | List all URLs currently in the frontier This does not take into account URL scheduling. Used to check current status of all URLs within the frontier |
 
  
 
