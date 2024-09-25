@@ -69,7 +69,7 @@ The Java code generated from the schema is available as a Maven dependency.
 		<dependency>
 			<groupId>com.github.crawler-commons</groupId>
 			<artifactId>urlfrontier-API</artifactId>
-			<version>2.3</version>
+			<version>2.4</version>
 		</dependency>
 	</dependencies>
 ```
