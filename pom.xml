@@ -186,7 +186,7 @@
 					</dependency>
 				</dependencies>
 				<configuration>
-					<skip>${skip.format.code}</skip>
+					<skip>${skipFormatCode}</skip>
 					<formatterOptions>
 						<googleJavaFormat.aosp>true</googleJavaFormat.aosp>
 						<googleJavaFormat.fixImportsOnly>false</googleJavaFormat.fixImportsOnly>
