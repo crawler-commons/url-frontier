@@ -11,6 +11,7 @@ import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Boolean;
+import crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
@@ -868,6 +869,26 @@ public abstract class AbstractFrontierService
             writeExecutorService.shutdownNow();
             readExecutorService.shutdownNow();
         }
+    }
+
+    public void setCrawlLimit(CrawlLimitParams params, StreamObserver<Empty> responseObserver) {
+        QueueWithinCrawl searchKey = new QueueWithinCrawl(params.getKey(), params.getCrawlID());
+        synchronized (getQueues()) {
+            QueueInterface qi = getQueues().get(searchKey);
+            if (qi != null) {
+                qi.setCrawlLimit(params.getLimit());
+            } else {
+                LOG.error(
+                        "Queue with key: {} and CrawlId: {} was not found.",
+                        searchKey.getQueue(),
+                        searchKey.getCrawlid());
+                responseObserver.onError(
+                        new RuntimeException("CrawlId and Queue combination is not found."));
+                return;
+            }
+        }
+
+        responseObserver.onCompleted();
     }
 
     public abstract void getURLStatus(
