@@ -4,6 +4,7 @@
 package crawlercommons.urlfrontier.service;
 
 import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
+import io.grpc.protobuf.services.ProtoReflectionService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.prometheus.client.exporter.HTTPServer;
@@ -170,7 +171,10 @@ public class URLFrontierServer implements Callable<Integer> {
             }
         }
 
-        this.server = ServerBuilder.forPort(port).addService(service).build();
+        this.server = ServerBuilder.forPort(port)
+            .addService(service)
+            .addService(ProtoReflectionService.newInstance())
+            .build();
         server.start();
         LOG.info(
                 "Started URLFrontierServer [{}] on port {} as {}",
