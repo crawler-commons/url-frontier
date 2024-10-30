@@ -1,0 +1,21 @@
+lint:
+    rules:
+        no_default: false
+
+        remove:
+            - FIELD_NAMES_EXCLUDE_PREPOSITIONS
+            - MESSAGE_NAMES_EXCLUDE_PREPOSITIONS
+            - MESSAGES_HAVE_COMMENT
+            - SERVICES_HAVE_COMMENT
+
+    rules_option:
+        max_line_length:
+            max_chars: 120
+            tab_chars: 4
+
+        indent:
+            style: 4
+
+    directories:
+        exclude:
+            - proto/validate
