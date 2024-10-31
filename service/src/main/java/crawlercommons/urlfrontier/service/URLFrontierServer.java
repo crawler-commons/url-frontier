@@ -4,9 +4,9 @@
 package crawlercommons.urlfrontier.service;
 
 import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
-import io.grpc.protobuf.services.ProtoReflectionService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.protobuf.services.ProtoReflectionService;
 import io.prometheus.client.exporter.HTTPServer;
 import io.prometheus.client.hotspot.DefaultExports;
 import java.io.Closeable;
@@ -171,11 +171,18 @@ public class URLFrontierServer implements Callable<Integer> {
             }
         }
 
-        this.server = ServerBuilder.forPort(port)
-            .addService(service)
-            .addService(ProtoReflectionService.newInstance())
-            .build();
-        server.start();
+        Boolean enableReflection =
+                Boolean.parseBoolean(
+                        configuration.getOrDefault("server.enable_reflection", "false"));
+
+        ServerBuilder builder = ServerBuilder.forPort(port).addService(service);
+
+        if (enableReflection) {
+            builder.addService(ProtoReflectionService.newInstance());
+        }
+
+        this.server = builder.build();
+        this.server.start();
         LOG.info(
                 "Started URLFrontierServer [{}] on port {} as {}",
                 service.getClass().getSimpleName(),
