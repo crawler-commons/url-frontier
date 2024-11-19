@@ -84,6 +84,9 @@ service URLFrontier {
          Used to check current status of all URLs within the frontier
      **/
      rpc ListURLs(ListUrlParams) returns (stream URLItem) {}
+     
+     /** Count URLs currently in the frontier **/
+     rpc CountURLs(CountUrlParams) returns (Long) {}
 }
 
 /** 
@@ -323,4 +326,13 @@ message ListUrlParams {
   string crawlID = 4;
   // only for the current local instance
   bool local = 5;
+}
+
+message CountUrlParams {
+  /** ID for the queue **/
+  string key = 1;
+  // crawl ID
+  string crawlID = 2;
+  // only for the current local instance
+  bool local = 3;
 }

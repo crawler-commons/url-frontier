@@ -13,6 +13,8 @@ import java.util.Set;
 
 public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterface {
 
+    private static final long serialVersionUID = 1787185139558575689L;
+
     public URLQueue(InternalURL initial) {
         this.add(initial);
     }

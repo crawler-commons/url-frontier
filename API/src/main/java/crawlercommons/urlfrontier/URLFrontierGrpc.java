@@ -844,6 +844,57 @@ public final class URLFrontierGrpc {
         return getListURLsMethod;
     }
 
+    private static volatile io.grpc.MethodDescriptor<
+                    crawlercommons.urlfrontier.Urlfrontier.CountUrlParams,
+                    crawlercommons.urlfrontier.Urlfrontier.Long>
+            getCountURLsMethod;
+
+    @io.grpc.stub.annotations.RpcMethod(
+            fullMethodName = SERVICE_NAME + '/' + "CountURLs",
+            requestType = crawlercommons.urlfrontier.Urlfrontier.CountUrlParams.class,
+            responseType = crawlercommons.urlfrontier.Urlfrontier.Long.class,
+            methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+    public static io.grpc.MethodDescriptor<
+                    crawlercommons.urlfrontier.Urlfrontier.CountUrlParams,
+                    crawlercommons.urlfrontier.Urlfrontier.Long>
+            getCountURLsMethod() {
+        io.grpc.MethodDescriptor<
+                        crawlercommons.urlfrontier.Urlfrontier.CountUrlParams,
+                        crawlercommons.urlfrontier.Urlfrontier.Long>
+                getCountURLsMethod;
+        if ((getCountURLsMethod = URLFrontierGrpc.getCountURLsMethod) == null) {
+            synchronized (URLFrontierGrpc.class) {
+                if ((getCountURLsMethod = URLFrontierGrpc.getCountURLsMethod) == null) {
+                    URLFrontierGrpc.getCountURLsMethod =
+                            getCountURLsMethod =
+                                    io.grpc.MethodDescriptor
+                                            .<crawlercommons.urlfrontier.Urlfrontier.CountUrlParams,
+                                                    crawlercommons.urlfrontier.Urlfrontier.Long>
+                                                    newBuilder()
+                                            .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                                            .setFullMethodName(
+                                                    generateFullMethodName(
+                                                            SERVICE_NAME, "CountURLs"))
+                                            .setSampledToLocalTracing(true)
+                                            .setRequestMarshaller(
+                                                    io.grpc.protobuf.ProtoUtils.marshaller(
+                                                            crawlercommons.urlfrontier.Urlfrontier
+                                                                    .CountUrlParams
+                                                                    .getDefaultInstance()))
+                                            .setResponseMarshaller(
+                                                    io.grpc.protobuf.ProtoUtils.marshaller(
+                                                            crawlercommons.urlfrontier.Urlfrontier
+                                                                    .Long.getDefaultInstance()))
+                                            .setSchemaDescriptor(
+                                                    new URLFrontierMethodDescriptorSupplier(
+                                                            "CountURLs"))
+                                            .build();
+                }
+            }
+        }
+        return getCountURLsMethod;
+    }
+
     /** Creates a new async stub that supports all call types for the service */
     public static URLFrontierStub newStub(io.grpc.Channel channel) {
         io.grpc.stub.AbstractStub.StubFactory<URLFrontierStub> factory =
@@ -1136,6 +1187,15 @@ public final class URLFrontierGrpc {
                         responseObserver) {
             io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
                     getListURLsMethod(), responseObserver);
+        }
+
+        /** */
+        default void countURLs(
+                crawlercommons.urlfrontier.Urlfrontier.CountUrlParams request,
+                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
+                        responseObserver) {
+            io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(
+                    getCountURLsMethod(), responseObserver);
         }
     }
 
@@ -1439,6 +1499,17 @@ public final class URLFrontierGrpc {
                     request,
                     responseObserver);
         }
+
+        /** */
+        public void countURLs(
+                crawlercommons.urlfrontier.Urlfrontier.CountUrlParams request,
+                io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
+                        responseObserver) {
+            io.grpc.stub.ClientCalls.asyncUnaryCall(
+                    getChannel().newCall(getCountURLsMethod(), getCallOptions()),
+                    request,
+                    responseObserver);
+        }
     }
 
     /** A stub to allow clients to do synchronous rpc calls to service URLFrontier. */
@@ -1658,6 +1729,13 @@ public final class URLFrontierGrpc {
             return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
                     getChannel(), getListURLsMethod(), getCallOptions(), request);
         }
+
+        /** */
+        public crawlercommons.urlfrontier.Urlfrontier.Long countURLs(
+                crawlercommons.urlfrontier.Urlfrontier.CountUrlParams request) {
+            return io.grpc.stub.ClientCalls.blockingUnaryCall(
+                    getChannel(), getCountURLsMethod(), getCallOptions(), request);
+        }
     }
 
     /** A stub to allow clients to do ListenableFuture-style rpc calls to service URLFrontier. */
@@ -1862,6 +1940,14 @@ public final class URLFrontierGrpc {
             return io.grpc.stub.ClientCalls.futureUnaryCall(
                     getChannel().newCall(getGetURLStatusMethod(), getCallOptions()), request);
         }
+
+        /** */
+        public com.google.common.util.concurrent.ListenableFuture<
+                        crawlercommons.urlfrontier.Urlfrontier.Long>
+                countURLs(crawlercommons.urlfrontier.Urlfrontier.CountUrlParams request) {
+            return io.grpc.stub.ClientCalls.futureUnaryCall(
+                    getChannel().newCall(getCountURLsMethod(), getCallOptions()), request);
+        }
     }
 
     private static final int METHODID_LIST_NODES = 0;
@@ -1879,7 +1965,8 @@ public final class URLFrontierGrpc {
     private static final int METHODID_SET_CRAWL_LIMIT = 12;
     private static final int METHODID_GET_URLSTATUS = 13;
     private static final int METHODID_LIST_URLS = 14;
-    private static final int METHODID_PUT_URLS = 15;
+    private static final int METHODID_COUNT_URLS = 15;
+    private static final int METHODID_PUT_URLS = 16;
 
     private static final class MethodHandlers<Req, Resp>
             implements io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -2001,6 +2088,13 @@ public final class URLFrontierGrpc {
                             (crawlercommons.urlfrontier.Urlfrontier.ListUrlParams) request,
                             (io.grpc.stub.StreamObserver<
                                             crawlercommons.urlfrontier.Urlfrontier.URLItem>)
+                                    responseObserver);
+                    break;
+                case METHODID_COUNT_URLS:
+                    serviceImpl.countURLs(
+                            (crawlercommons.urlfrontier.Urlfrontier.CountUrlParams) request,
+                            (io.grpc.stub.StreamObserver<
+                                            crawlercommons.urlfrontier.Urlfrontier.Long>)
                                     responseObserver);
                     break;
                 default:
@@ -2142,6 +2236,13 @@ public final class URLFrontierGrpc {
                                         crawlercommons.urlfrontier.Urlfrontier.ListUrlParams,
                                         crawlercommons.urlfrontier.Urlfrontier.URLItem>(
                                         service, METHODID_LIST_URLS)))
+                .addMethod(
+                        getCountURLsMethod(),
+                        io.grpc.stub.ServerCalls.asyncUnaryCall(
+                                new MethodHandlers<
+                                        crawlercommons.urlfrontier.Urlfrontier.CountUrlParams,
+                                        crawlercommons.urlfrontier.Urlfrontier.Long>(
+                                        service, METHODID_COUNT_URLS)))
                 .build();
     }
 
@@ -2210,6 +2311,7 @@ public final class URLFrontierGrpc {
                                             .addMethod(getSetCrawlLimitMethod())
                                             .addMethod(getGetURLStatusMethod())
                                             .addMethod(getListURLsMethod())
+                                            .addMethod(getCountURLsMethod())
                                             .build();
                 }
             }
