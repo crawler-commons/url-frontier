@@ -1189,7 +1189,13 @@ public final class URLFrontierGrpc {
                     getListURLsMethod(), responseObserver);
         }
 
-        /** */
+        /**
+         *
+         *
+         * <pre>
+         * * Count URLs currently in the frontier *
+         * </pre>
+         */
         default void countURLs(
                 crawlercommons.urlfrontier.Urlfrontier.CountUrlParams request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
@@ -1500,7 +1506,13 @@ public final class URLFrontierGrpc {
                     responseObserver);
         }
 
-        /** */
+        /**
+         *
+         *
+         * <pre>
+         * * Count URLs currently in the frontier *
+         * </pre>
+         */
         public void countURLs(
                 crawlercommons.urlfrontier.Urlfrontier.CountUrlParams request,
                 io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
@@ -1730,7 +1742,13 @@ public final class URLFrontierGrpc {
                     getChannel(), getListURLsMethod(), getCallOptions(), request);
         }
 
-        /** */
+        /**
+         *
+         *
+         * <pre>
+         * * Count URLs currently in the frontier *
+         * </pre>
+         */
         public crawlercommons.urlfrontier.Urlfrontier.Long countURLs(
                 crawlercommons.urlfrontier.Urlfrontier.CountUrlParams request) {
             return io.grpc.stub.ClientCalls.blockingUnaryCall(
@@ -1941,7 +1959,13 @@ public final class URLFrontierGrpc {
                     getChannel().newCall(getGetURLStatusMethod(), getCallOptions()), request);
         }
 
-        /** */
+        /**
+         *
+         *
+         * <pre>
+         * * Count URLs currently in the frontier *
+         * </pre>
+         */
         public com.google.common.util.concurrent.ListenableFuture<
                         crawlercommons.urlfrontier.Urlfrontier.Long>
                 countURLs(crawlercommons.urlfrontier.Urlfrontier.CountUrlParams request) {

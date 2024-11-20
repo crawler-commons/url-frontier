@@ -326,6 +326,10 @@ message ListUrlParams {
   string crawlID = 4;
   // only for the current local instance
   bool local = 5;
+  // Search filter on url (can be empty, default is empty)
+  optional string filter = 6;
+  // Ignore Case sensitivity for search filter (default is false -> case sensitive)
+  optional bool ignoreCase = 7;
 }
 
 message CountUrlParams {
@@ -333,6 +337,10 @@ message CountUrlParams {
   string key = 1;
   // crawl ID
   string crawlID = 2;
-  // only for the current local instance
-  bool local = 3;
+  // Search filter on url (can be empty, default is empty)
+  optional string filter = 3;
+  // Ignore Case sensitivity for search filter (default is false -> case sensitive)
+  optional bool ignoreCase = 4;
+  // only for the current local instance (default is false)
+  optional bool local = 5;
 }

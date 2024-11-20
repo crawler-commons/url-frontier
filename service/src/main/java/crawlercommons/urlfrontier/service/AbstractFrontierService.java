@@ -49,6 +49,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
@@ -905,6 +906,9 @@ public abstract class AbstractFrontierService
         long start = request.getStart();
         String key = request.getKey();
 
+        String filter = request.getFilter();
+        boolean ignoreCase = request.getIgnoreCase();
+
         final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
 
         // 100 by default
@@ -919,7 +923,7 @@ public abstract class AbstractFrontierService
                 normalisedCrawlID,
                 key);
 
-        long totalCount = -1;
+        long totalCount = 0;
         long sentCount = 0;
 
         synchronized (getQueues()) {
@@ -942,14 +946,23 @@ public abstract class AbstractFrontierService
                 CloseableIterator<URLItem> urliter = urlIterator(e);
 
                 while (urliter.hasNext()) {
-                    totalCount++;
-                    if (totalCount < start) {
-                        urliter.next();
-                    } else if (sentCount < maxURLs) {
-                        responseObserver.onNext(urliter.next());
-                        sentCount++;
-                    } else {
-                        break;
+                    URLItem cur = urliter.next();
+
+                    if (StringUtils.isEmpty(filter)
+                            || (!ignoreCase && cur.getKnown().getInfo().getUrl().contains(filter))
+                            || (ignoreCase
+                                    && StringUtils.containsIgnoreCase(
+                                            cur.getKnown().getInfo().getUrl(), filter))) {
+
+                        if (totalCount < start) {
+                            totalCount++;
+                        } else if (sentCount < maxURLs) {
+                            totalCount++;
+                            sentCount++;
+                            responseObserver.onNext(cur);
+                        } else {
+                            break;
+                        }
                     }
                 }
 
@@ -1001,10 +1014,17 @@ public abstract class AbstractFrontierService
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long> responseObserver) {
 
         String key = request.getKey();
+        String filter = request.getFilter();
+        boolean ignoreCase = request.getIgnoreCase();
 
         final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
 
-        LOG.info("Received request to count URLs [crawlId {}, key {}]", normalisedCrawlID, key);
+        LOG.info(
+                "Received request to count URLs [crawlId={}, key={}, filter={}, ignoreCase={}]",
+                normalisedCrawlID,
+                key,
+                filter,
+                ignoreCase);
 
         long totalCount = 0;
 
@@ -1028,8 +1048,15 @@ public abstract class AbstractFrontierService
                 CloseableIterator<URLItem> urliter = urlIterator(e);
 
                 while (urliter.hasNext()) {
-                    urliter.next();
-                    totalCount++;
+                    URLItem cur = urliter.next();
+
+                    if (StringUtils.isBlank(filter)
+                            || (!ignoreCase && cur.getKnown().getInfo().getUrl().contains(filter))
+                            || (ignoreCase
+                                    && StringUtils.containsIgnoreCase(
+                                            cur.getKnown().getInfo().getUrl(), filter))) {
+                        totalCount++;
+                    }
                 }
 
                 try {

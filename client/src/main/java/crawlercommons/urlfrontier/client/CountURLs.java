@@ -37,6 +37,20 @@ public class CountURLs implements Runnable {
                     "restricts the scope to this frontier instance instead of aggregating over the cluster")
     private Boolean local;
 
+    @Option(
+            names = {"-f", "--filter"},
+            defaultValue = "",
+            paramLabel = "STRING",
+            description = "String filter applied to URLs")
+    private String filter;
+
+    @Option(
+            names = {"-i", "--ignore-case"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description = "Ignore case sensitivity for search filter")
+    private Boolean ignoreCase;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -54,6 +68,11 @@ public class CountURLs implements Runnable {
 
         builder.setCrawlID(crawl);
         builder.setLocal(local);
+
+        builder.setFilter(filter);
+        builder.setIgnoreCase(ignoreCase);
+
+        builder.setFilter(filter);
 
         Long s = blockingFrontier.countURLs(builder.build());
         System.out.println(s.getValue() + " URLs in frontier");

@@ -359,7 +359,137 @@ class MemoryFrontierServiceTest {
     }
 
     @Test
+    @Order(9)
+    void testListAllURLsCaseInsensitive() {
+
+        ListUrlParams params =
+                ListUrlParams.newBuilder()
+                        .setCrawlID("crawl_id")
+                        .setStart(0)
+                        .setSize(100)
+                        .setFilter("COMPLETED")
+                        .setIgnoreCase(true)
+                        .build();
+
+        final AtomicInteger fetched = new AtomicInteger(0);
+        final AtomicInteger count = new AtomicInteger(0);
+
+        StreamObserver<URLItem> statusObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(URLItem value) {
+                        // receives confirmation that the value has been received
+                        logURLItem(value);
+
+                        if (value.hasKnown()) {
+                            fetched.incrementAndGet();
+                        }
+                        count.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testListAllURLsCaseInsensitive");
+                    }
+                };
+
+        memoryFrontierService.listURLs(params, statusObserver);
+        assertEquals(1, count.get());
+    }
+
+    @Test
+    @Order(10)
+    void testListAllURLsCaseSensitive() {
+
+        ListUrlParams params =
+                ListUrlParams.newBuilder()
+                        .setCrawlID("crawl_id")
+                        .setStart(0)
+                        .setSize(100)
+                        .setFilter("COMPLETED")
+                        .setIgnoreCase(false)
+                        .build();
+
+        final AtomicInteger fetched = new AtomicInteger(0);
+        final AtomicInteger count = new AtomicInteger(0);
+
+        StreamObserver<URLItem> statusObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(URLItem value) {
+                        // receives confirmation that the value has been received
+                        logURLItem(value);
+
+                        if (value.hasKnown()) {
+                            fetched.incrementAndGet();
+                        }
+                        count.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testListAllURLsCaseSensitive");
+                    }
+                };
+
+        memoryFrontierService.listURLs(params, statusObserver);
+        assertEquals(0, count.get());
+    }
+
+    @Test
+    @Order(11)
+    void testListAllURLstart() {
+
+        ListUrlParams params =
+                ListUrlParams.newBuilder().setCrawlID("crawl_id").setStart(3).setSize(10).build();
+
+        final AtomicInteger fetched = new AtomicInteger(0);
+        final AtomicInteger count = new AtomicInteger(0);
+
+        StreamObserver<URLItem> statusObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(URLItem value) {
+                        // receives confirmation that the value has been received
+                        logURLItem(value);
+
+                        if (value.hasKnown()) {
+                            fetched.incrementAndGet();
+                        }
+                        count.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testListAllURLs");
+                    }
+                };
+
+        memoryFrontierService.listURLs(params, statusObserver);
+        assertEquals(1, count.get());
+    }
+
+    @Test
     @Order(99)
+    // Must be last test
     void testNoRescheduleCompleted() {
 
         String crawlId = "crawl_id";
