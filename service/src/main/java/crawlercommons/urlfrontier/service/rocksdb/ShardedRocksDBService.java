@@ -8,6 +8,7 @@ import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
+import crawlercommons.urlfrontier.service.CloseableIterator;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
@@ -15,7 +16,6 @@ import crawlercommons.urlfrontier.service.cluster.DistributedFrontierService;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -101,7 +101,7 @@ public class ShardedRocksDBService extends DistributedFrontierService {
 
     @Override
     // TODO Implementation of urlIterator for ShardedRocksDB
-    protected Iterator<URLItem> urlIterator(
+    protected CloseableIterator<URLItem> urlIterator(
             Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long max) {
         throw new UnsupportedOperationException(
                 "Feature not implemented for ShardedRocksDB backend");

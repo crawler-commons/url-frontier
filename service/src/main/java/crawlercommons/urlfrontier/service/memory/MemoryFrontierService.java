@@ -11,6 +11,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
+import crawlercommons.urlfrontier.service.CloseableIterator;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
@@ -224,12 +225,12 @@ public class MemoryFrontierService extends AbstractFrontierService {
         }
     }
 
-    public Iterator<URLItem> urlIterator(
+    public CloseableIterator<URLItem> urlIterator(
             Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long maxURLs) {
         return new MemoryURLItemIterator(qentry, start, maxURLs);
     }
 
-    class MemoryURLItemIterator implements Iterator<URLItem> {
+    class MemoryURLItemIterator implements CloseableIterator<URLItem> {
 
         private final org.slf4j.Logger LOG = LoggerFactory.getLogger(MemoryURLItemIterator.class);
 
@@ -297,6 +298,11 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 }
             }
             return null; // shouldn't happen
+        }
+
+        @Override
+        public void close() {
+            // No need to close anything here
         }
     }
 }

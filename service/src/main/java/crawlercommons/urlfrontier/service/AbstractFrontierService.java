@@ -938,7 +938,7 @@ public abstract class AbstractFrontierService
                     continue;
                 }
 
-                Iterator<URLItem> urliter = urlIterator(e);
+                CloseableIterator<URLItem> urliter = urlIterator(e);
 
                 while (urliter.hasNext()) {
                     totalCount++;
@@ -951,17 +951,24 @@ public abstract class AbstractFrontierService
                         break;
                     }
                 }
+
+                try {
+                    urliter.close();
+                } catch (IOException e1) {
+                    LOG.warn("Error closing URLIterator", e1);
+                }
             }
         }
 
         responseObserver.onCompleted();
     }
 
-    protected Iterator<URLItem> urlIterator(Entry<QueueWithinCrawl, QueueInterface> qentry) {
+    protected CloseableIterator<URLItem> urlIterator(
+            Entry<QueueWithinCrawl, QueueInterface> qentry) {
         return urlIterator(qentry, 0L, Long.MAX_VALUE);
     }
 
-    protected abstract Iterator<URLItem> urlIterator(
+    protected abstract CloseableIterator<URLItem> urlIterator(
             Entry<QueueWithinCrawl, QueueInterface> qentry, long start, long max);
 
     /**
