@@ -300,7 +300,7 @@ public class RocksDBService extends AbstractFrontierService {
                 }
 
                 // too early for it?
-                long scheduled = Long.parseLong(currentKey.substring(pos2 + 1, pos3));
+                long scheduled = Long.parseLong(currentKey, pos2 + 1, pos3, 10);
                 if (scheduled > now) {
                     // they are sorted by date no need to go further
                     return alreadySent;
@@ -823,7 +823,7 @@ public class RocksDBService extends AbstractFrontierService {
                     final int pos2 = currentKey.indexOf('_', pos + 1);
                     final int pos3 = currentKey.indexOf('_', pos2 + 1);
 
-                    fromEpoch = Long.parseLong(currentKey.substring(pos2 + 1, pos3));
+                    fromEpoch = Long.parseLong(currentKey, pos2 + 1, pos3, 10);
 
                     try {
                         info =
