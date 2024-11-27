@@ -943,9 +943,7 @@ public class RocksDBService extends AbstractFrontierService {
                 final String schedulingKey =
                         new String(rocksIterator.value(), StandardCharsets.UTF_8);
 
-                if (LOG.isDebugEnabled()) {
                 LOG.debug("current key {}, schedulingKey={}", currentKey, schedulingKey);
-                }
 
                 byte[] scheduled = null;
                 try {
@@ -970,9 +968,7 @@ public class RocksDBService extends AbstractFrontierService {
                         LOG.error(e.getMessage(), e);
                     }
                 } else {
-                    if (LOG.isDebugEnabled()) {
                     LOG.debug("no schedule for {}", currentKey);
-                    }
 
                     final int pos1 = currentKey.indexOf('_');
                     final int pos2 = currentKey.indexOf('_', pos1 + 1);
