@@ -970,8 +970,8 @@ public abstract class AbstractFrontierService
                     urliter.close();
                 } catch (IOException e1) {
                     LOG.warn("Error closing URLIterator", e1);
+                }
             }
-        }
         }
 
         responseObserver.onCompleted();
