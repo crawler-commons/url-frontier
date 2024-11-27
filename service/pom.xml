@@ -20,6 +20,7 @@
 		<logback.version>1.5.8</logback.version>
 		<mockito.version>5.13.0</mockito.version>
 		<commons.io.version>2.16.1</commons.io.version>
+		<commons.lang.version>3.17.0</commons.lang.version>
 	</properties>
 
 	<build>
@@ -118,7 +119,12 @@
 			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons.lang.version}</version>
+		</dependency>
 	</dependencies>
 
 </project>

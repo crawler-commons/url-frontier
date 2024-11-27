@@ -84,6 +84,9 @@ service URLFrontier {
          Used to check current status of all URLs within the frontier
      **/
      rpc ListURLs(ListUrlParams) returns (stream URLItem) {}
+     
+     /** Count URLs currently in the frontier **/
+     rpc CountURLs(CountUrlParams) returns (Long) {}
 }
 
 /** 
@@ -323,4 +326,21 @@ message ListUrlParams {
   string crawlID = 4;
   // only for the current local instance
   bool local = 5;
+  // Search filter on url (can be empty, default is empty)
+  optional string filter = 6;
+  // Ignore Case sensitivity for search filter (default is false -> case sensitive)
+  optional bool ignoreCase = 7;
+}
+
+message CountUrlParams {
+  /** ID for the queue **/
+  string key = 1;
+  // crawl ID
+  string crawlID = 2;
+  // Search filter on url (can be empty, default is empty)
+  optional string filter = 3;
+  // Ignore Case sensitivity for search filter (default is false -> case sensitive)
+  optional bool ignoreCase = 4;
+  // only for the current local instance (default is false)
+  optional bool local = 5;
 }

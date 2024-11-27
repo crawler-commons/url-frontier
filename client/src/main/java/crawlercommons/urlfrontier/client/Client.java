@@ -10,7 +10,7 @@ import picocli.CommandLine.Option;
 @Command(
         name = "Client",
         mixinStandardHelpOptions = true,
-        version = "2.4",
+        version = "2.5",
         subcommands = {
             ListNodes.class,
             ListQueues.class,
@@ -26,6 +26,7 @@ import picocli.CommandLine.Option;
             SetLogLevel.class,
             SetCrawlLimit.class,
             GetURLStatus.class,
+            CountURLs.class
         },
         description = "Interacts with a URL Frontier from the command line")
 public class Client {

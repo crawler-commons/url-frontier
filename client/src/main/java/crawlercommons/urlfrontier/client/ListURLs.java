@@ -93,6 +93,20 @@ public class ListURLs implements Runnable {
             })
     private boolean parse;
 
+    @Option(
+            names = {"-f", "--filter"},
+            defaultValue = "",
+            paramLabel = "STRING",
+            description = "String filter applied to URLs")
+    private String filter;
+
+    @Option(
+            names = {"-i", "--ignore-case"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description = "Ignore case sensitivity for search filter")
+    private Boolean ignoreCase;
+
     // Use the system default time zone
     private ZoneId zoneId = ZoneId.systemDefault();
 
@@ -107,6 +121,9 @@ public class ListURLs implements Runnable {
         builder.setSize(maxNumURLs);
         builder.setStart(start);
         builder.setCrawlID(crawl);
+
+        builder.setFilter(filter);
+        builder.setIgnoreCase(ignoreCase);
 
         PrintStream outstream = null;
         if (output.length() > 0) {
