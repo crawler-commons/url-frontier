@@ -17,310 +17,328 @@
 
 syntax = "proto3";
 
-option java_package = "crawlercommons.urlfrontier";
-
 package urlfrontier;
 
+import "google/protobuf/bool_value.proto";
+import "google/protobuf/int64_value.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_package = "crawlercommons.urlfrontier";
+option go_package = "github.com/crawlercommons/url-frontier/v3";
+
 service URLFrontier {
+  // Return the list of nodes forming the cluster the current node belongs to.
+  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse);
 
-     /** Return the list of nodes forming the cluster the current node belongs to **/
-     rpc ListNodes(Empty) returns (StringList) {}
+  // Return the list of crawls handled by the frontier(s).
+  rpc ListCrawls(ListCrawlsRequest) returns (ListCrawlsResponse);
 
-     /** Return the list of crawls handled by the frontier(s) **/
-     rpc ListCrawls(Local) returns (StringList) {}
+  // Delete an entire crawl, returns the number of URLs removed this way.
+  rpc DeleteCrawl(DeleteCrawlRequest) returns (DeleteCrawlResponse);
 
-     /** Delete an entire crawl, returns the number of URLs removed this way **/
-     rpc DeleteCrawl(DeleteCrawlMessage) returns (Long) {}
+  // Return a list of queues for a specific crawl. Can chose whether to include
+  // inactive queues (a queue is active if it has URLs due for fetching);
+  // by default the service will return up to 100 results from offset 0 and
+  // exclude inactive queues.
+  rpc ListQueues(ListQueuesRequest) returns (ListQueuesResponse);
 
-     /** Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
-       by default the service will return up to 100 results from offset 0 and exclude inactive queues.**/
-     rpc ListQueues(Pagination) returns (QueueList) {}
+  // Stream URLs due for fetching from M queues with up to N items per queue.
+  rpc GetURLs(GetURLsRequest) returns (stream GetURLsResponse);
 
-     /** Stream URLs due for fetching from M queues with up to N items per queue **/
-     rpc GetURLs(GetParams) returns (stream URLInfo) {}
+  // Push URL items to the server; they get created (if they don't already
+  // exist) in the case of DiscoveredURLItems or updated if KnownURLItems.
+  rpc PutURLs(stream PutURLsRequest) returns (stream PutURLsResponse);
 
-     /** Push URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems **/
-     rpc PutURLs(stream URLItem) returns (stream AckMessage) {}
+  // Return stats for a specific queue or an entire crawl. Does not aggregate
+  // the stats across different crawlids.
+  rpc GetStats(GetStatsRequest) returns (GetStatsResponse);
 
-     /** Return stats for a specific queue or an entire crawl. Does not aggregate the stats across different crawlids. **/
-     rpc GetStats(QueueWithinCrawlParams) returns (Stats) {}
-     
-     /** Delete the queue based on the key in parameter, returns the number of URLs removed this way **/
-     rpc DeleteQueue(QueueWithinCrawlParams) returns (Long) {}
+  // Delete the queue based on the key in parameter, returns the number of URLs
+  // removed this way.
+  rpc DeleteQueue(DeleteQueueRequest) returns (DeleteQueueResponse);
 
-     /** Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch
-      1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time
-      indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance. 
-      **/
-     rpc BlockQueueUntil(BlockQueueParams) returns (Empty) {}
-          
-     /** De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. **/
-     rpc SetActive(Active) returns (Empty) {}
+  // Block a queue from sending URLs until after the given timestamp. A
+  // timestamp in the past will unblock the queue. The block will get removed
+  // once the time indicated in argument is reached. This is useful for cases
+  // where a server returns a Retry-After for instance.
+  rpc BlockQueueUntil(BlockQueueUntilRequest) returns (BlockQueueUntilResponse);
 
-     /** Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) **/
-     rpc GetActive(Local) returns (Boolean) {}
-     
-     /** Set a delay from a given queue.
-      No URLs will be obtained via GetURLs for this queue until the number of seconds specified has 
-      elapsed since the last time URLs were retrieved.
-       Usually informed by the delay setting of robots.txt.
-      **/
-     rpc SetDelay(QueueDelayParams) returns (Empty) {}
-          
-     /** Overrides the log level for a given package **/
-     rpc SetLogLevel(LogLevelParams) returns (Empty) {}
+  // Activate or deactivate the crawl. GetURLs will not return anything until
+  // SetActive is set to true. PutURLs will still accept incoming data.
+  rpc SetActive(SetActiveRequest) returns (SetActiveResponse);
 
-     /** Sets crawl limit for domain **/
-     rpc SetCrawlLimit(CrawlLimitParams) returns (Empty) {}
+  // Returns true if the crawl is active, false if it has been deactivated
+  // with SetActive.
+  rpc GetActive(GetActiveRequest) returns (GetActiveResponse);
 
-     /** Get status of a particular URL 
-         This does not take into account URL scheduling.
-         Used to check current status of an URL within the frontier
-     **/
-     rpc GetURLStatus(URLStatusRequest) returns (URLItem) {}
-     
-     /** List all URLs currently in the frontier 
-         This does not take into account URL scheduling.
-         Used to check current status of all URLs within the frontier
-     **/
-     rpc ListURLs(ListUrlParams) returns (stream URLItem) {}
+  // Set a delay from a given queue. No URLs will be obtained via GetURLs for
+  // this queue until the number of seconds specified has elapsed since the last
+  // time URLs were retrieved. Usually informed by the delay setting of
+  // robots.txt.
+  rpc SetDelay(SetDelayRequest) returns (SetDelayResponse);
+
+  // Overrides the log level for a given package.
+  rpc SetLogLevel(SetLogLevelRequest) returns (SetLogLevelResponse);
+
+  // Sets crawl limit for domain.
+  rpc SetCrawlLimit(SetCrawlLimitRequest) returns (SetCrawlLimitResponse);
+
+  // Get status of a particular URL. This does not take into account URL
+  // scheduling. Used to check current status of an URL within the frontier.
+  rpc GetURLStatus(GetURLStatusRequest) returns (GetURLStatusResponse);
+
+  // List all URLs currently in the frontier. This does not take into account
+  // URL scheduling. Used to check current status of all URLs within the
+  // frontier.
+  rpc ListURLs(ListURLsRequest) returns (stream ListURLsResponse);
 }
 
-/** 
-* Message returned by the GetStats method
-**/
-message Stats {
-  // number of active URLs in queues
-  uint64 size = 1;
-  // number of URLs currently in flight
-  uint32 inProcess = 2;
-  // custom counts 
-  map<string, uint64> counts = 3;
-  // number of active queues in the frontier
-  uint64 numberOfQueues = 4;
-  // crawl ID
-  string crawlID = 5;
+// The request message for ListNodes.
+message ListNodesRequest {
+  // empty
 }
 
-message Pagination {
-  // position of the first result in the list; defaults to 0
-  uint32 start = 1;
-  // max number of values; defaults to 100
-  uint32 size = 2;
-  // include inactive queues; defaults to false
-  bool include_inactive = 3;
-  // crawl ID
-  string crawlID = 4;
-  // only for the current local instance
-  bool local = 5;
+// The response message for ListNodes.
+message ListNodesResponse {
+  repeated string values = 1;
 }
 
-message DeleteCrawlMessage {
-  string value = 1;
+// The request message for ListCrawls.
+message ListCrawlsRequest {
+  // empty
+}
+
+// The response message for ListCrawls.
+message ListCrawlsResponse {
+  repeated string values = 1;
+}
+
+// The request message for DeleteCrawl.
+message DeleteCrawlRequest {
+  string crawl_id = 1;
   bool local = 2;
 }
 
-message Empty {
+// The response message for DeleteCrawl.
+message DeleteCrawlResponse {
+  google.protobuf.Int64Value urls_removed = 1;
 }
 
-message Local {
+// The request message for ListQueues.
+message ListQueuesRequest {
+  uint32 start = 1;
+  uint32 size = 2;
+  bool include_inactive = 3;
+  string crawl_id = 4;
+  bool local = 5;
+}
+
+// The response message for ListQueues.
+message ListQueuesResponse {
+  repeated string values = 1;
+  uint64 total = 2;
+  uint32 start = 3;
+  uint32 size = 4;
+  string crawl_id = 5;
+}
+
+// The request message for GetURLs.
+message GetURLsRequest {
+  uint32 max_urls_per_queue = 1;
+  uint32 max_queues = 2;
+  string key = 3;
+  uint32 delay_requestable = 4;
+  oneof crawl {
+    bool any_crawl_id = 5;
+    string crawl_id = 6;
+  }
+}
+
+// The response message for GetURLs.
+message GetURLsResponse {
+  URLInfo url = 1;
+}
+
+// The request message for PutURLs.
+message PutURLsRequest {
+  URLInfo url = 1;
+}
+
+// The response message for PutURLs.
+message PutURLsResponse {
+  AckMessage ack = 1;
+}
+
+// The request message for GetStats.
+message GetStatsRequest {
+  string key = 1;
+  string crawl_id = 2;
+  bool local = 3;
+}
+
+// The response message for GetStats.
+message GetStatsResponse {
+  uint64 size = 1;
+  uint32 in_process = 2;
+  map<string, uint64> counts = 3;
+  uint64 number_of_queues = 4;
+  string crawl_id = 5;
+}
+
+// The request message for DeleteQueue.
+message DeleteQueueRequest {
+  string key = 1;
+  string crawl_id = 2;
+  bool local = 3;
+}
+
+// The response message for DeleteQueue.
+message DeleteQueueResponse {
+  google.protobuf.Int64Value urls_removed = 1;
+}
+
+// The request message for BlockQueueUntil.
+message BlockQueueUntilRequest {
+  string key = 1;
+  google.protobuf.Timestamp time = 2;
+  string crawl_id = 3;
+  bool local = 4;
+}
+
+// The response message for BlockQueueUntil.
+message BlockQueueUntilResponse {
+  // empty
+}
+
+// The request message for SetActive.
+message SetActiveRequest {
+  bool state = 1;
+  bool local = 2;
+}
+
+// The response message for SetActive.
+message SetActiveResponse {
+  // empty
+}
+
+// The request message for GetActive.
+message GetActiveRequest {
   bool local = 1;
 }
 
-message Active {
-  bool state = 1;
-  bool local = 2;
+// The response message for GetActive.
+message GetActiveResponse {
+  google.protobuf.BoolValue state = 1;
 }
 
-message Boolean {
-  bool state = 1;
-}
-
-message Long {
-  uint64 value = 1;
-}
-
-/** Returned by ListQueues **/
-message QueueList {
-  repeated string values = 1;
-  // total number of queues
-  uint64 total = 2;
-  // position of the first result in the list
-  uint32 start = 3;
-  // number of values returned
-  uint32 size = 4;
-  // crawl ID - empty string for default
-  string crawlID = 5;
-}
-
-message StringList {
-  repeated string values = 1;
-}
-
-message QueueWithinCrawlParams {
-  /** ID for the queue **/
+// The request message for SetDelay.
+message SetDelayRequest {
   string key = 1;
-  // crawl ID - empty string for default
-  string crawlID = 2;
-  // only for this instance
-  bool local = 3;
-}
-
-/** Parameter message for SetDelay **/
-message QueueDelayParams {
-  /** ID for the queue - an empty value sets the default for all the queues **/
-  string key = 1;
-  //  delay in seconds before a queue can provide new URLs
   uint32 delay_requestable = 2;
-  // crawl ID - empty string for default
-  string crawlID = 3;
-  // only for this instance
+  string crawl_id = 3;
   bool local = 4;
 }
 
-/** Parameter message for BlockQueueUntil **/
-message BlockQueueParams {
-  /** ID for the queue **/
+// The response message for SetDelay.
+message SetDelayResponse {
+  // empty
+}
+
+// The request message for SetLogLevel.
+message SetLogLevelRequest {
+  string package = 1;
+  Level level = 2;
+  bool local = 3;
+
+  enum Level {
+    LEVEL_UNSPECIFIED = 0;
+    LEVEL_TRACE = 1;
+    LEVEL_DEBUG = 2;
+    LEVEL_INFO = 3;
+    LEVEL_WARN = 4;
+    LEVEL_ERROR = 5;
+  }
+}
+
+// The response message for SetLogLevel.
+message SetLogLevelResponse {
+  // empty
+}
+
+// The request message for SetCrawlLimit.
+message SetCrawlLimitRequest {
   string key = 1;
-  /** Expressed in seconds of UTC time since Unix epoch
-      1970-01-01T00:00:00Z. The default value of 0 will unblock the queue.
-  **/
-  uint64 time = 2;
-  // crawl ID
-  string crawlID = 3;
-  // only for this instance
-  bool local = 4;
+  uint32 limit = 2;
+  string crawl_id = 3;
 }
 
-/** Parameter message for GetURLs **/
-message GetParams {
-  // maximum number of URLs per queue, the default value of 0 means no limit
-  uint32 max_urls_per_queue = 1;
-  // maximum number of queues to get URLs from, the default value of 0 means no limit
-  uint32 max_queues = 2;
-  // queue id if restricting to a specific queue
+// The response message for SetCrawlLimit.
+message SetCrawlLimitResponse {
+  // empty
+}
+
+// The request message for GetURLStatus.
+message GetURLStatusRequest {
+  string url = 1;
+  string key = 2;
+  string crawl_id = 3;
+}
+
+// The response message for GetURLStatus.
+message GetURLStatusResponse {
+  URLItem url = 1;
+}
+
+// The request message for ListURLs.
+message ListURLsRequest {
+  uint32 start = 1;
+  uint32 size = 2;
   string key = 3;
-  //  delay in seconds before a URL can be unlocked and sent again for fetching 
-  uint32 delay_requestable = 4;
-  oneof item {
-    AnyCrawlID anyCrawlID = 5;
-    string crawlID = 6;
-  }
+  string crawl_id = 4;
+  bool local = 5;
 }
 
-message AnyCrawlID {}
+// The response message for ListURLs.
+message ListURLsResponse {
+  URLItem url = 1;
+}
 
-/** Wrapper for a KnownURLItem or DiscoveredURLItem **/
 message URLItem {
-oneof item {
+    oneof item {
     DiscoveredURLItem discovered = 1;
-    KnownURLItem known = 2;
+      KnownURLItem known = 2;
   }
-  /** Identifier specified by the client, if missing, the URL is returned **/
-  string ID = 3;
+  string id = 3;
 }
 
 message AckMessage {
-  /** ID which had been specified by the client **/
-  string ID = 1;
-  
-  /** Status indicating whether the input was successfully processed or not. SKIPPED means that 
-  the URL should not be resent e.g. there is something inherently wrong with it (too long? invalid?)
-  whereas FAIL means that the input could be resent.
-  **/
-  
-  enum Status{
-      OK = 0;
-      SKIPPED = 1;
-      FAIL = 2;
-   }
-   
-   Status status = 2;
-}
+    string id = 1;
+    Status status = 2;
 
+  enum Status {
+        STATUS_UNSPECIFIED = 0;
+        STATUS_OK = 1;
+        STATUS_SKIPPED = 2;
+        STATUS_FAIL = 3;
+    }
+}
 
 message URLInfo {
-  /** URL **/
-  string url = 1;
-  /** The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname,
-    domain name or IP or the URL. If not set, the service will use a sensible default like hostname.
-  **/
-  string key = 2;
-  /** 
-  Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc...
-  **/
-  map<string, StringList> metadata = 3;
-  /** crawl ID **/
-  string crawlID = 4;
-}
-
-/**
- URL which was already known in the frontier, was returned by GetURLs() and processed by the crawler. Used for updating the information 
- about it in the frontier. If the date is not set, the URL will be considered done and won't be resubmitted for fetching, otherwise
- it will be elligible for fetching after the delay has elapsed.
-**/
-message KnownURLItem {
-  URLInfo info = 1;
-  /** Expressed in seconds of UTC time since Unix epoch
-      1970-01-01T00:00:00Z. Optional, the default value of 0 indicates
-      that a URL should not be refetched.
-  **/
-  uint64 refetchable_from_date = 2;
-}
-
-/**
- URL discovered during the crawl, might already be known in the URL Frontier or not.
-**/
-message DiscoveredURLItem {
-  URLInfo info = 1;
-}
-
-/**
- Configuration of the log level for a particular package, e.g.
- crawlercommons.urlfrontier.service.rocksdb DEBUG
-**/
-message LogLevelParams {
-  string package = 1;
-  enum Level {
-    TRACE = 0;
-    DEBUG = 1;
-    INFO = 2;
-    WARN = 3;
-    ERROR = 4;
-  }
-  Level level = 2;
-  // only for this instance
-  bool local = 3;
-}
-
-
-/** Parameter message for SetCrawlLimit **/
-message CrawlLimitParams {
-  /** ID for the queue **/
-  string key = 1;
-  uint32 limit = 2;
-  // crawl ID
-  string crawlID = 3;
-}
-
-message URLStatusRequest {
-    /** URL for which we request info */
     string url = 1;
-    /** ID for the queue **/
     string key = 2;
-    // crawl ID - empty string for default
-    string crawlID = 3;
+    map<string, StringList> metadata = 3;
+    string crawl_id = 4;
 }
 
-message ListUrlParams {
-  // position of the first result in the list; defaults to 0
-  uint32 start = 1;
-  // max number of values; defaults to 100
-  uint32 size = 2;
-  /** ID for the queue **/
-  string key = 3;
-  // crawl ID
-  string crawlID = 4;
-  // only for the current local instance
-  bool local = 5;
+message KnownURLItem {
+    URLInfo info = 1;
+    uint64 refetchable_from_date = 2;
+}
+
+message DiscoveredURLItem {
+    URLInfo info = 1;
+}
+
+message StringList {
+    repeated string values = 1;
 }
