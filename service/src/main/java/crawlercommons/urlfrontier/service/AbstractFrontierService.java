@@ -907,6 +907,7 @@ public abstract class AbstractFrontierService
         String key = request.getKey();
 
         String filter = request.getFilter();
+        boolean doFilter = StringUtils.isNotBlank(filter); // Should we filter the URLs ?
         boolean ignoreCase = request.getIgnoreCase();
 
         final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
@@ -923,7 +924,7 @@ public abstract class AbstractFrontierService
                 normalisedCrawlID,
                 key);
 
-        long totalCount = 0;
+        long pos = -1; // Current position in the list of (filtered) URLs
         long sentCount = 0;
 
         synchronized (getQueues()) {
@@ -945,23 +946,15 @@ public abstract class AbstractFrontierService
 
                 CloseableIterator<URLItem> urliter = urlIterator(e);
 
-                while (urliter.hasNext()) {
+                while (urliter.hasNext() && sentCount < maxURLs) {
                     URLItem cur = urliter.next();
 
-                    if (StringUtils.isEmpty(filter)
-                            || (!ignoreCase && cur.getKnown().getInfo().getUrl().contains(filter))
-                            || (ignoreCase
-                                    && StringUtils.containsIgnoreCase(
-                                            cur.getKnown().getInfo().getUrl(), filter))) {
+                    if (!doFilter || filterURL(cur, filter, ignoreCase)) {
+                        pos++;
 
-                        if (totalCount < start) {
-                            totalCount++;
-                        } else if (sentCount < maxURLs) {
-                            totalCount++;
+                        if (pos >= start && sentCount < maxURLs) {
                             sentCount++;
                             responseObserver.onNext(cur);
-                        } else {
-                            break;
                         }
                     }
                 }
@@ -1015,6 +1008,7 @@ public abstract class AbstractFrontierService
 
         String key = request.getKey();
         String filter = request.getFilter();
+        boolean doFilter = StringUtils.isNotBlank(filter); // Should we filter the URLs ?
         boolean ignoreCase = request.getIgnoreCase();
 
         final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
@@ -1050,11 +1044,7 @@ public abstract class AbstractFrontierService
                 while (urliter.hasNext()) {
                     URLItem cur = urliter.next();
 
-                    if (StringUtils.isBlank(filter)
-                            || (!ignoreCase && cur.getKnown().getInfo().getUrl().contains(filter))
-                            || (ignoreCase
-                                    && StringUtils.containsIgnoreCase(
-                                            cur.getKnown().getInfo().getUrl(), filter))) {
+                    if (!doFilter || filterURL(cur, filter, ignoreCase)) {
                         totalCount++;
                     }
                 }
@@ -1073,5 +1063,21 @@ public abstract class AbstractFrontierService
                         .build());
 
         responseObserver.onCompleted();
+    }
+
+    /**
+     * Check if an URLItem matches a text filter
+     *
+     * @param cur The URLItem to be filtered
+     * @param text The string to search for
+     * @param ignoreCase if the filter should be case insentive
+     * @return true if the URLItem matches the filter
+     */
+    private boolean filterURL(URLItem cur, String text, boolean ignoreCase) {
+
+        String curURL = cur.getKnown().getInfo().getUrl();
+        return ignoreCase
+                ? StringUtils.containsIgnoreCase(curURL, text)
+                : StringUtils.contains(curURL, text);
     }
 }
