@@ -11,6 +11,7 @@ import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Boolean;
+import crawlercommons.urlfrontier.Urlfrontier.CountUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
@@ -48,6 +49,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
@@ -904,6 +906,10 @@ public abstract class AbstractFrontierService
         long start = request.getStart();
         String key = request.getKey();
 
+        String filter = request.getFilter();
+        boolean doFilter = StringUtils.isNotBlank(filter); // Should we filter the URLs ?
+        boolean ignoreCase = request.getIgnoreCase();
+
         final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
 
         // 100 by default
@@ -918,7 +924,7 @@ public abstract class AbstractFrontierService
                 normalisedCrawlID,
                 key);
 
-        long totalCount = -1;
+        long pos = -1; // Current position in the list of (filtered) URLs
         long sentCount = 0;
 
         synchronized (getQueues()) {
@@ -940,15 +946,16 @@ public abstract class AbstractFrontierService
 
                 CloseableIterator<URLItem> urliter = urlIterator(e);
 
-                while (urliter.hasNext()) {
-                    totalCount++;
-                    if (totalCount < start) {
-                        urliter.next();
-                    } else if (sentCount < maxURLs) {
-                        responseObserver.onNext(urliter.next());
-                        sentCount++;
-                    } else {
-                        break;
+                while (urliter.hasNext() && sentCount < maxURLs) {
+                    URLItem cur = urliter.next();
+
+                    if (!doFilter || filterURL(cur, filter, ignoreCase)) {
+                        pos++;
+
+                        if (pos >= start && sentCount < maxURLs) {
+                            sentCount++;
+                            responseObserver.onNext(cur);
+                        }
                     }
                 }
 
@@ -991,5 +998,86 @@ public abstract class AbstractFrontierService
         builder.setKnown(kbuilder.build());
 
         return builder.build();
+    }
+
+    /** Count the number of URLs in a given queue/crawl */
+    @Override
+    public void countURLs(
+            CountUrlParams request,
+            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long> responseObserver) {
+
+        String key = request.getKey();
+        String filter = request.getFilter();
+        boolean doFilter = StringUtils.isNotBlank(filter); // Should we filter the URLs ?
+        boolean ignoreCase = request.getIgnoreCase();
+
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+
+        LOG.info(
+                "Received request to count URLs [crawlId={}, key={}, filter={}, ignoreCase={}]",
+                normalisedCrawlID,
+                key,
+                filter,
+                ignoreCase);
+
+        long totalCount = 0;
+
+        synchronized (getQueues()) {
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
+                    getQueues().entrySet().iterator();
+
+            while (qiterator.hasNext()) {
+                Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
+
+                // check that it is within the right crawlID
+                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                    continue;
+                }
+
+                // check that it is within the right key/queue
+                if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
+                    continue;
+                }
+
+                CloseableIterator<URLItem> urliter = urlIterator(e);
+
+                while (urliter.hasNext()) {
+                    URLItem cur = urliter.next();
+
+                    if (!doFilter || filterURL(cur, filter, ignoreCase)) {
+                        totalCount++;
+                    }
+                }
+
+                try {
+                    urliter.close();
+                } catch (Exception e1) {
+                    LOG.warn("Error closing URLIterator", e1);
+                }
+            }
+        }
+
+        responseObserver.onNext(
+                crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
+                        .setValue(totalCount)
+                        .build());
+
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Check if an URLItem matches a text filter
+     *
+     * @param cur The URLItem to be filtered
+     * @param text The string to search for
+     * @param ignoreCase if the filter should be case insentive
+     * @return true if the URLItem matches the filter
+     */
+    private boolean filterURL(URLItem cur, String text, boolean ignoreCase) {
+
+        String curURL = cur.getKnown().getInfo().getUrl();
+        return ignoreCase
+                ? StringUtils.containsIgnoreCase(curURL, text)
+                : StringUtils.contains(curURL, text);
     }
 }

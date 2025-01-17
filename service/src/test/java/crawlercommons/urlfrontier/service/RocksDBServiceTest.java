@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
@@ -386,6 +387,110 @@ class RocksDBServiceTest {
 
         assertEquals(1, nbQueues);
         assertEquals(3, nbUrls);
+    }
+
+    @Test
+    @Order(9)
+    void testCountURLs() {
+
+        Urlfrontier.CountUrlParams.Builder builder = Urlfrontier.CountUrlParams.newBuilder();
+
+        builder.setKey("queue_mysite");
+        builder.setCrawlID("crawl_id");
+        builder.setLocal(false);
+
+        StreamObserver<Urlfrontier.Long> responseObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(Urlfrontier.Long value) {
+                        // receives confirmation that the value has been received
+                        assertEquals(3, value.getValue());
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                        fail();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testNoRescheduleCompleted 1/2");
+                    }
+                };
+
+        rocksDBService.countURLs(builder.build(), responseObserver);
+    }
+
+    @Test
+    @Order(10)
+    void testCountURLsCaseSensitive() {
+
+        Urlfrontier.CountUrlParams.Builder builder = Urlfrontier.CountUrlParams.newBuilder();
+
+        builder.setKey("queue_mysite");
+        builder.setCrawlID("crawl_id");
+        builder.setFilter("COMPLETED");
+        builder.setIgnoreCase(false);
+
+        StreamObserver<Urlfrontier.Long> responseObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(Urlfrontier.Long value) {
+                        // receives confirmation that the value has been received
+                        assertEquals(0, value.getValue());
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                        fail();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testNoRescheduleCompleted 1/2");
+                    }
+                };
+
+        rocksDBService.countURLs(builder.build(), responseObserver);
+    }
+
+    @Test
+    @Order(9)
+    void testCountURsLCaseInsensitive() {
+
+        Urlfrontier.CountUrlParams.Builder builder = Urlfrontier.CountUrlParams.newBuilder();
+
+        builder.setKey("queue_mysite");
+        builder.setCrawlID("crawl_id");
+        builder.setFilter("COMPLETED");
+        builder.setIgnoreCase(true);
+
+        StreamObserver<Urlfrontier.Long> responseObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(Urlfrontier.Long value) {
+                        // receives confirmation that the value has been received
+                        assertEquals(1, value.getValue());
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                        fail();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOG.info("completed testNoRescheduleCompleted 1/2");
+                    }
+                };
+
+        rocksDBService.countURLs(builder.build(), responseObserver);
     }
 
     @Test

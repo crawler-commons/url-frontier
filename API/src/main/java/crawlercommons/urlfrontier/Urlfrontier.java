@@ -21082,6 +21082,71 @@ public final class Urlfrontier {
          * @return The local.
          */
         boolean getLocal();
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 6;</code>
+         *
+         * @return Whether the filter field is set.
+         */
+        boolean hasFilter();
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 6;</code>
+         *
+         * @return The filter.
+         */
+        java.lang.String getFilter();
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 6;</code>
+         *
+         * @return The bytes for filter.
+         */
+        com.google.protobuf.ByteString getFilterBytes();
+
+        /**
+         *
+         *
+         * <pre>
+         * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+         * </pre>
+         *
+         * <code>optional bool ignoreCase = 7;</code>
+         *
+         * @return Whether the ignoreCase field is set.
+         */
+        boolean hasIgnoreCase();
+
+        /**
+         *
+         *
+         * <pre>
+         * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+         * </pre>
+         *
+         * <code>optional bool ignoreCase = 7;</code>
+         *
+         * @return The ignoreCase.
+         */
+        boolean getIgnoreCase();
     }
 
     /** Protobuf type {@code urlfrontier.ListUrlParams} */
@@ -21099,6 +21164,7 @@ public final class Urlfrontier {
         private ListUrlParams() {
             key_ = "";
             crawlID_ = "";
+            filter_ = "";
         }
 
         @java.lang.Override
@@ -21122,6 +21188,7 @@ public final class Urlfrontier {
                             crawlercommons.urlfrontier.Urlfrontier.ListUrlParams.Builder.class);
         }
 
+        private int bitField0_;
         public static final int START_FIELD_NUMBER = 1;
         private int start_ = 0;
 
@@ -21285,6 +21352,110 @@ public final class Urlfrontier {
             return local_;
         }
 
+        public static final int FILTER_FIELD_NUMBER = 6;
+
+        @SuppressWarnings("serial")
+        private volatile java.lang.Object filter_ = "";
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 6;</code>
+         *
+         * @return Whether the filter field is set.
+         */
+        @java.lang.Override
+        public boolean hasFilter() {
+            return ((bitField0_ & 0x00000001) != 0);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 6;</code>
+         *
+         * @return The filter.
+         */
+        @java.lang.Override
+        public java.lang.String getFilter() {
+            java.lang.Object ref = filter_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                filter_ = s;
+                return s;
+            }
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 6;</code>
+         *
+         * @return The bytes for filter.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getFilterBytes() {
+            java.lang.Object ref = filter_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                filter_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int IGNORECASE_FIELD_NUMBER = 7;
+        private boolean ignoreCase_ = false;
+
+        /**
+         *
+         *
+         * <pre>
+         * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+         * </pre>
+         *
+         * <code>optional bool ignoreCase = 7;</code>
+         *
+         * @return Whether the ignoreCase field is set.
+         */
+        @java.lang.Override
+        public boolean hasIgnoreCase() {
+            return ((bitField0_ & 0x00000002) != 0);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+         * </pre>
+         *
+         * <code>optional bool ignoreCase = 7;</code>
+         *
+         * @return The ignoreCase.
+         */
+        @java.lang.Override
+        public boolean getIgnoreCase() {
+            return ignoreCase_;
+        }
+
         private byte memoizedIsInitialized = -1;
 
         @java.lang.Override
@@ -21315,6 +21486,12 @@ public final class Urlfrontier {
             if (local_ != false) {
                 output.writeBool(5, local_);
             }
+            if (((bitField0_ & 0x00000001) != 0)) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 6, filter_);
+            }
+            if (((bitField0_ & 0x00000002) != 0)) {
+                output.writeBool(7, ignoreCase_);
+            }
             getUnknownFields().writeTo(output);
         }
 
@@ -21339,6 +21516,12 @@ public final class Urlfrontier {
             if (local_ != false) {
                 size += com.google.protobuf.CodedOutputStream.computeBoolSize(5, local_);
             }
+            if (((bitField0_ & 0x00000001) != 0)) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, filter_);
+            }
+            if (((bitField0_ & 0x00000002) != 0)) {
+                size += com.google.protobuf.CodedOutputStream.computeBoolSize(7, ignoreCase_);
+            }
             size += getUnknownFields().getSerializedSize();
             memoizedSize = size;
             return size;
@@ -21360,6 +21543,14 @@ public final class Urlfrontier {
             if (!getKey().equals(other.getKey())) return false;
             if (!getCrawlID().equals(other.getCrawlID())) return false;
             if (getLocal() != other.getLocal()) return false;
+            if (hasFilter() != other.hasFilter()) return false;
+            if (hasFilter()) {
+                if (!getFilter().equals(other.getFilter())) return false;
+            }
+            if (hasIgnoreCase() != other.hasIgnoreCase()) return false;
+            if (hasIgnoreCase()) {
+                if (getIgnoreCase() != other.getIgnoreCase()) return false;
+            }
             if (!getUnknownFields().equals(other.getUnknownFields())) return false;
             return true;
         }
@@ -21381,6 +21572,14 @@ public final class Urlfrontier {
             hash = (53 * hash) + getCrawlID().hashCode();
             hash = (37 * hash) + LOCAL_FIELD_NUMBER;
             hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(getLocal());
+            if (hasFilter()) {
+                hash = (37 * hash) + FILTER_FIELD_NUMBER;
+                hash = (53 * hash) + getFilter().hashCode();
+            }
+            if (hasIgnoreCase()) {
+                hash = (37 * hash) + IGNORECASE_FIELD_NUMBER;
+                hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(getIgnoreCase());
+            }
             hash = (29 * hash) + getUnknownFields().hashCode();
             memoizedHashCode = hash;
             return hash;
@@ -21526,6 +21725,8 @@ public final class Urlfrontier {
                 key_ = "";
                 crawlID_ = "";
                 local_ = false;
+                filter_ = "";
+                ignoreCase_ = false;
                 return this;
             }
 
@@ -21579,6 +21780,16 @@ public final class Urlfrontier {
                 if (((from_bitField0_ & 0x00000010) != 0)) {
                     result.local_ = local_;
                 }
+                int to_bitField0_ = 0;
+                if (((from_bitField0_ & 0x00000020) != 0)) {
+                    result.filter_ = filter_;
+                    to_bitField0_ |= 0x00000001;
+                }
+                if (((from_bitField0_ & 0x00000040) != 0)) {
+                    result.ignoreCase_ = ignoreCase_;
+                    to_bitField0_ |= 0x00000002;
+                }
+                result.bitField0_ |= to_bitField0_;
             }
 
             @java.lang.Override
@@ -21649,6 +21860,14 @@ public final class Urlfrontier {
                 if (other.getLocal() != false) {
                     setLocal(other.getLocal());
                 }
+                if (other.hasFilter()) {
+                    filter_ = other.filter_;
+                    bitField0_ |= 0x00000020;
+                    onChanged();
+                }
+                if (other.hasIgnoreCase()) {
+                    setIgnoreCase(other.getIgnoreCase());
+                }
                 this.mergeUnknownFields(other.getUnknownFields());
                 onChanged();
                 return this;
@@ -21705,6 +21924,18 @@ public final class Urlfrontier {
                                     bitField0_ |= 0x00000010;
                                     break;
                                 } // case 40
+                            case 50:
+                                {
+                                    filter_ = input.readStringRequireUtf8();
+                                    bitField0_ |= 0x00000020;
+                                    break;
+                                } // case 50
+                            case 56:
+                                {
+                                    ignoreCase_ = input.readBool();
+                                    bitField0_ |= 0x00000040;
+                                    break;
+                                } // case 56
                             default:
                                 {
                                     if (!super.parseUnknownField(input, extensionRegistry, tag)) {
@@ -22114,6 +22345,204 @@ public final class Urlfrontier {
                 return this;
             }
 
+            private java.lang.Object filter_ = "";
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 6;</code>
+             *
+             * @return Whether the filter field is set.
+             */
+            public boolean hasFilter() {
+                return ((bitField0_ & 0x00000020) != 0);
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 6;</code>
+             *
+             * @return The filter.
+             */
+            public java.lang.String getFilter() {
+                java.lang.Object ref = filter_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    filter_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 6;</code>
+             *
+             * @return The bytes for filter.
+             */
+            public com.google.protobuf.ByteString getFilterBytes() {
+                java.lang.Object ref = filter_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    filter_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 6;</code>
+             *
+             * @param value The filter to set.
+             * @return This builder for chaining.
+             */
+            public Builder setFilter(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                filter_ = value;
+                bitField0_ |= 0x00000020;
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 6;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearFilter() {
+                filter_ = getDefaultInstance().getFilter();
+                bitField0_ = (bitField0_ & ~0x00000020);
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 6;</code>
+             *
+             * @param value The bytes for filter to set.
+             * @return This builder for chaining.
+             */
+            public Builder setFilterBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+                filter_ = value;
+                bitField0_ |= 0x00000020;
+                onChanged();
+                return this;
+            }
+
+            private boolean ignoreCase_;
+
+            /**
+             *
+             *
+             * <pre>
+             * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+             * </pre>
+             *
+             * <code>optional bool ignoreCase = 7;</code>
+             *
+             * @return Whether the ignoreCase field is set.
+             */
+            @java.lang.Override
+            public boolean hasIgnoreCase() {
+                return ((bitField0_ & 0x00000040) != 0);
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+             * </pre>
+             *
+             * <code>optional bool ignoreCase = 7;</code>
+             *
+             * @return The ignoreCase.
+             */
+            @java.lang.Override
+            public boolean getIgnoreCase() {
+                return ignoreCase_;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+             * </pre>
+             *
+             * <code>optional bool ignoreCase = 7;</code>
+             *
+             * @param value The ignoreCase to set.
+             * @return This builder for chaining.
+             */
+            public Builder setIgnoreCase(boolean value) {
+
+                ignoreCase_ = value;
+                bitField0_ |= 0x00000040;
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+             * </pre>
+             *
+             * <code>optional bool ignoreCase = 7;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearIgnoreCase() {
+                bitField0_ = (bitField0_ & ~0x00000040);
+                ignoreCase_ = false;
+                onChanged();
+                return this;
+            }
+
             @java.lang.Override
             public final Builder setUnknownFields(
                     final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -22174,6 +22603,1458 @@ public final class Urlfrontier {
 
         @java.lang.Override
         public crawlercommons.urlfrontier.Urlfrontier.ListUrlParams getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
+    }
+
+    public interface CountUrlParamsOrBuilder
+            extends
+            // @@protoc_insertion_point(interface_extends:urlfrontier.CountUrlParams)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The key.
+         */
+        java.lang.String getKey();
+
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The bytes for key.
+         */
+        com.google.protobuf.ByteString getKeyBytes();
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>string crawlID = 2;</code>
+         *
+         * @return The crawlID.
+         */
+        java.lang.String getCrawlID();
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>string crawlID = 2;</code>
+         *
+         * @return The bytes for crawlID.
+         */
+        com.google.protobuf.ByteString getCrawlIDBytes();
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 3;</code>
+         *
+         * @return Whether the filter field is set.
+         */
+        boolean hasFilter();
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 3;</code>
+         *
+         * @return The filter.
+         */
+        java.lang.String getFilter();
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 3;</code>
+         *
+         * @return The bytes for filter.
+         */
+        com.google.protobuf.ByteString getFilterBytes();
+
+        /**
+         *
+         *
+         * <pre>
+         * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+         * </pre>
+         *
+         * <code>optional bool ignoreCase = 4;</code>
+         *
+         * @return Whether the ignoreCase field is set.
+         */
+        boolean hasIgnoreCase();
+
+        /**
+         *
+         *
+         * <pre>
+         * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+         * </pre>
+         *
+         * <code>optional bool ignoreCase = 4;</code>
+         *
+         * @return The ignoreCase.
+         */
+        boolean getIgnoreCase();
+
+        /**
+         *
+         *
+         * <pre>
+         * only for the current local instance (default is false)
+         * </pre>
+         *
+         * <code>optional bool local = 5;</code>
+         *
+         * @return Whether the local field is set.
+         */
+        boolean hasLocal();
+
+        /**
+         *
+         *
+         * <pre>
+         * only for the current local instance (default is false)
+         * </pre>
+         *
+         * <code>optional bool local = 5;</code>
+         *
+         * @return The local.
+         */
+        boolean getLocal();
+    }
+
+    /** Protobuf type {@code urlfrontier.CountUrlParams} */
+    public static final class CountUrlParams extends com.google.protobuf.GeneratedMessageV3
+            implements
+            // @@protoc_insertion_point(message_implements:urlfrontier.CountUrlParams)
+            CountUrlParamsOrBuilder {
+        private static final long serialVersionUID = 0L;
+
+        // Use CountUrlParams.newBuilder() to construct.
+        private CountUrlParams(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+
+        private CountUrlParams() {
+            key_ = "";
+            crawlID_ = "";
+            filter_ = "";
+        }
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(UnusedPrivateParameter unused) {
+            return new CountUrlParams();
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_CountUrlParams_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+            return crawlercommons.urlfrontier.Urlfrontier
+                    .internal_static_urlfrontier_CountUrlParams_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            crawlercommons.urlfrontier.Urlfrontier.CountUrlParams.class,
+                            crawlercommons.urlfrontier.Urlfrontier.CountUrlParams.Builder.class);
+        }
+
+        private int bitField0_;
+        public static final int KEY_FIELD_NUMBER = 1;
+
+        @SuppressWarnings("serial")
+        private volatile java.lang.Object key_ = "";
+
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The key.
+         */
+        @java.lang.Override
+        public java.lang.String getKey() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                key_ = s;
+                return s;
+            }
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * ID for the queue *
+         * </pre>
+         *
+         * <code>string key = 1;</code>
+         *
+         * @return The bytes for key.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getKeyBytes() {
+            java.lang.Object ref = key_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                key_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int CRAWLID_FIELD_NUMBER = 2;
+
+        @SuppressWarnings("serial")
+        private volatile java.lang.Object crawlID_ = "";
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>string crawlID = 2;</code>
+         *
+         * @return The crawlID.
+         */
+        @java.lang.Override
+        public java.lang.String getCrawlID() {
+            java.lang.Object ref = crawlID_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                crawlID_ = s;
+                return s;
+            }
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * crawl ID
+         * </pre>
+         *
+         * <code>string crawlID = 2;</code>
+         *
+         * @return The bytes for crawlID.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getCrawlIDBytes() {
+            java.lang.Object ref = crawlID_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                crawlID_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int FILTER_FIELD_NUMBER = 3;
+
+        @SuppressWarnings("serial")
+        private volatile java.lang.Object filter_ = "";
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 3;</code>
+         *
+         * @return Whether the filter field is set.
+         */
+        @java.lang.Override
+        public boolean hasFilter() {
+            return ((bitField0_ & 0x00000001) != 0);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 3;</code>
+         *
+         * @return The filter.
+         */
+        @java.lang.Override
+        public java.lang.String getFilter() {
+            java.lang.Object ref = filter_;
+            if (ref instanceof java.lang.String) {
+                return (java.lang.String) ref;
+            } else {
+                com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                java.lang.String s = bs.toStringUtf8();
+                filter_ = s;
+                return s;
+            }
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * Search filter on url (can be empty, default is empty)
+         * </pre>
+         *
+         * <code>optional string filter = 3;</code>
+         *
+         * @return The bytes for filter.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString getFilterBytes() {
+            java.lang.Object ref = filter_;
+            if (ref instanceof java.lang.String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                filter_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        public static final int IGNORECASE_FIELD_NUMBER = 4;
+        private boolean ignoreCase_ = false;
+
+        /**
+         *
+         *
+         * <pre>
+         * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+         * </pre>
+         *
+         * <code>optional bool ignoreCase = 4;</code>
+         *
+         * @return Whether the ignoreCase field is set.
+         */
+        @java.lang.Override
+        public boolean hasIgnoreCase() {
+            return ((bitField0_ & 0x00000002) != 0);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+         * </pre>
+         *
+         * <code>optional bool ignoreCase = 4;</code>
+         *
+         * @return The ignoreCase.
+         */
+        @java.lang.Override
+        public boolean getIgnoreCase() {
+            return ignoreCase_;
+        }
+
+        public static final int LOCAL_FIELD_NUMBER = 5;
+        private boolean local_ = false;
+
+        /**
+         *
+         *
+         * <pre>
+         * only for the current local instance (default is false)
+         * </pre>
+         *
+         * <code>optional bool local = 5;</code>
+         *
+         * @return Whether the local field is set.
+         */
+        @java.lang.Override
+        public boolean hasLocal() {
+            return ((bitField0_ & 0x00000004) != 0);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * only for the current local instance (default is false)
+         * </pre>
+         *
+         * <code>optional bool local = 5;</code>
+         *
+         * @return The local.
+         */
+        @java.lang.Override
+        public boolean getLocal() {
+            return local_;
+        }
+
+        private byte memoizedIsInitialized = -1;
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(key_)) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
+            }
+            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crawlID_)) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 2, crawlID_);
+            }
+            if (((bitField0_ & 0x00000001) != 0)) {
+                com.google.protobuf.GeneratedMessageV3.writeString(output, 3, filter_);
+            }
+            if (((bitField0_ & 0x00000002) != 0)) {
+                output.writeBool(4, ignoreCase_);
+            }
+            if (((bitField0_ & 0x00000004) != 0)) {
+                output.writeBool(5, local_);
+            }
+            getUnknownFields().writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(key_)) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
+            }
+            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crawlID_)) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, crawlID_);
+            }
+            if (((bitField0_ & 0x00000001) != 0)) {
+                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, filter_);
+            }
+            if (((bitField0_ & 0x00000002) != 0)) {
+                size += com.google.protobuf.CodedOutputStream.computeBoolSize(4, ignoreCase_);
+            }
+            if (((bitField0_ & 0x00000004) != 0)) {
+                size += com.google.protobuf.CodedOutputStream.computeBoolSize(5, local_);
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof crawlercommons.urlfrontier.Urlfrontier.CountUrlParams)) {
+                return super.equals(obj);
+            }
+            crawlercommons.urlfrontier.Urlfrontier.CountUrlParams other =
+                    (crawlercommons.urlfrontier.Urlfrontier.CountUrlParams) obj;
+
+            if (!getKey().equals(other.getKey())) return false;
+            if (!getCrawlID().equals(other.getCrawlID())) return false;
+            if (hasFilter() != other.hasFilter()) return false;
+            if (hasFilter()) {
+                if (!getFilter().equals(other.getFilter())) return false;
+            }
+            if (hasIgnoreCase() != other.hasIgnoreCase()) return false;
+            if (hasIgnoreCase()) {
+                if (getIgnoreCase() != other.getIgnoreCase()) return false;
+            }
+            if (hasLocal() != other.hasLocal()) return false;
+            if (hasLocal()) {
+                if (getLocal() != other.getLocal()) return false;
+            }
+            if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + KEY_FIELD_NUMBER;
+            hash = (53 * hash) + getKey().hashCode();
+            hash = (37 * hash) + CRAWLID_FIELD_NUMBER;
+            hash = (53 * hash) + getCrawlID().hashCode();
+            if (hasFilter()) {
+                hash = (37 * hash) + FILTER_FIELD_NUMBER;
+                hash = (53 * hash) + getFilter().hashCode();
+            }
+            if (hasIgnoreCase()) {
+                hash = (37 * hash) + IGNORECASE_FIELD_NUMBER;
+                hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(getIgnoreCase());
+            }
+            if (hasLocal()) {
+                hash = (37 * hash) + LOCAL_FIELD_NUMBER;
+                hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(getLocal());
+            }
+            hash = (29 * hash) + getUnknownFields().hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseFrom(
+                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseDelimitedFrom(
+                java.io.InputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseFrom(
+                com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+                    PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() {
+            return newBuilder();
+        }
+
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+
+        public static Builder newBuilder(
+                crawlercommons.urlfrontier.Urlfrontier.CountUrlParams prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+
+        /** Protobuf type {@code urlfrontier.CountUrlParams} */
+        public static final class Builder
+                extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+                implements
+                // @@protoc_insertion_point(builder_implements:urlfrontier.CountUrlParams)
+                crawlercommons.urlfrontier.Urlfrontier.CountUrlParamsOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_CountUrlParams_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+                    internalGetFieldAccessorTable() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_CountUrlParams_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                crawlercommons.urlfrontier.Urlfrontier.CountUrlParams.class,
+                                crawlercommons.urlfrontier.Urlfrontier.CountUrlParams.Builder
+                                        .class);
+            }
+
+            // Construct using crawlercommons.urlfrontier.Urlfrontier.CountUrlParams.newBuilder()
+            private Builder() {}
+
+            private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+            }
+
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                bitField0_ = 0;
+                key_ = "";
+                crawlID_ = "";
+                filter_ = "";
+                ignoreCase_ = false;
+                local_ = false;
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+                return crawlercommons.urlfrontier.Urlfrontier
+                        .internal_static_urlfrontier_CountUrlParams_descriptor;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CountUrlParams
+                    getDefaultInstanceForType() {
+                return crawlercommons.urlfrontier.Urlfrontier.CountUrlParams.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CountUrlParams build() {
+                crawlercommons.urlfrontier.Urlfrontier.CountUrlParams result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public crawlercommons.urlfrontier.Urlfrontier.CountUrlParams buildPartial() {
+                crawlercommons.urlfrontier.Urlfrontier.CountUrlParams result =
+                        new crawlercommons.urlfrontier.Urlfrontier.CountUrlParams(this);
+                if (bitField0_ != 0) {
+                    buildPartial0(result);
+                }
+                onBuilt();
+                return result;
+            }
+
+            private void buildPartial0(
+                    crawlercommons.urlfrontier.Urlfrontier.CountUrlParams result) {
+                int from_bitField0_ = bitField0_;
+                if (((from_bitField0_ & 0x00000001) != 0)) {
+                    result.key_ = key_;
+                }
+                if (((from_bitField0_ & 0x00000002) != 0)) {
+                    result.crawlID_ = crawlID_;
+                }
+                int to_bitField0_ = 0;
+                if (((from_bitField0_ & 0x00000004) != 0)) {
+                    result.filter_ = filter_;
+                    to_bitField0_ |= 0x00000001;
+                }
+                if (((from_bitField0_ & 0x00000008) != 0)) {
+                    result.ignoreCase_ = ignoreCase_;
+                    to_bitField0_ |= 0x00000002;
+                }
+                if (((from_bitField0_ & 0x00000010) != 0)) {
+                    result.local_ = local_;
+                    to_bitField0_ |= 0x00000004;
+                }
+                result.bitField0_ |= to_bitField0_;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.setField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+
+            @java.lang.Override
+            public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index,
+                    java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof crawlercommons.urlfrontier.Urlfrontier.CountUrlParams) {
+                    return mergeFrom((crawlercommons.urlfrontier.Urlfrontier.CountUrlParams) other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(crawlercommons.urlfrontier.Urlfrontier.CountUrlParams other) {
+                if (other
+                        == crawlercommons.urlfrontier.Urlfrontier.CountUrlParams
+                                .getDefaultInstance()) return this;
+                if (!other.getKey().isEmpty()) {
+                    key_ = other.key_;
+                    bitField0_ |= 0x00000001;
+                    onChanged();
+                }
+                if (!other.getCrawlID().isEmpty()) {
+                    crawlID_ = other.crawlID_;
+                    bitField0_ |= 0x00000002;
+                    onChanged();
+                }
+                if (other.hasFilter()) {
+                    filter_ = other.filter_;
+                    bitField0_ |= 0x00000004;
+                    onChanged();
+                }
+                if (other.hasIgnoreCase()) {
+                    setIgnoreCase(other.getIgnoreCase());
+                }
+                if (other.hasLocal()) {
+                    setLocal(other.getLocal());
+                }
+                this.mergeUnknownFields(other.getUnknownFields());
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                if (extensionRegistry == null) {
+                    throw new java.lang.NullPointerException();
+                }
+                try {
+                    boolean done = false;
+                    while (!done) {
+                        int tag = input.readTag();
+                        switch (tag) {
+                            case 0:
+                                done = true;
+                                break;
+                            case 10:
+                                {
+                                    key_ = input.readStringRequireUtf8();
+                                    bitField0_ |= 0x00000001;
+                                    break;
+                                } // case 10
+                            case 18:
+                                {
+                                    crawlID_ = input.readStringRequireUtf8();
+                                    bitField0_ |= 0x00000002;
+                                    break;
+                                } // case 18
+                            case 26:
+                                {
+                                    filter_ = input.readStringRequireUtf8();
+                                    bitField0_ |= 0x00000004;
+                                    break;
+                                } // case 26
+                            case 32:
+                                {
+                                    ignoreCase_ = input.readBool();
+                                    bitField0_ |= 0x00000008;
+                                    break;
+                                } // case 32
+                            case 40:
+                                {
+                                    local_ = input.readBool();
+                                    bitField0_ |= 0x00000010;
+                                    break;
+                                } // case 40
+                            default:
+                                {
+                                    if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                                        done = true; // was an endgroup tag
+                                    }
+                                    break;
+                                } // default:
+                        } // switch (tag)
+                    } // while (!done)
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    throw e.unwrapIOException();
+                } finally {
+                    onChanged();
+                } // finally
+                return this;
+            }
+
+            private int bitField0_;
+
+            private java.lang.Object key_ = "";
+
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return The key.
+             */
+            public java.lang.String getKey() {
+                java.lang.Object ref = key_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    key_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return The bytes for key.
+             */
+            public com.google.protobuf.ByteString getKeyBytes() {
+                java.lang.Object ref = key_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    key_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @param value The key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKey(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                key_ = value;
+                bitField0_ |= 0x00000001;
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearKey() {
+                key_ = getDefaultInstance().getKey();
+                bitField0_ = (bitField0_ & ~0x00000001);
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * * ID for the queue *
+             * </pre>
+             *
+             * <code>string key = 1;</code>
+             *
+             * @param value The bytes for key to set.
+             * @return This builder for chaining.
+             */
+            public Builder setKeyBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+                key_ = value;
+                bitField0_ |= 0x00000001;
+                onChanged();
+                return this;
+            }
+
+            private java.lang.Object crawlID_ = "";
+
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>string crawlID = 2;</code>
+             *
+             * @return The crawlID.
+             */
+            public java.lang.String getCrawlID() {
+                java.lang.Object ref = crawlID_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    crawlID_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>string crawlID = 2;</code>
+             *
+             * @return The bytes for crawlID.
+             */
+            public com.google.protobuf.ByteString getCrawlIDBytes() {
+                java.lang.Object ref = crawlID_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    crawlID_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>string crawlID = 2;</code>
+             *
+             * @param value The crawlID to set.
+             * @return This builder for chaining.
+             */
+            public Builder setCrawlID(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                crawlID_ = value;
+                bitField0_ |= 0x00000002;
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>string crawlID = 2;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearCrawlID() {
+                crawlID_ = getDefaultInstance().getCrawlID();
+                bitField0_ = (bitField0_ & ~0x00000002);
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * crawl ID
+             * </pre>
+             *
+             * <code>string crawlID = 2;</code>
+             *
+             * @param value The bytes for crawlID to set.
+             * @return This builder for chaining.
+             */
+            public Builder setCrawlIDBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+                crawlID_ = value;
+                bitField0_ |= 0x00000002;
+                onChanged();
+                return this;
+            }
+
+            private java.lang.Object filter_ = "";
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 3;</code>
+             *
+             * @return Whether the filter field is set.
+             */
+            public boolean hasFilter() {
+                return ((bitField0_ & 0x00000004) != 0);
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 3;</code>
+             *
+             * @return The filter.
+             */
+            public java.lang.String getFilter() {
+                java.lang.Object ref = filter_;
+                if (!(ref instanceof java.lang.String)) {
+                    com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+                    java.lang.String s = bs.toStringUtf8();
+                    filter_ = s;
+                    return s;
+                } else {
+                    return (java.lang.String) ref;
+                }
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 3;</code>
+             *
+             * @return The bytes for filter.
+             */
+            public com.google.protobuf.ByteString getFilterBytes() {
+                java.lang.Object ref = filter_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+                    filter_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 3;</code>
+             *
+             * @param value The filter to set.
+             * @return This builder for chaining.
+             */
+            public Builder setFilter(java.lang.String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                filter_ = value;
+                bitField0_ |= 0x00000004;
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 3;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearFilter() {
+                filter_ = getDefaultInstance().getFilter();
+                bitField0_ = (bitField0_ & ~0x00000004);
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Search filter on url (can be empty, default is empty)
+             * </pre>
+             *
+             * <code>optional string filter = 3;</code>
+             *
+             * @param value The bytes for filter to set.
+             * @return This builder for chaining.
+             */
+            public Builder setFilterBytes(com.google.protobuf.ByteString value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                checkByteStringIsUtf8(value);
+                filter_ = value;
+                bitField0_ |= 0x00000004;
+                onChanged();
+                return this;
+            }
+
+            private boolean ignoreCase_;
+
+            /**
+             *
+             *
+             * <pre>
+             * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+             * </pre>
+             *
+             * <code>optional bool ignoreCase = 4;</code>
+             *
+             * @return Whether the ignoreCase field is set.
+             */
+            @java.lang.Override
+            public boolean hasIgnoreCase() {
+                return ((bitField0_ & 0x00000008) != 0);
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+             * </pre>
+             *
+             * <code>optional bool ignoreCase = 4;</code>
+             *
+             * @return The ignoreCase.
+             */
+            @java.lang.Override
+            public boolean getIgnoreCase() {
+                return ignoreCase_;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+             * </pre>
+             *
+             * <code>optional bool ignoreCase = 4;</code>
+             *
+             * @param value The ignoreCase to set.
+             * @return This builder for chaining.
+             */
+            public Builder setIgnoreCase(boolean value) {
+
+                ignoreCase_ = value;
+                bitField0_ |= 0x00000008;
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * Ignore Case sensitivity for search filter (default is false -&gt; case sensitive)
+             * </pre>
+             *
+             * <code>optional bool ignoreCase = 4;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearIgnoreCase() {
+                bitField0_ = (bitField0_ & ~0x00000008);
+                ignoreCase_ = false;
+                onChanged();
+                return this;
+            }
+
+            private boolean local_;
+
+            /**
+             *
+             *
+             * <pre>
+             * only for the current local instance (default is false)
+             * </pre>
+             *
+             * <code>optional bool local = 5;</code>
+             *
+             * @return Whether the local field is set.
+             */
+            @java.lang.Override
+            public boolean hasLocal() {
+                return ((bitField0_ & 0x00000010) != 0);
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * only for the current local instance (default is false)
+             * </pre>
+             *
+             * <code>optional bool local = 5;</code>
+             *
+             * @return The local.
+             */
+            @java.lang.Override
+            public boolean getLocal() {
+                return local_;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * only for the current local instance (default is false)
+             * </pre>
+             *
+             * <code>optional bool local = 5;</code>
+             *
+             * @param value The local to set.
+             * @return This builder for chaining.
+             */
+            public Builder setLocal(boolean value) {
+
+                local_ = value;
+                bitField0_ |= 0x00000010;
+                onChanged();
+                return this;
+            }
+
+            /**
+             *
+             *
+             * <pre>
+             * only for the current local instance (default is false)
+             * </pre>
+             *
+             * <code>optional bool local = 5;</code>
+             *
+             * @return This builder for chaining.
+             */
+            public Builder clearLocal() {
+                bitField0_ = (bitField0_ & ~0x00000010);
+                local_ = false;
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+            // @@protoc_insertion_point(builder_scope:urlfrontier.CountUrlParams)
+        }
+
+        // @@protoc_insertion_point(class_scope:urlfrontier.CountUrlParams)
+        private static final crawlercommons.urlfrontier.Urlfrontier.CountUrlParams DEFAULT_INSTANCE;
+
+        static {
+            DEFAULT_INSTANCE = new crawlercommons.urlfrontier.Urlfrontier.CountUrlParams();
+        }
+
+        public static crawlercommons.urlfrontier.Urlfrontier.CountUrlParams getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<CountUrlParams> PARSER =
+                new com.google.protobuf.AbstractParser<CountUrlParams>() {
+                    @java.lang.Override
+                    public CountUrlParams parsePartialFrom(
+                            com.google.protobuf.CodedInputStream input,
+                            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                            throws com.google.protobuf.InvalidProtocolBufferException {
+                        Builder builder = newBuilder();
+                        try {
+                            builder.mergeFrom(input, extensionRegistry);
+                        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                            throw e.setUnfinishedMessage(builder.buildPartial());
+                        } catch (com.google.protobuf.UninitializedMessageException e) {
+                            throw e.asInvalidProtocolBufferException()
+                                    .setUnfinishedMessage(builder.buildPartial());
+                        } catch (java.io.IOException e) {
+                            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                                    .setUnfinishedMessage(builder.buildPartial());
+                        }
+                        return builder.buildPartial();
+                    }
+                };
+
+        public static com.google.protobuf.Parser<CountUrlParams> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<CountUrlParams> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public crawlercommons.urlfrontier.Urlfrontier.CountUrlParams getDefaultInstanceForType() {
             return DEFAULT_INSTANCE;
         }
     }
@@ -22282,6 +24163,10 @@ public final class Urlfrontier {
             internal_static_urlfrontier_ListUrlParams_descriptor;
     private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internal_static_urlfrontier_ListUrlParams_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_urlfrontier_CountUrlParams_descriptor;
+    private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_urlfrontier_CountUrlParams_fieldAccessorTable;
 
     public static com.google.protobuf.Descriptors.FileDescriptor getDescriptor() {
         return descriptor;
@@ -22338,37 +24223,44 @@ public final class Urlfrontier {
                     + "\005ERROR\020\004\"?\n\020CrawlLimitParams\022\013\n\003key\030\001 \001("
                     + "\t\022\r\n\005limit\030\002 \001(\r\022\017\n\007crawlID\030\003 \001(\t\"=\n\020URL"
                     + "StatusRequest\022\013\n\003url\030\001 \001(\t\022\013\n\003key\030\002 \001(\t\022"
-                    + "\017\n\007crawlID\030\003 \001(\t\"Y\n\rListUrlParams\022\r\n\005sta"
-                    + "rt\030\001 \001(\r\022\014\n\004size\030\002 \001(\r\022\013\n\003key\030\003 \001(\t\022\017\n\007c"
-                    + "rawlID\030\004 \001(\t\022\r\n\005local\030\005 \001(\0102\244\010\n\013URLFront"
-                    + "ier\022:\n\tListNodes\022\022.urlfrontier.Empty\032\027.u"
-                    + "rlfrontier.StringList\"\000\022;\n\nListCrawls\022\022."
-                    + "urlfrontier.Local\032\027.urlfrontier.StringLi"
-                    + "st\"\000\022C\n\013DeleteCrawl\022\037.urlfrontier.Delete"
-                    + "CrawlMessage\032\021.urlfrontier.Long\"\000\022?\n\nLis"
-                    + "tQueues\022\027.urlfrontier.Pagination\032\026.urlfr"
-                    + "ontier.QueueList\"\000\022;\n\007GetURLs\022\026.urlfront"
-                    + "ier.GetParams\032\024.urlfrontier.URLInfo\"\0000\001\022"
-                    + ">\n\007PutURLs\022\024.urlfrontier.URLItem\032\027.urlfr"
-                    + "ontier.AckMessage\"\000(\0010\001\022E\n\010GetStats\022#.ur"
-                    + "lfrontier.QueueWithinCrawlParams\032\022.urlfr"
-                    + "ontier.Stats\"\000\022G\n\013DeleteQueue\022#.urlfront"
-                    + "ier.QueueWithinCrawlParams\032\021.urlfrontier"
-                    + ".Long\"\000\022F\n\017BlockQueueUntil\022\035.urlfrontier"
-                    + ".BlockQueueParams\032\022.urlfrontier.Empty\"\000\022"
-                    + "6\n\tSetActive\022\023.urlfrontier.Active\032\022.urlf"
-                    + "rontier.Empty\"\000\0227\n\tGetActive\022\022.urlfronti"
-                    + "er.Local\032\024.urlfrontier.Boolean\"\000\022?\n\010SetD"
-                    + "elay\022\035.urlfrontier.QueueDelayParams\032\022.ur"
-                    + "lfrontier.Empty\"\000\022@\n\013SetLogLevel\022\033.urlfr"
-                    + "ontier.LogLevelParams\032\022.urlfrontier.Empt"
-                    + "y\"\000\022D\n\rSetCrawlLimit\022\035.urlfrontier.Crawl"
-                    + "LimitParams\032\022.urlfrontier.Empty\"\000\022E\n\014Get"
-                    + "URLStatus\022\035.urlfrontier.URLStatusRequest"
-                    + "\032\024.urlfrontier.URLItem\"\000\022@\n\010ListURLs\022\032.u"
-                    + "rlfrontier.ListUrlParams\032\024.urlfrontier.U"
-                    + "RLItem\"\0000\001B\034\n\032crawlercommons.urlfrontier"
-                    + "b\006proto3"
+                    + "\017\n\007crawlID\030\003 \001(\t\"\241\001\n\rListUrlParams\022\r\n\005st"
+                    + "art\030\001 \001(\r\022\014\n\004size\030\002 \001(\r\022\013\n\003key\030\003 \001(\t\022\017\n\007"
+                    + "crawlID\030\004 \001(\t\022\r\n\005local\030\005 \001(\010\022\023\n\006filter\030\006"
+                    + " \001(\tH\000\210\001\001\022\027\n\nignoreCase\030\007 \001(\010H\001\210\001\001B\t\n\007_f"
+                    + "ilterB\r\n\013_ignoreCase\"\224\001\n\016CountUrlParams\022"
+                    + "\013\n\003key\030\001 \001(\t\022\017\n\007crawlID\030\002 \001(\t\022\023\n\006filter\030"
+                    + "\003 \001(\tH\000\210\001\001\022\027\n\nignoreCase\030\004 \001(\010H\001\210\001\001\022\022\n\005l"
+                    + "ocal\030\005 \001(\010H\002\210\001\001B\t\n\007_filterB\r\n\013_ignoreCas"
+                    + "eB\010\n\006_local2\343\010\n\013URLFrontier\022:\n\tListNodes"
+                    + "\022\022.urlfrontier.Empty\032\027.urlfrontier.Strin"
+                    + "gList\"\000\022;\n\nListCrawls\022\022.urlfrontier.Loca"
+                    + "l\032\027.urlfrontier.StringList\"\000\022C\n\013DeleteCr"
+                    + "awl\022\037.urlfrontier.DeleteCrawlMessage\032\021.u"
+                    + "rlfrontier.Long\"\000\022?\n\nListQueues\022\027.urlfro"
+                    + "ntier.Pagination\032\026.urlfrontier.QueueList"
+                    + "\"\000\022;\n\007GetURLs\022\026.urlfrontier.GetParams\032\024."
+                    + "urlfrontier.URLInfo\"\0000\001\022>\n\007PutURLs\022\024.url"
+                    + "frontier.URLItem\032\027.urlfrontier.AckMessag"
+                    + "e\"\000(\0010\001\022E\n\010GetStats\022#.urlfrontier.QueueW"
+                    + "ithinCrawlParams\032\022.urlfrontier.Stats\"\000\022G"
+                    + "\n\013DeleteQueue\022#.urlfrontier.QueueWithinC"
+                    + "rawlParams\032\021.urlfrontier.Long\"\000\022F\n\017Block"
+                    + "QueueUntil\022\035.urlfrontier.BlockQueueParam"
+                    + "s\032\022.urlfrontier.Empty\"\000\0226\n\tSetActive\022\023.u"
+                    + "rlfrontier.Active\032\022.urlfrontier.Empty\"\000\022"
+                    + "7\n\tGetActive\022\022.urlfrontier.Local\032\024.urlfr"
+                    + "ontier.Boolean\"\000\022?\n\010SetDelay\022\035.urlfronti"
+                    + "er.QueueDelayParams\032\022.urlfrontier.Empty\""
+                    + "\000\022@\n\013SetLogLevel\022\033.urlfrontier.LogLevelP"
+                    + "arams\032\022.urlfrontier.Empty\"\000\022D\n\rSetCrawlL"
+                    + "imit\022\035.urlfrontier.CrawlLimitParams\032\022.ur"
+                    + "lfrontier.Empty\"\000\022E\n\014GetURLStatus\022\035.urlf"
+                    + "rontier.URLStatusRequest\032\024.urlfrontier.U"
+                    + "RLItem\"\000\022@\n\010ListURLs\022\032.urlfrontier.ListU"
+                    + "rlParams\032\024.urlfrontier.URLItem\"\0000\001\022=\n\tCo"
+                    + "untURLs\022\033.urlfrontier.CountUrlParams\032\021.u"
+                    + "rlfrontier.Long\"\000B\034\n\032crawlercommons.urlf"
+                    + "rontierb\006proto3"
         };
         descriptor =
                 com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
@@ -22571,7 +24463,15 @@ public final class Urlfrontier {
                 new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                         internal_static_urlfrontier_ListUrlParams_descriptor,
                         new java.lang.String[] {
-                            "Start", "Size", "Key", "CrawlID", "Local",
+                            "Start", "Size", "Key", "CrawlID", "Local", "Filter", "IgnoreCase",
+                        });
+        internal_static_urlfrontier_CountUrlParams_descriptor =
+                getDescriptor().getMessageTypes().get(24);
+        internal_static_urlfrontier_CountUrlParams_fieldAccessorTable =
+                new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                        internal_static_urlfrontier_CountUrlParams_descriptor,
+                        new java.lang.String[] {
+                            "Key", "CrawlID", "Filter", "IgnoreCase", "Local",
                         });
     }
 
