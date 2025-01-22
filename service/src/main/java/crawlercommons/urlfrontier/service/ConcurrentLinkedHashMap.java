@@ -179,8 +179,8 @@ public class ConcurrentLinkedHashMap<K, V> implements Map<K, V> {
         ConcurrentLinkedHashMap<Integer, String> clhMap = new ConcurrentLinkedHashMap<>();
 
         // Simulate concurrent puts
-        ExecutorService executor = Executors.newFixedThreadPool(4);
-        for (int i = 1; i <= 10; i++) {
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        for (int i = 1; i <= 20; i++) {
             final int key = i;
             executor.submit(() -> clhMap.put(key, "Value" + key));
         }

@@ -118,7 +118,7 @@ public abstract class AbstractFrontierService
     private List<String> nodes;
 
     // in memory map of metadata for each queue
-    private final Map<QueueWithinCrawl, QueueInterface> queues = new ConcurrentLinkedHashMap<>();
+    private final Map<QueueWithinCrawl, QueueInterface> queues = new ConcurrentOrderedMap<>();
 
     protected final ExecutorService readExecutorService;
     protected final ExecutorService writeExecutorService;
@@ -637,23 +637,22 @@ public abstract class AbstractFrontierService
             final QueueInterface currentQueue;
             final QueueWithinCrawl currentCrawlQueue;
 
-            synchronized (getQueues()) {
-                Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                        getQueues().entrySet().iterator();
-                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
-                currentQueue = e.getValue();
-                currentCrawlQueue = e.getKey();
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                    getQueues().entrySet().iterator();
+            Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+            currentQueue = e.getValue();
+            currentCrawlQueue = e.getKey();
 
-                // to make sure we don't loop over the ones we already processed
-                if (firstCrawlQueue == null) {
-                    firstCrawlQueue = currentCrawlQueue;
-                } else if (firstCrawlQueue.equals(currentCrawlQueue)) {
-                    break;
-                }
-                // We remove the entry and put it at the end of the map
-                iterator.remove();
-                getQueues().put(currentCrawlQueue, currentQueue);
+            // to make sure we don't loop over the ones we already processed
+            if (firstCrawlQueue == null) {
+                firstCrawlQueue = currentCrawlQueue;
+            } else if (firstCrawlQueue.equals(currentCrawlQueue)) {
+                break;
             }
+
+            // We remove the entry and put it at the end of the map
+            iterator.remove();
+            getQueues().put(currentCrawlQueue, currentQueue);
 
             // if a crawlID has been specified make sure it matches
             if (crawlID != null && !currentCrawlQueue.getCrawlid().equals(crawlID)) {
@@ -866,19 +865,18 @@ public abstract class AbstractFrontierService
 
     public void setCrawlLimit(CrawlLimitParams params, StreamObserver<Empty> responseObserver) {
         QueueWithinCrawl searchKey = new QueueWithinCrawl(params.getKey(), params.getCrawlID());
-        synchronized (getQueues()) {
-            QueueInterface qi = getQueues().get(searchKey);
-            if (qi != null) {
-                qi.setCrawlLimit(params.getLimit());
-            } else {
-                LOG.error(
-                        "Queue with key: {} and CrawlId: {} was not found.",
-                        searchKey.getQueue(),
-                        searchKey.getCrawlid());
-                responseObserver.onError(
-                        new RuntimeException("CrawlId and Queue combination is not found."));
-                return;
-            }
+
+        QueueInterface qi = getQueues().get(searchKey);
+        if (qi != null) {
+            qi.setCrawlLimit(params.getLimit());
+        } else {
+            LOG.error(
+                    "Queue with key: {} and CrawlId: {} was not found.",
+                    searchKey.getQueue(),
+                    searchKey.getCrawlid());
+            responseObserver.onError(
+                    new RuntimeException("CrawlId and Queue combination is not found."));
+            return;
         }
 
         responseObserver.onCompleted();
@@ -918,43 +916,41 @@ public abstract class AbstractFrontierService
         long pos = -1; // Current position in the list of (filtered) URLs
         long sentCount = 0;
 
-        synchronized (getQueues()) {
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
-                    getQueues().entrySet().iterator();
+        Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
+                getQueues().entrySet().iterator();
 
-            while (qiterator.hasNext() && sentCount < maxURLs) {
-                Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
+        while (qiterator.hasNext() && sentCount < maxURLs) {
+            Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
 
-                // check that it is within the right crawlID
-                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
-                    continue;
-                }
+            // check that it is within the right crawlID
+            if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                continue;
+            }
 
-                // check that it is within the right key/queue
-                if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
-                    continue;
-                }
+            // check that it is within the right key/queue
+            if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
+                continue;
+            }
 
-                CloseableIterator<URLItem> urliter = urlIterator(e);
+            CloseableIterator<URLItem> urliter = urlIterator(e);
 
-                while (urliter.hasNext() && sentCount < maxURLs) {
-                    URLItem cur = urliter.next();
+            while (urliter.hasNext() && sentCount < maxURLs) {
+                URLItem cur = urliter.next();
 
-                    if (!doFilter || filterURL(cur, filter, ignoreCase)) {
-                        pos++;
+                if (!doFilter || filterURL(cur, filter, ignoreCase)) {
+                    pos++;
 
-                        if (pos >= start && sentCount < maxURLs) {
-                            sentCount++;
-                            responseObserver.onNext(cur);
-                        }
+                    if (pos >= start && sentCount < maxURLs) {
+                        sentCount++;
+                        responseObserver.onNext(cur);
                     }
                 }
+            }
 
-                try {
-                    urliter.close();
-                } catch (IOException e1) {
-                    LOG.warn("Error closing URLIterator", e1);
-                }
+            try {
+                urliter.close();
+            } catch (IOException e1) {
+                LOG.warn("Error closing URLIterator", e1);
             }
         }
 
@@ -1013,38 +1009,36 @@ public abstract class AbstractFrontierService
 
         long totalCount = 0;
 
-        synchronized (getQueues()) {
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
-                    getQueues().entrySet().iterator();
+        Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
+                getQueues().entrySet().iterator();
 
-            while (qiterator.hasNext()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
+        while (qiterator.hasNext()) {
+            Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
 
-                // check that it is within the right crawlID
-                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
-                    continue;
+            // check that it is within the right crawlID
+            if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                continue;
+            }
+
+            // check that it is within the right key/queue
+            if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
+                continue;
+            }
+
+            CloseableIterator<URLItem> urliter = urlIterator(e);
+
+            while (urliter.hasNext()) {
+                URLItem cur = urliter.next();
+
+                if (!doFilter || filterURL(cur, filter, ignoreCase)) {
+                    totalCount++;
                 }
+            }
 
-                // check that it is within the right key/queue
-                if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
-                    continue;
-                }
-
-                CloseableIterator<URLItem> urliter = urlIterator(e);
-
-                while (urliter.hasNext()) {
-                    URLItem cur = urliter.next();
-
-                    if (!doFilter || filterURL(cur, filter, ignoreCase)) {
-                        totalCount++;
-                    }
-                }
-
-                try {
-                    urliter.close();
-                } catch (Exception e1) {
-                    LOG.warn("Error closing URLIterator", e1);
-                }
+            try {
+                urliter.close();
+            } catch (Exception e1) {
+                LOG.warn("Error closing URLIterator", e1);
             }
         }
 
