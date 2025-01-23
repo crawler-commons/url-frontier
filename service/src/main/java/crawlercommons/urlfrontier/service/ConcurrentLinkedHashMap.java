@@ -9,12 +9,11 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,7 +25,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
-public class ConcurrentLinkedHashMap<K, V> implements Map<K, V> {
+public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
+        implements ConcurrentMap<K, V> {
 
     private final ConcurrentHashMap<K, V> map;
     private final ConcurrentLinkedQueue<K> order;
@@ -171,26 +171,59 @@ public class ConcurrentLinkedHashMap<K, V> implements Map<K, V> {
         return entries;
     }
 
-    // Optional: Override additional Map default methods for better performance or
-    // additional behaviors.
+    @Override
+    public V putIfAbsent(K key, V value) {
 
-    // Example usage:
-    public static void main(String[] args) throws InterruptedException {
-        ConcurrentLinkedHashMap<Integer, String> clhMap = new ConcurrentLinkedHashMap<>();
-
-        // Simulate concurrent puts
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-        for (int i = 1; i <= 20; i++) {
-            final int key = i;
-            executor.submit(() -> clhMap.put(key, "Value" + key));
+        lock.lock();
+        try {
+            if (!map.containsKey(key)) return put(key, value);
+            else return map.get(key);
+        } finally {
+            lock.unlock();
         }
+    }
 
-        executor.shutdown();
-        executor.awaitTermination(1, TimeUnit.SECONDS);
+    @Override
+    public boolean remove(Object key, Object value) {
 
-        // Iterate in insertion order
-        for (Map.Entry<Integer, String> entry : clhMap.entrySet()) {
-            System.out.println(entry.getKey() + " => " + entry.getValue());
+        lock.lock();
+        try {
+            if (map.containsKey(key) && Objects.equals(map.get(key), value)) {
+                remove(key);
+                return true;
+            } else {
+                return false;
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public boolean replace(K key, V oldValue, V newValue) {
+
+        lock.lock();
+        try {
+            if (map.containsKey(key) && Objects.equals(map.get(key), oldValue)) {
+                put(key, newValue);
+                return true;
+            } else {
+                return false;
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public V replace(K key, V value) {
+
+        lock.lock();
+        try {
+            if (map.containsKey(key)) return put(key, value);
+            else return null;
+        } finally {
+            lock.unlock();
         }
     }
 }

@@ -2,13 +2,11 @@ package crawlercommons.urlfrontier.service;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.StampedLock;
 import java.util.stream.Collectors;
@@ -23,7 +21,7 @@ import java.util.stream.Collectors;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
-public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> {
+public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V> {
     // Main storage for key-value pairs
     private final ConcurrentHashMap<K, V> valueMap;
 
@@ -146,23 +144,45 @@ public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> {
         }
     }
 
-    // Example usage:
-    public static void main(String[] args) throws InterruptedException {
-        ConcurrentLinkedHashMap<Integer, String> clhMap = new ConcurrentLinkedHashMap<>();
-
-        // Simulate concurrent puts
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-        for (int i = 1; i <= 20; i++) {
-            final int key = i;
-            executor.submit(() -> clhMap.put(key, "Value" + key));
+    @Override
+    // FIXME: Should be atomic but stamped lock is not reentrant
+    public V putIfAbsent(K key, V value) {
+        long stamp = lock.writeLock();
+        try {
+            if (!valueMap.containsKey(key)) return put(key, value);
+            else return valueMap.get(key);
+        } finally {
+            lock.unlockWrite(stamp);
         }
+    }
 
-        executor.shutdown();
-        executor.awaitTermination(1, TimeUnit.SECONDS);
+    @Override
+    // FIXME: Should be atomic but stamped lock is not reentrant
+    public boolean remove(Object key, Object value) {
 
-        // Iterate in insertion order
-        for (Map.Entry<Integer, String> entry : clhMap.entrySet()) {
-            System.out.println(entry.getKey() + " => " + entry.getValue());
+        long stamp = lock.writeLock();
+        try {
+            if (valueMap.containsKey(key) && Objects.equals(valueMap.get(key), value)) {
+                remove(key);
+                return true;
+            } else {
+                return false;
+            }
+        } finally {
+            lock.unlockWrite(stamp);
+        }
+    }
+
+    @Override
+    // FIXME: Should be atomic but stamped lock is not reentrant
+    public V replace(K key, V value) {
+
+        long stamp = lock.writeLock();
+        try {
+            if (valueMap.containsKey(key)) return put(key, value);
+            else return null;
+        } finally {
+            lock.unlockWrite(stamp);
         }
     }
 }
