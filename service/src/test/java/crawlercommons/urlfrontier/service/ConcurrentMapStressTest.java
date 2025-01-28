@@ -1,5 +1,7 @@
 package crawlercommons.urlfrontier.service;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,13 +42,9 @@ public class ConcurrentMapStressTest {
 
         // Shutdown and await completion
         executor.shutdown();
-        executor.awaitTermination(10, TimeUnit.MINUTES);
+        executor.awaitTermination(30, TimeUnit.MINUTES);
 
         long endTime = System.currentTimeMillis();
-
-        // Final assertions
-        System.out.println("Final size of the map: " + map.size());
-        System.out.println("Execution time (ms): " + (endTime - startTime));
 
         // Validate data consistency
         int remainingKeys = 0;
@@ -56,7 +54,10 @@ public class ConcurrentMapStressTest {
             }
         }
 
-        System.out.println("Remaining keys count: " + remainingKeys);
+        // Final assertions
+        System.out.println("Execution time (ms): " + (endTime - startTime));
+        System.out.println(
+                "Final size of the map: " + map.size() + "\tNb of keys: " + remainingKeys);
         System.out.println("Stress test completed successfully.");
     }
 
@@ -96,13 +97,9 @@ public class ConcurrentMapStressTest {
 
         // Shutdown and await completion
         executor.shutdown();
-        executor.awaitTermination(10, TimeUnit.MINUTES);
+        executor.awaitTermination(30, TimeUnit.MINUTES);
 
         long endTime = System.currentTimeMillis();
-
-        // Final assertions
-        System.out.println("Final size of the map: " + map.size());
-        System.out.println("Execution time (ms): " + (endTime - startTime));
 
         // Validate data consistency
         int remainingKeys = 0;
@@ -112,8 +109,14 @@ public class ConcurrentMapStressTest {
             }
         }
 
-        System.out.println("Remaining keys count from pre-filled data: " + remainingKeys);
-        System.out.println("Stress test completed successfully.");
+        // Final assertions
+        System.out.println("Execution time (ms): " + (endTime - startTime));
+        System.out.println(
+                "Final size of the map: "
+                        + map.size()
+                        + "\tRemaining keys count from pre-filled data: "
+                        + remainingKeys);
+        System.out.println("Read-heavy stress test completed successfully.");
     }
 
     public static void writeHeavy(final Map<Integer, Integer> map) throws InterruptedException {
@@ -148,13 +151,9 @@ public class ConcurrentMapStressTest {
 
         // Shutdown and await completion
         executor.shutdown();
-        executor.awaitTermination(10, TimeUnit.MINUTES);
+        executor.awaitTermination(30, TimeUnit.MINUTES);
 
         long endTime = System.currentTimeMillis();
-
-        // Final assertions
-        System.out.println("Final size of the map: " + map.size());
-        System.out.println("Execution time (ms): " + (endTime - startTime));
 
         // Validate data consistency
         int remainingKeys = 0;
@@ -164,13 +163,25 @@ public class ConcurrentMapStressTest {
             }
         }
 
-        System.out.println("Remaining keys count: " + remainingKeys);
-        System.out.println("Stress test completed successfully.");
+        // Final assertions
+        System.out.println("Execution time (ms): " + (endTime - startTime));
+        System.out.println(
+                "Final size of the map: " + map.size() + "\tRemaining keys: " + remainingKeys);
+
+        System.out.println("Write-heavy Stress test completed successfully.");
     }
 
     public static void main(String[] args) throws InterruptedException {
         ConcurrentLinkedHashMap<Integer, Integer> linkedMap = new ConcurrentLinkedHashMap<>();
         ConcurrentOrderedMap<Integer, Integer> orderedMap = new ConcurrentOrderedMap<>();
+        ConcurrentStripedOrderedMap<Integer, Integer> stripedMap =
+                new ConcurrentStripedOrderedMap<>();
+
+        Map<Integer, Integer> syncMap =
+                Collections.synchronizedMap(new LinkedHashMap<Integer, Integer>());
+
+        System.out.println("Benchmark Synchronized LinkedHashMap");
+        benchmark(syncMap);
 
         System.out.println("Benchmark ConcurrentLinkedHashMap");
         benchmark(linkedMap);
@@ -178,20 +189,42 @@ public class ConcurrentMapStressTest {
         System.out.println("Benchmark ConcurrentOrderedMap");
         benchmark(orderedMap);
 
+        System.out.println("Benchmark ConcurrentStripedOrderedMap");
+        benchmark(stripedMap);
+
+        System.out.println("-----------------------------------------------------");
+        syncMap = Collections.synchronizedMap(new LinkedHashMap<Integer, Integer>());
         linkedMap = new ConcurrentLinkedHashMap<>();
         orderedMap = new ConcurrentOrderedMap<>();
+        stripedMap = new ConcurrentStripedOrderedMap<>();
+
+        System.out.println("Read-Heavy test synchronized LinkedHashMap");
+        readHeavy(syncMap);
+
         System.out.println("Read-Heavy test ConcurrentLinkedHashMap");
         readHeavy(linkedMap);
 
         System.out.println("Read-Heavy ConcurrentOrderedMap");
         readHeavy(orderedMap);
 
+        System.out.println("Read-Heavy ConcurrentStripedOrderedMap");
+        readHeavy(stripedMap);
+
+        System.out.println("-----------------------------------------------------");
+        syncMap = Collections.synchronizedMap(new LinkedHashMap<Integer, Integer>());
         linkedMap = new ConcurrentLinkedHashMap<>();
         orderedMap = new ConcurrentOrderedMap<>();
+        stripedMap = new ConcurrentStripedOrderedMap<>();
+        System.out.println("Write-Heavy test synchronized LinkedHashMap");
+        writeHeavy(syncMap);
+
         System.out.println("Write-Heavy test ConcurrentLinkedHashMap");
-        readHeavy(linkedMap);
+        writeHeavy(linkedMap);
 
         System.out.println("Write-Heavy ConcurrentOrderedMap");
-        readHeavy(orderedMap);
+        writeHeavy(orderedMap);
+
+        System.out.println("Write-Heavy ConcurrentStripedOrderedMap");
+        writeHeavy(stripedMap);
     }
 }

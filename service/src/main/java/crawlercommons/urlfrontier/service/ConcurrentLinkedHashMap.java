@@ -33,11 +33,18 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
     private final ReentrantLock lock; // To maintain consistency between map and order
     private final AtomicInteger size;
 
-    public ConcurrentLinkedHashMap() {
-        this.map = new ConcurrentHashMap<>();
+    private static final int DEFAULT_CONCURRENCY = 16;
+    private static final int DEFAULT_SIZE = DEFAULT_CONCURRENCY * 16;
+
+    public ConcurrentLinkedHashMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
+        this.map = new ConcurrentHashMap<>(initialCapacity, loadFactor, concurrencyLevel);
         this.order = new ConcurrentLinkedQueue<>();
         this.lock = new ReentrantLock();
         this.size = new AtomicInteger(0);
+    }
+
+    public ConcurrentLinkedHashMap() {
+        this(DEFAULT_SIZE, 0.75f, DEFAULT_CONCURRENCY);
     }
 
     @Override

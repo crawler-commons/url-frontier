@@ -1,5 +1,6 @@
 package crawlercommons.urlfrontier.service;
 
+import com.google.common.util.concurrent.Striped;
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -8,7 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.StampedLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -21,7 +23,9 @@ import java.util.stream.Collectors;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
-public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V> {
+public class ConcurrentStripedOrderedMap<K, V> extends AbstractMap<K, V>
+        implements ConcurrentMap<K, V> {
+
     // Main storage for key-value pairs
     private final ConcurrentHashMap<K, V> valueMap;
 
@@ -31,27 +35,52 @@ public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> implements Con
     // Atomic counter to track insertion order
     private final AtomicLong insertionCounter;
 
-    // Stamped lock for read-write operations
-    private final StampedLock lock;
+    private static final int DEFAULT_STRIPES = 32;
 
-    private static final int DEFAULT_CONCURRENCY = 16;
-    private static final int DEFAULT_SIZE = DEFAULT_CONCURRENCY * 16;
+    private final Striped<Lock> striped;
 
-    public ConcurrentOrderedMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
-        this.valueMap = new ConcurrentHashMap<>(initialCapacity, loadFactor, concurrencyLevel);
-        this.insertionOrderMap = new ConcurrentSkipListMap<>();
-        this.insertionCounter = new AtomicLong(0);
-        this.lock = new StampedLock();
+    public ConcurrentStripedOrderedMap() {
+        this(DEFAULT_STRIPES);
     }
 
-    public ConcurrentOrderedMap() {
-        this(DEFAULT_SIZE, 0.75f, DEFAULT_CONCURRENCY);
+    private final ReentrantLock globalLock = new ReentrantLock();
+
+    public ConcurrentStripedOrderedMap(int stripes) {
+        this.valueMap = new ConcurrentHashMap<>(32 * stripes, 0.75f, stripes);
+        this.insertionOrderMap = new ConcurrentSkipListMap<>();
+        this.insertionCounter = new AtomicLong(0);
+        this.striped = Striped.lock(stripes);
+    }
+
+    private Lock getStripe(Object key) {
+        return striped.get(Objects.hashCode(key));
+    }
+
+    private void lockAllStripes() {
+        globalLock.lock();
+        try {
+            // Lock each stripe
+            for (int i = 0; i < striped.size(); i++) {
+                striped.get(i).lock();
+            }
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    private void unlockAllStripes() {
+        // Unlock each stripe
+        for (int i = 0; i < striped.size(); i++) {
+            striped.get(i).unlock();
+        }
     }
 
     @Override
     public V put(K key, V value) {
 
-        long stamp = lock.writeLock();
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
         try {
             // Check if key already exists
             V oldValue = valueMap.get(key);
@@ -67,18 +96,22 @@ public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> implements Con
 
             return oldValue;
         } finally {
-            lock.unlockWrite(stamp);
+            stripe.unlock();
         }
     }
 
     @Override
     public V get(Object key) {
+
         return valueMap.get(key);
     }
 
     @Override
     public V remove(Object key) {
-        long stamp = lock.writeLock();
+
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
         try {
             V removedValue = valueMap.remove(key);
 
@@ -89,7 +122,7 @@ public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> implements Con
 
             return removedValue;
         } finally {
-            lock.unlockWrite(stamp);
+            stripe.unlock();
         }
     }
 
@@ -100,80 +133,58 @@ public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> implements Con
      * @return a linked hash set will all keys
      */
     public Set<K> keySet() {
-        // Return entries in insertion order
-        long stamp = lock.tryOptimisticRead();
 
-        Set<K> orderedKeys =
+        // Return keys in insertion order
+        Set<K> orderedKeys;
+
+        // Validate the read to ensure no concurrent modification
+        orderedKeys =
                 insertionOrderMap.values().stream()
                         .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        // Validate the read to ensure no concurrent modifications
-        if (!lock.validate(stamp)) {
-            stamp = lock.readLock();
-            try {
-                orderedKeys =
-                        insertionOrderMap.values().stream()
-                                .collect(Collectors.toCollection(LinkedHashSet::new));
-            } finally {
-                lock.unlockRead(stamp);
-            }
-        }
 
         return orderedKeys;
     }
 
-    /**
-     * Insertion order is preserved. The entry set returned is not backed up by the map.
-     *
-     * @return a linked hash set will all entries
-     */
     @Override
     public Set<Entry<K, V>> entrySet() {
         // Return entries in insertion order
-        long stamp = lock.tryOptimisticRead();
 
-        Set<Entry<K, V>> orderedEntries =
+        Set<Entry<K, V>> orderedEntries;
+
+        orderedEntries =
                 insertionOrderMap.values().stream()
                         .map(key -> new SimpleImmutableEntry<>(key, valueMap.get(key)))
                         .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        // Validate the read to ensure no concurrent modifications
-        if (!lock.validate(stamp)) {
-            stamp = lock.readLock();
-            try {
-                orderedEntries =
-                        insertionOrderMap.values().stream()
-                                .map(key -> new SimpleImmutableEntry<>(key, valueMap.get(key)))
-                                .collect(Collectors.toCollection(LinkedHashSet::new));
-            } finally {
-                lock.unlockRead(stamp);
-            }
-        }
 
         return orderedEntries;
     }
 
     @Override
     public int size() {
+
         return valueMap.size();
     }
 
     @Override
     public void clear() {
-        long stamp = lock.writeLock();
+        lockAllStripes();
+
         try {
             valueMap.clear();
             insertionOrderMap.clear();
             insertionCounter.set(0);
         } finally {
-            lock.unlockWrite(stamp);
+            unlockAllStripes();
         }
     }
 
     // Additional methods for more advanced concurrent operations
     @Override
     public boolean replace(K key, V oldValue, V newValue) {
-        long stamp = lock.writeLock();
+
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
         try {
             if (valueMap.replace(key, oldValue, newValue)) {
                 // Remove old insertion order entry and add new one
@@ -183,47 +194,51 @@ public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> implements Con
             }
             return false;
         } finally {
-            lock.unlockWrite(stamp);
+            stripe.unlock();
         }
     }
 
     @Override
     public V putIfAbsent(K key, V value) {
-        long stamp = lock.writeLock();
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
         try {
-            if (!valueMap.containsKey(key)) {
-                insertionOrderMap.put(insertionCounter.getAndIncrement(), key);
-                return valueMap.put(key, value);
-            } else {
-                return valueMap.get(key);
-            }
+            if (!valueMap.containsKey(key)) return put(key, value);
+            else return valueMap.get(key);
         } finally {
-            lock.unlockWrite(stamp);
+            stripe.unlock();
         }
     }
 
     @Override
     public boolean remove(Object key, Object value) {
 
-        if (valueMap.containsKey(key) && Objects.equals(valueMap.get(key), value)) {
-            remove(key);
-            return true;
-        } else {
-            return false;
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
+        try {
+            if (valueMap.containsKey(key) && Objects.equals(valueMap.get(key), value)) {
+                remove(key);
+                return true;
+            } else {
+                return false;
+            }
+        } finally {
+            stripe.unlock();
         }
     }
 
     @Override
-    // FIXME: Should be atomic but stamped lock is not reentrant
     public V replace(K key, V value) {
 
-        long stamp = lock.writeLock();
+        Lock stripe = getStripe(key);
+        stripe.lock();
         try {
-            if (valueMap.containsKey(key)) {
-                return put(key, value);
-            } else return null;
+            if (valueMap.containsKey(key)) return put(key, value);
+            else return null;
         } finally {
-            lock.unlockWrite(stamp);
+            stripe.unlock();
         }
     }
 }
