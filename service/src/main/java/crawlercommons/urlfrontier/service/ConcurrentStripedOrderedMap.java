@@ -38,18 +38,19 @@ public class ConcurrentStripedOrderedMap<K, V> implements ConcurrentInsertionOrd
     // Atomic counter to track insertion order
     private final AtomicLong insertionCounter;
 
-    private static final int DEFAULT_STRIPES = 32;
+    private static final int DEFAULT_CONCURRENCY = 32;
+    private static final int DEFAULT_SIZE = DEFAULT_CONCURRENCY * 16;
 
     private final Striped<Lock> striped;
 
     public ConcurrentStripedOrderedMap() {
-        this(DEFAULT_STRIPES);
+        this(DEFAULT_CONCURRENCY);
     }
 
     private final ReentrantLock globalLock = new ReentrantLock();
 
     public ConcurrentStripedOrderedMap(int stripes) {
-        this.valueMap = new ConcurrentHashMap<>(32 * stripes, 0.75f, stripes);
+        this.valueMap = new ConcurrentHashMap<>(DEFAULT_SIZE, 0.75f, stripes);
         this.insertionOrderMap = new ConcurrentSkipListMap<>();
         this.insertionCounter = new AtomicLong(0);
         this.striped = Striped.lock(stripes);

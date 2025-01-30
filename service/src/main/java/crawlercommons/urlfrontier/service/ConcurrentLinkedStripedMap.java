@@ -3,6 +3,7 @@
 
 package crawlercommons.urlfrontier.service;
 
+import com.google.common.util.concurrent.Striped;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -25,26 +27,51 @@ import java.util.concurrent.locks.ReentrantLock;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
-public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
+public class ConcurrentLinkedStripedMap<K, V> extends AbstractMap<K, V>
         implements ConcurrentMap<K, V> {
 
     private final ConcurrentHashMap<K, V> map;
     private final ConcurrentLinkedQueue<K> order;
-    private final ReentrantLock lock; // To maintain consistency between map and order
     private final AtomicInteger size;
+
+    private final Striped<Lock> striped;
+    private final ReentrantLock globalLock = new ReentrantLock();
 
     private static final int DEFAULT_CONCURRENCY = 32;
     private static final int DEFAULT_SIZE = DEFAULT_CONCURRENCY * 16;
 
-    public ConcurrentLinkedHashMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
-        this.map = new ConcurrentHashMap<>(initialCapacity, loadFactor, concurrencyLevel);
+    public ConcurrentLinkedStripedMap(int concurrencyLevel) {
+        this.map = new ConcurrentHashMap<>(DEFAULT_SIZE, 0.75f, concurrencyLevel);
         this.order = new ConcurrentLinkedQueue<>();
-        this.lock = new ReentrantLock();
+        this.striped = Striped.lock(concurrencyLevel);
         this.size = new AtomicInteger(0);
     }
 
-    public ConcurrentLinkedHashMap() {
-        this(DEFAULT_SIZE, 0.75f, DEFAULT_CONCURRENCY);
+    public ConcurrentLinkedStripedMap() {
+        this(DEFAULT_CONCURRENCY);
+    }
+
+    private Lock getStripe(Object key) {
+        return striped.get(Objects.hashCode(key));
+    }
+
+    private void lockAllStripes() {
+        globalLock.lock();
+        try {
+            // Lock each stripe
+            for (int i = 0; i < striped.size(); i++) {
+                striped.get(i).lock();
+            }
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
+    private void unlockAllStripes() {
+        // Unlock each stripe
+        for (int i = 0; i < striped.size(); i++) {
+            striped.get(i).unlock();
+        }
     }
 
     @Override
@@ -79,7 +106,9 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
     @Override
     public V put(K key, V value) {
         V previous;
-        lock.lock();
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
         try {
             previous = map.put(key, value);
             if (previous == null) {
@@ -87,7 +116,7 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
                 size.incrementAndGet();
             }
         } finally {
-            lock.unlock();
+            stripe.unlock();
         }
         return previous;
     }
@@ -99,7 +128,9 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
     @Override
     public V remove(Object key) {
         V removedValue;
-        lock.lock();
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
         try {
             removedValue = map.remove(key);
             if (removedValue != null) {
@@ -107,7 +138,7 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
                 size.decrementAndGet();
             }
         } finally {
-            lock.unlock();
+            stripe.unlock();
         }
         return removedValue;
     }
@@ -118,7 +149,7 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        lock.lock();
+        lockAllStripes();
         try {
             for (Entry<? extends K, ? extends V> entry : m.entrySet()) {
                 K key = entry.getKey();
@@ -129,20 +160,20 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
                 }
             }
         } finally {
-            lock.unlock();
+            unlockAllStripes();
         }
     }
 
     /** Removes all of the mappings from this map and clears the insertion order. */
     @Override
     public void clear() {
-        lock.lock();
+        lockAllStripes();
         try {
             map.clear();
             order.clear();
             size.set(0);
         } finally {
-            lock.unlock();
+            unlockAllStripes();
         }
     }
 
@@ -181,19 +212,23 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
     @Override
     public V putIfAbsent(K key, V value) {
 
-        lock.lock();
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
         try {
             if (!map.containsKey(key)) return put(key, value);
             else return map.get(key);
         } finally {
-            lock.unlock();
+            stripe.unlock();
         }
     }
 
     @Override
     public boolean remove(Object key, Object value) {
 
-        lock.lock();
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
         try {
             if (map.containsKey(key) && Objects.equals(map.get(key), value)) {
                 remove(key);
@@ -202,14 +237,16 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
                 return false;
             }
         } finally {
-            lock.unlock();
+            stripe.unlock();
         }
     }
 
     @Override
     public boolean replace(K key, V oldValue, V newValue) {
 
-        lock.lock();
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
         try {
             if (map.containsKey(key) && Objects.equals(map.get(key), oldValue)) {
                 put(key, newValue);
@@ -218,19 +255,21 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
                 return false;
             }
         } finally {
-            lock.unlock();
+            stripe.unlock();
         }
     }
 
     @Override
     public V replace(K key, V value) {
 
-        lock.lock();
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
         try {
             if (map.containsKey(key)) return put(key, value);
             else return null;
         } finally {
-            lock.unlock();
+            stripe.unlock();
         }
     }
 }

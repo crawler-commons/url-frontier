@@ -176,6 +176,8 @@ public class ConcurrentMapStressTest {
         ConcurrentOrderedMap<Integer, Integer> orderedMap = new ConcurrentOrderedMap<>();
         ConcurrentStripedOrderedMap<Integer, Integer> stripedMap =
                 new ConcurrentStripedOrderedMap<>();
+        ConcurrentLinkedStripedMap<Integer, Integer> linkedStriped =
+                new ConcurrentLinkedStripedMap<>();
 
         Map<Integer, Integer> syncMap =
                 Collections.synchronizedMap(new LinkedHashMap<Integer, Integer>());
@@ -192,11 +194,15 @@ public class ConcurrentMapStressTest {
         System.out.println("Benchmark ConcurrentStripedOrderedMap");
         benchmark(stripedMap);
 
+        System.out.println("Benchmark ConcurrentLinkedStripedMap");
+        benchmark(linkedStriped);
+
         System.out.println("-----------------------------------------------------");
         syncMap = Collections.synchronizedMap(new LinkedHashMap<Integer, Integer>());
         linkedMap = new ConcurrentLinkedHashMap<>();
         orderedMap = new ConcurrentOrderedMap<>();
         stripedMap = new ConcurrentStripedOrderedMap<>();
+        linkedStriped = new ConcurrentLinkedStripedMap<>();
 
         System.out.println("Read-Heavy test synchronized LinkedHashMap");
         readHeavy(syncMap);
@@ -210,11 +216,15 @@ public class ConcurrentMapStressTest {
         System.out.println("Read-Heavy ConcurrentStripedOrderedMap");
         readHeavy(stripedMap);
 
+        System.out.println("Read-Heavy ConcurrentLinkedStripedMap");
+        readHeavy(linkedStriped);
+
         System.out.println("-----------------------------------------------------");
         syncMap = Collections.synchronizedMap(new LinkedHashMap<Integer, Integer>());
         linkedMap = new ConcurrentLinkedHashMap<>();
         orderedMap = new ConcurrentOrderedMap<>();
         stripedMap = new ConcurrentStripedOrderedMap<>();
+        linkedStriped = new ConcurrentLinkedStripedMap<>();
         System.out.println("Write-Heavy test synchronized LinkedHashMap");
         writeHeavy(syncMap);
 
@@ -226,5 +236,8 @@ public class ConcurrentMapStressTest {
 
         System.out.println("Write-Heavy ConcurrentStripedOrderedMap");
         writeHeavy(stripedMap);
+
+        System.out.println("Write-Heavy ConcurrentLinkedStripedMap");
+        writeHeavy(linkedStriped);
     }
 }

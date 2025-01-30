@@ -38,7 +38,7 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     // Stamped lock for read-write operations
     private final StampedLock lock;
 
-    private static final int DEFAULT_CONCURRENCY = 16;
+    private static final int DEFAULT_CONCURRENCY = 32;
     private static final int DEFAULT_SIZE = DEFAULT_CONCURRENCY * 16;
 
     public ConcurrentOrderedMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
