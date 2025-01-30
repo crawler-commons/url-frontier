@@ -122,34 +122,33 @@ public class MemoryFrontierService extends AbstractFrontierService {
         QueueWithinCrawl qk = QueueWithinCrawl.get(key, iu.crawlID);
 
         // get the priority queue or create one
-        synchronized (getQueues()) {
-            URLQueue queue = (URLQueue) getQueues().get(qk);
-            if (queue == null) {
-                getQueues().put(qk, new URLQueue(iu));
-                return Status.OK;
-            }
+        URLQueue queue = (URLQueue) getQueues().get(qk);
+        if (queue == null) {
+            getQueues().put(qk, new URLQueue(iu));
+            return Status.OK;
+        }
 
-            // check whether the URL already exists
-            if (queue.contains(iu)) {
-                if (discovered) {
-                    putURLs_alreadyknown_count.inc();
-                    // we already discovered it - so no need for it
-                    return Status.SKIPPED;
-                } else {
-                    // overwrite the existing version
-                    queue.remove(iu);
-                }
-            }
-
-            // add the new item
-            // unless it is an update and it's nextFetchDate is 0 == NEVER
-            if (!discovered && iu.nextFetchDate == 0) {
-                putURLs_completed_count.inc();
-                queue.addToCompleted(iu.url);
+        // check whether the URL already exists
+        if (queue.contains(iu)) {
+            if (discovered) {
+                putURLs_alreadyknown_count.inc();
+                // we already discovered it - so no need for it
+                return Status.SKIPPED;
             } else {
-                queue.add(iu);
+                // overwrite the existing version
+                queue.remove(iu);
             }
         }
+
+        // add the new item
+        // unless it is an update and it's nextFetchDate is 0 == NEVER
+        if (!discovered && iu.nextFetchDate == 0) {
+            putURLs_completed_count.inc();
+            queue.addToCompleted(iu.url);
+        } else {
+            queue.add(iu);
+        }
+
         return Status.OK;
     }
 

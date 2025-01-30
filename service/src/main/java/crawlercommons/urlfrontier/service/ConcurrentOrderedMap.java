@@ -1,11 +1,15 @@
 package crawlercommons.urlfrontier.service;
 
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.StampedLock;
@@ -21,7 +25,7 @@ import java.util.stream.Collectors;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
-public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V> {
+public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K, V> {
     // Main storage for key-value pairs
     private final ConcurrentHashMap<K, V> valueMap;
 
@@ -225,5 +229,91 @@ public class ConcurrentOrderedMap<K, V> extends AbstractMap<K, V> implements Con
         } finally {
             lock.unlockWrite(stamp);
         }
+    }
+
+    /*
+     * Returns the first entry according to insertion order
+     */
+    public Entry<K, V> firsEntry() {
+        K key = insertionOrderMap.firstEntry().getValue();
+
+        return new AbstractMap.SimpleImmutableEntry<>(key, valueMap.get(key));
+    }
+
+    /*
+     * Remove & Returns the first entry according to insertion order
+     */
+    public Entry<K, V> pollFirstEntry() {
+
+        long stamp = lock.writeLock();
+        try {
+
+            // Retrieves and removes the first key from the order queue
+            Entry<Long, K> firstEntry = insertionOrderMap.pollFirstEntry();
+            K key = firstEntry.getValue();
+            if (key != null) {
+                // Get the value and remove the entry from the map
+                V value = valueMap.get(key);
+                valueMap.remove(key);
+
+                return new AbstractMap.SimpleImmutableEntry<>(key, value);
+            } else {
+                return null;
+            }
+        } finally {
+            lock.unlockWrite(stamp);
+        }
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return valueMap.isEmpty();
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+
+        return valueMap.containsKey(key);
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+
+        return valueMap.containsValue(value);
+    }
+
+    @Override
+    public void putAll(Map<? extends K, ? extends V> m) {
+        // TODO Implement this optional operation
+        throw new UnsupportedOperationException();
+    }
+
+    /** Returns a Collection view of the values contained in this map in insertion order. */
+    @Override
+    public Collection<V> values() {
+        List<V> values;
+
+        // Return entries in insertion order
+        long stamp = lock.tryOptimisticRead();
+
+        values =
+                insertionOrderMap.values().stream()
+                        .map(key -> valueMap.get(key))
+                        .collect(Collectors.toCollection(ArrayList::new));
+
+        // Validate the read to ensure no concurrent modifications
+        if (!lock.validate(stamp)) {
+            stamp = lock.readLock();
+            try {
+                values =
+                        insertionOrderMap.values().stream()
+                                .map(key -> valueMap.get(key))
+                                .collect(Collectors.toCollection(ArrayList::new));
+            } finally {
+                lock.unlockRead(stamp);
+            }
+        }
+
+        return values;
     }
 }

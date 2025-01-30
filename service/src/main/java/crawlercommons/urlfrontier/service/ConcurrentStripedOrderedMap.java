@@ -2,11 +2,15 @@ package crawlercommons.urlfrontier.service;
 
 import com.google.common.util.concurrent.Striped;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
@@ -23,8 +27,7 @@ import java.util.stream.Collectors;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
-public class ConcurrentStripedOrderedMap<K, V> extends AbstractMap<K, V>
-        implements ConcurrentMap<K, V> {
+public class ConcurrentStripedOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K, V> {
 
     // Main storage for key-value pairs
     private final ConcurrentHashMap<K, V> valueMap;
@@ -240,5 +243,76 @@ public class ConcurrentStripedOrderedMap<K, V> extends AbstractMap<K, V>
         } finally {
             stripe.unlock();
         }
+    }
+
+    /*
+     * Returns the first entry according to insertion order
+     */
+    public Entry<K, V> firsEntry() {
+        K key = insertionOrderMap.firstEntry().getValue();
+
+        return new AbstractMap.SimpleImmutableEntry<>(key, valueMap.get(key));
+    }
+
+    /*
+     * Remove & Returns the first entry according to insertion order
+     */
+    public Entry<K, V> pollFirstEntry() {
+
+        Entry<Long, K> firstEntry = insertionOrderMap.firstEntry();
+        K key = firstEntry.getValue();
+        Lock stripe = getStripe(key);
+        try {
+
+            // Removes the first key from the order queue
+            insertionOrderMap.pollFirstEntry();
+            if (key != null) {
+                // Get the value and remove the entry from the map
+                V value = valueMap.get(key);
+                valueMap.remove(key);
+
+                return new AbstractMap.SimpleImmutableEntry<>(key, value);
+            } else {
+                return null;
+            }
+        } finally {
+            stripe.unlock();
+        }
+    }
+
+    @Override
+    public boolean isEmpty() {
+
+        return valueMap.isEmpty();
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+
+        return valueMap.containsKey(key);
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+
+        return valueMap.containsValue(value);
+    }
+
+    @Override
+    public void putAll(Map<? extends K, ? extends V> m) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Collection<V> values() {
+        List<V> values;
+
+        values =
+                insertionOrderMap.values().stream()
+                        .map(key -> valueMap.get(key))
+                        .collect(Collectors.toCollection(ArrayList::new));
+
+        return values;
     }
 }

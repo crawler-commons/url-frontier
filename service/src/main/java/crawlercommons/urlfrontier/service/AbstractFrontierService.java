@@ -118,7 +118,8 @@ public abstract class AbstractFrontierService
     private List<String> nodes;
 
     // in memory map of metadata for each queue
-    private final Map<QueueWithinCrawl, QueueInterface> queues = new ConcurrentOrderedMap<>();
+    private final ConcurrentInsertionOrderMap<QueueWithinCrawl, QueueInterface> queues =
+            new ConcurrentOrderedMap<>();
 
     protected final ExecutorService readExecutorService;
     protected final ExecutorService writeExecutorService;
@@ -145,7 +146,7 @@ public abstract class AbstractFrontierService
         LOG.info("Using {} threads for writing to queues", wthreadNum);
     }
 
-    public Map<QueueWithinCrawl, QueueInterface> getQueues() {
+    public ConcurrentInsertionOrderMap<QueueWithinCrawl, QueueInterface> getQueues() {
         return queues;
     }
 
@@ -637,9 +638,7 @@ public abstract class AbstractFrontierService
             final QueueInterface currentQueue;
             final QueueWithinCrawl currentCrawlQueue;
 
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    getQueues().entrySet().iterator();
-            Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+            Entry<QueueWithinCrawl, QueueInterface> e = getQueues().firsEntry();
             currentQueue = e.getValue();
             currentCrawlQueue = e.getKey();
 
@@ -651,8 +650,9 @@ public abstract class AbstractFrontierService
             }
 
             // We remove the entry and put it at the end of the map
-            iterator.remove();
-            getQueues().put(currentCrawlQueue, currentQueue);
+            // TODO Review if this needs to be atomic ?
+            Entry<QueueWithinCrawl, QueueInterface> first = getQueues().pollFirstEntry();
+            getQueues().put(first.getKey(), first.getValue());
 
             // if a crawlID has been specified make sure it matches
             if (crawlID != null && !currentCrawlQueue.getCrawlid().equals(crawlID)) {
