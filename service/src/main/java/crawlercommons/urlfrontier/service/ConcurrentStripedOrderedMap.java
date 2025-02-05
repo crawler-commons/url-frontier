@@ -234,7 +234,7 @@ public class ConcurrentStripedOrderedMap<K, V> implements ConcurrentInsertionOrd
         stripe.lock();
 
         try {
-            if (valueMap.containsKey(key) && Objects.equals(valueMap.get(key), value)) {
+            if (valueMap.containsKey(key) && Objects.equals(valueMap.get(key).value, value)) {
                 remove(key);
                 return true;
             } else {
