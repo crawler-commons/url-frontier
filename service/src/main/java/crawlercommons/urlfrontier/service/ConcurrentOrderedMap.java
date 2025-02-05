@@ -1,5 +1,6 @@
 package crawlercommons.urlfrontier.service;
 
+
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
  */
 public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K, V> {
     // Main storage for key-value pairs
-    private final ConcurrentHashMap<K, V> valueMap;
+    private final ConcurrentHashMap<K, ValueEntry> valueMap;
 
     // Tracks insertion order using a concurrent skip list map
     private final ConcurrentSkipListMap<Long, K> insertionOrderMap;
@@ -40,6 +41,16 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
 
     private static final int DEFAULT_CONCURRENCY = 32;
     private static final int DEFAULT_SIZE = DEFAULT_CONCURRENCY * 16;
+
+    class ValueEntry {
+        public ValueEntry(V v, long o) {
+            this.value = v;
+            this.order = o;
+        }
+
+        V value;
+        long order;
+    }
 
     public ConcurrentOrderedMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
         this.valueMap = new ConcurrentHashMap<>(initialCapacity, loadFactor, concurrencyLevel);
@@ -58,16 +69,18 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
         long stamp = lock.writeLock();
         try {
             // Check if key already exists
-            V oldValue = valueMap.get(key);
-
-            // Remove old insertion order if key exists
-            if (oldValue != null) {
-                insertionOrderMap.entrySet().removeIf(entry -> entry.getValue().equals(key));
+            V oldValue;
+            ValueEntry ventry = valueMap.get(key);
+            if (ventry != null) {
+                oldValue = ventry.value;
+                ventry.value = value;
+            } else {
+                // Add to value map and track insertion order
+                oldValue = null;
+                long newOrder = insertionCounter.getAndIncrement();
+                insertionOrderMap.put(newOrder, key);
+                valueMap.put(key, new ValueEntry(value, newOrder));
             }
-
-            // Add to value map and track insertion order
-            valueMap.put(key, value);
-            insertionOrderMap.put(insertionCounter.getAndIncrement(), key);
 
             return oldValue;
         } finally {
@@ -77,21 +90,21 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
 
     @Override
     public V get(Object key) {
-        return valueMap.get(key);
+        ValueEntry ventry = valueMap.get(key);
+        return (ventry != null) ? ventry.value : null;
     }
 
     @Override
     public V remove(Object key) {
         long stamp = lock.writeLock();
         try {
-            V removedValue = valueMap.remove(key);
+            ValueEntry removed = valueMap.remove(key);
 
-            // Remove from insertion order map if value existed
-            if (removedValue != null) {
-                insertionOrderMap.entrySet().removeIf(entry -> entry.getValue().equals(key));
+            if (removed != null) {
+                insertionOrderMap.remove(removed.order);
             }
 
-            return removedValue;
+            return (removed != null) ? removed.value : null;
         } finally {
             lock.unlockWrite(stamp);
         }
@@ -107,17 +120,13 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
         // Return entries in insertion order
         long stamp = lock.tryOptimisticRead();
 
-        Set<K> orderedKeys =
-                insertionOrderMap.values().stream()
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<K> orderedKeys = new LinkedHashSet<>(insertionOrderMap.values());
 
         // Validate the read to ensure no concurrent modifications
         if (!lock.validate(stamp)) {
             stamp = lock.readLock();
             try {
-                orderedKeys =
-                        insertionOrderMap.values().stream()
-                                .collect(Collectors.toCollection(LinkedHashSet::new));
+                orderedKeys = new LinkedHashSet<>(insertionOrderMap.values());
             } finally {
                 lock.unlockRead(stamp);
             }
@@ -138,7 +147,7 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
 
         Set<Entry<K, V>> orderedEntries =
                 insertionOrderMap.values().stream()
-                        .map(key -> new SimpleImmutableEntry<>(key, valueMap.get(key)))
+                        .map(key -> new SimpleImmutableEntry<>(key, valueMap.get(key).value))
                         .collect(Collectors.toCollection(LinkedHashSet::new));
 
         // Validate the read to ensure no concurrent modifications
@@ -147,7 +156,10 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
             try {
                 orderedEntries =
                         insertionOrderMap.values().stream()
-                                .map(key -> new SimpleImmutableEntry<>(key, valueMap.get(key)))
+                                .map(
+                                        key ->
+                                                new SimpleImmutableEntry<>(
+                                                        key, valueMap.get(key).value))
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
             } finally {
                 lock.unlockRead(stamp);
@@ -178,14 +190,20 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     @Override
     public boolean replace(K key, V oldValue, V newValue) {
         long stamp = lock.writeLock();
+
         try {
-            if (valueMap.replace(key, oldValue, newValue)) {
-                // Remove old insertion order entry and add new one
-                insertionOrderMap.entrySet().removeIf(entry -> entry.getValue().equals(key));
-                insertionOrderMap.put(insertionCounter.getAndIncrement(), key);
-                return true;
+            if (valueMap.containsKey(key)) {
+                ValueEntry ventry = valueMap.get(key);
+                if (ventry != null && Objects.equals(ventry.value, oldValue)) {
+                    ventry.value = newValue;
+
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
             }
-            return false;
         } finally {
             lock.unlockWrite(stamp);
         }
@@ -196,10 +214,12 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
         long stamp = lock.writeLock();
         try {
             if (!valueMap.containsKey(key)) {
-                insertionOrderMap.put(insertionCounter.getAndIncrement(), key);
-                return valueMap.put(key, value);
+                long newOrder = insertionCounter.getAndIncrement();
+                insertionOrderMap.put(newOrder, key);
+                ValueEntry oldValue = valueMap.put(key, new ValueEntry(value, newOrder));
+                return (oldValue != null) ? oldValue.value : null;
             } else {
-                return valueMap.get(key);
+                return valueMap.get(key).value;
             }
         } finally {
             lock.unlockWrite(stamp);
@@ -209,7 +229,7 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     @Override
     public boolean remove(Object key, Object value) {
 
-        if (valueMap.containsKey(key) && Objects.equals(valueMap.get(key), value)) {
+        if (valueMap.containsKey(key) && Objects.equals(valueMap.get(key).value, value)) {
             remove(key);
             return true;
         } else {
@@ -237,7 +257,7 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     public Entry<K, V> firsEntry() {
         K key = insertionOrderMap.firstEntry().getValue();
 
-        return new AbstractMap.SimpleImmutableEntry<>(key, valueMap.get(key));
+        return new AbstractMap.SimpleImmutableEntry<>(key, valueMap.get(key).value);
     }
 
     /*
@@ -253,7 +273,7 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
             K key = firstEntry.getValue();
             if (key != null) {
                 // Get the value and remove the entry from the map
-                V value = valueMap.get(key);
+                V value = valueMap.get(key).value;
                 valueMap.remove(key);
 
                 return new AbstractMap.SimpleImmutableEntry<>(key, value);
@@ -298,7 +318,7 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
 
         values =
                 insertionOrderMap.values().stream()
-                        .map(key -> valueMap.get(key))
+                        .map(key -> valueMap.get(key).value)
                         .collect(Collectors.toCollection(ArrayList::new));
 
         // Validate the read to ensure no concurrent modifications
@@ -307,7 +327,7 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
             try {
                 values =
                         insertionOrderMap.values().stream()
-                                .map(key -> valueMap.get(key))
+                                .map(key -> valueMap.get(key).value)
                                 .collect(Collectors.toCollection(ArrayList::new));
             } finally {
                 lock.unlockRead(stamp);
