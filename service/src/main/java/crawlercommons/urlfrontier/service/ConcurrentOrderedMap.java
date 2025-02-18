@@ -1,12 +1,10 @@
 package crawlercommons.urlfrontier.service;
 
-
+import java.util.AbstractCollection;
 import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
+import java.util.AbstractSet;
 import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -14,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.StampedLock;
-import java.util.stream.Collectors;
 
 /**
  * Concurrent version of LinkedHashMap Design goal is the same as for ConcurrentHashMap: Maintain
@@ -112,61 +109,77 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
 
     @Override
     /**
-     * Insertion order is preserved. The entry set returned is not backed up by the map.
+     * Insertion order is preserved.
      *
      * @return a linked hash set will all keys
      */
     public Set<K> keySet() {
-        // Return entries in insertion order
-        long stamp = lock.tryOptimisticRead();
+        return new AbstractSet<>() {
+            @Override
+            public Iterator<K> iterator() {
+                return new Iterator<>() {
+                    final Iterator<Entry<Long, K>> orderedIterator =
+                            insertionOrderMap.entrySet().iterator();
 
-        Set<K> orderedKeys = new LinkedHashSet<>(insertionOrderMap.values());
+                    @Override
+                    public boolean hasNext() {
+                        return orderedIterator.hasNext();
+                    }
 
-        // Validate the read to ensure no concurrent modifications
-        if (!lock.validate(stamp)) {
-            stamp = lock.readLock();
-            try {
-                orderedKeys = new LinkedHashSet<>(insertionOrderMap.values());
-            } finally {
-                lock.unlockRead(stamp);
+                    @Override
+                    public K next() {
+                        return orderedIterator.next().getValue();
+                    }
+
+                    @Override
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
+                };
             }
-        }
 
-        return orderedKeys;
+            @Override
+            public int size() {
+                // Don't use size on CSLM as it's not in O(1) but rather O(n) and may be inacurate
+                return valueMap.size();
+            }
+        };
     }
 
     /**
-     * Insertion order is preserved. The entry set returned is not backed up by the map.
+     * Insertion order is preserved.
      *
      * @return a linked hash set will all entries
      */
     @Override
-    public Set<Entry<K, V>> entrySet() {
-        // Return entries in insertion order
-        long stamp = lock.tryOptimisticRead();
+    public Set<Map.Entry<K, V>> entrySet() {
+        return new AbstractSet<Map.Entry<K, V>>() {
+            @Override
+            public Iterator<Map.Entry<K, V>> iterator() {
+                return new Iterator<Map.Entry<K, V>>() {
+                    final Iterator<Entry<Long, K>> orderedIterator =
+                            insertionOrderMap.entrySet().iterator();
 
-        Set<Entry<K, V>> orderedEntries =
-                insertionOrderMap.values().stream()
-                        .map(key -> new SimpleImmutableEntry<>(key, valueMap.get(key).value))
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
+                    @Override
+                    public boolean hasNext() {
+                        return orderedIterator.hasNext();
+                    }
 
-        // Validate the read to ensure no concurrent modifications
-        if (!lock.validate(stamp)) {
-            stamp = lock.readLock();
-            try {
-                orderedEntries =
-                        insertionOrderMap.values().stream()
-                                .map(
-                                        key ->
-                                                new SimpleImmutableEntry<>(
-                                                        key, valueMap.get(key).value))
-                                .collect(Collectors.toCollection(LinkedHashSet::new));
-            } finally {
-                lock.unlockRead(stamp);
+                    @Override
+                    public Map.Entry<K, V> next() {
+                        Entry<Long, K> nextEntry = orderedIterator.next();
+                        K key = nextEntry.getValue();
+                        V value = valueMap.get(key).value;
+                        return new AbstractMap.SimpleImmutableEntry<>(key, value);
+                    }
+                };
             }
-        }
 
-        return orderedEntries;
+            @Override
+            public int size() {
+                return valueMap.size();
+            }
+        };
     }
 
     @Override
@@ -238,14 +251,23 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     }
 
     @Override
-    // FIXME: Should be atomic but stamped lock is not reentrant
     public V replace(K key, V value) {
 
         long stamp = lock.writeLock();
         try {
             if (valueMap.containsKey(key)) {
-                return put(key, value);
-            } else return null;
+                ValueEntry vEntry = valueMap.get(key);
+                V oldValue = vEntry.value;
+                vEntry.value = value;
+
+                return oldValue;
+            } else {
+                long newOrder = insertionCounter.getAndIncrement();
+                insertionOrderMap.put(newOrder, key);
+                valueMap.put(key, new ValueEntry(value, newOrder));
+
+                return null;
+            }
         } finally {
             lock.unlockWrite(stamp);
         }
@@ -254,7 +276,7 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     /*
      * Returns the first entry according to insertion order
      */
-    public Entry<K, V> firsEntry() {
+    public Entry<K, V> firstEntry() {
         K key = insertionOrderMap.firstEntry().getValue();
 
         return new AbstractMap.SimpleImmutableEntry<>(key, valueMap.get(key).value);
@@ -304,36 +326,54 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        // TODO Implement this optional operation
-        throw new UnsupportedOperationException();
+
+        long stamp = lock.writeLock();
+        try {
+            for (Entry<? extends K, ? extends V> entry : m.entrySet()) {
+                K key = entry.getKey();
+
+                // Check if key already exists
+                ValueEntry ventry = valueMap.get(key);
+                if (ventry != null) {
+                    ventry.value = entry.getValue();
+                } else {
+                    long newOrder = insertionCounter.getAndIncrement();
+                    insertionOrderMap.put(newOrder, key);
+                    valueMap.put(key, new ValueEntry(entry.getValue(), newOrder));
+                }
+            }
+        } finally {
+            lock.unlock(stamp);
+        }
     }
 
     /** Returns a Collection view of the values contained in this map in insertion order. */
     @Override
     public Collection<V> values() {
-        List<V> values;
+        return new AbstractCollection<>() {
+            @Override
+            public Iterator<V> iterator() {
+                return new Iterator<>() {
+                    final Iterator<Entry<Long, K>> orderedIterator =
+                            insertionOrderMap.entrySet().iterator();
 
-        // Return entries in insertion order
-        long stamp = lock.tryOptimisticRead();
+                    @Override
+                    public boolean hasNext() {
+                        return orderedIterator.hasNext();
+                    }
 
-        values =
-                insertionOrderMap.values().stream()
-                        .map(key -> valueMap.get(key).value)
-                        .collect(Collectors.toCollection(ArrayList::new));
-
-        // Validate the read to ensure no concurrent modifications
-        if (!lock.validate(stamp)) {
-            stamp = lock.readLock();
-            try {
-                values =
-                        insertionOrderMap.values().stream()
-                                .map(key -> valueMap.get(key).value)
-                                .collect(Collectors.toCollection(ArrayList::new));
-            } finally {
-                lock.unlockRead(stamp);
+                    @Override
+                    public V next() {
+                        K key = orderedIterator.next().getValue();
+                        return valueMap.get(key).value;
+                    }
+                };
             }
-        }
 
-        return values;
+            @Override
+            public int size() {
+                return valueMap.size();
+            }
+        };
     }
 }

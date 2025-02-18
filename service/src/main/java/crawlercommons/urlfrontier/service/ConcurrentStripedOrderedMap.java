@@ -1,12 +1,11 @@
 package crawlercommons.urlfrontier.service;
 
 import com.google.common.util.concurrent.Striped;
+import java.util.AbstractCollection;
 import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
+import java.util.AbstractSet;
 import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -15,7 +14,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
 /**
  * Concurrent version of LinkedHashMap Design goal is the same as for ConcurrentHashMap: Maintain
@@ -99,12 +97,11 @@ public class ConcurrentStripedOrderedMap<K, V> implements ConcurrentInsertionOrd
         try {
             // Check if key already exists
             ValueEntry ventry = valueMap.get(key);
-            V oldValue;
+            V oldValue = null;
             if (ventry != null) {
                 oldValue = ventry.value;
                 ventry.value = value;
             } else {
-                oldValue = null;
                 long newOrder = insertionCounter.getAndIncrement();
                 insertionOrderMap.put(newOrder, key);
                 valueMap.put(key, new ValueEntry(value, newOrder));
@@ -145,27 +142,72 @@ public class ConcurrentStripedOrderedMap<K, V> implements ConcurrentInsertionOrd
 
     @Override
     /**
-     * Insertion order is preserved. The entry set returned is not backed up by the map.
+     * Insertion order is preserved.
      *
      * @return a linked hash set will all keys
      */
     public Set<K> keySet() {
+        return new AbstractSet<>() {
+            @Override
+            public Iterator<K> iterator() {
+                return new Iterator<>() {
+                    final Iterator<Entry<Long, K>> orderedIterator =
+                            insertionOrderMap.entrySet().iterator();
 
-        return new LinkedHashSet<>(insertionOrderMap.values());
+                    @Override
+                    public boolean hasNext() {
+                        return orderedIterator.hasNext();
+                    }
+
+                    @Override
+                    public K next() {
+                        return orderedIterator.next().getValue();
+                    }
+
+                    @Override
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
+                };
+            }
+
+            @Override
+            public int size() {
+                // Don't use size on CSLM as it's not in O(1) but rather O(n) and may be inacurate
+                return valueMap.size();
+            }
+        };
     }
 
     @Override
-    public Set<Entry<K, V>> entrySet() {
-        // Return entries in insertion order
+    public Set<Map.Entry<K, V>> entrySet() {
+        return new AbstractSet<Map.Entry<K, V>>() {
+            @Override
+            public Iterator<Map.Entry<K, V>> iterator() {
+                return new Iterator<Map.Entry<K, V>>() {
+                    final Iterator<Entry<Long, K>> orderedIterator =
+                            insertionOrderMap.entrySet().iterator();
 
-        Set<Entry<K, V>> orderedEntries;
+                    @Override
+                    public boolean hasNext() {
+                        return orderedIterator.hasNext();
+                    }
 
-        orderedEntries =
-                insertionOrderMap.values().stream()
-                        .map(key -> new SimpleImmutableEntry<>(key, valueMap.get(key).value))
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
+                    @Override
+                    public Map.Entry<K, V> next() {
+                        Entry<Long, K> nextEntry = orderedIterator.next();
+                        K key = nextEntry.getValue();
+                        V value = valueMap.get(key).value;
+                        return new AbstractMap.SimpleImmutableEntry<>(key, value);
+                    }
+                };
+            }
 
-        return orderedEntries;
+            @Override
+            public int size() {
+                return valueMap.size();
+            }
+        };
     }
 
     @Override
@@ -218,7 +260,7 @@ public class ConcurrentStripedOrderedMap<K, V> implements ConcurrentInsertionOrd
 
         try {
             if (!valueMap.containsKey(key)) {
-                return put(key, value);
+                return this.put(key, value);
             } else {
                 return valueMap.get(key).value;
             }
@@ -264,10 +306,16 @@ public class ConcurrentStripedOrderedMap<K, V> implements ConcurrentInsertionOrd
     /*
      * Returns the first entry according to insertion order
      */
-    public Entry<K, V> firsEntry() {
-        K key = insertionOrderMap.firstEntry().getValue();
+    public Entry<K, V> firstEntry() {
+        Entry<Long, K> first = insertionOrderMap.firstEntry();
 
-        return new AbstractMap.SimpleImmutableEntry<>(key, valueMap.get(key).value);
+        if (first != null) {
+            K key = first.getValue();
+
+            return new AbstractMap.SimpleImmutableEntry<>(key, valueMap.get(key).value);
+        } else {
+            return null;
+        }
     }
 
     /*
@@ -276,6 +324,10 @@ public class ConcurrentStripedOrderedMap<K, V> implements ConcurrentInsertionOrd
     public Entry<K, V> pollFirstEntry() {
 
         Entry<Long, K> firstEntry = insertionOrderMap.firstEntry();
+        if (firstEntry == null) {
+            return null;
+        }
+
         K key = firstEntry.getValue();
         Lock stripe = getStripe(key);
         stripe.lock();
@@ -341,13 +393,30 @@ public class ConcurrentStripedOrderedMap<K, V> implements ConcurrentInsertionOrd
 
     @Override
     public Collection<V> values() {
-        List<V> values;
+        return new AbstractCollection<>() {
+            @Override
+            public Iterator<V> iterator() {
+                return new Iterator<>() {
+                    final Iterator<Entry<Long, K>> orderedIterator =
+                            insertionOrderMap.entrySet().iterator();
 
-        values =
-                insertionOrderMap.values().stream()
-                        .map(key -> valueMap.get(key).value)
-                        .collect(Collectors.toCollection(ArrayList::new));
+                    @Override
+                    public boolean hasNext() {
+                        return orderedIterator.hasNext();
+                    }
 
-        return values;
+                    @Override
+                    public V next() {
+                        K key = orderedIterator.next().getValue();
+                        return valueMap.get(key).value;
+                    }
+                };
+            }
+
+            @Override
+            public int size() {
+                return valueMap.size();
+            }
+        };
     }
 }

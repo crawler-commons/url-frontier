@@ -83,7 +83,7 @@ public class ConcurrentLinkedHashMap<K, V> extends AbstractMap<K, V>
         try {
             previous = map.put(key, value);
             if (previous == null) {
-                order.add(key);
+                order.offer(key);
                 size.incrementAndGet();
             }
         } finally {

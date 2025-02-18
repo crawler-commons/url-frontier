@@ -187,7 +187,7 @@ public class ConcurrentLinkedStripedMap<K, V> extends AbstractMap<K, V>
     /** Returns a Collection view of the values contained in this map in insertion order. */
     @Override
     public Collection<V> values() {
-        List<V> values = new ArrayList<V>(this.size.get());
+        List<V> values = new ArrayList<>(this.size.get());
         for (K key : order) {
             V value = map.get(key);
             if (value != null) {

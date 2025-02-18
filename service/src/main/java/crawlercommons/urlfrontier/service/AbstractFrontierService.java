@@ -638,7 +638,7 @@ public abstract class AbstractFrontierService
             final QueueInterface currentQueue;
             final QueueWithinCrawl currentCrawlQueue;
 
-            Entry<QueueWithinCrawl, QueueInterface> e = getQueues().firsEntry();
+            Entry<QueueWithinCrawl, QueueInterface> e = getQueues().firstEntry();
             currentQueue = e.getValue();
             currentCrawlQueue = e.getKey();
 
