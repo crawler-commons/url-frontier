@@ -321,7 +321,7 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     @Override
     public boolean containsValue(Object value) {
 
-        return valueMap.containsValue(value);
+        return valueMap.values().stream().anyMatch(v -> Objects.equals(value, v.value));
     }
 
     @Override
