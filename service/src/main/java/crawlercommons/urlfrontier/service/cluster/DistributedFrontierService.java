@@ -386,14 +386,13 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             }
         }
 
-        synchronized (getQueues()) {
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    getQueues().entrySet().iterator();
-            while (iterator.hasNext()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
-                crawlIDs.add(e.getKey().getCrawlid());
-            }
+        Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
+                getQueues().entrySet().iterator();
+        while (iterator.hasNext()) {
+            Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+            crawlIDs.add(e.getKey().getCrawlid());
         }
+
         responseObserver.onNext(StringList.newBuilder().addAllValues(crawlIDs).build());
         responseObserver.onCompleted();
     }

@@ -9,6 +9,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.CloseableIterator;
+import crawlercommons.urlfrontier.service.ConcurrentInsertionOrderMap;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
@@ -83,7 +84,7 @@ public class ShardedRocksDBService extends DistributedFrontierService {
     }
 
     @Override
-    public Map<QueueWithinCrawl, QueueInterface> getQueues() {
+    public ConcurrentInsertionOrderMap<QueueWithinCrawl, QueueInterface> getQueues() {
         return instance.getQueues();
     }
 
