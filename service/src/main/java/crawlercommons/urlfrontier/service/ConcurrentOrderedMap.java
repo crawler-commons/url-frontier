@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2020 Crawler-commons
+// SPDX-FileCopyrightText: 2025 Crawler-commons
 // SPDX-License-Identifier: Apache-2.0
 
 package crawlercommons.urlfrontier.service;
