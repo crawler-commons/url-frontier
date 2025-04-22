@@ -169,11 +169,13 @@ class ConcurrentOrderedMapTest {
     void testEntrySet() {
         map.put("key1", "value1");
         map.put("key2", "value2");
+        map.put("key3", "value3");
 
         Set<Map.Entry<String, String>> entries = map.entrySet();
-        assertEquals(2, entries.size());
+        assertEquals(3, entries.size());
         assertTrue(entries.contains(new AbstractMap.SimpleEntry<>("key1", "value1")));
         assertTrue(entries.contains(new AbstractMap.SimpleEntry<>("key2", "value2")));
+        assertTrue(entries.contains(new AbstractMap.SimpleEntry<>("key3", "value3")));
     }
 
     @Test
@@ -253,5 +255,73 @@ class ConcurrentOrderedMapTest {
         int[] count = {0};
         map.forEach((k, v) -> count[0]++);
         assertEquals(2, count[0]);
+    }
+
+    @Test
+    void testEntrySetIterator() {
+        for (int i = 0; i < 10; i++) {
+            map.put("key" + i, "value" + i);
+        }
+
+        map.remove("key5");
+
+        // key5 will be at the end
+        map.put("key5", null);
+
+        Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
+
+        // Removes key0
+        map.pollFirstEntry();
+
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            // Remove while iterating
+            if ("key2".equals(key)) {
+                map.remove("key6");
+            }
+
+            assertTrue(key.startsWith("key"));
+            if ("key5".equals(key)) {
+                assertNull(value);
+            } else {
+                assertTrue(value.startsWith("value"));
+            }
+        }
+    }
+
+    @Test
+    void testKeySetIterator() {
+        for (int i = 0; i < 10; i++) {
+            map.put("key" + i, "value" + i);
+        }
+
+        map.remove("key5");
+
+        // key5 will be at the end
+        map.put("key5", null);
+
+        map.remove("key6");
+
+        Iterator<String> iterator = map.keySet().iterator();
+
+        // Removes key0
+        map.pollFirstEntry();
+
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            System.out.println("Key: " + key);
+
+            assertTrue(key.startsWith("key"));
+            if ("key0".equals(key)) {
+                assertNull(map.get(key));
+            } else if ("key5".equals(key)) {
+                assertNull(map.get(key));
+            } else {
+                assertTrue(map.get(key).startsWith("value"));
+            }
+        }
     }
 }
