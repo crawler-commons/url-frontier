@@ -10,6 +10,7 @@ import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.LoggerFactory;
 
 /**
  * Concurrent version of LinkedHashMap Design goal is the same as for ConcurrentHashMap: Maintain
@@ -31,6 +33,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K, V> {
 
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ConcurrentOrderedMap.class);
+
     // Main storage for key-value pairs
     private final ConcurrentHashMap<K, ValueEntry> valueMap;
 
@@ -44,6 +48,10 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     private static final int DEFAULT_SIZE = DEFAULT_CONCURRENCY * 16;
 
     private final Striped<Lock> striped;
+
+    // Used for first entry tracking
+    private volatile Long firstEntryOrder = null;
+    private K firstEntryKey = null;
 
     class ValueEntry {
         public ValueEntry(V v, long o) {
@@ -108,6 +116,15 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                 long newOrder = insertionCounter.getAndIncrement();
                 insertionOrderMap.put(newOrder, key);
                 valueMap.put(key, new ValueEntry(value, newOrder));
+
+                if (firstEntryOrder == null) {
+                    firstEntryOrder = newOrder;
+
+                    synchronized (this) {
+                        // Update first entry key if this is the first entry
+                        firstEntryKey = key;
+                    }
+                }
             }
 
             return oldValue;
@@ -135,6 +152,20 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
             // Remove from insertion order map if value existed
             if (removed != null) {
                 insertionOrderMap.remove(removed.order);
+                if (removed.order == firstEntryOrder) {
+                    // Update first entry order if the removed entry was the first one
+                    try {
+                        firstEntryOrder = insertionOrderMap.firstKey();
+                        synchronized (this) {
+                            firstEntryKey = insertionOrderMap.get(firstEntryOrder);
+                        }
+                    } catch (NoSuchElementException e) {
+                        firstEntryOrder = null;
+                        synchronized (this) {
+                            firstEntryKey = null;
+                        }
+                    }
+                }
             }
 
             return (removed != null) ? removed.value : null;
@@ -186,25 +217,34 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                     final Iterator<Entry<Long, K>> orderedIterator =
                             insertionOrderMap.entrySet().iterator();
 
+                    Entry<Long, K> nextEntry = null;
+
                     @Override
                     public boolean hasNext() {
-                        return orderedIterator.hasNext();
+                        while (nextEntry == null && orderedIterator.hasNext()) {
+                            Entry<Long, K> entry = orderedIterator.next();
+                            K key = entry.getValue();
+                            ValueEntry valueEntry = valueMap.get(key);
+                            if (valueEntry != null) {
+                                this.nextEntry = entry;
+                                return true;
+                            }
+                        }
+                        return nextEntry != null;
                     }
 
                     @Override
                     public Map.Entry<K, V> next() {
-                        Entry<Long, K> nextEntry = orderedIterator.next();
-                        K key = nextEntry.getValue();
-                        if (valueMap.containsKey(key)) {
-                            V value = valueMap.get(key).value;
-                            return new AbstractMap.SimpleImmutableEntry<>(key, value);
-                        } else {
-                            if (orderedIterator.hasNext()) {
-                                return next();
-                            } else {
-                                return null;
-                            }
+                        Entry<Long, K> entry = this.nextEntry;
+                        this.nextEntry = null;
+
+                        K key = entry.getValue();
+                        ValueEntry valueEntry = valueMap.get(key);
+                        if (valueEntry == null) {
+                            throw new NoSuchElementException();
                         }
+
+                        return new AbstractMap.SimpleImmutableEntry<>(key, valueEntry.value);
                     }
                 };
             }
@@ -230,6 +270,12 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
             valueMap.clear();
             insertionOrderMap.clear();
             insertionCounter.set(0);
+
+            firstEntryOrder = null;
+            synchronized (this) {
+                firstEntryKey = null;
+            }
+
         } finally {
             unlockAllStripes();
         }
@@ -317,8 +363,15 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
 
         if (first != null) {
             K key = first.getValue();
+            ValueEntry valueEntry = valueMap.get(key);
 
-            return new AbstractMap.SimpleImmutableEntry<>(key, valueMap.get(key).value);
+            if (valueEntry != null) {
+                return new AbstractMap.SimpleImmutableEntry<>(key, valueEntry.value);
+            } else {
+                LOG.error(
+                        "Inconsistent state: key {} exists in order map but not in value map", key);
+                return null;
+            }
         } else {
             return null;
         }
@@ -328,28 +381,51 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
      * Remove & Returns the first entry according to insertion order
      */
     public Entry<K, V> pollFirstEntry() {
+        K key;
+        Long order;
+        Lock stripe = null;
 
-        Entry<Long, K> firstEntry = insertionOrderMap.firstEntry();
-        if (firstEntry == null) {
-            return null;
-        }
-
-        K key = firstEntry.getValue();
-        Lock stripe = getStripe(key);
-        stripe.lock();
-        try {
-
-            // Removes the first key from the order queue
-            insertionOrderMap.pollFirstEntry();
-            if (key != null) {
-                // Get the value and remove the entry from the map
-                V value = valueMap.get(key).value;
-                valueMap.remove(key);
-
-                return new AbstractMap.SimpleImmutableEntry<>(key, value);
-            } else {
+        // Synchronize to ensure atomic read of firstEntryKey
+        synchronized (this) {
+            order = firstEntryOrder;
+            key = firstEntryKey;
+            if (key == null || order == null) {
                 return null;
             }
+
+            stripe = getStripe(key);
+            stripe.lock();
+        }
+
+        try {
+            Entry<Long, K> removed = insertionOrderMap.pollFirstEntry();
+            if (removed == null) {
+                return null;
+            }
+
+            // Get and remove from value map
+            ValueEntry valueEntry = valueMap.remove(removed.getValue());
+            if (valueEntry == null) {
+                LOG.error(
+                        "Inconsistent state: key {} exists in order map but not in value map", key);
+                return null;
+            }
+
+            // Update first entry tracking
+            Entry<Long, K> newFirst = insertionOrderMap.firstEntry();
+            if (newFirst != null) {
+                firstEntryOrder = newFirst.getKey();
+                synchronized (this) {
+                    firstEntryKey = newFirst.getValue();
+                }
+            } else {
+                firstEntryOrder = null;
+                synchronized (this) {
+                    firstEntryKey = null;
+                }
+            }
+
+            return new AbstractMap.SimpleImmutableEntry<>(key, valueEntry.value);
         } finally {
             stripe.unlock();
         }
@@ -390,6 +466,15 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                     long newOrder = insertionCounter.getAndIncrement();
                     insertionOrderMap.put(newOrder, key);
                     valueMap.put(key, new ValueEntry(entry.getValue(), newOrder));
+
+                    if (firstEntryOrder == null) {
+                        firstEntryOrder = newOrder;
+
+                        synchronized (this) {
+                            // Update first entry key if this is the first entry
+                            firstEntryKey = key;
+                        }
+                    }
                 }
             }
         } finally {
@@ -406,24 +491,31 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                     final Iterator<Entry<Long, K>> orderedIterator =
                             insertionOrderMap.entrySet().iterator();
 
+                    Entry<Long, K> nextEntry = null;
+
                     @Override
                     public boolean hasNext() {
-                        return orderedIterator.hasNext();
+                        while (nextEntry == null && orderedIterator.hasNext()) {
+                            Entry<Long, K> entry = orderedIterator.next();
+                            K key = entry.getValue();
+                            if (valueMap.containsKey(key)) {
+                                nextEntry = entry;
+                                return true;
+                            }
+                        }
+                        return nextEntry != null;
                     }
 
                     @Override
                     public V next() {
-                        K key = orderedIterator.next().getValue();
-
-                        if (valueMap.containsKey(key)) {
-                            return valueMap.get(key).value;
-                        } else {
-                            if (orderedIterator.hasNext()) {
-                                return next();
-                            } else {
-                                return null;
-                            }
+                        Entry<Long, K> entry = nextEntry;
+                        nextEntry = null;
+                        K key = entry.getValue();
+                        ValueEntry valueEntry = valueMap.get(key);
+                        if (valueEntry == null) {
+                            throw new NoSuchElementException();
                         }
+                        return valueEntry.value;
                     }
                 };
             }

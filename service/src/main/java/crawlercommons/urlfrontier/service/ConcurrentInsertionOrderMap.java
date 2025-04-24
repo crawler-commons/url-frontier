@@ -23,19 +23,23 @@ public interface ConcurrentInsertionOrderMap<K, V> extends ConcurrentMap<K, V> {
     /** Remove & returns the first entry according to insertion order */
     Entry<K, V> pollFirstEntry();
 
-    /** Returns a set containing the keys in this map. Remove is not supported by the iterator */
+    /**
+     * Returns a set containing the keys in this map. The iterator returned by this set is weakly
+     * consistent. Remove is not supported by the iterator
+     */
     @Override
     Set<K> keySet();
 
     /**
-     * Returns a set containing the mappings in this map. Remove is not supported by the iterator
+     * Returns a set containing the mappings in this map. The iterator returned by this set is
+     * weakly consistent. Remove is not supported by the iterator
      */
     @Override
     Set<Map.Entry<K, V>> entrySet();
 
     /**
-     * Returns a collection containing the values in this map. Remove is not supported by the
-     * iterator
+     * Returns a collection containing the values in this map. The iterator returned by this
+     * collection is weakly consistent. Remove is not supported by the iterator
      */
     @Override
     Collection<V> values();
