@@ -9,6 +9,7 @@ import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -48,10 +49,6 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     private static final int DEFAULT_SIZE = DEFAULT_CONCURRENCY * 16;
 
     private final Striped<Lock> striped;
-
-    // Used for first entry tracking
-    private volatile Long firstEntryOrder = null;
-    private K firstEntryKey = null;
 
     class ValueEntry {
         public ValueEntry(V v, long o) {
@@ -114,17 +111,8 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                 ventry.value = value;
             } else {
                 long newOrder = insertionCounter.getAndIncrement();
-                insertionOrderMap.put(newOrder, key);
                 valueMap.put(key, new ValueEntry(value, newOrder));
-
-                if (firstEntryOrder == null) {
-                    firstEntryOrder = newOrder;
-
-                    synchronized (this) {
-                        // Update first entry key if this is the first entry
-                        firstEntryKey = key;
-                    }
-                }
+                insertionOrderMap.put(newOrder, key);
             }
 
             return oldValue;
@@ -152,20 +140,6 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
             // Remove from insertion order map if value existed
             if (removed != null) {
                 insertionOrderMap.remove(removed.order);
-                if (removed.order == firstEntryOrder) {
-                    // Update first entry order if the removed entry was the first one
-                    try {
-                        firstEntryOrder = insertionOrderMap.firstKey();
-                        synchronized (this) {
-                            firstEntryKey = insertionOrderMap.get(firstEntryOrder);
-                        }
-                    } catch (NoSuchElementException e) {
-                        firstEntryOrder = null;
-                        synchronized (this) {
-                            firstEntryKey = null;
-                        }
-                    }
-                }
             }
 
             return (removed != null) ? removed.value : null;
@@ -206,6 +180,24 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                 return valueMap.size();
             }
         };
+    }
+
+    @Override
+    public Set<Map.Entry<K, V>> entrySetView() {
+        LinkedHashSet<Map.Entry<K, V>> entrySet = new LinkedHashSet<>(valueMap.size());
+        insertionOrderMap.forEach(
+                (order, key) -> {
+                    ValueEntry valueEntry = valueMap.get(key);
+                    if (valueEntry != null) {
+                        entrySet.add(new AbstractMap.SimpleImmutableEntry<>(key, valueEntry.value));
+                    } else {
+                        LOG.warn(
+                                "Inconsistent state (entrySetView): key {} exists in order map but not in value map",
+                                key);
+                    }
+                });
+
+        return entrySet;
     }
 
     @Override
@@ -270,11 +262,6 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
             valueMap.clear();
             insertionOrderMap.clear();
             insertionCounter.set(0);
-
-            firstEntryOrder = null;
-            synchronized (this) {
-                firstEntryKey = null;
-            }
 
         } finally {
             unlockAllStripes();
@@ -369,7 +356,8 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                 return new AbstractMap.SimpleImmutableEntry<>(key, valueEntry.value);
             } else {
                 LOG.error(
-                        "Inconsistent state: key {} exists in order map but not in value map", key);
+                        "Inconsistent state (firstEntry): key {} exists in order map but not in value map",
+                        key);
                 return null;
             }
         } else {
@@ -382,47 +370,25 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
      */
     public Entry<K, V> pollFirstEntry() {
         K key;
-        Long order;
-        Lock stripe = null;
 
-        // Synchronize to ensure atomic read of firstEntryKey
-        synchronized (this) {
-            order = firstEntryOrder;
-            key = firstEntryKey;
-            if (key == null || order == null) {
-                return null;
-            }
-
-            stripe = getStripe(key);
-            stripe.lock();
+        Entry<Long, K> removed = insertionOrderMap.pollFirstEntry();
+        if (removed == null) {
+            return null;
         }
 
-        try {
-            Entry<Long, K> removed = insertionOrderMap.pollFirstEntry();
-            if (removed == null) {
-                return null;
-            }
+        // Get and remove from value map
+        key = removed.getValue();
 
-            // Get and remove from value map
-            ValueEntry valueEntry = valueMap.remove(removed.getValue());
+        Lock stripe = getStripe(key);
+        stripe.lock();
+
+        try {
+            ValueEntry valueEntry = valueMap.remove(key);
             if (valueEntry == null) {
                 LOG.error(
-                        "Inconsistent state: key {} exists in order map but not in value map", key);
+                        "Inconsistent state (pollFirstEntry): key {} exists in order map but not in value map",
+                        key);
                 return null;
-            }
-
-            // Update first entry tracking
-            Entry<Long, K> newFirst = insertionOrderMap.firstEntry();
-            if (newFirst != null) {
-                firstEntryOrder = newFirst.getKey();
-                synchronized (this) {
-                    firstEntryKey = newFirst.getValue();
-                }
-            } else {
-                firstEntryOrder = null;
-                synchronized (this) {
-                    firstEntryKey = null;
-                }
             }
 
             return new AbstractMap.SimpleImmutableEntry<>(key, valueEntry.value);
@@ -464,17 +430,8 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                     ventry.value = entry.getValue();
                 } else {
                     long newOrder = insertionCounter.getAndIncrement();
-                    insertionOrderMap.put(newOrder, key);
                     valueMap.put(key, new ValueEntry(entry.getValue(), newOrder));
-
-                    if (firstEntryOrder == null) {
-                        firstEntryOrder = newOrder;
-
-                        synchronized (this) {
-                            // Update first entry key if this is the first entry
-                            firstEntryKey = key;
-                        }
-                    }
+                    insertionOrderMap.put(newOrder, key);
                 }
             }
         } finally {
