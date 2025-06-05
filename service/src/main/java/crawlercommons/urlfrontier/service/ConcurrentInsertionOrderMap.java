@@ -43,4 +43,11 @@ public interface ConcurrentInsertionOrderMap<K, V> extends ConcurrentMap<K, V> {
      */
     @Override
     Collection<V> values();
+
+    /**
+     * Returns a set view containing the mappings in this map which is not backed by the map. (Used
+     * in listURLs and countURLs to avoid NoSuchElementException if another thread has rotated the
+     * queue in getURLs)
+     */
+    Set<Map.Entry<K, V>> entrySetView();
 }
