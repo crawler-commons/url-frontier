@@ -699,13 +699,13 @@ public class RocksDBService extends AbstractFrontierService {
                 if (samePrefix) {
                     if (startKey == null) {
                         startKey =
-                                (prefixed_queue.getCrawlid().replaceAll("_", "%5F") + "_")
+                                (prefixed_queue.getCrawlid().replace("_", "%5F") + "_")
                                         .getBytes(StandardCharsets.UTF_8);
                     }
                     toDelete.add(prefixed_queue);
                 } else if (startKey != null) {
                     endKey =
-                            (prefixed_queue.getCrawlid().replaceAll("_", "%5F") + "_")
+                            (prefixed_queue.getCrawlid().replace("_", "%5F") + "_")
                                     .getBytes(StandardCharsets.UTF_8);
                     break;
                 }

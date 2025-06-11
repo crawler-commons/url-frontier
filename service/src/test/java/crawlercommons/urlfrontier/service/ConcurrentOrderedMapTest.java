@@ -17,6 +17,9 @@ class ConcurrentOrderedMapTest {
 
     private ConcurrentOrderedMap<String, String> map;
 
+    private final int NUM_THREADS = 10;
+    private final int NUM_ITERATIONS = 100;
+
     @BeforeEach
     void setUp() {
         map = new ConcurrentOrderedMap<>();
@@ -68,17 +71,16 @@ class ConcurrentOrderedMapTest {
 
     @Test
     void testConcurrentOperations() {
-        int numThreads = 10;
-        int numIterations = 100;
+        // This test checks that multiple threads can add and remove entries concurrently
 
-        Thread[] threads = new Thread[numThreads];
+        Thread[] threads = new Thread[NUM_THREADS];
 
-        for (int i = 0; i < numThreads; i++) {
+        for (int i = 0; i < NUM_THREADS; i++) {
             threads[i] =
                     new Thread(
                             () -> {
-                                for (int j = 0; j < numIterations; j++) {
-                                    String key = "key" + j;
+                                for (int j = 0; j < NUM_ITERATIONS; j++) {
+                                    String key = Thread.currentThread().getId() + " iter=" + j;
                                     String value = "value" + j;
                                     map.put(key, value);
                                     assertEquals(
@@ -312,7 +314,6 @@ class ConcurrentOrderedMapTest {
 
         while (iterator.hasNext()) {
             String key = iterator.next();
-            System.out.println("Key: " + key);
 
             assertTrue(key.startsWith("key"));
             if ("key0".equals(key)) {
@@ -323,5 +324,44 @@ class ConcurrentOrderedMapTest {
                 assertTrue(map.get(key).startsWith("value"));
             }
         }
+    }
+
+    @Test
+    void testConcurrentPollFirstEntry() throws InterruptedException {
+        // This test checks that multiple threads can poll entries from the map concurrently
+        // Fill the map with entries
+        for (int i = 0; i < NUM_ITERATIONS; i++) {
+            map.put("key" + i, "value" + i);
+        }
+
+        Set<String> polledKeys = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+        Thread[] threads = new Thread[NUM_THREADS];
+
+        Runnable poller =
+                () -> {
+                    Map.Entry<String, String> entry;
+                    while ((entry = map.pollFirstEntry()) != null) {
+                        // Ensure each key is only polled once
+                        boolean unique = polledKeys.add(entry.getKey());
+                        assertTrue(unique, "Duplicate key polled: " + entry.getKey());
+                        assertNotNull(entry.getValue());
+                    }
+                };
+
+        for (int i = 0; i < NUM_THREADS; i++) {
+            threads[i] = new Thread(poller);
+        }
+        for (Thread t : threads) {
+            t.start();
+        }
+
+        // Wait for all threads to finish
+        for (Thread t : threads) {
+            t.join();
+        }
+
+        // All entries should have been polled exactly once
+        assertEquals(NUM_ITERATIONS, polledKeys.size());
+        assertTrue(map.isEmpty());
     }
 }
