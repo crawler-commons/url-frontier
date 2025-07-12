@@ -20,7 +20,7 @@
 		<logback.version>1.5.17</logback.version>
 		<mockito.version>5.13.0</mockito.version>
 		<commons.io.version>2.16.1</commons.io.version>
-		<commons.lang.version>3.17.0</commons.lang.version>
+		<commons.lang.version>3.18.0</commons.lang.version>
 	</properties>
 
 	<build>
