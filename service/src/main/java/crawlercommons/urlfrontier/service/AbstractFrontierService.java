@@ -933,25 +933,21 @@ public abstract class AbstractFrontierService
                 continue;
             }
 
-            CloseableIterator<URLItem> urliter = urlIterator(e);
+            try (CloseableIterator<URLItem> urliter = urlIterator(e)) {
+                while (urliter.hasNext() && sentCount < maxURLs) {
+                    URLItem cur = urliter.next();
 
-            while (urliter.hasNext() && sentCount < maxURLs) {
-                URLItem cur = urliter.next();
+                    if (!doFilter || filterURL(cur, filter, ignoreCase)) {
+                        pos++;
 
-                if (!doFilter || filterURL(cur, filter, ignoreCase)) {
-                    pos++;
-
-                    if (pos >= start && sentCount < maxURLs) {
-                        sentCount++;
-                        responseObserver.onNext(cur);
+                        if (pos >= start && sentCount < maxURLs) {
+                            sentCount++;
+                            responseObserver.onNext(cur);
+                        }
                     }
                 }
-            }
-
-            try {
-                urliter.close();
-            } catch (IOException e1) {
-                LOG.warn("Error closing URLIterator", e1);
+            } catch (Exception e1) {
+                LOG.warn(e1.getMessage(), e1);
             }
         }
 
@@ -1026,20 +1022,16 @@ public abstract class AbstractFrontierService
                 continue;
             }
 
-            CloseableIterator<URLItem> urliter = urlIterator(e);
+            try (CloseableIterator<URLItem> urliter = urlIterator(e)) {
+                while (urliter.hasNext()) {
+                    URLItem cur = urliter.next();
 
-            while (urliter.hasNext()) {
-                URLItem cur = urliter.next();
-
-                if (!doFilter || filterURL(cur, filter, ignoreCase)) {
-                    totalCount++;
+                    if (!doFilter || filterURL(cur, filter, ignoreCase)) {
+                        totalCount++;
+                    }
                 }
-            }
-
-            try {
-                urliter.close();
             } catch (Exception e1) {
-                LOG.warn("Error closing URLIterator", e1);
+                LOG.warn(e1.getMessage(), e1);
             }
         }
 
