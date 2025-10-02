@@ -15,7 +15,7 @@
 	<description>URLFrontier Java API</description>
 
 	<properties>
-		<grpc.version>1.66.0</grpc.version>
+		<grpc.version>1.75.0</grpc.version>
 	</properties>
 
 	<dependencies>
