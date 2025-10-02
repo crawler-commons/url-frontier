@@ -368,7 +368,7 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     /*
      * Remove & Returns the first entry according to insertion order
      */
-    public Entry<K, V> pollFirstEntry() {
+    public synchronized Entry<K, V> pollFirstEntry() {
         K key;
 
         Entry<Long, K> removed = insertionOrderMap.pollFirstEntry();
