@@ -3,9 +3,6 @@ package crawlercommons.urlfrontier;
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /** */
-@javax.annotation.Generated(
-        value = "by gRPC proto compiler (version 1.66.0)",
-        comments = "Source: urlfrontier.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class URLFrontierGrpc {
 
@@ -908,6 +905,19 @@ public final class URLFrontierGrpc {
         return URLFrontierStub.newStub(factory, channel);
     }
 
+    /** Creates a new blocking-style stub that supports all types of calls on the service */
+    public static URLFrontierBlockingV2Stub newBlockingV2Stub(io.grpc.Channel channel) {
+        io.grpc.stub.AbstractStub.StubFactory<URLFrontierBlockingV2Stub> factory =
+                new io.grpc.stub.AbstractStub.StubFactory<URLFrontierBlockingV2Stub>() {
+                    @java.lang.Override
+                    public URLFrontierBlockingV2Stub newStub(
+                            io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+                        return new URLFrontierBlockingV2Stub(channel, callOptions);
+                    }
+                };
+        return URLFrontierBlockingV2Stub.newStub(factory, channel);
+    }
+
     /**
      * Creates a new blocking-style stub that supports unary and streaming output calls on the
      * service
@@ -1525,6 +1535,271 @@ public final class URLFrontierGrpc {
     }
 
     /** A stub to allow clients to do synchronous rpc calls to service URLFrontier. */
+    public static final class URLFrontierBlockingV2Stub
+            extends io.grpc.stub.AbstractBlockingStub<URLFrontierBlockingV2Stub> {
+        private URLFrontierBlockingV2Stub(
+                io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+            super(channel, callOptions);
+        }
+
+        @java.lang.Override
+        protected URLFrontierBlockingV2Stub build(
+                io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+            return new URLFrontierBlockingV2Stub(channel, callOptions);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Return the list of nodes forming the cluster the current node belongs to *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.StringList listNodes(
+                crawlercommons.urlfrontier.Urlfrontier.Empty request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getListNodesMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Return the list of crawls handled by the frontier(s) *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.StringList listCrawls(
+                crawlercommons.urlfrontier.Urlfrontier.Local request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getListCrawlsMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Delete an entire crawl, returns the number of URLs removed this way *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Long deleteCrawl(
+                crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getDeleteCrawlMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Return a list of queues for a specific crawl. Can chose whether to include inactive queues (a queue is active if it has URLs due for fetching);
+         * by default the service will return up to 100 results from offset 0 and exclude inactive queues.*
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.QueueList listQueues(
+                crawlercommons.urlfrontier.Urlfrontier.Pagination request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getListQueuesMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Stream URLs due for fetching from M queues with up to N items per queue *
+         * </pre>
+         */
+        @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/10918")
+        public io.grpc.stub.BlockingClientCall<?, crawlercommons.urlfrontier.Urlfrontier.URLInfo>
+                getURLs(crawlercommons.urlfrontier.Urlfrontier.GetParams request) {
+            return io.grpc.stub.ClientCalls.blockingV2ServerStreamingCall(
+                    getChannel(), getGetURLsMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Push URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems *
+         * </pre>
+         */
+        @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/10918")
+        public io.grpc.stub.BlockingClientCall<
+                        crawlercommons.urlfrontier.Urlfrontier.URLItem,
+                        crawlercommons.urlfrontier.Urlfrontier.AckMessage>
+                putURLs() {
+            return io.grpc.stub.ClientCalls.blockingBidiStreamingCall(
+                    getChannel(), getPutURLsMethod(), getCallOptions());
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Return stats for a specific queue or an entire crawl. Does not aggregate the stats across different crawlids. *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Stats getStats(
+                crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getGetStatsMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Delete the queue based on the key in parameter, returns the number of URLs removed this way *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Long deleteQueue(
+                crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getDeleteQueueMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Block a queue from sending URLs; the argument is the number of seconds of UTC time since Unix epoch
+         * 1970-01-01T00:00:00Z. The default value of 0 will unblock the queue. The block will get removed once the time
+         * indicated in argument is reached. This is useful for cases where a server returns a Retry-After for instance.
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Empty blockQueueUntil(
+                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getBlockQueueUntilMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Empty setActive(
+                crawlercommons.urlfrontier.Urlfrontier.Active request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getSetActiveMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Boolean getActive(
+                crawlercommons.urlfrontier.Urlfrontier.Local request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getGetActiveMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Set a delay from a given queue.
+         * No URLs will be obtained via GetURLs for this queue until the number of seconds specified has
+         * elapsed since the last time URLs were retrieved.
+         * Usually informed by the delay setting of robots.txt.
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Empty setDelay(
+                crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getSetDelayMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Overrides the log level for a given package *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Empty setLogLevel(
+                crawlercommons.urlfrontier.Urlfrontier.LogLevelParams request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getSetLogLevelMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Sets crawl limit for domain *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Empty setCrawlLimit(
+                crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getSetCrawlLimitMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Get status of a particular URL
+         * This does not take into account URL scheduling.
+         * Used to check current status of an URL within the frontier
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.URLItem getURLStatus(
+                crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getGetURLStatusMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * List all URLs currently in the frontier
+         * This does not take into account URL scheduling.
+         * Used to check current status of all URLs within the frontier
+         * </pre>
+         */
+        @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/10918")
+        public io.grpc.stub.BlockingClientCall<?, crawlercommons.urlfrontier.Urlfrontier.URLItem>
+                listURLs(crawlercommons.urlfrontier.Urlfrontier.ListUrlParams request) {
+            return io.grpc.stub.ClientCalls.blockingV2ServerStreamingCall(
+                    getChannel(), getListURLsMethod(), getCallOptions(), request);
+        }
+
+        /**
+         *
+         *
+         * <pre>
+         * * Count URLs currently in the frontier *
+         * </pre>
+         */
+        public crawlercommons.urlfrontier.Urlfrontier.Long countURLs(
+                crawlercommons.urlfrontier.Urlfrontier.CountUrlParams request)
+                throws io.grpc.StatusException {
+            return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+                    getChannel(), getCountURLsMethod(), getCallOptions(), request);
+        }
+    }
+
+    /** A stub to allow clients to do limited synchronous rpc calls to service URLFrontier. */
     public static final class URLFrontierBlockingStub
             extends io.grpc.stub.AbstractBlockingStub<URLFrontierBlockingStub> {
         private URLFrontierBlockingStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
