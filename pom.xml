@@ -91,7 +91,7 @@
 		<minimalJavaBuildVersion>11</minimalJavaBuildVersion>
         <picocli.version>4.7.6</picocli.version>
         <junit.version>5.11.0</junit.version>
-        <protoc.version>3.25.8</protoc.version>
+        <protobuf.version>3.25.8</protobuf.version>
 	</properties>
 
 	<build>

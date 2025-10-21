@@ -16,6 +16,7 @@
 
 	<properties>
 		<grpc.version>1.76.0</grpc.version>
+		<protobuf-maven-plugin.version>3.10.2</protobuf-maven-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -48,13 +49,45 @@
 		</dependency>
 
 	</dependencies>
+	
+	
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>com.google.protobuf</groupId>
 				<artifactId>protobuf-java</artifactId>
-				<version>${protoc.version}</version>
+				<version>${protobuf.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>io.github.ascopes</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>${protobuf-maven-plugin.version}</version>
+				<configuration>
+					<protocVersion>${protobuf.version}</protocVersion>
+					<!-- Vanilla protoc plugins - these are platform specific
+					executables just like protoc is. -->
+					<binaryMavenPlugins>
+						<binaryMavenPlugin>
+							<groupId>io.grpc</groupId>
+							<artifactId>protoc-gen-grpc-java</artifactId>
+							<version>${grpc.version}</version>
+						</binaryMavenPlugin>
+					</binaryMavenPlugins>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
 </project>

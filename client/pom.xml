@@ -41,7 +41,7 @@
 	</build>
 
 	<properties>
-		<protobuf.java.util.version>${protoc.version}</protobuf.java.util.version>
+		<protobuf.java.util.version>${protobuf.version}</protobuf.java.util.version>
 	</properties>
 
 	<dependencies>
