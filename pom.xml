@@ -87,7 +87,7 @@
 		<version.maven-jar-plugin>3.4.2</version.maven-jar-plugin>
 		<version.maven-javadoc-plugin>3.10.0</version.maven-javadoc-plugin>
 		<version.maven-release-plugin>3.1.1</version.maven-release-plugin>
-		<version.maven-shade-plugin>3.6.0</version.maven-shade-plugin>
+		<version.maven-shade-plugin>3.6.1</version.maven-shade-plugin>
 		<minimalJavaBuildVersion>11</minimalJavaBuildVersion>
         <picocli.version>4.7.6</picocli.version>
         <junit.version>5.11.0</junit.version>
