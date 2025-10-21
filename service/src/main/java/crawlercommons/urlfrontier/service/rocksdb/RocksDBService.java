@@ -16,7 +16,6 @@ import crawlercommons.urlfrontier.service.CloseableIterator;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -33,6 +32,8 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.lang3.StringUtils;
 import org.rocksdb.BlockBasedTableConfig;
 import org.rocksdb.BloomFilter;
 import org.rocksdb.ColumnFamilyDescriptor;
@@ -814,7 +815,7 @@ public class RocksDBService extends AbstractFrontierService {
             if (schedulingKey != null) {
                 final String currentKey = new String(schedulingKey, StandardCharsets.UTF_8);
 
-                if (StringUtil.isNullOrEmpty(currentKey)) {
+                if (StringUtils.isEmpty(currentKey)) {
                     info = URLInfo.newBuilder().setCrawlID(crawlId).setKey(key).setUrl(url).build();
 
                     found = true;
@@ -954,7 +955,7 @@ public class RocksDBService extends AbstractFrontierService {
                 long fromEpoch = 0;
                 URLInfo info = null;
 
-                if (!StringUtil.isNullOrEmpty(schedulingKey)) {
+                if (!StringUtils.isEmpty(schedulingKey)) {
                     final int pos1 = schedulingKey.indexOf('_');
                     final int pos2 = schedulingKey.indexOf('_', pos1 + 1);
                     final int pos3 = schedulingKey.indexOf('_', pos2 + 1);

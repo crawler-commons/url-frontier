@@ -16,11 +16,11 @@
 
 	<properties>
 		<prometheus.version>0.16.0</prometheus.version>
-		<rocksdb.version>9.6.1</rocksdb.version>
+		<rocksdb.version>9.7.3</rocksdb.version>
 		<logback.version>1.5.17</logback.version>
 		<mockito.version>5.13.0</mockito.version>
 		<commons.io.version>2.16.1</commons.io.version>
-		<commons.lang.version>3.18.0</commons.lang.version>
+		<commons.lang.version>3.19.0</commons.lang.version>
 	</properties>
 
 	<build>
