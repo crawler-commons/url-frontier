@@ -69,7 +69,7 @@ The Java code generated from the schema is available as a Maven dependency.
 		<dependency>
 			<groupId>com.github.crawler-commons</groupId>
 			<artifactId>urlfrontier-API</artifactId>
-			<version>2.4</version>
+			<version>2.5</version>
 		</dependency>
 	</dependencies>
 ```
@@ -77,20 +77,10 @@ The Java code generated from the schema is available as a Maven dependency.
 
 # Code generation
 
-The Java code can be (re)generated as follows; change the OS & processor values if required.
 
-```
-osproc=linux-x86_64
-wget https://github.com/protocolbuffers/protobuf/releases/download/v25.5/protoc-25.5-$osproc.zip
-unzip -p protoc-25.5-$osproc.zip bin/protoc > protoc
-rm protoc-25.5-$osproc.zip
-chmod a+x protoc
-wget https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.66.0/protoc-gen-grpc-java-1.66.0-$osproc.exe
-chmod a+x protoc-gen-grpc-java-1.66.0-$osproc.exe
-./protoc --plugin=protoc-gen-grpc-java=./protoc-gen-grpc-java-1.66.0-$osproc.exe --proto_path=. --java_out=src/main/java --grpc-java_out=src/main/java urlfrontier.proto
-```
-
-Since the Java code is provided here and the corresponding JARs will be available from Maven, regenerating from the schema is not necessary.
+The GRPC Java code is now generated automatically with the Protobuf Maven Plugin ( https://github.com/ascopes/protobuf-maven-plugin ).
+There is no need anymore to download the protoc and protoc-gen-grpc compilers.
+The protocol definition file (urlfrontier.proto) has been moved under src/main/protobuf.
 
 For other languages, you need to generate the code stubs yourself, as shown here for Python
 
