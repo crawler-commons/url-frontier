@@ -9,6 +9,7 @@
     - [AnyCrawlID](#urlfrontier-AnyCrawlID)
     - [BlockQueueParams](#urlfrontier-BlockQueueParams)
     - [Boolean](#urlfrontier-Boolean)
+    - [CountUrlParams](#urlfrontier-CountUrlParams)
     - [CrawlLimitParams](#urlfrontier-CrawlLimitParams)
     - [DeleteCrawlMessage](#urlfrontier-DeleteCrawlMessage)
     - [DiscoveredURLItem](#urlfrontier-DiscoveredURLItem)
@@ -122,6 +123,25 @@ Parameter message for BlockQueueUntil *
 
 
 
+<a name="urlfrontier-CountUrlParams"></a>
+
+### CountUrlParams
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  | ID for the queue * |
+| crawlID | [string](#string) |  | crawl ID |
+| filter | [string](#string) | optional | Search filter on url (can be empty, default is empty) |
+| ignoreCase | [bool](#bool) | optional | Ignore Case sensitivity for search filter (default is false -&gt; case sensitive) |
+| local | [bool](#bool) | optional | only for the current local instance (default is false) |
+
+
+
+
+
+
 <a name="urlfrontier-CrawlLimitParams"></a>
 
 ### CrawlLimitParams
@@ -158,6 +178,7 @@ Parameter message for SetCrawlLimit *
 <a name="urlfrontier-DiscoveredURLItem"></a>
 
 ### DiscoveredURLItem
+
 URL discovered during the crawl, might already be known in the URL Frontier or not.
 
 
@@ -203,6 +224,7 @@ Parameter message for GetURLs *
 <a name="urlfrontier-KnownURLItem"></a>
 
 ### KnownURLItem
+
 URL which was already known in the frontier, was returned by GetURLs() and processed by the crawler. Used for updating the information 
 about it in the frontier. If the date is not set, the URL will be considered done and won&#39;t be resubmitted for fetching, otherwise
 it will be elligible for fetching after the delay has elapsed.
@@ -231,6 +253,8 @@ it will be elligible for fetching after the delay has elapsed.
 | key | [string](#string) |  | ID for the queue * |
 | crawlID | [string](#string) |  | crawl ID |
 | local | [bool](#bool) |  | only for the current local instance |
+| filter | [string](#string) | optional | Search filter on url (can be empty, default is empty) |
+| ignoreCase | [bool](#bool) | optional | Ignore Case sensitivity for search filter (default is false -&gt; case sensitive) |
 
 
 
@@ -255,6 +279,7 @@ it will be elligible for fetching after the delay has elapsed.
 <a name="urlfrontier-LogLevelParams"></a>
 
 ### LogLevelParams
+
 Configuration of the log level for a particular package, e.g.
 crawlercommons.urlfrontier.service.rocksdb DEBUG
 
@@ -361,6 +386,7 @@ Returned by ListQueues *
 <a name="urlfrontier-Stats"></a>
 
 ### Stats
+
 Message returned by the GetStats method
 
 
@@ -418,7 +444,7 @@ Message returned by the GetStats method
 | ----- | ---- | ----- | ----------- |
 | url | [string](#string) |  | URL * |
 | key | [string](#string) |  | The key is used to put the URLs into queues, the value can be anything set by the client but would typically be the hostname, domain name or IP or the URL. If not set, the service will use a sensible default like hostname. |
-| metadata | [URLInfo.MetadataEntry](#urlfrontier-URLInfo-MetadataEntry) | repeated | Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc... |
+| metadata | [URLInfo.MetadataEntry](#urlfrontier-URLInfo-MetadataEntry) | repeated |  Arbitrary key / values stored alongside the URL. Can be anything needed by the crawler like http status, source URL etc... |
 | crawlID | [string](#string) |  | crawl ID * |
 
 
@@ -533,6 +559,7 @@ Wrapper for a KnownURLItem or DiscoveredURLItem *
 | SetCrawlLimit | [CrawlLimitParams](#urlfrontier-CrawlLimitParams) | [Empty](#urlfrontier-Empty) | Sets crawl limit for domain * |
 | GetURLStatus | [URLStatusRequest](#urlfrontier-URLStatusRequest) | [URLItem](#urlfrontier-URLItem) | Get status of a particular URL This does not take into account URL scheduling. Used to check current status of an URL within the frontier |
 | ListURLs | [ListUrlParams](#urlfrontier-ListUrlParams) | [URLItem](#urlfrontier-URLItem) stream | List all URLs currently in the frontier This does not take into account URL scheduling. Used to check current status of all URLs within the frontier |
+| CountURLs | [CountUrlParams](#urlfrontier-CountUrlParams) | [Long](#urlfrontier-Long) | Count URLs currently in the frontier * |
 
  
 
