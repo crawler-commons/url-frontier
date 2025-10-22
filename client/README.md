@@ -21,6 +21,7 @@ Commands:
   ListNodes    Prints out list of nodes forming the cluster
   ListQueues   Prints out active queues
   ListCrawls   Prints out list of crawls
+  ListURLs     Prints out all URLs in the Frontier
   GetStats     Prints out stats from the Frontier
   PutURLs      Send URLs from a file into a Frontier
   GetURLs      Get URLs from a Frontier and display in the standard output
@@ -29,4 +30,5 @@ Commands:
   DeleteQueue  Delete a queue from the Frontier
   DeleteCrawl  Delete an entire crawl from the Frontier
   SetLogLevel  Change the log level of a package in the Frontier service
+  CountURLs    Counts the number of URLs in a Frontier
 ```

@@ -20,7 +20,7 @@ public interface ConcurrentInsertionOrderMap<K, V> extends ConcurrentMap<K, V> {
     /** Returns the first entry according to insertion order */
     Entry<K, V> firstEntry();
 
-    /** Remove & returns the first entry according to insertion order */
+    /** Remove and returns the first entry according to insertion order */
     Entry<K, V> pollFirstEntry();
 
     /**
