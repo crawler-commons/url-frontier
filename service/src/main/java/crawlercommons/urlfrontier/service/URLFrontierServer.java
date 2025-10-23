@@ -25,7 +25,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name = "URL Frontier Server", mixinStandardHelpOptions = true, version = "2.4")
+@Command(name = "URL Frontier Server", mixinStandardHelpOptions = true, version = "2.5")
 public class URLFrontierServer implements Callable<Integer> {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLFrontierServer.class);
