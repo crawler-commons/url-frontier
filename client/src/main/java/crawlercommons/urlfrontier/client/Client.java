@@ -10,7 +10,7 @@ import picocli.CommandLine.Option;
 @Command(
         name = "Client",
         mixinStandardHelpOptions = true,
-        version = "2.5",
+        version = "2.6-SNAPSHOT",
         subcommands = {
             ListNodes.class,
             ListQueues.class,
