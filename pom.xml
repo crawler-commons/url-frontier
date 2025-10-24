@@ -293,16 +293,6 @@
 							<deploymentName>Crawler-Commons URLFrontier ${project.version}</deploymentName>
 						</configuration>
 					</plugin>
-					<plugin>
-						<groupId>org.sonatype.central</groupId>
-						<artifactId>central-publishing-maven-plugin</artifactId>
-						<version>${central-publishing-plugin.version}</version>
-						<extensions>true</extensions>
-						<configuration>
-							<publishingServerId>central</publishingServerId>
-							<deploymentName>Crawler-Commons URLFrontier ${project.version}</deploymentName>
-						</configuration>
-					</plugin>
 				</plugins>
 			</build>
 		</profile>

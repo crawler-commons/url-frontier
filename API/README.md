@@ -82,6 +82,10 @@ The GRPC Java code is now generated automatically with the Protobuf Maven Plugin
 There is no need anymore to download the protoc and protoc-gen-grpc compilers.
 The protocol definition file (urlfrontier.proto) has been moved under src/main/protobuf.
 
+Important note: The version of protoc downloaded from the Maven repository will not run natively on Alpine Linux
+unless you install the gcompat package  which provides glibc compatibility (apk add gcompat).
+
+
 For other languages, you need to generate the code stubs yourself, as shown here for Python
 
 ```
