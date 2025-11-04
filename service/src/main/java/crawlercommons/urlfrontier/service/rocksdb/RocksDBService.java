@@ -245,6 +245,7 @@ public class RocksDBService extends AbstractFrontierService {
                 boolean done = rocksIterator.value().length == 0;
                 if (done) {
                     queueMD.incrementCompleted();
+                    crawlStats.incCompletedURLCount(Qkey.getCrawlid());
                 } else {
                     // if no checks have been done increment active
                     if (!check) {
@@ -253,6 +254,9 @@ public class RocksDBService extends AbstractFrontierService {
                     // double check the number of scheduled later on
                     numScheduled++;
                 }
+
+                // Increment the number of URLs for that crawl
+                crawlStats.incTotalURLCount(Qkey.getCrawlid());
             }
         }
         // check the last key
@@ -261,6 +265,11 @@ public class RocksDBService extends AbstractFrontierService {
                 && getQueues().get(previousQueueID).countActive() != numScheduled) {
             throw new RuntimeException(
                     "Incorrect number of active URLs for queue " + previousQueueID);
+        }
+
+        if (check) {
+            LOG.info("Recovery scan completed - {} queues found", getQueues().size());
+            crawlStats.logStats();
         }
     }
 
@@ -403,6 +412,7 @@ public class RocksDBService extends AbstractFrontierService {
 
         try {
             final byte[] existenceKey = existenceKeyString.getBytes(StandardCharsets.UTF_8);
+            boolean newUrl = true;
 
             // is this URL already known?
             try (WriteBatch writeBatch = new WriteBatch();
@@ -433,6 +443,7 @@ public class RocksDBService extends AbstractFrontierService {
                     // remove from queue metadata
                     queueMD.removeFromProcessed(url);
                     queueMD.decrementActive();
+                    newUrl = false;
                 }
 
                 // add the new item
@@ -443,6 +454,7 @@ public class RocksDBService extends AbstractFrontierService {
                     schedulingKey = new byte[] {};
                     queueMD.incrementCompleted();
                     putURLs_completed_count.inc();
+                    crawlStats.incCompletedURLCount(crawlID);
                 } else {
                     // it is either brand new or already known
                     // create a scheduling key for it
@@ -456,6 +468,10 @@ public class RocksDBService extends AbstractFrontierService {
                     writeBatch.put(
                             columnFamilyHandleList.get(1), schedulingKey, info.toByteArray());
                     queueMD.incrementActive();
+
+                    if (newUrl) {
+                        crawlStats.incTotalURLCount(crawlID);
+                    }
                 }
 
                 if (isClosing()) {
@@ -677,6 +693,9 @@ public class RocksDBService extends AbstractFrontierService {
             io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long>
                     responseObserver) {
         long total = deleteLocalCrawl(crawlID.getValue());
+
+        crawlStats.delete(crawlID.getValue());
+
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder().setValue(total).build());
         responseObserver.onCompleted();

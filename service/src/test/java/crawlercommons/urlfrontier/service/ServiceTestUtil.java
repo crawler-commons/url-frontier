@@ -3,18 +3,17 @@
 
 package crawlercommons.urlfrontier.service;
 
-import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
-import io.grpc.stub.StreamObserver;
 import java.time.Instant;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.LoggerFactory;
 
 public class ServiceTestUtil {
+
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ServiceTestUtil.class);
 
     public static void initURLs(AbstractFrontierService service) {
 
@@ -28,42 +27,7 @@ public class ServiceTestUtil {
         String url4 = "https://www.mysite.com/secondqueue";
         String key4 = "another_queue";
 
-        final AtomicBoolean completed = new AtomicBoolean(false);
-        final AtomicInteger acked = new AtomicInteger(0);
-        final AtomicInteger failed = new AtomicInteger(0);
-        final AtomicInteger skipped = new AtomicInteger(0);
-        final AtomicInteger ok = new AtomicInteger(0);
         int sent = 0;
-
-        StreamObserver<AckMessage> responseObserver =
-                new StreamObserver<>() {
-
-                    @Override
-                    public void onNext(crawlercommons.urlfrontier.Urlfrontier.AckMessage value) {
-                        // receives confirmation that the value has been received
-                        acked.addAndGet(1);
-                        if (value.getStatus().equals(AckMessage.Status.SKIPPED)) {
-                            skipped.getAndIncrement();
-                        } else if (value.getStatus().equals(AckMessage.Status.FAIL)) {
-                            failed.getAndIncrement();
-                        } else if (value.getStatus().equals(AckMessage.Status.OK)) {
-                            ok.getAndIncrement();
-                        }
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                        completed.set(true);
-                        t.printStackTrace();
-                    }
-
-                    @Override
-                    public void onCompleted() {
-                        completed.set(true);
-                    }
-                };
-
-        StreamObserver<URLItem> streamObserver = service.putURLs(responseObserver);
 
         crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder1 = URLItem.newBuilder();
         StringList sl1 = StringList.newBuilder().addValues("md1").build();
@@ -71,6 +35,7 @@ public class ServiceTestUtil {
         StringList sl3 = StringList.newBuilder().addValues("md3").build();
         StringList sl4 = StringList.newBuilder().addValues("md4").build();
 
+        // Adding a discovered URL
         URLInfo info1 =
                 URLInfo.newBuilder()
                         .setUrl(url1)
@@ -83,15 +48,16 @@ public class ServiceTestUtil {
         builder1.setDiscovered(disco1);
         builder1.setID(crawlId + "_" + url1);
 
-        streamObserver.onNext(builder1.build());
+        service.putURLItem(builder1.build());
         sent++;
 
+        // Adding a completed URL
         URLInfo info2 =
                 URLInfo.newBuilder()
                         .setUrl(url2)
                         .setCrawlID(crawlId)
                         .setKey(key2)
-                        .putMetadata("meta1", sl2)
+                        .putMetadata("meta2", sl2)
                         .build();
 
         DiscoveredURLItem disco2 = DiscoveredURLItem.newBuilder().setInfo(info2).build();
@@ -99,7 +65,8 @@ public class ServiceTestUtil {
         builder1.setDiscovered(disco2);
         builder1.setID(crawlId + "_" + url2);
 
-        streamObserver.onNext(builder1.build());
+        // Add url2 first as discovered
+        service.putURLItem(builder1.build());
         sent++;
 
         crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder2 = URLItem.newBuilder();
@@ -109,9 +76,11 @@ public class ServiceTestUtil {
         builder2.setKnown(known);
         builder2.setID(crawlId + "_" + url2);
 
-        streamObserver.onNext(builder2.build());
+        // Then resend it with a refetch date of 0
+        service.putURLItem(builder2.build());
         sent++;
 
+        // Adding a known URL to refetch
         URLInfo info3 =
                 URLInfo.newBuilder()
                         .setUrl(url3)
@@ -130,9 +99,10 @@ public class ServiceTestUtil {
         builder3.setKnown(torefetch);
         builder3.setID(crawlId + "_" + url3);
 
-        streamObserver.onNext(builder3.build());
+        service.putURLItem(builder3.build());
         sent++;
 
+        // Adding a known URL to refetch in another queue
         URLInfo info4 =
                 URLInfo.newBuilder()
                         .setUrl(url4)
@@ -151,18 +121,9 @@ public class ServiceTestUtil {
         builder4.setKnown(queuetwo);
         builder4.setID(crawlId + "_" + url4);
 
-        streamObserver.onNext(builder4.build());
+        service.putURLItem(builder4.build());
         sent++;
 
-        streamObserver.onCompleted();
-
-        // wait for completion
-        while (!completed.get() || sent != acked.get()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
+        LOG.info("Init test data with {} putURLItem calls", sent);
     }
 }

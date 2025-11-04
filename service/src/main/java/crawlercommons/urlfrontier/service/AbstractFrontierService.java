@@ -6,6 +6,7 @@ package crawlercommons.urlfrontier.service;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import crawlercommons.urlfrontier.CrawlID;
+import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
@@ -14,6 +15,8 @@ import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.CountUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
+import crawlercommons.urlfrontier.Urlfrontier.GetCrawlStatsParams;
+import crawlercommons.urlfrontier.Urlfrontier.GetCrawlStatsResponse;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Local;
@@ -49,6 +52,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
@@ -120,6 +124,9 @@ public abstract class AbstractFrontierService
     // in memory map of metadata for each queue
     private final ConcurrentInsertionOrderMap<QueueWithinCrawl, QueueInterface> queues =
             new ConcurrentOrderedMap<>();
+
+    // Per crawl statistics
+    protected final CrawlStats crawlStats = new CrawlStats();
 
     protected final ExecutorService readExecutorService;
     protected final ExecutorService writeExecutorService;
@@ -247,7 +254,10 @@ public abstract class AbstractFrontierService
                 QueueInterface q = getQueues().remove(quid);
                 total += q.countActive();
             }
+
+            crawlStats.delete(normalisedCrawlID);
         }
+
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder().setValue(total).build());
         responseObserver.onCompleted();
@@ -1054,8 +1064,31 @@ public abstract class AbstractFrontierService
     private boolean filterURL(URLItem cur, String text, boolean ignoreCase) {
 
         String curURL = cur.getKnown().getInfo().getUrl();
-        return ignoreCase
-                ? StringUtils.containsIgnoreCase(curURL, text)
-                : StringUtils.contains(curURL, text);
+        return ignoreCase ? Strings.CI.contains(curURL, text) : Strings.CS.contains(curURL, text);
+    }
+
+    @Override
+    public void getCrawlStats(
+            GetCrawlStatsParams request, StreamObserver<GetCrawlStatsResponse> responseObserver) {
+
+        String crawlId = CrawlID.normaliseCrawlID(request.getCrawlID());
+        Urlfrontier.Long total =
+                Urlfrontier.Long.newBuilder()
+                        .setValue(crawlStats.getTotalURLCount(crawlId))
+                        .build();
+
+        Urlfrontier.Long completed =
+                Urlfrontier.Long.newBuilder()
+                        .setValue(crawlStats.getCompletedURLCount(crawlId))
+                        .build();
+
+        Urlfrontier.GetCrawlStatsResponse response =
+                Urlfrontier.GetCrawlStatsResponse.newBuilder()
+                        .setTotalURL(total)
+                        .setCompletedURL(completed)
+                        .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 }

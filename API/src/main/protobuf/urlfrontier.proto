@@ -87,6 +87,11 @@ service URLFrontier {
      
      /** Count URLs currently in the frontier **/
      rpc CountURLs(CountUrlParams) returns (Long) {}
+     
+     /** Return the crawl-wide total number of URLs ever added to the frontier.
+         This is a cumulative count and does not decrease when URLs are removed from the frontier.
+      **/
+     rpc GetCrawlStats(GetCrawlStatsParams) returns (GetCrawlStatsResponse) {}
 }
 
 /** 
@@ -344,3 +349,16 @@ message CountUrlParams {
   // only for the current local instance (default is false)
   optional bool local = 5;
 }
+
+message GetCrawlStatsParams {
+  // crawl ID
+  string crawlID = 1;
+}
+
+message GetCrawlStatsResponse {
+  // Total number of URLs ever added to the frontier for this crawl
+  Long totalURL = 1;
+  // Total number of URLs ever completed (fetched) for this crawl
+  Long completedURL = 2;
+}
+

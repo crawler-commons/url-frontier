@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.GetCrawlStatsParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
@@ -19,22 +20,24 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
 import io.grpc.stub.StreamObserver;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.LoggerFactory;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -42,33 +45,30 @@ class RocksDBServiceTest {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBServiceTest.class);
 
-    private static final String ROCKSDB_PATH = "./target/rocksdb";
+    @TempDir Path tempDir;
 
     RocksDBService rocksDBService;
 
     @AfterEach
     void shutdown() throws IOException {
         rocksDBService.close();
-    }
-
-    @AfterAll
-    static void cleanup() {
-        LOG.info("Cleaning up directory {}", ROCKSDB_PATH);
-        FileUtils.deleteQuietly(new File(ROCKSDB_PATH));
+        LOG.info("Cleaning up directory {}", tempDir);
+        FileUtils.deleteQuietly(tempDir.toFile());
     }
 
     @BeforeEach
     void setup() {
 
         Map<String, String> conf = new HashMap<>();
-        conf.put("rocksdb.path", ROCKSDB_PATH);
+        conf.put("rocksdb.path", tempDir.toAbsolutePath().toString());
+        LOG.info("Temp directory for test: {}", tempDir);
         rocksDBService = new RocksDBService(conf, "localhost", 7071);
         ServiceTestUtil.initURLs(rocksDBService);
     }
 
     @Test
     @Order(1)
-    void testDiscovered() {
+    void testGetStatusDiscovered() {
         String crawlId = "crawl_id";
         String url = "https://www.mysite.com/discovered";
         String key = "queue_mysite";
@@ -116,7 +116,7 @@ class RocksDBServiceTest {
 
     @Test
     @Order(2)
-    void testCompleted() {
+    void testGetStatusCompleted() {
 
         String crawlId = "crawl_id";
         String url = "https://www.mysite.com/completed";
@@ -153,7 +153,7 @@ class RocksDBServiceTest {
 
                     @Override
                     public void onCompleted() {
-                        LOG.info("completed testGetStatusKnown");
+                        LOG.info("completed testGetStatusCompleted");
                     }
                 };
 
@@ -253,7 +253,7 @@ class RocksDBServiceTest {
 
                     @Override
                     public void onCompleted() {
-                        LOG.info("completed testGetStatusKnown");
+                        LOG.info("completed testGetStatusToRefetch");
                     }
                 };
 
@@ -294,7 +294,7 @@ class RocksDBServiceTest {
 
                     @Override
                     public void onCompleted() {
-                        LOG.info("completed testListURLs");
+                        LOG.info("completed testListAllURLs");
                     }
                 };
 
@@ -337,7 +337,7 @@ class RocksDBServiceTest {
 
                     @Override
                     public void onCompleted() {
-                        LOG.info("completed testListURLs");
+                        LOG.info("completed testListURLsinglequeue");
                     }
                 };
 
@@ -418,7 +418,7 @@ class RocksDBServiceTest {
 
                     @Override
                     public void onCompleted() {
-                        LOG.info("completed testNoRescheduleCompleted 1/2");
+                        LOG.info("completed testCountURLs");
                     }
                 };
 
@@ -453,7 +453,7 @@ class RocksDBServiceTest {
 
                     @Override
                     public void onCompleted() {
-                        LOG.info("completed testNoRescheduleCompleted 1/2");
+                        LOG.info("completed testCountURLsCaseSensitive");
                     }
                 };
 
@@ -461,7 +461,7 @@ class RocksDBServiceTest {
     }
 
     @Test
-    @Order(9)
+    @Order(11)
     void testCountURsLCaseInsensitive() {
 
         Urlfrontier.CountUrlParams.Builder builder = Urlfrontier.CountUrlParams.newBuilder();
@@ -488,11 +488,67 @@ class RocksDBServiceTest {
 
                     @Override
                     public void onCompleted() {
-                        LOG.info("completed testNoRescheduleCompleted 1/2");
+                        LOG.info("completed testCountURsLCaseInsensitive");
                     }
                 };
 
         rocksDBService.countURLs(builder.build(), responseObserver);
+    }
+
+    @Test
+    @Order(12)
+    void testCrawlStats() {
+        GetCrawlStatsParams statsParams =
+                GetCrawlStatsParams.newBuilder().setCrawlID("crawl_id").build();
+
+        final AtomicLong total = new AtomicLong(0);
+        final AtomicLong completed = new AtomicLong(0);
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.GetCrawlStatsResponse>
+                streamObserver =
+                        new StreamObserver<
+                                crawlercommons.urlfrontier.Urlfrontier.GetCrawlStatsResponse>() {
+
+                            @Override
+                            public void onNext(
+                                    crawlercommons.urlfrontier.Urlfrontier.GetCrawlStatsResponse
+                                            value) {
+                                total.set(value.getTotalURL().getValue());
+                                completed.set(value.getCompletedURL().getValue());
+
+                                // receives confirmation that the value has been received
+                                LOG.info("CrawlStats total    : " + total);
+                                LOG.info("CrawlStats completed: " + completed);
+                            }
+
+                            @Override
+                            public void onError(Throwable t) {
+                                t.printStackTrace();
+                                latch.countDown();
+                            }
+
+                            @Override
+                            public void onCompleted() {
+                                LOG.info("completed testCrawlStats");
+                                latch.countDown();
+                            }
+                        };
+
+        rocksDBService.getCrawlStats(statsParams, streamObserver);
+
+        try {
+            // wait up‑to 5 seconds for the async call to finish
+            if (!latch.await(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                fail("Timed out waiting for crawl stats");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail("Interrupted while waiting for crawl stats");
+        }
+
+        assertEquals(4, total.intValue());
+        assertEquals(1, completed.intValue());
     }
 
     @Test
@@ -666,7 +722,7 @@ class RocksDBServiceTest {
 
                     @Override
                     public void onCompleted() {
-                        LOG.info("completed testNoRescheduleCompleted 1/2");
+                        LOG.info("completed testRescheduleCompleted 1/2");
                     }
                 };
 
@@ -819,7 +875,7 @@ class RocksDBServiceTest {
 
                     @Override
                     public void onCompleted() {
-                        LOG.info("completed testNoRescheduleCompleted 2/2");
+                        LOG.info("completed testRescheduleCompleted 2/2");
                     }
                 };
 

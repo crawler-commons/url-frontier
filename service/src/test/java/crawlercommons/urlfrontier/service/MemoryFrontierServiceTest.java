@@ -5,9 +5,11 @@ package crawlercommons.urlfrontier.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.GetCrawlStatsParams;
 import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
@@ -17,9 +19,11 @@ import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
 import io.grpc.stub.StreamObserver;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.jupiter.api.BeforeAll;
+import java.util.concurrent.atomic.AtomicLong;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -34,8 +38,8 @@ class MemoryFrontierServiceTest {
 
     static MemoryFrontierService memoryFrontierService;
 
-    @BeforeAll
-    static void setup() {
+    @BeforeEach
+    void setup() {
         memoryFrontierService = new MemoryFrontierService("localhost", 7071);
         ServiceTestUtil.initURLs(memoryFrontierService);
     }
@@ -485,6 +489,62 @@ class MemoryFrontierServiceTest {
 
         memoryFrontierService.listURLs(params, statusObserver);
         assertEquals(1, count.get());
+    }
+
+    @Test
+    @Order(12)
+    void testCrawlStats() {
+        GetCrawlStatsParams statsParams =
+                GetCrawlStatsParams.newBuilder().setCrawlID("crawl_id").build();
+
+        final AtomicLong total = new AtomicLong(0);
+        final AtomicLong completed = new AtomicLong(0);
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<crawlercommons.urlfrontier.Urlfrontier.GetCrawlStatsResponse>
+                streamObserver =
+                        new StreamObserver<
+                                crawlercommons.urlfrontier.Urlfrontier.GetCrawlStatsResponse>() {
+
+                            @Override
+                            public void onNext(
+                                    crawlercommons.urlfrontier.Urlfrontier.GetCrawlStatsResponse
+                                            value) {
+                                total.set(value.getTotalURL().getValue());
+                                completed.set(value.getCompletedURL().getValue());
+
+                                // receives confirmation that the value has been received
+                                LOG.info("CrawlStats total    : " + total);
+                                LOG.info("CrawlStats completed: " + completed);
+                            }
+
+                            @Override
+                            public void onError(Throwable t) {
+                                t.printStackTrace();
+                                latch.countDown();
+                            }
+
+                            @Override
+                            public void onCompleted() {
+                                LOG.info("completed testCrawlStats");
+                                latch.countDown();
+                            }
+                        };
+
+        memoryFrontierService.getCrawlStats(statsParams, streamObserver);
+
+        try {
+            // wait up‑to 5 seconds for the async call to finish
+            if (!latch.await(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                fail("Timed out waiting for crawl stats");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail("Interrupted while waiting for crawl stats");
+        }
+
+        assertEquals(4, total.intValue());
+        assertEquals(1, completed.intValue());
     }
 
     @Test
