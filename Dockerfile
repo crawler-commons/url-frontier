@@ -1,4 +1,4 @@
-FROM maven:3-jdk-11 AS build
+FROM maven:3-eclipse-temurin-17 AS build
 
 RUN useradd -m urlfrontier
 
@@ -18,7 +18,7 @@ RUN mvn clean package -DskipFormatCode=true
 RUN rm service/target/original-*.jar
 RUN cp service/target/*.jar urlfrontier-service.jar
 
-FROM openjdk:11-jdk-slim
+FROM eclipse-temurin:17-jdk-noble
 
 RUN useradd -m urlfrontier
 
