@@ -74,19 +74,19 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- needed to build within Docker -->
 		<skipFormatCode>false</skipFormatCode>
-		<version.maven-enforcer-plugin>3.5.0</version.maven-enforcer-plugin>
+		<version.maven-enforcer-plugin>3.6.2</version.maven-enforcer-plugin>
 		<minimalMavenBuildVersion>3.6.3</minimalMavenBuildVersion>
-		<version.maven-compiler-plugin>3.13.0</version.maven-compiler-plugin>
-		<git-code-format-maven-plugin.version>5.3</git-code-format-maven-plugin.version>
+		<version.maven-compiler-plugin>3.14.1</version.maven-compiler-plugin>
+		<git-code-format-maven-plugin.version>5.4</git-code-format-maven-plugin.version>
 		<version.maven-gpg-plugin>3.2.8</version.maven-gpg-plugin>
 		<version.maven-source-plugin>3.3.1</version.maven-source-plugin>
 		<version.maven-jar-plugin>3.4.2</version.maven-jar-plugin>
 		<version.maven-javadoc-plugin>3.12.0</version.maven-javadoc-plugin>
 		<version.maven-release-plugin>3.1.1</version.maven-release-plugin>
 		<version.maven-shade-plugin>3.6.1</version.maven-shade-plugin>
-		<minimalJavaBuildVersion>11</minimalJavaBuildVersion>
-        <picocli.version>4.7.6</picocli.version>
-        <junit.version>5.11.0</junit.version>
+		<minimalJavaBuildVersion>17</minimalJavaBuildVersion>
+        <picocli.version>4.7.7</picocli.version>
+        <junit.version>5.14.1</junit.version>
         <protobuf.version>3.25.8</protobuf.version>
         <central-publishing-plugin.version>0.9.0</central-publishing-plugin.version>
 	</properties>
@@ -99,7 +99,7 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${version.maven-compiler-plugin}</version>
 					<configuration>
-						<release>11</release>
+						<release>17</release>
 					</configuration>
 				</plugin>
 				<plugin>
