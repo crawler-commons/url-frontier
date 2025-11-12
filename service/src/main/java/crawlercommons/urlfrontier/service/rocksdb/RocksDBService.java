@@ -3,6 +3,7 @@
 
 package crawlercommons.urlfrontier.service.rocksdb;
 
+import com.google.common.util.concurrent.Striped;
 import com.google.protobuf.InvalidProtocolBufferException;
 import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
@@ -32,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
 import org.apache.commons.lang3.StringUtils;
 import org.rocksdb.BlockBasedTableConfig;
 import org.rocksdb.BloomFilter;
@@ -66,9 +68,11 @@ public class RocksDBService extends AbstractFrontierService {
 
     private Statistics statistics;
 
+    private static final Striped<Lock> STRIPED_LOCKS = Striped.lock(128); // 128 stripes
+
     // no explicit config
     public RocksDBService(String host, int port) {
-        this(new HashMap<String, String>(), host, port);
+        this(new HashMap<>(), host, port);
     }
 
     private final ConcurrentHashMap<QueueWithinCrawl, QueueWithinCrawl> queuesBeingDeleted =
@@ -390,14 +394,15 @@ public class RocksDBService extends AbstractFrontierService {
             return Status.SKIPPED;
         }
 
-        // make it intern so that all threads accessing this method
-        // share the same instance of the String, this way we can synchronize
-        // on it and make sure that 2 threads working on the same URL won't
+        final String existenceKeyString = (qk.toString() + "_" + url);
+        // Synchronize on existence key (avoid interning String to reduce mem usage)
+        // Make sure that 2 threads working on the same URL won't
         // both be considered non-existant
-        final String existenceKeyString = (qk.toString() + "_" + url).intern();
-        final byte[] existenceKey = existenceKeyString.getBytes(StandardCharsets.UTF_8);
+        final Lock existenceLock = lockFor(existenceKeyString);
+        existenceLock.lock();
 
-        synchronized (existenceKeyString) {
+        try {
+            final byte[] existenceKey = existenceKeyString.getBytes(StandardCharsets.UTF_8);
 
             // is this URL already known?
             try (WriteBatch writeBatch = new WriteBatch();
@@ -468,6 +473,8 @@ public class RocksDBService extends AbstractFrontierService {
                 LOG.error("RocksDB exception", e);
                 return Status.FAIL;
             }
+        } finally {
+            existenceLock.unlock();
         }
 
         return Status.OK;
@@ -1003,5 +1010,9 @@ public class RocksDBService extends AbstractFrontierService {
         public void close() {
             this.rocksIterator.close();
         }
+    }
+
+    private static Lock lockFor(String compositeKey) {
+        return STRIPED_LOCKS.get(compositeKey);
     }
 }
