@@ -27,6 +27,8 @@ public class ServiceTestUtil {
         String key3 = "queue_mysite";
         String url4 = "https://www.mysite.com/secondqueue";
         String key4 = "another_queue";
+        String url5 = "https://www.delete.me/tobedeleted";
+        String key5 = "delete_queue";
 
         final AtomicBoolean completed = new AtomicBoolean(false);
         final AtomicInteger acked = new AtomicInteger(0);
@@ -152,6 +154,21 @@ public class ServiceTestUtil {
         builder4.setID(crawlId + "_" + url4);
 
         streamObserver.onNext(builder4.build());
+        sent++;
+
+        URLInfo info5 = URLInfo.newBuilder().setUrl(url5).setCrawlID(crawlId).setKey(key5).build();
+
+        crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder5 = URLItem.newBuilder();
+        KnownURLItem deleteItem =
+                KnownURLItem.newBuilder()
+                        .setInfo(info5)
+                        .setRefetchableFromDate(Instant.now().getEpochSecond() + 3600)
+                        .build();
+
+        builder5.setKnown(deleteItem);
+        builder5.setID(crawlId + "_" + url5);
+
+        streamObserver.onNext(builder5.build());
         sent++;
 
         streamObserver.onCompleted();

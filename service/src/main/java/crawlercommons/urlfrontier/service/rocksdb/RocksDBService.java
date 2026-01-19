@@ -56,6 +56,10 @@ public class RocksDBService extends AbstractFrontierService {
 
     private static final DecimalFormat DF = new DecimalFormat("0000000000");
 
+    // Used for testPurge when enabled
+    @SuppressWarnings("unused")
+    private static final Instant oldCreatDt = Instant.ofEpochSecond(489243020L);
+
     static {
         RocksDB.loadLibrary();
     }
@@ -117,7 +121,8 @@ public class RocksDBService extends AbstractFrontierService {
                     Arrays.asList(
                             new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, cfOpts),
                             new ColumnFamilyDescriptor("queues".getBytes(), cfOpts),
-                            new ColumnFamilyDescriptor("queueInfos".getBytes(), cfOpts));
+                            new ColumnFamilyDescriptor("queueInfos".getBytes(), cfOpts),
+                            new ColumnFamilyDescriptor("creationDates".getBytes(), cfOpts));
 
             long start = System.currentTimeMillis();
 
@@ -346,6 +351,7 @@ public class RocksDBService extends AbstractFrontierService {
 
         long nextFetchDate;
         boolean discovered = true;
+        boolean brandNew = true; // Can be either discovered or known
         URLInfo info;
 
         putURLs_urls_count.inc();
@@ -359,7 +365,7 @@ public class RocksDBService extends AbstractFrontierService {
             KnownURLItem known = value.getKnown();
             info = known.getInfo();
             nextFetchDate = known.getRefetchableFromDate();
-            discovered = Boolean.FALSE;
+            discovered = false;
         }
 
         String Qkey = info.getKey();
@@ -429,6 +435,7 @@ public class RocksDBService extends AbstractFrontierService {
                     if (isClosing()) {
                         return Status.FAIL;
                     }
+                    brandNew = false;
                     writeBatch.delete(columnFamilyHandleList.get(1), schedulingKey);
                     // remove from queue metadata
                     queueMD.removeFromProcessed(url);
@@ -464,6 +471,19 @@ public class RocksDBService extends AbstractFrontierService {
 
                 // update the link to its queue
                 writeBatch.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
+
+                // Keep creation date in a separate column family
+                // This is updated only for brand new items and not read during sendURLsForQueue
+                // (we need it for both discovered and completed URLs, if we want to clean old URLs
+                // later)
+                if (brandNew) {
+                    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+                    buffer.putLong(Instant.now().getEpochSecond());
+                    // NOSONAR
+                    // buffer.putLong(oldCreatDt.getEpochSecond());
+
+                    writeBatch.put(columnFamilyHandleList.get(3), existenceKey, buffer.array());
+                }
 
                 // batch the updates - this way the scheduling and main tables will always be in
                 // sync
@@ -778,10 +798,12 @@ public class RocksDBService extends AbstractFrontierService {
         // processed
         rocksDB.deleteRange(columnFamilyHandleList.get(1), prefix, endKey);
         rocksDB.deleteRange(columnFamilyHandleList.get(0), prefix, endKey);
+        rocksDB.deleteRange(columnFamilyHandleList.get(3), prefix, endKey);
 
         if (includeEndKey) {
             rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
             rocksDB.delete(columnFamilyHandleList.get(0), endKey);
+            rocksDB.deleteRange(columnFamilyHandleList.get(3), endKey, endKey);
         }
     }
 
@@ -856,7 +878,18 @@ public class RocksDBService extends AbstractFrontierService {
         }
 
         if (found) {
-            responseObserver.onNext(buildURLItem(builder, knownbuilder, info, fromEpoch));
+            // Get the creation date
+            long creatDt = 0L;
+
+            try {
+                byte[] baCreatDt = rocksDB.get(columnFamilyHandleList.get(3), existenceKey);
+                creatDt = ByteBuffer.wrap(baCreatDt).getLong();
+            } catch (RocksDBException e) {
+                LOG.error("Cannot read creation date ", e);
+                responseObserver.onError(io.grpc.Status.fromThrowable(e).asRuntimeException());
+            }
+
+            responseObserver.onNext(buildURLItem(builder, knownbuilder, info, fromEpoch, creatDt));
             responseObserver.onCompleted();
         } else {
             responseObserver.onError(io.grpc.Status.NOT_FOUND.asRuntimeException());
@@ -952,8 +985,10 @@ public class RocksDBService extends AbstractFrontierService {
                 LOG.debug("current key {}, schedulingKey={}", currentKey, schedulingKey);
 
                 byte[] scheduled = null;
+                byte[] created = null;
                 try {
                     scheduled = rocksDB.get(columnFamilyHandleList.get(1), rocksIterator.value());
+                    created = rocksDB.get(columnFamilyHandleList.get(3), rocksIterator.key());
                 } catch (RocksDBException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -1000,7 +1035,8 @@ public class RocksDBService extends AbstractFrontierService {
                     hasNext = rocksIterator.isValid();
                 }
 
-                return buildURLItem(builder, knownBuilder, info, fromEpoch);
+                ByteBuffer lCreated = ByteBuffer.wrap(created);
+                return buildURLItem(builder, knownBuilder, info, fromEpoch, lCreated.getLong());
             }
 
             return null; // Shouldn't happen
@@ -1014,5 +1050,40 @@ public class RocksDBService extends AbstractFrontierService {
 
     private static Lock lockFor(String compositeKey) {
         return STRIPED_LOCKS.get(compositeKey);
+    }
+
+    @Override
+    public void deleteURLItem(URLItem e) {
+
+        // Get URLInfo
+        URLInfo info;
+        if (e.hasDiscovered()) {
+            info = e.getDiscovered().getInfo();
+        } else {
+            info = e.getKnown().getInfo();
+        }
+
+        // Compute existence key
+        final QueueWithinCrawl qk = QueueWithinCrawl.get(info.getKey(), info.getCrawlID());
+        final String existenceKeyString = (qk.toString() + "_" + info.getUrl());
+        byte[] key = existenceKeyString.getBytes(StandardCharsets.UTF_8);
+
+        synchronized (getQueues()) {
+            try {
+                // Delete scheduling entry if exists
+                byte[] schedulingKey = rocksDB.get(columnFamilyHandleList.get(0), key);
+                if (schedulingKey != null) {
+                    rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
+                }
+
+                // Delete the creation date
+                rocksDB.delete(columnFamilyHandleList.get(3), key);
+
+                // Delete the existence key
+                rocksDB.delete(columnFamilyHandleList.get(0), key);
+            } catch (RocksDBException e1) {
+                LOG.error(e1.getMessage());
+            }
+        }
     }
 }

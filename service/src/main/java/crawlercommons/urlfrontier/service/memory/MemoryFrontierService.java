@@ -16,6 +16,7 @@ import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import io.grpc.stub.StreamObserver;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -31,6 +32,12 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(MemoryFrontierService.class);
+
+    private Map<String, Long> creationDates = new HashMap<>();
+
+    // Used for testPurge when enabled
+    @SuppressWarnings("unused")
+    private static final Instant oldCreatDt = Instant.ofEpochSecond(489243020L);
 
     public MemoryFrontierService(final Map<String, String> configuration, String host, int port) {
         super(configuration, host, port);
@@ -125,7 +132,18 @@ public class MemoryFrontierService extends AbstractFrontierService {
         synchronized (getQueues()) {
             URLQueue queue = (URLQueue) getQueues().get(qk);
             if (queue == null) {
-                getQueues().put(qk, new URLQueue(iu));
+                queue = new URLQueue(iu);
+                getQueues().put(qk, queue);
+                creationDates.put(iu.url, Instant.now().getEpochSecond());
+                // creationDates.put(iu.url, oldCreatDt.getEpochSecond());
+
+                // If known and nextFetchDate, set to completed
+                if (!discovered && iu.nextFetchDate == 0) {
+                    queue.remove(iu);
+                    putURLs_completed_count.inc();
+                    queue.addToCompleted(iu.url);
+                }
+
                 return Status.OK;
             }
 
@@ -147,6 +165,9 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 putURLs_completed_count.inc();
                 queue.addToCompleted(iu.url);
             } else {
+                creationDates.put(iu.url, Instant.now().getEpochSecond());
+                // creationDates.put(iu.url, oldCreatDt.getEpochSecond());
+
                 queue.add(iu);
             }
         }
@@ -192,7 +213,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
         if (queue.isCompleted(url)) {
             found = true;
-            responseObserver.onNext(buildURLItem(builder, knownBuilder, info, 0));
+            long creatDt = creationDates.get(url);
+            responseObserver.onNext(buildURLItem(builder, knownBuilder, info, 0, creatDt));
         } else {
             Iterator<InternalURL> iter = queue.iterator();
 
@@ -212,6 +234,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
                     }
 
                     builder.setKnown(knownBuilder.build());
+                    builder.setCreationDate(creationDates.get(url));
                     found = true;
                     responseObserver.onNext(builder.build());
                     break;
@@ -277,7 +300,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
                                 .build();
                 if (pos >= start) {
                     sent++;
-                    return buildURLItem(builder, knownBuilder, info, 0);
+                    long creatDt = creationDates.get(curcomplete);
+                    return buildURLItem(builder, knownBuilder, info, 0, creatDt);
                 } else {
                     return next();
                 }
@@ -289,7 +313,9 @@ public class MemoryFrontierService extends AbstractFrontierService {
                         URLInfo info = item.toURLInfo(qentry.getKey());
                         if (pos >= start) {
                             sent++;
-                            return buildURLItem(builder, knownBuilder, info, item.nextFetchDate);
+                            long creatDt = creationDates.get(item.url);
+                            return buildURLItem(
+                                    builder, knownBuilder, info, item.nextFetchDate, creatDt);
                         } else {
                             return next();
                         }
@@ -304,6 +330,33 @@ public class MemoryFrontierService extends AbstractFrontierService {
         @Override
         public void close() {
             // No need to close anything here
+        }
+    }
+
+    @Override
+    public void deleteURLItem(URLItem e) {
+        // Get URLInfo
+        URLInfo info;
+        if (e.hasDiscovered()) {
+            info = e.getDiscovered().getInfo();
+        } else {
+            info = e.getKnown().getInfo();
+        }
+
+        Object[] parsed = InternalURL.from(e);
+        InternalURL iu = (InternalURL) parsed[2];
+
+        final QueueWithinCrawl qwc = QueueWithinCrawl.get(info.getKey(), info.getCrawlID());
+        synchronized (getQueues()) {
+            URLQueue queue = (URLQueue) getQueues().get(qwc);
+
+            if (queue.isCompleted(info.getUrl())) {
+                queue.getCompleted().remove(info.getUrl());
+                creationDates.remove(info.getUrl());
+            } else if (queue.contains(iu)) {
+                queue.remove(iu);
+                creationDates.remove(info.getUrl());
+            }
         }
     }
 }

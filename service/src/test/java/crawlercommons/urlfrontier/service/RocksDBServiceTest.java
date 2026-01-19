@@ -10,9 +10,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
+import crawlercommons.urlfrontier.Urlfrontier.CountUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
+import crawlercommons.urlfrontier.Urlfrontier.PurgeUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
@@ -21,16 +23,19 @@ import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
 import io.grpc.stub.StreamObserver;
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -93,6 +98,8 @@ class RocksDBServiceTest {
                             assertEquals(crawlId, value.getKnown().getInfo().getCrawlID());
                             assertEquals(key, value.getKnown().getInfo().getKey());
                             assertTrue(value.getKnown().getRefetchableFromDate() > 0);
+                            // Check creation date is not null
+                            assertTrue(value.getCreationDate() > 0);
                         }
                         count.incrementAndGet();
                     }
@@ -142,6 +149,8 @@ class RocksDBServiceTest {
                             assertEquals(crawlId, value.getKnown().getInfo().getCrawlID());
                             assertEquals(key, value.getKnown().getInfo().getKey());
                             assertEquals(0, value.getKnown().getRefetchableFromDate());
+                            // Check creation date is not null
+                            assertTrue(value.getCreationDate() > 0);
                         }
                         count.incrementAndGet();
                     }
@@ -206,10 +215,8 @@ class RocksDBServiceTest {
     }
 
     private void logURLItem(URLItem item) {
-        if (item.hasDiscovered()) {
-            LOG.info(item.getDiscovered().toString());
-        } else if (item.hasKnown()) {
-            LOG.info(item.getKnown().toString());
+        if (item.hasDiscovered() || item.hasKnown()) {
+            LOG.info(item.toString());
         } else {
             LOG.error("Unknown URLItem type");
         }
@@ -236,6 +243,9 @@ class RocksDBServiceTest {
                     public void onNext(URLItem value) {
                         // receives confirmation that the value has been received
                         logURLItem(value);
+
+                        // Check creation date is not null
+                        assertTrue(value.getCreationDate() > 0);
 
                         // Internally, MemoryFrontierService does not make a distinction
                         // between discovered and known which have to be re-fetched
@@ -281,6 +291,9 @@ class RocksDBServiceTest {
                         // receives confirmation that the value has been received
                         logURLItem(value);
 
+                        // Check creation date is not null
+                        assertTrue(value.getCreationDate() > 0);
+
                         if (value.hasKnown()) {
                             fetched.incrementAndGet();
                         }
@@ -299,7 +312,7 @@ class RocksDBServiceTest {
                 };
 
         rocksDBService.listURLs(params, statusObserver);
-        assertEquals(4, count.get());
+        assertEquals(5, count.get());
     }
 
     @Test
@@ -324,6 +337,9 @@ class RocksDBServiceTest {
                         // receives confirmation that the value has been received
                         logURLItem(value);
 
+                        // Check creation date is not null
+                        assertTrue(value.getCreationDate() > 0);
+
                         if (value.hasKnown()) {
                             fetched.incrementAndGet();
                         }
@@ -347,7 +363,7 @@ class RocksDBServiceTest {
 
     @Test
     @Order(7)
-    void testMemoryIterator() {
+    void testUrlIterator() {
         int nbQueues = 0;
         int nbUrls = 0;
 
@@ -357,18 +373,20 @@ class RocksDBServiceTest {
             Iterator<URLItem> iter = rocksDBService.urlIterator(cur, 0, 100);
             while (iter.hasNext()) {
                 URLItem item = iter.next();
+                // Check creation date is not null
+                assertTrue(item.getCreationDate() > 0);
                 System.out.println(item.toString());
                 nbUrls++;
             }
         }
 
-        assertEquals(2, nbQueues);
-        assertEquals(4, nbUrls);
+        assertEquals(3, nbQueues);
+        assertEquals(5, nbUrls);
     }
 
     @Test
     @Order(8)
-    void testMemoryIteratorSingleQueue() {
+    void testUrlIteratorSingleQueue() {
         int nbQueues = 0;
         int nbUrls = 0;
 
@@ -382,13 +400,15 @@ class RocksDBServiceTest {
             Iterator<URLItem> iter = rocksDBService.urlIterator(cur, 0, 100);
             while (iter.hasNext()) {
                 URLItem item = iter.next();
+                // Check creation date is not null
+                assertTrue(item.getCreationDate() > 0);
                 System.out.println(item.toString());
                 nbUrls++;
             }
         }
 
-        assertEquals(1, nbQueues);
-        assertEquals(3, nbUrls);
+        assertEquals(2, nbQueues);
+        assertEquals(4, nbUrls);
     }
 
     @Test
@@ -496,7 +516,7 @@ class RocksDBServiceTest {
     }
 
     @Test
-    @Order(98)
+    @Order(90)
     void testNoRescheduleCompleted() {
 
         String crawlId = "crawl_id";
@@ -513,6 +533,9 @@ class RocksDBServiceTest {
                     public void onNext(URLItem value) {
                         // receives confirmation that the value has been received
                         logURLItem(value);
+
+                        // Check creation date is not null
+                        assertTrue(value.getCreationDate() > 0);
 
                         // Internally, MemoryFrontierService does not make a distinction
                         // between discovered and known which have to be re-fetched
@@ -606,6 +629,9 @@ class RocksDBServiceTest {
                         // receives confirmation that the value has been received
                         logURLItem(value);
 
+                        // Check creation date is not null
+                        assertTrue(value.getCreationDate() > 0);
+
                         // Internally, MemoryFrontierService does not make a distinction
                         // between discovered and known which have to be re-fetched
                         if (value.hasKnown()) {
@@ -628,7 +654,7 @@ class RocksDBServiceTest {
     }
 
     @Test
-    @Order(99)
+    @Order(91)
     void testRescheduleCompleted() {
 
         String crawlId = "crawl_id";
@@ -646,6 +672,9 @@ class RocksDBServiceTest {
                     public void onNext(URLItem value) {
                         // receives confirmation that the value has been received
                         logURLItem(value);
+
+                        // Check creation date is not null
+                        assertTrue(value.getCreationDate() > 0);
 
                         // Internally, MemoryFrontierService does not make a distinction
                         // between discovered and known which have to be re-fetched
@@ -805,6 +834,9 @@ class RocksDBServiceTest {
                         // receives confirmation that the value has been received
                         logURLItem(value);
 
+                        // Check creation date is not null
+                        assertTrue(value.getCreationDate() > 0);
+
                         // Internally, MemoryFrontierService does not make a distinction
                         // between discovered and known which have to be re-fetched
                         if (value.hasKnown()) {
@@ -824,5 +856,109 @@ class RocksDBServiceTest {
                 };
 
         rocksDBService.getURLStatus(request, statusObserver2);
+    }
+
+    @Test
+    @Order(92)
+    void testDeleteURLItem() {
+
+        URLInfo info5 =
+                URLInfo.newBuilder()
+                        .setUrl("https://www.delete.me/tobedeleted")
+                        .setCrawlID("crawl_id")
+                        .setKey("delete_queue")
+                        .build();
+
+        crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder5 = URLItem.newBuilder();
+        KnownURLItem deleteItem =
+                KnownURLItem.newBuilder()
+                        .setInfo(info5)
+                        .setRefetchableFromDate(Instant.now().getEpochSecond() + 3600)
+                        .build();
+
+        builder5.setKnown(deleteItem);
+        builder5.setID("crawl_id" + "_" + "https://www.delete.me/tobedeleted");
+
+        rocksDBService.deleteURLItem(builder5.build());
+
+        CountUrlParams countParams = CountUrlParams.newBuilder().setCrawlID("crawl_id").build();
+        final AtomicLong count = new AtomicLong(0L);
+        StreamObserver<Urlfrontier.Long> countObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(Urlfrontier.Long value) {
+                        count.set(value.getValue());
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {}
+                };
+
+        rocksDBService.countURLs(countParams, countObserver);
+        assertEquals(4L, count.get());
+    }
+
+    @Test
+    @Order(99)
+    @Disabled
+    // Must hardcode creation date in service before testing that
+    // Test works with creation date set as Unix Epoch 489243020L (3/Jul/1985) and guaranteed to
+    // work until 2040
+    void testPurge() {
+
+        PurgeUrlParams purgeParams1 =
+                PurgeUrlParams.newBuilder().setCrawlID("crawl_id").setDays(20000).build();
+
+        final AtomicLong count1 = new AtomicLong(0L);
+        StreamObserver<Urlfrontier.Long> purgeObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(Urlfrontier.Long value) {
+                        count1.set(value.getValue());
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {}
+                };
+
+        rocksDBService.purgeURLs(purgeParams1, purgeObserver);
+        assertEquals(0L, count1.get());
+
+        PurgeUrlParams purgeParams2 =
+                PurgeUrlParams.newBuilder().setCrawlID("crawl_id").setDays(365).build();
+
+        final AtomicLong count2 = new AtomicLong(0L);
+        StreamObserver<Urlfrontier.Long> countObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(Urlfrontier.Long value) {
+                        count2.set(value.getValue());
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {}
+                };
+
+        rocksDBService.purgeURLs(purgeParams2, countObserver);
+
+        assertEquals(5L, count2.get());
     }
 }
