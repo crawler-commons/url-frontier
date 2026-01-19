@@ -35,10 +35,6 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
     private Map<String, Long> creationDates = new HashMap<>();
 
-    // Used for testPurge when enabled
-    @SuppressWarnings("unused")
-    private static final Instant oldCreatDt = Instant.ofEpochSecond(489243020L);
-
     public MemoryFrontierService(final Map<String, String> configuration, String host, int port) {
         super(configuration, host, port);
     }
@@ -135,7 +131,6 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 queue = new URLQueue(iu);
                 getQueues().put(qk, queue);
                 creationDates.put(iu.url, Instant.now().getEpochSecond());
-                // creationDates.put(iu.url, oldCreatDt.getEpochSecond());
 
                 // If known and nextFetchDate, set to completed
                 if (!discovered && iu.nextFetchDate == 0) {
@@ -166,8 +161,6 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 queue.addToCompleted(iu.url);
             } else {
                 creationDates.put(iu.url, Instant.now().getEpochSecond());
-                // creationDates.put(iu.url, oldCreatDt.getEpochSecond());
-
                 queue.add(iu);
             }
         }

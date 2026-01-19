@@ -56,10 +56,6 @@ public class RocksDBService extends AbstractFrontierService {
 
     private static final DecimalFormat DF = new DecimalFormat("0000000000");
 
-    // Used for testPurge when enabled
-    @SuppressWarnings("unused")
-    private static final Instant oldCreatDt = Instant.ofEpochSecond(489243020L);
-
     static {
         RocksDB.loadLibrary();
     }
@@ -479,8 +475,6 @@ public class RocksDBService extends AbstractFrontierService {
                 if (brandNew) {
                     ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
                     buffer.putLong(Instant.now().getEpochSecond());
-                    // NOSONAR
-                    // buffer.putLong(oldCreatDt.getEpochSecond());
 
                     writeBatch.put(columnFamilyHandleList.get(3), existenceKey, buffer.array());
                 }
