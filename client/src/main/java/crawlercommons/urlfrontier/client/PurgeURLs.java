@@ -19,14 +19,14 @@ public class PurgeURLs implements Runnable {
             names = {"-k", "--key"},
             defaultValue = "",
             paramLabel = "STRING",
-            description = "key of the queue to get the URL count for")
+            description = "key of the queue to from where to delete URLs")
     private String key;
 
     @Option(
             names = {"-c", "--crawlID"},
             defaultValue = "DEFAULT",
             paramLabel = "STRING",
-            description = "crawl to get the URL count for")
+            description = "crawl from where to delete URLs")
     private String crawl;
 
     @Option(
