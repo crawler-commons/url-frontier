@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     name: Docker image deployment
-    runs-on: carbonrunner-4vcpu-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
