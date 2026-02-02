@@ -1066,8 +1066,19 @@ public class RocksDBService extends AbstractFrontierService {
             try {
                 // Delete scheduling entry if exists
                 byte[] schedulingKey = rocksDB.get(columnFamilyHandleList.get(0), key);
-                if (schedulingKey != null) {
+
+                // check the value - if it is an empty byte array it means that the URL has been
+                // processed and is not scheduled
+                // otherwise it is scheduled
+                boolean completed = schedulingKey.length == 0;
+
+                QueueMetadata queueMD = (QueueMetadata) getQueues().get(qk);
+
+                if (!completed) {
                     rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
+                    queueMD.decrementActive();
+                } else {
+                    queueMD.decrementCompleted();
                 }
 
                 // Delete the creation date

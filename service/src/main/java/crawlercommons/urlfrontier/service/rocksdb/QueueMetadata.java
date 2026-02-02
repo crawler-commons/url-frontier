@@ -131,6 +131,10 @@ public class QueueMetadata implements QueueInterface {
         completed.incrementAndGet();
     }
 
+    public void decrementCompleted() {
+        completed.decrementAndGet();
+    }
+
     @Override
     public int countActive() {
         return active.get();

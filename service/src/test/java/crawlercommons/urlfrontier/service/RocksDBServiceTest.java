@@ -15,6 +15,7 @@ import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.PurgeUrlParams;
+import crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
@@ -33,8 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -49,21 +49,17 @@ class RocksDBServiceTest {
 
     private static final String ROCKSDB_PATH = "./target/rocksdb";
 
-    RocksDBService rocksDBService;
-
-    @AfterEach
-    void shutdown() throws IOException {
-        rocksDBService.close();
-    }
+    static RocksDBService rocksDBService;
 
     @AfterAll
-    static void cleanup() {
+    static void cleanup() throws IOException {
+        rocksDBService.close();
         LOG.info("Cleaning up directory {}", ROCKSDB_PATH);
         FileUtils.deleteQuietly(new File(ROCKSDB_PATH));
     }
 
-    @BeforeEach
-    void setup() {
+    @BeforeAll
+    static void setup() {
 
         Map<String, String> conf = new HashMap<>();
         conf.put("rocksdb.path", ROCKSDB_PATH);
@@ -934,6 +930,7 @@ class RocksDBServiceTest {
                 };
 
         rocksDBService.purgeURLs(purgeParams1, purgeObserver);
+        // Nothing should be deleted
         assertEquals(0L, count1.get());
 
         PurgeUrlParams purgeParams2 =
@@ -957,8 +954,40 @@ class RocksDBServiceTest {
                     public void onCompleted() {}
                 };
 
+        // Get total nb of URLs before the purge
+        // (Nb may vary depending on previous test(s) executed)
+        long c1 = ServiceTestUtil.countAllURLs(rocksDBService);
+
         rocksDBService.purgeURLs(purgeParams2, countObserver);
 
-        assertEquals(5L, count2.get());
+        // Get total nb of URLs after the purge (should be 0)
+        long c2 = ServiceTestUtil.countAllURLs(rocksDBService);
+        assertEquals(0L, c2);
+
+        // Check we deleted the right nb of URLs
+        assertEquals(c1, count2.get());
+
+        // Check that queue stats are properly updated
+        StreamObserver<Urlfrontier.Stats> statsObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(Urlfrontier.Stats value) {
+                        assertEquals(0L, value.getSize());
+                        assertEquals(0L, value.getCountsOrDefault("completed", 0L));
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    @Override
+                    public void onCompleted() {}
+                };
+
+        QueueWithinCrawlParams qwcp =
+                QueueWithinCrawlParams.newBuilder().setCrawlID("crawl_id").build();
+        rocksDBService.getStats(qwcp, statsObserver);
     }
 }

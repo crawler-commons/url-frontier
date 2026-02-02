@@ -3,6 +3,9 @@
 
 package crawlercommons.urlfrontier.service;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
+import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
@@ -13,6 +16,7 @@ import io.grpc.stub.StreamObserver;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ServiceTestUtil {
 
@@ -181,5 +185,42 @@ public class ServiceTestUtil {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    /**
+     * Returns the total number of URLs in the service (all crawls & queues)
+     *
+     * @param service
+     * @return
+     */
+    public static long countAllURLs(AbstractFrontierService service) {
+
+        final AtomicLong ret = new AtomicLong(0L);
+
+        StreamObserver<Urlfrontier.Long> responseObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(Urlfrontier.Long value) {
+                        ret.set(value.getValue());
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                        fail();
+                    }
+
+                    @Override
+                    public void onCompleted() {}
+                };
+
+        Urlfrontier.CountUrlParams.Builder builder = Urlfrontier.CountUrlParams.newBuilder();
+        builder.setCrawlID("crawl_id");
+        builder.setLocal(true);
+
+        service.countURLs(builder.build(), responseObserver);
+
+        return ret.get();
     }
 }
