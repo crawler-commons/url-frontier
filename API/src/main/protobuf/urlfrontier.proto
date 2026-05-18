@@ -87,6 +87,9 @@ service URLFrontier {
      
      /** Count URLs currently in the frontier **/
      rpc CountURLs(CountUrlParams) returns (Long) {}
+     
+     /** Deletes URLs from a frontier which are older than N days **/
+     rpc PurgeURLs(PurgeUrlParams) returns (Long) {}
 }
 
 /** 
@@ -221,6 +224,10 @@ oneof item {
   }
   /** Identifier specified by the client, if missing, the URL is returned **/
   string ID = 3;
+  /** Creation date of the URLInfo 
+  Expressed in seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z.
+  **/
+  uint64 creation_date = 4;
 }
 
 message AckMessage {
@@ -344,3 +351,13 @@ message CountUrlParams {
   // only for the current local instance (default is false)
   optional bool local = 5;
 }
+
+message PurgeUrlParams {
+  /** ID for the queue **/
+  string key = 1;
+  // crawl ID
+  string crawlID = 2;
+  // Nb of days
+  uint32 days = 3;
+}
+

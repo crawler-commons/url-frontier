@@ -107,4 +107,11 @@ public class ShardedRocksDBService extends DistributedFrontierService {
         throw new UnsupportedOperationException(
                 "Feature not implemented for ShardedRocksDB backend");
     }
+
+    @Override
+    // TODO Implementation of deleteURLItem for ShardedRocksDB
+    public void deleteURLItem(URLItem item) {
+        throw new UnsupportedOperationException(
+                "Feature not implemented for ShardedRocksDB backend");
+    }
 }

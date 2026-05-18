@@ -6,6 +6,7 @@ package crawlercommons.urlfrontier.service;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import crawlercommons.urlfrontier.CrawlID;
+import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
@@ -18,6 +19,7 @@ import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Local;
 import crawlercommons.urlfrontier.Urlfrontier.LogLevelParams;
+import crawlercommons.urlfrontier.Urlfrontier.PurgeUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
@@ -32,6 +34,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,6 +52,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFrontierService
@@ -973,13 +977,18 @@ public abstract class AbstractFrontierService
      * @return
      */
     public static URLItem buildURLItem(
-            URLItem.Builder builder, KnownURLItem.Builder kbuilder, URLInfo info, long refetch) {
+            URLItem.Builder builder,
+            KnownURLItem.Builder kbuilder,
+            URLInfo info,
+            long refetch,
+            long creationDate) {
         builder.clear();
         kbuilder.clear();
 
         kbuilder.setInfo(info);
         kbuilder.setRefetchableFromDate(refetch);
         builder.setKnown(kbuilder.build());
+        builder.setCreationDate(creationDate);
 
         return builder.build();
     }
@@ -1054,8 +1063,76 @@ public abstract class AbstractFrontierService
     private boolean filterURL(URLItem cur, String text, boolean ignoreCase) {
 
         String curURL = cur.getKnown().getInfo().getUrl();
-        return ignoreCase
-                ? StringUtils.containsIgnoreCase(curURL, text)
-                : StringUtils.contains(curURL, text);
+        return ignoreCase ? Strings.CI.contains(curURL, text) : Strings.CS.contains(curURL, text);
     }
+
+    @Override
+    public void purgeURLs(
+            PurgeUrlParams request,
+            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Long> responseObserver) {
+
+        final String key = request.getKey();
+        final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+        int days = request.getDays();
+
+        LOG.info(
+                "Received request to purge URLs [crawlId={}, key={}, days={}]",
+                normalisedCrawlID,
+                key,
+                days);
+
+        long deletedCount = 0;
+
+        // Cutoff date  = now - number of days we want to keep
+        Instant cutoff = Instant.now().minus(Period.ofDays(days));
+
+        synchronized (getQueues()) {
+            Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
+                    getQueues().entrySetView().iterator();
+
+            while (qiterator.hasNext()) {
+                Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
+
+                // check that it is within the right crawlID
+                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                    continue;
+                }
+
+                // check that it is within the right key/queue
+                if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
+                    continue;
+                }
+
+                try (CloseableIterator<URLItem> urliter = urlIterator(e)) {
+                    List<URLItem> toDelete = new ArrayList<>();
+
+                    while (urliter.hasNext()) {
+                        URLItem cur = urliter.next();
+
+                        if (Instant.ofEpochSecond(cur.getCreationDate()).isBefore(cutoff)) {
+                            // Add to deletion list (should not delete while iterating URLItem in
+                            // queue)
+                            toDelete.add(cur);
+                            deletedCount++;
+                        }
+                    }
+
+                    toDelete.stream().forEach(x -> deleteURLItem(x));
+
+                } catch (Exception e1) {
+                    LOG.warn(e1.getMessage(), e1);
+                }
+            }
+        }
+
+        responseObserver.onNext(Urlfrontier.Long.newBuilder().setValue(deletedCount).build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Deletes a single URLItem
+     *
+     * @param item
+     */
+    public abstract void deleteURLItem(URLItem item);
 }

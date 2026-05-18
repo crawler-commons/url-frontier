@@ -4,7 +4,6 @@
 package crawlercommons.urlfrontier.service.memory;
 
 import crawlercommons.urlfrontier.service.QueueInterface;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
@@ -119,9 +118,9 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
     }
 
     /**
-     * @return The unmodifiable set of completed URLs
+     * @return The set of completed URLs
      */
     public Set<String> getCompleted() {
-        return Collections.unmodifiableSet(completed);
+        return completed;
     }
 }
