@@ -434,7 +434,7 @@ public abstract class AbstractFrontierService
         long completed = 0;
         long activeQueues = 0;
 
-        List<QueueInterface> _queues = new LinkedList<>();
+        List<QueueInterface> lqueues = new LinkedList<>();
 
         final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
 
@@ -443,7 +443,7 @@ public abstract class AbstractFrontierService
             QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
             QueueInterface q = getQueues().get(qwc);
             if (q != null) {
-                _queues.add(q);
+                lqueues.add(q);
             } else {
                 // TODO notify an error to the client
             }
@@ -453,12 +453,12 @@ public abstract class AbstractFrontierService
 
             // check that the queues belong to the crawlid specified
             Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    getQueues().entrySet().iterator();
+                    getQueues().entrySetView().iterator();
             while (iterator.hasNext()) {
                 Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
                 QueueWithinCrawl qwc = e.getKey();
                 if (qwc.getCrawlid().equals(normalisedCrawlID)) {
-                    _queues.add(e.getValue());
+                    lqueues.add(e.getValue());
                 }
             }
         }
@@ -467,7 +467,7 @@ public abstract class AbstractFrontierService
 
         long now = Instant.now().getEpochSecond();
 
-        for (QueueInterface q : _queues) {
+        for (QueueInterface q : lqueues) {
             final int inProcForQ = q.getInProcess(now);
             final int activeForQ = q.countActive();
             if (inProcForQ > 0 || activeForQ > 0) {
