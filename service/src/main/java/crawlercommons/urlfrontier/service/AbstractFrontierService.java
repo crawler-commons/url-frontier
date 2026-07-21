@@ -111,7 +111,9 @@ public abstract class AbstractFrontierService
                     .help("Number of completed URLs")
                     .register();
 
-    private boolean active = true;
+    // written by setActive on gRPC handler threads, read by getURLs on other
+    // threads: volatile for visibility (JVM-level only, not distributed ordering)
+    private volatile boolean active = true;
 
     private int defaultDelayForQueues = 1;
 
