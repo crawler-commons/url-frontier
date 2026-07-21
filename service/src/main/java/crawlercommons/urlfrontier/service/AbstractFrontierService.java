@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileUtils;
@@ -499,19 +500,67 @@ public abstract class AbstractFrontierService
         responseObserver.onCompleted();
     }
 
+    /** Returned by {@link #tryReserveQueue} when the queue cannot be reserved. */
+    static final long RESERVE_FAILED = Long.MIN_VALUE;
+
     /**
-     * Checks whether a queue is currently eligible for serving URLs: its politeness delay has
-     * elapsed and it has not reached its cap of in-process URLs.
+     * In-band marker stored in lastProduced while a send is in flight, so that no other request can
+     * reserve the queue regardless of executor scheduling delays. lastProduced is only ever read by
+     * this class, is not persisted, and 0 is a legitimate value, hence the sentinels.
      */
-    boolean checkQueueEligibility(QueueInterface queue, long now, int maxURLsPerQueue) {
-        int delay = queue.getDelay();
-        if (delay == -1) {
-            delay = getDefaultDelayForQueues();
+    static final long RESERVATION_IN_PROGRESS = Long.MAX_VALUE;
+
+    /**
+     * Atomically checks that a queue is eligible for serving URLs (politeness delay elapsed,
+     * in-process cap not reached, no send already in flight) and reserves it by storing {@link
+     * #RESERVATION_IN_PROGRESS} in lastProduced. Callers MUST finalize the reservation with {@link
+     * #finalizeReservation}.
+     *
+     * @return the previous lastProduced value if the queue was reserved, {@link #RESERVE_FAILED}
+     *     otherwise
+     */
+    long tryReserveQueue(QueueInterface queue, long now, int maxURLsPerQueue) {
+        synchronized (queue) {
+            long previous = queue.getLastProduced();
+            // must be checked first: it also guards the delay check below against overflow
+            // (RESERVATION_IN_PROGRESS + delay wraps negative)
+            if (previous == RESERVATION_IN_PROGRESS) {
+                return RESERVE_FAILED;
+            }
+            int delay = queue.getDelay();
+            if (delay == -1) {
+                delay = getDefaultDelayForQueues();
+            }
+            if (previous + delay >= now || queue.getInProcess(now) >= maxURLsPerQueue) {
+                return RESERVE_FAILED;
+            }
+            queue.setLastProduced(RESERVATION_IN_PROGRESS);
+            return previous;
         }
-        if (queue.getLastProduced() + delay >= now) {
-            return false;
+    }
+
+    /**
+     * Finalizes a reservation taken with {@link #tryReserveQueue}. Fail-closed: when the send did
+     * not complete normally its outcome is unknown (URLs may have been emitted before the
+     * exception), so the politeness window is enforced.
+     */
+    void finalizeReservation(
+            QueueInterface queue,
+            long reservationTime,
+            long previous,
+            int sent,
+            boolean completedNormally) {
+        synchronized (queue) {
+            if (queue.getLastProduced() != RESERVATION_IN_PROGRESS) {
+                // should never happen: no other writer while the queue is reserved
+                return;
+            }
+            if (completedNormally && sent == 0) {
+                queue.setLastProduced(previous);
+            } else {
+                queue.setLastProduced(reservationTime);
+            }
         }
-        return queue.getInProcess(now) < maxURLsPerQueue;
     }
 
     @Override
@@ -604,15 +653,29 @@ public abstract class AbstractFrontierService
                 return;
             }
 
-            // too early or already has its fill of URLs in process?
-            if (!checkQueueEligibility(queue, now, maxURLsPerQueue)) {
+            // atomically check the politeness gate and reserve the queue
+            final long previousLastProduced = tryReserveQueue(queue, now, maxURLsPerQueue);
+            if (previousLastProduced == RESERVE_FAILED) {
                 responseObserver.onCompleted();
                 return;
             }
 
-            int totalSent =
-                    sendURLsForQueue(
-                            queue, qwc, maxURLsPerQueue, secsUntilRequestable, now, synchStreamObs);
+            int totalSent = 0;
+            boolean completedNormally = false;
+            try {
+                totalSent =
+                        sendURLsForQueue(
+                                queue,
+                                qwc,
+                                maxURLsPerQueue,
+                                secsUntilRequestable,
+                                now,
+                                synchStreamObs);
+                completedNormally = true;
+            } finally {
+                finalizeReservation(queue, now, previousLastProduced, totalSent, completedNormally);
+            }
+
             responseObserver.onCompleted();
 
             getURLs_urls_count.inc(totalSent);
@@ -623,10 +686,6 @@ public abstract class AbstractFrontierService
                     key,
                     (System.currentTimeMillis() - start),
                     requestID.toString());
-
-            if (totalSent != 0) {
-                queue.setLastProduced(now);
-            }
 
             requestTimer.observeDuration();
 
@@ -683,33 +742,60 @@ public abstract class AbstractFrontierService
                 continue;
             }
 
-            // too early or already has its fill of URLs in process?
-            if (!checkQueueEligibility(currentQueue, now, maxURLsPerQueue)) {
+            // atomically check the politeness gate and reserve the queue
+            final long previousLastProduced = tryReserveQueue(currentQueue, now, maxURLsPerQueue);
+            if (previousLastProduced == RESERVE_FAILED) {
                 continue;
             }
 
             inProcess.incrementAndGet();
 
-            readExecutorService.execute(
-                    () -> {
-                        final int sentForQ =
-                                sendURLsForQueue(
-                                        currentQueue,
-                                        currentCrawlQueue,
-                                        maxURLsPerQueue,
-                                        secsUntilRequestable,
-                                        now,
-                                        synchStreamObs);
-
-                        if (sentForQ > 0) {
-                            currentQueue.setLastProduced(now);
-                            totalSent.addAndGet(sentForQ);
-                            numQueuesSent.incrementAndGet();
-                        }
-
-                        inProcess.decrementAndGet();
-                        numQueuesTried.incrementAndGet();
-                    });
+            try {
+                readExecutorService.execute(
+                        () -> {
+                            int sentForQ = 0;
+                            boolean completedNormally = false;
+                            try {
+                                try {
+                                    sentForQ =
+                                            sendURLsForQueue(
+                                                    currentQueue,
+                                                    currentCrawlQueue,
+                                                    maxURLsPerQueue,
+                                                    secsUntilRequestable,
+                                                    now,
+                                                    synchStreamObs);
+                                    completedNormally = true;
+                                } finally {
+                                    finalizeReservation(
+                                            currentQueue,
+                                            now,
+                                            previousLastProduced,
+                                            sentForQ,
+                                            completedNormally);
+                                }
+                                if (sentForQ > 0) {
+                                    totalSent.addAndGet(sentForQ);
+                                    numQueuesSent.incrementAndGet();
+                                }
+                            } finally {
+                                // even if finalizeReservation throws, these must run or the
+                                // busy-wait below never terminates
+                                inProcess.decrementAndGet();
+                                numQueuesTried.incrementAndGet();
+                            }
+                        });
+            } catch (RejectedExecutionException e) {
+                // the task never started: release the reservation and undo the counter
+                finalizeReservation(currentQueue, now, previousLastProduced, 0, true);
+                inProcess.decrementAndGet();
+                LOG.error(
+                        "Executor rejected getURLs task for queue {} {}",
+                        currentCrawlQueue,
+                        requestID,
+                        e);
+                break;
+            }
         }
 
         // wait for all threads to have finished
