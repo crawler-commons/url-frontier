@@ -15,6 +15,7 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
+import crawlercommons.urlfrontier.Urlfrontier.Active;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
@@ -214,6 +215,26 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 qwc,
                 observer -> super.blockQueueUntil(localParams, observer),
                 (stub, observer) -> stub.blockQueueUntil(localParams, observer),
+                responseObserver);
+    }
+
+    /**
+     * In cluster mode, a request with local=false is applied locally and broadcast to every other
+     * node. Concurrent setActive calls are not globally ordered: conflicting broadcasts may leave
+     * nodes divergent even when each call reports success. local=true stays local. Unlike the other
+     * overrides there is no isClosing() guard, because the base method changes the flag even while
+     * closing.
+     */
+    @Override
+    public void setActive(Active request, StreamObserver<Empty> responseObserver) {
+        if (request.getLocal() || !clusterMode) {
+            super.setActive(request, responseObserver);
+            return;
+        }
+        final Active localParams = Active.newBuilder(request).setLocal(true).build();
+        broadcastAll(
+                observer -> super.setActive(localParams, observer),
+                (stub, observer) -> stub.setActive(localParams, observer),
                 responseObserver);
     }
 
