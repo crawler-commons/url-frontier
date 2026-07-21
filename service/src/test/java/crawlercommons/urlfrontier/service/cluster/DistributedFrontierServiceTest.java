@@ -5,6 +5,7 @@ package crawlercommons.urlfrontier.service.cluster;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -14,8 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
+import crawlercommons.urlfrontier.Urlfrontier.Active;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.Local;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
@@ -55,13 +58,17 @@ class DistributedFrontierServiceTest {
     private static final List<String> NODES = List.of("localhost:" + PORT_A, "localhost:" + PORT_B);
     private static final String PATH_A = "./target/rocksdb-shard-a";
     private static final String PATH_B = "./target/rocksdb-shard-b";
+    private static final Local LOCAL_TRUE = Local.newBuilder().setLocal(true).build();
+    private static final Local LOCAL_FALSE = Local.newBuilder().setLocal(false).build();
 
     static ShardedRocksDBService serviceA;
     static ShardedRocksDBService serviceB;
     static Server serverA;
     static Server serverB;
     static ManagedChannel channelA;
+    static ManagedChannel channelB;
     static URLFrontierBlockingStub stubA;
+    static URLFrontierBlockingStub stubB;
 
     @BeforeAll
     static void setup() throws IOException {
@@ -72,7 +79,9 @@ class DistributedFrontierServiceTest {
         serverA = ServerBuilder.forPort(PORT_A).addService(serviceA).build().start();
         serverB = ServerBuilder.forPort(PORT_B).addService(serviceB).build().start();
         channelA = ManagedChannelBuilder.forTarget("localhost:" + PORT_A).usePlaintext().build();
+        channelB = ManagedChannelBuilder.forTarget("localhost:" + PORT_B).usePlaintext().build();
         stubA = URLFrontierGrpc.newBlockingStub(channelA);
+        stubB = URLFrontierGrpc.newBlockingStub(channelB);
     }
 
     private static ShardedRocksDBService newService(String path, int port) {
@@ -84,10 +93,13 @@ class DistributedFrontierServiceTest {
 
     @AfterAll
     static void teardown() throws Exception {
-        if (channelA != null) {
+        for (ManagedChannel channel : new ManagedChannel[] {channelA, channelB}) {
+            if (channel == null) {
+                continue;
+            }
             try {
-                channelA.shutdownNow();
-                channelA.awaitTermination(5, TimeUnit.SECONDS);
+                channel.shutdownNow();
+                channel.awaitTermination(5, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -327,6 +339,56 @@ class DistributedFrontierServiceTest {
     }
 
     @Test
+    @Order(10)
+    void setActiveLocalFalseDeactivatesEveryNode() {
+        try {
+            stubA.setActive(Active.newBuilder().setState(false).setLocal(false).build());
+
+            assertFalse(
+                    stubA.getActive(LOCAL_TRUE).getState(),
+                    "node A must be inactive (silent local-only on master)");
+            assertFalse(
+                    stubB.getActive(LOCAL_TRUE).getState(),
+                    "node B must be inactive (silent local-only on master)");
+        } finally {
+            stubA.setActive(Active.newBuilder().setState(true).setLocal(false).build());
+        }
+    }
+
+    @Test
+    @Order(11)
+    void setActiveLocalTrueStaysLocal() {
+        try {
+            stubA.setActive(Active.newBuilder().setState(false).setLocal(true).build());
+
+            assertTrue(stubB.getActive(LOCAL_TRUE).getState(), "node B must stay active");
+        } finally {
+            stubA.setActive(Active.newBuilder().setState(true).setLocal(true).build());
+        }
+    }
+
+    @Test
+    @Order(12)
+    void getActiveLocalFalseIsFalseOnMixedState() {
+        try {
+            // deactivate B only, bypassing the broadcast
+            stubB.setActive(Active.newBuilder().setState(false).setLocal(true).build());
+
+            assertFalse(
+                    stubA.getActive(LOCAL_FALSE).getState(),
+                    "mixed cluster state must report inactive");
+        } finally {
+            stubB.setActive(Active.newBuilder().setState(true).setLocal(true).build());
+        }
+    }
+
+    @Test
+    @Order(13)
+    void getActiveLocalFalseIsTrueWhenAllNodesActive() {
+        assertTrue(stubA.getActive(LOCAL_FALSE).getState());
+    }
+
+    @Test
     @Order(20)
     void ownerUnreachableSurfacesError() throws Exception {
         serverB.shutdownNow();
@@ -398,5 +460,26 @@ class DistributedFrontierServiceTest {
                         .build());
 
         assertEquals(44, serviceA.getQueues().get(qwc).getDelay());
+    }
+
+    @Test
+    @Order(24)
+    void getActiveLocalFalseErrorsWhenNodeUnreachable() {
+        // an unreachable node must surface an error, never a fabricated false
+        assertThrows(StatusRuntimeException.class, () -> stubA.getActive(LOCAL_FALSE));
+    }
+
+    @Test
+    @Order(25)
+    void getActiveDoesNotShortCircuitOnLocalInactive() {
+        try {
+            stubA.setActive(Active.newBuilder().setState(false).setLocal(true).build());
+
+            // a short-circuiting implementation would return false here without
+            // querying the dead node; the contract requires an error instead
+            assertThrows(StatusRuntimeException.class, () -> stubA.getActive(LOCAL_FALSE));
+        } finally {
+            stubA.setActive(Active.newBuilder().setState(true).setLocal(true).build());
+        }
     }
 }

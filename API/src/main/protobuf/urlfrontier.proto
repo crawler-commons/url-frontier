@@ -54,10 +54,12 @@ service URLFrontier {
       **/
      rpc BlockQueueUntil(BlockQueueParams) returns (Empty) {}
           
-     /** De/activate the crawl. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data. **/
+     /** De/activate the frontier. GetURLs will not return anything until SetActive is set to true. PutURLs will still take incoming data.
+      The state belongs to the frontier node, not to a specific crawl; with local set to false the change is applied to every node in the cluster. **/
      rpc SetActive(Active) returns (Empty) {}
 
-     /** Returns true if the crawl is active, false if it has been deactivated with SetActive(Boolean) **/
+     /** Returns true if the frontier is active, false if it has been deactivated with SetActive.
+      With local set to false, returns true only if every node in the cluster is active. **/
      rpc GetActive(Local) returns (Boolean) {}
      
      /** Set a delay from a given queue.
