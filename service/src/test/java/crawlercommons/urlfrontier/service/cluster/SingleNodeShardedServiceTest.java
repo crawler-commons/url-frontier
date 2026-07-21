@@ -10,7 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
+import crawlercommons.urlfrontier.Urlfrontier.Active;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.Local;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
@@ -126,5 +128,19 @@ class SingleNodeShardedServiceTest {
                         .build());
 
         assertEquals(66, service.getQueues().get(QueueWithinCrawl.get(key, "DEFAULT")).getDelay());
+    }
+
+    @Test
+    void setActiveAndGetActiveLocalFalseStayLocal() {
+        Local localFalse = Local.newBuilder().setLocal(false).build();
+        try {
+            stub.setActive(Active.newBuilder().setState(false).setLocal(false).build());
+
+            assertFalse(
+                    stub.getActive(localFalse).getState(),
+                    "single-node cluster: local state is the cluster state");
+        } finally {
+            stub.setActive(Active.newBuilder().setState(true).setLocal(false).build());
+        }
     }
 }

@@ -17,6 +17,7 @@ import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.Active;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
+import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
@@ -34,6 +35,7 @@ import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
+import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -236,6 +238,56 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 observer -> super.setActive(localParams, observer),
                 (stub, observer) -> stub.setActive(localParams, observer),
                 responseObserver);
+    }
+
+    /**
+     * In cluster mode, local=false returns the AND of every node's state: true only if all nodes
+     * are active. A mixed state returns false and logs a warning. This is not an atomic snapshot:
+     * it aggregates the states observed while querying the nodes, under a single shared deadline.
+     * An unreachable node surfaces an error rather than a fabricated false. local=true returns the
+     * state of this node only.
+     */
+    @Override
+    public void getActive(Local request, StreamObserver<Boolean> responseObserver) {
+        if (request.getLocal() || !clusterMode) {
+            super.getActive(request, responseObserver);
+            return;
+        }
+        final List<String> nodes = List.copyOf(getNodes());
+        if (nodes.indexOf(address) == -1) {
+            throw new RuntimeException(
+                    "Found conf 'nodes' but current node's address not in the list");
+        }
+        // one deadline for the whole aggregation, not per node
+        final Deadline deadline = Deadline.after(FORWARD_DEADLINE_SECONDS, TimeUnit.SECONDS);
+        final Local localRequest = Local.newBuilder().setLocal(true).build();
+        final boolean localState = isActive();
+        boolean allActive = localState;
+        boolean sawActive = localState;
+        boolean sawInactive = !localState;
+        try {
+            for (String node : nodes) {
+                if (node.equals(address)) {
+                    continue;
+                }
+                // &= evaluates the right-hand side regardless: every node is
+                // queried, an unreachable one fails the call instead of being
+                // silently folded into a false
+                final boolean nodeActive =
+                        getFrontier(node).withDeadline(deadline).getActive(localRequest).getState();
+                allActive &= nodeActive;
+                sawActive |= nodeActive;
+                sawInactive |= !nodeActive;
+            }
+        } catch (StatusRuntimeException e) {
+            responseObserver.onError(e);
+            return;
+        }
+        if (sawActive && sawInactive) {
+            LOG.warn("URLFrontier nodes report divergent active states");
+        }
+        responseObserver.onNext(Boolean.newBuilder().setState(allActive).build());
+        responseObserver.onCompleted();
     }
 
     /** Create or return an existing stream to an external Frontier * */

@@ -368,6 +368,27 @@ class DistributedFrontierServiceTest {
     }
 
     @Test
+    @Order(12)
+    void getActiveLocalFalseIsFalseOnMixedState() {
+        try {
+            // deactivate B only, bypassing the broadcast
+            stubB.setActive(Active.newBuilder().setState(false).setLocal(true).build());
+
+            assertFalse(
+                    stubA.getActive(LOCAL_FALSE).getState(),
+                    "mixed cluster state must report inactive");
+        } finally {
+            stubB.setActive(Active.newBuilder().setState(true).setLocal(true).build());
+        }
+    }
+
+    @Test
+    @Order(13)
+    void getActiveLocalFalseIsTrueWhenAllNodesActive() {
+        assertTrue(stubA.getActive(LOCAL_FALSE).getState());
+    }
+
+    @Test
     @Order(20)
     void ownerUnreachableSurfacesError() throws Exception {
         serverB.shutdownNow();
@@ -439,5 +460,26 @@ class DistributedFrontierServiceTest {
                         .build());
 
         assertEquals(44, serviceA.getQueues().get(qwc).getDelay());
+    }
+
+    @Test
+    @Order(24)
+    void getActiveLocalFalseErrorsWhenNodeUnreachable() {
+        // an unreachable node must surface an error, never a fabricated false
+        assertThrows(StatusRuntimeException.class, () -> stubA.getActive(LOCAL_FALSE));
+    }
+
+    @Test
+    @Order(25)
+    void getActiveDoesNotShortCircuitOnLocalInactive() {
+        try {
+            stubA.setActive(Active.newBuilder().setState(false).setLocal(true).build());
+
+            // a short-circuiting implementation would return false here without
+            // querying the dead node; the contract requires an error instead
+            assertThrows(StatusRuntimeException.class, () -> stubA.getActive(LOCAL_FALSE));
+        } finally {
+            stubA.setActive(Active.newBuilder().setState(true).setLocal(true).build());
+        }
     }
 }
