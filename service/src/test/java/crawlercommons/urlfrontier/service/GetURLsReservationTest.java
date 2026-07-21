@@ -4,6 +4,8 @@
 package crawlercommons.urlfrontier.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
@@ -13,6 +15,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
 import io.grpc.stub.StreamObserver;
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -189,5 +192,82 @@ class GetURLsReservationTest {
                 1,
                 service.sendInvocations.get(),
                 "queue was served more than once inside its delay window");
+    }
+
+    @Test
+    void zeroSentDoesNotPenalizeQueue() throws Exception {
+        InstrumentedMemoryService service = new InstrumentedMemoryService();
+        QueueInterface queue = seedQueue(service);
+        service.returnZero = true;
+
+        GetParams request =
+                GetParams.newBuilder().setMaxUrlsPerQueue(1).setDelayRequestable(30).build();
+
+        CollectingObserver first = new CollectingObserver();
+        service.getURLs(request, first);
+        assertTrue(first.completed.await(5, TimeUnit.SECONDS));
+
+        // nothing was sent: the previous lastProduced must be restored
+        assertEquals(0, queue.getLastProduced());
+
+        // and the queue is immediately reservable again
+        CollectingObserver second = new CollectingObserver();
+        service.getURLs(request, second);
+        assertTrue(second.completed.await(5, TimeUnit.SECONDS));
+        assertEquals(2, service.sendInvocations.get());
+    }
+
+    @Test
+    void inFlightReservationBlocksBeyondDelayWindow() throws Exception {
+        InstrumentedMemoryService service = new InstrumentedMemoryService();
+        QueueInterface queue = seedQueue(service);
+        queue.setDelay(5);
+        long now = 100;
+
+        // package-private helpers are declared on AbstractFrontierService
+        AbstractFrontierService frontier = service;
+
+        long previous = frontier.tryReserveQueue(queue, now, Integer.MAX_VALUE);
+        assertNotEquals(AbstractFrontierService.RESERVE_FAILED, previous);
+
+        // a timestamp-based reservation would have expired here; the in-flight marker holds
+        assertEquals(
+                AbstractFrontierService.RESERVE_FAILED,
+                frontier.tryReserveQueue(queue, now + 5 + 1, Integer.MAX_VALUE));
+
+        frontier.finalizeReservation(queue, now, previous, 3, true);
+        assertEquals(now, queue.getLastProduced());
+
+        // after finalization the normal delay rules apply again
+        assertEquals(
+                AbstractFrontierService.RESERVE_FAILED,
+                frontier.tryReserveQueue(queue, now + 5, Integer.MAX_VALUE));
+        assertNotEquals(
+                AbstractFrontierService.RESERVE_FAILED,
+                frontier.tryReserveQueue(queue, now + 6, Integer.MAX_VALUE));
+    }
+
+    @Test
+    void exceptionDuringSendFailsClosedAndDoesNotHang() throws Exception {
+        InstrumentedMemoryService service = new InstrumentedMemoryService();
+        QueueInterface queue = seedQueue(service);
+        service.throwOnFirstSend = true;
+
+        GetParams request =
+                GetParams.newBuilder().setMaxUrlsPerQueue(1).setDelayRequestable(30).build();
+
+        // without the try/finally around sendURLsForQueue this call never returns
+        CollectingObserver first = new CollectingObserver();
+        assertTimeoutPreemptively(Duration.ofSeconds(5), () -> service.getURLs(request, first));
+
+        // fail-closed: outcome unknown, so the politeness window is enforced
+        assertNotEquals(AbstractFrontierService.RESERVATION_IN_PROGRESS, queue.getLastProduced());
+        assertNotEquals(0, queue.getLastProduced());
+
+        // a second request inside the window must not serve the queue
+        CollectingObserver second = new CollectingObserver();
+        service.getURLs(request, second);
+        assertTrue(second.completed.await(5, TimeUnit.SECONDS));
+        assertEquals(1, service.sendInvocations.get());
     }
 }
