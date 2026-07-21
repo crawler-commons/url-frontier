@@ -15,12 +15,14 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
+import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Local;
 import crawlercommons.urlfrontier.Urlfrontier.LogLevelParams;
 import crawlercommons.urlfrontier.Urlfrontier.Pagination;
+import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
@@ -40,6 +42,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -64,6 +67,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     protected boolean clusterMode = false;
 
+    /** Maximum time granted to a forwarded control call before failing the caller. */
+    static final int FORWARD_DEADLINE_SECONDS = 30;
+
     private final CacheLoader<String, ManagedChannel> channelLoader =
             new CacheLoader<String, ManagedChannel>() {
                 @Override
@@ -85,6 +91,130 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     private URLFrontierBlockingStub getFrontier(String target) {
         return URLFrontierGrpc.newBlockingStub(channelCache.getUnchecked(target));
+    }
+
+    /**
+     * Identifies the partition (index in the sorted node list) owning a queue. Must stay
+     * bit-for-bit identical to the historical inline computation in putURLs: changing it (e.g. to
+     * floorMod) would silently remap existing queues without migration.
+     */
+    static int partitionFor(QueueWithinCrawl qwc, List<String> nodes) {
+        return Math.abs(qwc.toString().hashCode() % nodes.size());
+    }
+
+    @FunctionalInterface
+    interface LocalEmptyCall {
+        void invoke(StreamObserver<Empty> observer);
+    }
+
+    @FunctionalInterface
+    interface RemoteEmptyCall {
+        void invoke(URLFrontierStub stub, StreamObserver<Empty> observer);
+    }
+
+    private URLFrontierStub getAsyncFrontier(String target) {
+        return URLFrontierGrpc.newStub(channelCache.getUnchecked(target))
+                .withDeadlineAfter(FORWARD_DEADLINE_SECONDS, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Runs the call on the node owning the queue: locally when this node is the owner, otherwise
+     * forwarded once to the owner with a deadline. Exactly one terminal event reaches the response
+     * observer.
+     */
+    private void routeToOwner(
+            QueueWithinCrawl qwc,
+            LocalEmptyCall localCall,
+            RemoteEmptyCall remoteCall,
+            StreamObserver<Empty> responseObserver) {
+        final List<String> nodes = List.copyOf(getNodes());
+        final int localNodeIndex = nodes.indexOf(address);
+        if (localNodeIndex == -1) {
+            throw new RuntimeException(
+                    "Found conf 'nodes' but current node's address not in the list");
+        }
+        final int partition = partitionFor(qwc, nodes);
+        if (partition == localNodeIndex) {
+            localCall.invoke(responseObserver);
+        } else {
+            final EmptyAggregator aggregator = new EmptyAggregator(1, responseObserver);
+            remoteCall.invoke(getAsyncFrontier(nodes.get(partition)), aggregator.newChild());
+        }
+    }
+
+    /**
+     * Applies the call locally first, then forwards it to every other node with a deadline, so a
+     * fast remote failure can never unblock the caller before the local application has completed.
+     * Success is reported only when all nodes responded; the first failure is reported instead. The
+     * operation is not atomic: some nodes may have applied it when an error is returned. Repeating
+     * the same assignment is idempotent in the absence of concurrent newer writes.
+     */
+    private void broadcastAll(
+            LocalEmptyCall localCall,
+            RemoteEmptyCall remoteCall,
+            StreamObserver<Empty> responseObserver) {
+        final List<String> nodes = List.copyOf(getNodes());
+        if (nodes.indexOf(address) == -1) {
+            throw new RuntimeException(
+                    "Found conf 'nodes' but current node's address not in the list");
+        }
+        final EmptyAggregator aggregator = new EmptyAggregator(nodes.size(), responseObserver);
+        localCall.invoke(aggregator.newChild());
+        for (String node : nodes) {
+            if (node.equals(address)) {
+                continue;
+            }
+            remoteCall.invoke(getAsyncFrontier(node), aggregator.newChild());
+        }
+    }
+
+    /**
+     * In cluster mode, a keyed request with local=false is routed to the node owning the queue; a
+     * keyless one (default delay) is applied on every node. local=true always stays local.
+     */
+    @Override
+    public void setDelay(QueueDelayParams request, StreamObserver<Empty> responseObserver) {
+        if (request.getLocal() || !clusterMode || isClosing()) {
+            super.setDelay(request, responseObserver);
+            return;
+        }
+        final QueueDelayParams localParams =
+                QueueDelayParams.newBuilder(request).setLocal(true).build();
+        if (request.getKey().isEmpty()) {
+            broadcastAll(
+                    observer -> super.setDelay(localParams, observer),
+                    (stub, observer) -> stub.setDelay(localParams, observer),
+                    responseObserver);
+        } else {
+            final QueueWithinCrawl qwc =
+                    QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+            routeToOwner(
+                    qwc,
+                    observer -> super.setDelay(localParams, observer),
+                    (stub, observer) -> stub.setDelay(localParams, observer),
+                    responseObserver);
+        }
+    }
+
+    /**
+     * In cluster mode, a keyed request with local=false is routed to the node owning the queue. An
+     * empty key keeps the historical local no-op instead of being routed to an artificial owner.
+     * local=true always stays local.
+     */
+    @Override
+    public void blockQueueUntil(BlockQueueParams request, StreamObserver<Empty> responseObserver) {
+        if (request.getLocal() || !clusterMode || isClosing() || request.getKey().isEmpty()) {
+            super.blockQueueUntil(request, responseObserver);
+            return;
+        }
+        final QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+        final BlockQueueParams localParams =
+                BlockQueueParams.newBuilder(request).setLocal(true).build();
+        routeToOwner(
+                qwc,
+                observer -> super.blockQueueUntil(localParams, observer),
+                (stub, observer) -> stub.blockQueueUntil(localParams, observer),
+                responseObserver);
     }
 
     /** Create or return an existing stream to an external Frontier * */
@@ -493,7 +623,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 final QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
 
                 // work out which node should receive the item
-                int partition = Math.abs(qk.toString().hashCode() % getNodes().size());
+                int partition = partitionFor(qk, getNodes());
 
                 // is it the local node?
                 int localNodeIndex = getNodes().indexOf(address);

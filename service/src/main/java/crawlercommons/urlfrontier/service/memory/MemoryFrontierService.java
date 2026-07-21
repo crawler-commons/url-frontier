@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -33,7 +34,9 @@ public class MemoryFrontierService extends AbstractFrontierService {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(MemoryFrontierService.class);
 
-    private Map<String, Long> creationDates = new HashMap<>();
+    // written by the putURLs worker threads, read without synchronization by
+    // getURLStatus and the URL iterators
+    private Map<String, Long> creationDates = new ConcurrentHashMap<>();
 
     public MemoryFrontierService(final Map<String, String> configuration, String host, int port) {
         super(configuration, host, port);
@@ -154,13 +157,14 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 }
             }
 
+            creationDates.put(iu.url, Instant.now().getEpochSecond());
+
             // add the new item
             // unless it is an update and it's nextFetchDate is 0 == NEVER
             if (!discovered && iu.nextFetchDate == 0) {
                 putURLs_completed_count.inc();
                 queue.addToCompleted(iu.url);
             } else {
-                creationDates.put(iu.url, Instant.now().getEpochSecond());
                 queue.add(iu);
             }
         }
