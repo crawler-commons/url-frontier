@@ -499,6 +499,21 @@ public abstract class AbstractFrontierService
         responseObserver.onCompleted();
     }
 
+    /**
+     * Checks whether a queue is currently eligible for serving URLs: its politeness delay has
+     * elapsed and it has not reached its cap of in-process URLs.
+     */
+    boolean checkQueueEligibility(QueueInterface queue, long now, int maxURLsPerQueue) {
+        int delay = queue.getDelay();
+        if (delay == -1) {
+            delay = getDefaultDelayForQueues();
+        }
+        if (queue.getLastProduced() + delay >= now) {
+            return false;
+        }
+        return queue.getInProcess(now) < maxURLsPerQueue;
+    }
+
     @Override
     public void getURLs(GetParams request, StreamObserver<URLInfo> responseObserver) {
         // on hold or shutting down
@@ -589,16 +604,8 @@ public abstract class AbstractFrontierService
                 return;
             }
 
-            // too early?
-            int delay = queue.getDelay();
-            if (delay == -1) delay = getDefaultDelayForQueues();
-            if (queue.getLastProduced() + delay >= now) {
-                responseObserver.onCompleted();
-                return;
-            }
-
-            // already has its fill of URLs in process
-            if (queue.getInProcess(now) >= maxURLsPerQueue) {
+            // too early or already has its fill of URLs in process?
+            if (!checkQueueEligibility(queue, now, maxURLsPerQueue)) {
                 responseObserver.onCompleted();
                 return;
             }
@@ -676,15 +683,8 @@ public abstract class AbstractFrontierService
                 continue;
             }
 
-            // too early?
-            int delay = currentQueue.getDelay();
-            if (delay == -1) delay = getDefaultDelayForQueues();
-            if (currentQueue.getLastProduced() + delay >= now) {
-                continue;
-            }
-
-            // already has its fill of URLs in process
-            if (currentQueue.getInProcess(now) >= maxURLsPerQueue) {
+            // too early or already has its fill of URLs in process?
+            if (!checkQueueEligibility(currentQueue, now, maxURLsPerQueue)) {
                 continue;
             }
 
