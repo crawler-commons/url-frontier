@@ -972,6 +972,7 @@ public abstract class AbstractFrontierService
             return;
         }
 
+        responseObserver.onNext(Empty.getDefaultInstance());
         responseObserver.onCompleted();
     }
 
