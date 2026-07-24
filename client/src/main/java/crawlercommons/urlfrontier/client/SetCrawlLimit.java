@@ -31,6 +31,13 @@ public class SetCrawlLimit implements Runnable {
             description = "the limit. (0 to disable)")
     private int limit;
 
+    @CommandLine.Option(
+            names = {"--local"},
+            defaultValue = "false",
+            paramLabel = "BOOLEAN",
+            description = "restricts the scope to this frontier instance")
+    private boolean local;
+
     @Override
     public void run() {
         ManagedChannel channel =
@@ -45,6 +52,7 @@ public class SetCrawlLimit implements Runnable {
         builder.setCrawlID(crawl);
         builder.setKey(key);
         builder.setLimit(limit);
+        builder.setLocal(local);
 
         blockingFrontier.setCrawlLimit(builder.build());
 

@@ -313,6 +313,8 @@ message CrawlLimitParams {
   uint32 limit = 2;
   // crawl ID
   string crawlID = 3;
+  // only for this instance
+  bool local = 4;
 }
 
 message URLStatusRequest {
