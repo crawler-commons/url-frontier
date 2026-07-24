@@ -37,6 +37,56 @@ If no path is set explicitly for RocksDB,  the default value _./rocksdb_ will be
 For implementation supporting a cluster mode, it is required to use the parameter `-h xxx.xxx.xxx.xxx` with the private IP or hostname
 on which it is running so that it can report its location with the heartbeat.
 
+## Distributed mode
+
+The sharded implementation (`crawlercommons.urlfrontier.service.rocksdb.ShardedRocksDBService`) runs the Frontier as a cluster of nodes, each owning a partition of the queues.
+
+### Configuration and queue ownership
+
+Every node is started with the `nodes` parameter, a comma-separated list of `host:port` addresses. All nodes must be configured with the same unique set of addresses — the order does not matter, the list is sorted internally — and each node must appear in it exactly once, be started with `-h`/port matching its own entry, and use its own local RocksDB directory.
+
+A queue (key + crawl ID) is owned by exactly one node, determined by hashing the queue identifier over the sorted node list. URLs sent to any node are forwarded to the owner. Changing the set of nodes remaps queue ownership without migrating the data, so treat cluster resizes as a rebuild.
+
+### Control operations
+
+Since 2.6, the control RPCs act on the whole cluster no matter which node receives them. The `local` field on each request restricts the call to the receiving node instead. Forwarded calls carry a per-RPC deadline.
+
+| RPC | `local=false` (default) | `local=true` |
+|---|---|---|
+| `SetDelay` with a key | routed to the queue owner | this node only |
+| `SetDelay` without a key | default delay broadcast to every node | this node only |
+| `BlockQueueUntil` | routed to the queue owner (empty key: local no-op, as historically) | this node only |
+| `SetCrawlLimit` | routed to the queue owner (the crawl ID is normalized; empty key fails) | this node only |
+| `SetActive` | applied locally, then broadcast to every node | this node only |
+| `GetActive` | logical AND across all nodes: a mixed cluster reports `false`, an unreachable node is an error rather than `false`; the result is not an atomic snapshot | this node only |
+
+Broadcasts are not atomic: when an error is returned, some nodes may already have applied the change. Repeating the same call is idempotent in the absence of concurrent newer writes.
+
+### Reservation and politeness guarantees
+
+`GetURLs` takes all its per-queue eligibility decisions (blocked state, crawl limit, politeness delay, in-process cap) atomically. After a send returns one or more URLs, the queue cannot be served again inside its delay window, regardless of how many clients poll concurrently. A send that returns zero URLs restores the previous state, so an empty queue is not penalized and can be retried immediately.
+
+Once a queue-control RPC completes, reservations started afterwards observe the updated state; a send that was already reserved when the RPC arrived may still go out.
+
+### Persistence and restart behaviour
+
+RocksDB persists URL records and reconstructs queue counts, but control and lease state is held in memory. A restarted node loses:
+
+- per-queue delays and the default delay;
+- `blockedUntil` timestamps;
+- crawl limits;
+- the active state;
+- the politeness window (last-served timestamps);
+- the in-process leases.
+
+After a restart, clients must re-assert the delays, blocks and limits they rely on, and URLs that were in flight may be served again.
+
+### Deployment and security assumptions
+
+Inter-node channels are plaintext and the RPCs are unauthenticated: the service must only be exposed on a private, trusted network. Coordinated upgrades of all nodes are recommended — in a mixed-version cluster, calls forwarded to an older node behave as that version did.
+
+See #148, #150, #151, #156 and #157 for the details behind these semantics.
+
 ## Logging configuration
 
 The logging is done with Logback. A default configuration is loaded and will dump logs on the console at INFO level and above but the configuration
