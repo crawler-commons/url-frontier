@@ -5,18 +5,21 @@ package crawlercommons.urlfrontier.service.cluster;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.Active;
+import crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Local;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
+import crawlercommons.urlfrontier.service.rocksdb.QueueMetadata;
 import crawlercommons.urlfrontier.service.rocksdb.ShardedRocksDBService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -128,6 +131,57 @@ class SingleNodeShardedServiceTest {
                         .build());
 
         assertEquals(66, service.getQueues().get(QueueWithinCrawl.get(key, "DEFAULT")).getDelay());
+    }
+
+    @Test
+    void setCrawlLimitLocalFalseAppliedLocally() throws Exception {
+        String key = "single-limit.test";
+        CountDownLatch latch = new CountDownLatch(1);
+        StreamObserver<URLItem> input =
+                URLFrontierGrpc.newStub(channel)
+                        .putURLs(
+                                new StreamObserver<AckMessage>() {
+                                    @Override
+                                    public void onNext(AckMessage value) {}
+
+                                    @Override
+                                    public void onError(Throwable t) {
+                                        latch.countDown();
+                                    }
+
+                                    @Override
+                                    public void onCompleted() {
+                                        latch.countDown();
+                                    }
+                                });
+        URLInfo info =
+                URLInfo.newBuilder()
+                        .setUrl("https://" + key + "/page")
+                        .setKey(key)
+                        .setCrawlID("DEFAULT")
+                        .build();
+        input.onNext(
+                URLItem.newBuilder()
+                        .setDiscovered(DiscoveredURLItem.newBuilder().setInfo(info).build())
+                        .build());
+        input.onCompleted();
+        assertTrue(latch.await(10, TimeUnit.SECONDS), "putURLs did not complete in time");
+
+        QueueMetadata queue =
+                (QueueMetadata) service.getQueues().get(QueueWithinCrawl.get(key, "DEFAULT"));
+        assertNotNull(queue);
+        queue.setCompletedCount(1);
+        assertFalse(queue.isLimitReached());
+
+        stub.setCrawlLimit(
+                CrawlLimitParams.newBuilder()
+                        .setKey(key)
+                        .setCrawlID("DEFAULT")
+                        .setLimit(1)
+                        .setLocal(false)
+                        .build());
+
+        assertTrue(queue.isLimitReached(), "single node: the limit must be applied locally");
     }
 
     @Test

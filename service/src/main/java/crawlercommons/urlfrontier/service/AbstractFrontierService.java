@@ -956,8 +956,9 @@ public abstract class AbstractFrontierService
         }
     }
 
+    @Override
     public void setCrawlLimit(CrawlLimitParams params, StreamObserver<Empty> responseObserver) {
-        QueueWithinCrawl searchKey = new QueueWithinCrawl(params.getKey(), params.getCrawlID());
+        QueueWithinCrawl searchKey = QueueWithinCrawl.get(params.getKey(), params.getCrawlID());
 
         QueueInterface qi = getQueues().get(searchKey);
         if (qi != null) {
