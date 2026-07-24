@@ -14,6 +14,7 @@ import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
+import crawlercommons.urlfrontier.service.memory.URLQueue;
 import io.grpc.stub.StreamObserver;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
@@ -269,5 +270,68 @@ class GetURLsReservationTest {
         service.getURLs(request, second);
         assertTrue(second.completed.await(5, TimeUnit.SECONDS));
         assertEquals(1, service.sendInvocations.get());
+    }
+
+    @Test
+    void keyedRequestHonoursCrawlLimit() throws Exception {
+        InstrumentedMemoryService service = new InstrumentedMemoryService();
+        QueueInterface queue = seedQueue(service);
+        queue.setCrawlLimit(1);
+        ((URLQueue) queue).addToCompleted("https://www.mysite.com/done");
+        assertTrue(queue.isLimitReached());
+
+        GetParams request =
+                GetParams.newBuilder()
+                        .setKey(KEY)
+                        .setCrawlID(CRAWL_ID)
+                        .setMaxUrlsPerQueue(1)
+                        .setDelayRequestable(30)
+                        .build();
+        CollectingObserver observer = new CollectingObserver();
+        service.getURLs(request, observer);
+        assertTrue(observer.completed.await(5, TimeUnit.SECONDS));
+
+        assertEquals(
+                0,
+                service.sendInvocations.get(),
+                "a queue past its crawl limit must not be served on the keyed path");
+    }
+
+    @Test
+    void gateRejectsBlockedAndLimitedQueues() throws Exception {
+        InstrumentedMemoryService service = new InstrumentedMemoryService();
+        QueueInterface queue = seedQueue(service);
+        queue.setDelay(5);
+        AbstractFrontierService frontier = service;
+        long now = 100;
+
+        // blocked, including the boundary blockedUntil == now
+        queue.setBlockedUntil(now + 50);
+        assertEquals(
+                AbstractFrontierService.RESERVE_FAILED,
+                frontier.tryReserveQueue(queue, now, Integer.MAX_VALUE));
+        queue.setBlockedUntil(now);
+        assertEquals(
+                AbstractFrontierService.RESERVE_FAILED,
+                frontier.tryReserveQueue(queue, now, Integer.MAX_VALUE));
+
+        // unblocked: reserves; finalize to release the marker
+        queue.setBlockedUntil(now - 1);
+        long previous = frontier.tryReserveQueue(queue, now, Integer.MAX_VALUE);
+        assertNotEquals(AbstractFrontierService.RESERVE_FAILED, previous);
+        frontier.finalizeReservation(queue, now, previous, 0, true);
+
+        // limit reached
+        queue.setCrawlLimit(1);
+        ((URLQueue) queue).addToCompleted("https://www.mysite.com/done");
+        assertEquals(
+                AbstractFrontierService.RESERVE_FAILED,
+                frontier.tryReserveQueue(queue, now, Integer.MAX_VALUE));
+
+        // limit disabled again: reserves
+        queue.setCrawlLimit(0);
+        assertNotEquals(
+                AbstractFrontierService.RESERVE_FAILED,
+                frontier.tryReserveQueue(queue, now, Integer.MAX_VALUE));
     }
 }

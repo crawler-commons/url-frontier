@@ -4,11 +4,11 @@
 package crawlercommons.urlfrontier.service.memory;
 
 import crawlercommons.urlfrontier.service.QueueInterface;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterface {
 
@@ -18,7 +18,8 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
 
     // keep a hash of the completed URLs
     // these won't be refetched
-    private HashSet<String> completed = new HashSet<>();
+    // written by the putURLs worker threads, read by the getURLs gate via isLimitReached
+    private Set<String> completed = ConcurrentHashMap.newKeySet();
 
     private Optional<Integer> limit = Optional.empty();
 
