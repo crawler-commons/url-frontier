@@ -116,7 +116,9 @@ public abstract class AbstractFrontierService
     // threads: volatile for visibility (JVM-level only, not distributed ordering)
     private volatile boolean active = true;
 
-    private int defaultDelayForQueues = 1;
+    // written by setDelay on gRPC handler threads, read by the getURLs gate on other threads:
+    // volatile for visibility only, not linearized against the per-queue gates
+    private volatile int defaultDelayForQueues = 1;
 
     // used for reporting itself in a cluster setup
     protected final String address;
@@ -374,7 +376,11 @@ public abstract class AbstractFrontierService
             QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
             QueueInterface queue = getQueues().get(qwc);
             if (queue != null) {
-                queue.setBlockedUntil(request.getTime());
+                // same monitor as the reservation gate: a reservation started after this
+                // RPC completes observes the update
+                synchronized (queue) {
+                    queue.setBlockedUntil(request.getTime());
+                }
             }
         }
         responseObserver.onNext(Empty.getDefaultInstance());
@@ -390,7 +396,9 @@ public abstract class AbstractFrontierService
                 QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
                 QueueInterface queue = getQueues().get(qwc);
                 if (queue != null) {
-                    queue.setDelay(request.getDelayRequestable());
+                    synchronized (queue) {
+                        queue.setDelay(request.getDelayRequestable());
+                    }
                 }
             }
         }
@@ -511,10 +519,10 @@ public abstract class AbstractFrontierService
     static final long RESERVATION_IN_PROGRESS = Long.MAX_VALUE;
 
     /**
-     * Atomically checks that a queue is eligible for serving URLs (politeness delay elapsed,
-     * in-process cap not reached, no send already in flight) and reserves it by storing {@link
-     * #RESERVATION_IN_PROGRESS} in lastProduced. Callers MUST finalize the reservation with {@link
-     * #finalizeReservation}.
+     * Atomically checks that a queue is eligible for serving URLs (not blocked, crawl limit not
+     * reached, politeness delay elapsed, in-process cap not reached, no send already in flight) and
+     * reserves it by storing {@link #RESERVATION_IN_PROGRESS} in lastProduced. Callers MUST
+     * finalize the reservation with {@link #finalizeReservation}.
      *
      * @return the previous lastProduced value if the queue was reserved, {@link #RESERVE_FAILED}
      *     otherwise
@@ -525,6 +533,9 @@ public abstract class AbstractFrontierService
             // must be checked first: it also guards the delay check below against overflow
             // (RESERVATION_IN_PROGRESS + delay wraps negative)
             if (previous == RESERVATION_IN_PROGRESS) {
+                return RESERVE_FAILED;
+            }
+            if (queue.getBlockedUntil() >= now || queue.isLimitReached()) {
                 return RESERVE_FAILED;
             }
             int delay = queue.getDelay();
@@ -647,12 +658,6 @@ public abstract class AbstractFrontierService
                 return;
             }
 
-            // it is locked
-            if (queue.getBlockedUntil() >= now) {
-                synchStreamObs.onCompleted();
-                return;
-            }
-
             // atomically check the politeness gate and reserve the queue
             final long previousLastProduced = tryReserveQueue(queue, now, maxURLsPerQueue);
             if (previousLastProduced == RESERVE_FAILED) {
@@ -729,16 +734,6 @@ public abstract class AbstractFrontierService
 
             // if a crawlID has been specified make sure it matches
             if (crawlID != null && !currentCrawlQueue.getCrawlid().equals(crawlID)) {
-                continue;
-            }
-
-            // it is locked
-            if (currentQueue.getBlockedUntil() >= now) {
-                continue;
-            }
-
-            // Max urls reached
-            if (currentQueue.isLimitReached()) {
                 continue;
             }
 
@@ -962,7 +957,9 @@ public abstract class AbstractFrontierService
 
         QueueInterface qi = getQueues().get(searchKey);
         if (qi != null) {
-            qi.setCrawlLimit(params.getLimit());
+            synchronized (qi) {
+                qi.setCrawlLimit(params.getLimit());
+            }
         } else {
             LOG.error(
                     "Queue with key: {} and CrawlId: {} was not found.",
