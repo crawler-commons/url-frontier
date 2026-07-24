@@ -116,7 +116,9 @@ public abstract class AbstractFrontierService
     // threads: volatile for visibility (JVM-level only, not distributed ordering)
     private volatile boolean active = true;
 
-    private int defaultDelayForQueues = 1;
+    // written by setDelay on gRPC handler threads, read by the getURLs gate on other threads:
+    // volatile for visibility only, not linearized against the per-queue gates
+    private volatile int defaultDelayForQueues = 1;
 
     // used for reporting itself in a cluster setup
     protected final String address;
@@ -374,7 +376,11 @@ public abstract class AbstractFrontierService
             QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
             QueueInterface queue = getQueues().get(qwc);
             if (queue != null) {
-                queue.setBlockedUntil(request.getTime());
+                // same monitor as the reservation gate: a reservation started after this
+                // RPC completes observes the update
+                synchronized (queue) {
+                    queue.setBlockedUntil(request.getTime());
+                }
             }
         }
         responseObserver.onNext(Empty.getDefaultInstance());
@@ -390,7 +396,9 @@ public abstract class AbstractFrontierService
                 QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
                 QueueInterface queue = getQueues().get(qwc);
                 if (queue != null) {
-                    queue.setDelay(request.getDelayRequestable());
+                    synchronized (queue) {
+                        queue.setDelay(request.getDelayRequestable());
+                    }
                 }
             }
         }
@@ -948,7 +956,9 @@ public abstract class AbstractFrontierService
 
         QueueInterface qi = getQueues().get(searchKey);
         if (qi != null) {
-            qi.setCrawlLimit(params.getLimit());
+            synchronized (qi) {
+                qi.setCrawlLimit(params.getLimit());
+            }
         } else {
             LOG.error(
                     "Queue with key: {} and CrawlId: {} was not found.",

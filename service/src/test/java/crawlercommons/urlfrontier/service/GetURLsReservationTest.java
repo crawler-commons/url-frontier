@@ -17,6 +17,7 @@ import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
 import crawlercommons.urlfrontier.service.memory.URLQueue;
 import io.grpc.stub.StreamObserver;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -333,5 +334,59 @@ class GetURLsReservationTest {
         assertNotEquals(
                 AbstractFrontierService.RESERVE_FAILED,
                 frontier.tryReserveQueue(queue, now, Integer.MAX_VALUE));
+    }
+
+    @Test
+    void controlUpdateDuringInFlightReservationLeavesMarkerIntact() throws Exception {
+        // regression test: an update while a send is reserved must not clobber the marker
+        InstrumentedMemoryService service = new InstrumentedMemoryService();
+        QueueInterface queue = seedQueue(service);
+        queue.setDelay(5);
+        AbstractFrontierService frontier = service;
+        long now = 100;
+
+        long previous = frontier.tryReserveQueue(queue, now, Integer.MAX_VALUE);
+        assertNotEquals(AbstractFrontierService.RESERVE_FAILED, previous);
+
+        queue.setDelay(60); // control update mid-flight
+        assertEquals(AbstractFrontierService.RESERVATION_IN_PROGRESS, queue.getLastProduced());
+
+        frontier.finalizeReservation(queue, now, previous, 2, true);
+        assertEquals(now, queue.getLastProduced());
+    }
+
+    @Test
+    void queueBlockedViaRpcIsNotServedAfterwards() throws Exception {
+        // integration test: sequential, does not prove the synchronization itself
+        InstrumentedMemoryService service = new InstrumentedMemoryService();
+        seedQueue(service);
+
+        AtomicBoolean blocked = new AtomicBoolean(false);
+        service.blockQueueUntil(
+                crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams.newBuilder()
+                        .setKey(KEY)
+                        .setCrawlID(CRAWL_ID)
+                        .setTime(Instant.now().getEpochSecond() + 3600)
+                        .build(),
+                new StreamObserver<crawlercommons.urlfrontier.Urlfrontier.Empty>() {
+                    @Override
+                    public void onNext(crawlercommons.urlfrontier.Urlfrontier.Empty value) {}
+
+                    @Override
+                    public void onError(Throwable t) {}
+
+                    @Override
+                    public void onCompleted() {
+                        blocked.set(true);
+                    }
+                });
+        assertTrue(blocked.get());
+
+        GetParams request =
+                GetParams.newBuilder().setMaxUrlsPerQueue(1).setDelayRequestable(30).build();
+        CollectingObserver observer = new CollectingObserver();
+        service.getURLs(request, observer);
+        assertTrue(observer.completed.await(5, TimeUnit.SECONDS));
+        assertEquals(0, service.sendInvocations.get());
     }
 }
