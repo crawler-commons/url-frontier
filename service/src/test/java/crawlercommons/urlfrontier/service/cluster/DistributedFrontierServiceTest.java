@@ -17,12 +17,14 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.Active;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
+import crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Local;
 import crawlercommons.urlfrontier.Urlfrontier.QueueDelayParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
+import crawlercommons.urlfrontier.service.rocksdb.QueueMetadata;
 import crawlercommons.urlfrontier.service.rocksdb.ShardedRocksDBService;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -386,6 +388,70 @@ class DistributedFrontierServiceTest {
     @Order(13)
     void getActiveLocalFalseIsTrueWhenAllNodesActive() {
         assertTrue(stubA.getActive(LOCAL_FALSE).getState());
+    }
+
+    @Test
+    @Order(14)
+    void setCrawlLimitLocalFalseReachesOwnerWithEmptyCrawlID() throws Exception {
+        // empty crawlID exercises the end-to-end normalization: owner computation,
+        // forwarded message and base-method lookup must all agree on DEFAULT
+        final String key = keyOwnedBy(1, "limit-routed");
+        createQueue(key, "");
+        final QueueWithinCrawl qwc = QueueWithinCrawl.get(key, "");
+
+        QueueMetadata ownerQueue = (QueueMetadata) serviceB.getQueues().get(qwc);
+        assertNotNull(ownerQueue, "queue must exist on the owner (node B)");
+        ownerQueue.setCompletedCount(1);
+        assertFalse(ownerQueue.isLimitReached());
+
+        stubA.setCrawlLimit(
+                CrawlLimitParams.newBuilder().setKey(key).setCrawlID("").setLimit(1).build());
+
+        assertTrue(
+                ownerQueue.isLimitReached(),
+                "the limit set through the non-owner must be applied on the owner");
+    }
+
+    @Test
+    @Order(15)
+    void setCrawlLimitLocalTrueOnNonOwnerFailsAndLeavesOwnerUntouched() throws Exception {
+        final String key = keyOwnedBy(1, "limit-local");
+        createQueue(key, "DEFAULT");
+        final QueueWithinCrawl qwc = QueueWithinCrawl.get(key, "DEFAULT");
+
+        QueueMetadata ownerQueue = (QueueMetadata) serviceB.getQueues().get(qwc);
+        assertNotNull(ownerQueue);
+        ownerQueue.setCompletedCount(1);
+        assertFalse(ownerQueue.isLimitReached());
+
+        assertThrows(
+                StatusRuntimeException.class,
+                () ->
+                        stubA.setCrawlLimit(
+                                CrawlLimitParams.newBuilder()
+                                        .setKey(key)
+                                        .setCrawlID("DEFAULT")
+                                        .setLimit(1)
+                                        .setLocal(true)
+                                        .build()),
+                "local=true on a node that does not own the queue must fail");
+        assertFalse(ownerQueue.isLimitReached(), "the owner's queue must be untouched");
+    }
+
+    @Test
+    @Order(16)
+    void setCrawlLimitOnMissingQueuePropagatesRemoteError() {
+        // owned by B but never created: the routed call must propagate the owner's error
+        final String key = keyOwnedBy(1, "limit-missing");
+        assertThrows(
+                StatusRuntimeException.class,
+                () ->
+                        stubA.setCrawlLimit(
+                                CrawlLimitParams.newBuilder()
+                                        .setKey(key)
+                                        .setCrawlID("DEFAULT")
+                                        .setLimit(1)
+                                        .build()));
     }
 
     @Test

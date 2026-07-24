@@ -18,6 +18,7 @@ import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
 import crawlercommons.urlfrontier.Urlfrontier.Active;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Boolean;
+import crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams;
 import crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
@@ -217,6 +218,31 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 qwc,
                 observer -> super.blockQueueUntil(localParams, observer),
                 (stub, observer) -> stub.blockQueueUntil(localParams, observer),
+                responseObserver);
+    }
+
+    /**
+     * In cluster mode, a keyed request with local=false is routed to the node owning the queue. An
+     * empty key is invalid for this keyed-only operation and fails locally. local=true always stays
+     * local.
+     */
+    @Override
+    public void setCrawlLimit(CrawlLimitParams request, StreamObserver<Empty> responseObserver) {
+        if (request.getLocal() || !clusterMode || isClosing() || request.getKey().isEmpty()) {
+            super.setCrawlLimit(request, responseObserver);
+            return;
+        }
+        final QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
+        // forward the normalized crawlID so owners that don't normalize internally still match
+        final CrawlLimitParams localParams =
+                CrawlLimitParams.newBuilder(request)
+                        .setCrawlID(qwc.getCrawlid())
+                        .setLocal(true)
+                        .build();
+        routeToOwner(
+                qwc,
+                observer -> super.setCrawlLimit(localParams, observer),
+                (stub, observer) -> stub.setCrawlLimit(localParams, observer),
                 responseObserver);
     }
 
