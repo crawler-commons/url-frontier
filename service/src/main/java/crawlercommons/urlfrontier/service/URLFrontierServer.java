@@ -25,7 +25,10 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name = "URL Frontier Server", mixinStandardHelpOptions = true, version = "2.6-SNAPSHOT")
+// NOTE: mixinStandardHelpOptions is deliberately not used. '-h' is taken by --hostname below and
+// picocli silently drops the whole standard mixin when one of its names is already in use, leaving
+// the command with neither --help nor --version. Both are declared explicitly instead.
+@Command(name = "URL Frontier Server", versionProvider = VersionProvider.class)
 public class URLFrontierServer implements Callable<Integer> {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLFrontierServer.class);
@@ -57,6 +60,18 @@ public class URLFrontierServer implements Callable<Integer> {
             paramLabel = "NUM",
             description = "Port number to use for Prometheus server")
     int prometheus_server;
+
+    @Option(
+            names = {"--help"},
+            usageHelp = true,
+            description = "Show this help message and exit.")
+    boolean helpRequested;
+
+    @Option(
+            names = {"-V", "--version"},
+            versionHelp = true,
+            description = "Print version information and exit.")
+    boolean versionRequested;
 
     @Parameters List<String> positional;
 
