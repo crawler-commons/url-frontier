@@ -1,9 +1,8 @@
 name: Dockerhub Deployment
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 jobs:
   deploy:
@@ -18,6 +17,9 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: crawlercommons/url-frontier
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest,enable=${{ !github.event.release.prerelease }}
 
       - name: Login to DockerHub
         uses: docker/login-action@v4
