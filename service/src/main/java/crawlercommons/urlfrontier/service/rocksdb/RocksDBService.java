@@ -559,8 +559,8 @@ public class RocksDBService extends AbstractFrontierService {
         } catch (RocksDBException e) {
             LOG.error(
                     "Exception caught when deleting ranges - {} - {}",
-                    new String(startKey),
-                    new String(endKey),
+                    asString(startKey),
+                    asString(endKey),
                     e);
         }
 
@@ -745,8 +745,9 @@ public class RocksDBService extends AbstractFrontierService {
             } catch (RocksDBException e) {
                 LOG.error(
                         "Exception caught when deleting ranges - {} - {}",
-                        new String(startKey),
-                        new String(endKey));
+                        asString(startKey),
+                        asString(endKey),
+                        e);
             }
 
             for (QueueWithinCrawl quid : toDelete) {
@@ -795,6 +796,11 @@ public class RocksDBService extends AbstractFrontierService {
         final byte[] end = Arrays.copyOf(prefix, prefix.length);
         end[end.length - 1]++;
         return end;
+    }
+
+    /** Renders a key for logging - the boundaries of a range can be null * */
+    private static String asString(final byte[] key) {
+        return key == null ? "null" : new String(key, StandardCharsets.UTF_8);
     }
 
     @Override
