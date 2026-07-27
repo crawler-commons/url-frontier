@@ -773,22 +773,11 @@ public class RocksDBService extends AbstractFrontierService {
         }
 
         // if endKey is null it means that there is no other crawlID after this one
-        boolean includeEndKey = false;
-
+        // the tables do not all use the same key layout, so we can't take the last
+        // key of one of them as the end of the range: use the smallest key which is
+        // greater than everything sharing the prefix instead
         if (endKey == null) {
-            try (RocksIterator iter = rocksDB.newIterator(columnFamilyHandleList.get(0))) {
-                iter.seekToLast();
-                if (iter.isValid()) {
-                    // this is the last known URL
-                    endKey = iter.key();
-                    includeEndKey = true;
-                }
-            }
-        }
-
-        // no end key found?
-        if (endKey == null) {
-            throw new RuntimeException("No endkey found");
+            endKey = upperBound(prefix);
         }
 
         // delete the ranges in the queues table as well as the URLs already
@@ -796,12 +785,16 @@ public class RocksDBService extends AbstractFrontierService {
         rocksDB.deleteRange(columnFamilyHandleList.get(1), prefix, endKey);
         rocksDB.deleteRange(columnFamilyHandleList.get(0), prefix, endKey);
         rocksDB.deleteRange(columnFamilyHandleList.get(3), prefix, endKey);
+    }
 
-        if (includeEndKey) {
-            rocksDB.deleteRange(columnFamilyHandleList.get(1), endKey, endKey);
-            rocksDB.delete(columnFamilyHandleList.get(0), endKey);
-            rocksDB.deleteRange(columnFamilyHandleList.get(3), endKey, endKey);
-        }
+    /**
+     * Smallest key which is greater than every key starting with the prefix. The prefixes used for
+     * the deletions always end with the separator, incrementing its last byte is therefore enough.
+     */
+    private static byte[] upperBound(final byte[] prefix) {
+        final byte[] end = Arrays.copyOf(prefix, prefix.length);
+        end[end.length - 1]++;
+        return end;
     }
 
     @Override
