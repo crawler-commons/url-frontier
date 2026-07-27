@@ -676,7 +676,10 @@ public class RocksDBService extends AbstractFrontierService {
         if (queuesRead != 0) {
             // empty the table so that we don't read it again
             // if there has been a nasty crash
+            // the end key of deleteRange is exclusive, hence the
+            // explicit deletion of the last key
             rocksDB.deleteRange(columnFamilyHandleList.get(2), firstKey, lastKey);
+            rocksDB.delete(columnFamilyHandleList.get(2), lastKey);
         }
 
         long end = System.currentTimeMillis();
