@@ -37,10 +37,13 @@ import java.util.concurrent.locks.Lock;
 import org.apache.commons.lang3.StringUtils;
 import org.rocksdb.BlockBasedTableConfig;
 import org.rocksdb.BloomFilter;
+import org.rocksdb.Cache;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ColumnFamilyOptions;
 import org.rocksdb.DBOptions;
+import org.rocksdb.Filter;
+import org.rocksdb.LRUCache;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
@@ -69,6 +72,12 @@ public class RocksDBService extends AbstractFrontierService {
     // the same options are used for every write: allocating a native object per
     // URL would be pure overhead on the write path
     private final WriteOptions writeOptions = new WriteOptions();
+
+    // native objects referenced by the table configuration, kept so that they can
+    // be released when the service is closed - null if the filters are disabled
+    private Filter bloomFilter;
+
+    private Cache blockCache;
 
     private Statistics statistics;
 
@@ -103,7 +112,7 @@ public class RocksDBService extends AbstractFrontierService {
 
         boolean checkOnRecovery = configuration.containsKey("rocksdb.recovery.check");
 
-        boolean bloomFilters = configuration.containsKey("rocksdb.bloom.filters");
+        boolean bloomFilters = useBloomFilters(configuration);
 
         try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()) {
 
@@ -113,6 +122,10 @@ public class RocksDBService extends AbstractFrontierService {
             }
 
             cfOpts.optimizeUniversalStyleCompaction();
+
+            if (bloomFilters) {
+                cfOpts.setTableFormatConfig(buildTableConfig(configuration));
+            }
 
             // list of column family descriptors, first entry must always be default column
             // family
@@ -124,12 +137,6 @@ public class RocksDBService extends AbstractFrontierService {
                             new ColumnFamilyDescriptor("creationDates".getBytes(), cfOpts));
 
             long start = System.currentTimeMillis();
-
-            if (bloomFilters) {
-                LOG.info("Configuring Bloom filters");
-                cfOpts.setTableFormatConfig(
-                        new BlockBasedTableConfig().setFilterPolicy(new BloomFilter(10, false)));
-            }
 
             try (final DBOptions options = new DBOptions()) {
                 options.setCreateIfMissing(true).setCreateMissingColumnFamilies(true);
@@ -172,6 +179,60 @@ public class RocksDBService extends AbstractFrontierService {
 
             LOG.info("{} queues discovered in {} msec", getQueues().size(), (end2 - end));
         }
+    }
+
+    /**
+     * The filters are enabled by default: every URL sent to putURLItem needs a lookup to find out
+     * whether it is already known and most of them are not, which is the case they make cheap.
+     *
+     * <p>They used to be enabled with a valueless <i>rocksdb.bloom.filters</i> flag, so the mere
+     * presence of the key is still taken to mean 'enabled'.
+     */
+    static boolean useBloomFilters(final Map<String, String> configuration) {
+        if (!configuration.containsKey("rocksdb.bloom.filters")) {
+            return true;
+        }
+        final String value = configuration.get("rocksdb.bloom.filters");
+        return value == null || value.isEmpty() || Boolean.parseBoolean(value);
+    }
+
+    /**
+     * The filters spare the lookup done for every URL in putURLItem from having to read the data
+     * blocks of the SST files when the URL is not known yet. Universal compaction leaves several
+     * sorted runs to look into, which is what makes them worth their memory here.
+     *
+     * <p>The index and filter blocks are held in the block cache so that they stay bounded as the
+     * frontier grows, with a high priority so that data blocks get evicted before them.
+     */
+    private BlockBasedTableConfig buildTableConfig(final Map<String, String> configuration) {
+
+        double bitsPerKey = 10d;
+        final String sBitsPerKey = configuration.get("rocksdb.bloom.filters.bits_per_key");
+        if (sBitsPerKey != null) {
+            bitsPerKey = Double.parseDouble(sBitsPerKey);
+        }
+
+        long blockCacheSize = 256 * 1024 * 1024L;
+        final String sBlockCacheSize = configuration.get("rocksdb.block_cache_size");
+        if (sBlockCacheSize != null) {
+            blockCacheSize = Long.parseLong(sBlockCacheSize);
+        }
+
+        LOG.info(
+                "Configuring Bloom filters with {} bits per key and a block cache of {} bytes",
+                bitsPerKey,
+                blockCacheSize);
+
+        bloomFilter = new BloomFilter(bitsPerKey);
+        blockCache = new LRUCache(blockCacheSize);
+
+        return new BlockBasedTableConfig()
+                .setFilterPolicy(bloomFilter)
+                .setBlockCache(blockCache)
+                .setCacheIndexAndFilterBlocks(true)
+                .setCacheIndexAndFilterBlocksWithHighPriority(true)
+                .setPinL0FilterAndIndexBlocksInCache(true)
+                .setOptimizeFiltersForMemory(true);
     }
 
     private void recovery() {
@@ -619,6 +680,14 @@ public class RocksDBService extends AbstractFrontierService {
 
         // released once the db is closed and no write can be in flight anymore
         writeOptions.close();
+
+        if (bloomFilter != null) {
+            bloomFilter.close();
+        }
+
+        if (blockCache != null) {
+            blockCache.close();
+        }
     }
 
     /**
