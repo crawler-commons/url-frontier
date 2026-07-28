@@ -15,11 +15,11 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -104,10 +104,10 @@ public class PutURLs implements Callable<Integer> {
 
         boolean readError = false;
 
-        List<String> allLines;
-        try {
-            allLines = Files.readAllLines(Paths.get(file));
-            for (String line : allLines) {
+        // read the file line by line so that arbitrarily large inputs can be handled
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
 
                 // the stream is dead, no point in sending anything else
                 if (streamError.get()) {
