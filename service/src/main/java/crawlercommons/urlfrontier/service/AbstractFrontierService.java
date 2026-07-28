@@ -700,7 +700,6 @@ public abstract class AbstractFrontierService
         final AtomicInteger numQueuesTried = new AtomicInteger();
         final AtomicInteger numQueuesSent = new AtomicInteger();
         final AtomicInteger totalSent = new AtomicInteger();
-        final AtomicInteger inProcess = new AtomicInteger();
 
         QueueWithinCrawl firstCrawlQueue = null;
 
@@ -709,6 +708,26 @@ public abstract class AbstractFrontierService
             responseObserver.onCompleted();
             return;
         }
+
+        // the response is closed by whichever thread finishes last: this one if all the
+        // queues have already been served, otherwise the last worker to complete
+        final AsyncCompletion completion =
+                new AsyncCompletion(
+                        () -> {
+                            LOG.info(
+                                    "Sent {} from {} queue(s) in {} msec; tried {} queues. {}",
+                                    totalSent,
+                                    numQueuesSent,
+                                    (System.currentTimeMillis() - start),
+                                    numQueuesTried,
+                                    requestID.toString());
+
+                            getURLs_urls_count.inc(totalSent.get());
+
+                            requestTimer.observeDuration();
+
+                            synchStreamObs.onCompleted();
+                        });
 
         while (numQueuesSent.get() < maxQueues) {
 
@@ -743,7 +762,7 @@ public abstract class AbstractFrontierService
                 continue;
             }
 
-            inProcess.incrementAndGet();
+            completion.taskStarted();
 
             try {
                 readExecutorService.execute(
@@ -775,15 +794,15 @@ public abstract class AbstractFrontierService
                                 }
                             } finally {
                                 // even if finalizeReservation throws, these must run or the
-                                // busy-wait below never terminates
-                                inProcess.decrementAndGet();
+                                // response is never closed
                                 numQueuesTried.incrementAndGet();
+                                completion.taskDone();
                             }
                         });
             } catch (RejectedExecutionException e) {
                 // the task never started: release the reservation and undo the counter
                 finalizeReservation(currentQueue, now, previousLastProduced, 0, true);
-                inProcess.decrementAndGet();
+                completion.taskDone();
                 LOG.error(
                         "Executor rejected getURLs task for queue {} {}",
                         currentCrawlQueue,
@@ -793,28 +812,9 @@ public abstract class AbstractFrontierService
             }
         }
 
-        // wait for all threads to have finished
-        while (inProcess.get() != 0) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-
-        LOG.info(
-                "Sent {} from {} queue(s) in {} msec; tried {} queues. {}",
-                totalSent,
-                numQueuesSent,
-                (System.currentTimeMillis() - start),
-                numQueuesTried,
-                requestID.toString());
-
-        getURLs_urls_count.inc(totalSent.get());
-
-        requestTimer.observeDuration();
-
-        synchStreamObs.onCompleted();
+        // no more queues will be submitted: the response is closed here if every worker
+        // has already finished, or by the last one to finish otherwise
+        completion.noMoreTasks();
     }
 
     protected abstract int sendURLsForQueue(
@@ -861,7 +861,9 @@ public abstract class AbstractFrontierService
 
         return new StreamObserver<URLItem>() {
 
-            final AtomicInteger unacked = new AtomicInteger();
+            // closes the response once the client has stopped sending and every item
+            // handed to the write executor has been acked
+            final AsyncCompletion completion = new AsyncCompletion(sso::onCompleted);
 
             @Override
             public void onNext(URLItem value) {
@@ -885,16 +887,28 @@ public abstract class AbstractFrontierService
                     return;
                 }
 
-                unacked.incrementAndGet();
+                completion.taskStarted();
 
-                writeExecutorService.execute(
-                        () -> {
-                            final Status status = putURLItem(value);
-                            LOG.debug("putURL -> {} got status {}", url, status);
-                            final AckMessage ackedMessage = ack.setStatus(status).build();
-                            sso.onNext(ackedMessage);
-                            unacked.decrementAndGet();
-                        });
+                try {
+                    writeExecutorService.execute(
+                            () -> {
+                                try {
+                                    final Status status = putURLItem(value);
+                                    LOG.debug("putURL -> {} got status {}", url, status);
+                                    final AckMessage ackedMessage = ack.setStatus(status).build();
+                                    sso.onNext(ackedMessage);
+                                } finally {
+                                    // whatever happens the item must be released or the
+                                    // response is never closed
+                                    completion.taskDone();
+                                }
+                            });
+                } catch (RejectedExecutionException e) {
+                    // the task never started: tell the client instead of leaving it waiting
+                    LOG.error("Executor rejected putURLs task for {}", url, e);
+                    sso.onNext(ack.setStatus(Status.FAIL).build());
+                    completion.taskDone();
+                }
             }
 
             @Override
@@ -914,15 +928,9 @@ public abstract class AbstractFrontierService
             @Override
             public void onCompleted() {
                 // will this ever get called if the client is constantly streaming?
-                // check that all the work for this stream has ended
-                while (unacked.get() != 0) {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-                sso.onCompleted();
+                // the response is closed here if all the work for this stream has already
+                // ended, or by the last item to be acked otherwise
+                completion.noMoreTasks();
             }
         };
     }
