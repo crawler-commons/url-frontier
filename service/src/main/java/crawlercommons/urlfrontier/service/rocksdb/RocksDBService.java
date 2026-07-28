@@ -66,6 +66,10 @@ public class RocksDBService extends AbstractFrontierService {
     // opened
     private final List<ColumnFamilyHandle> columnFamilyHandleList = new ArrayList<>();
 
+    // the same options are used for every write: allocating a native object per
+    // URL would be pure overhead on the write path
+    private final WriteOptions writeOptions = new WriteOptions();
+
     private Statistics statistics;
 
     private static final Striped<Lock> STRIPED_LOCKS = Striped.lock(128); // 128 stripes
@@ -406,8 +410,7 @@ public class RocksDBService extends AbstractFrontierService {
             final byte[] existenceKey = existenceKeyString.getBytes(StandardCharsets.UTF_8);
 
             // is this URL already known?
-            try (WriteBatch writeBatch = new WriteBatch();
-                    WriteOptions writeOps = new WriteOptions()) {
+            try (WriteBatch writeBatch = new WriteBatch()) {
 
                 if (isClosing()) {
                     return Status.FAIL;
@@ -480,7 +483,7 @@ public class RocksDBService extends AbstractFrontierService {
 
                 // batch the updates - this way the scheduling and main tables will always be in
                 // sync
-                rocksDB.write(writeOps, writeBatch);
+                rocksDB.write(writeOptions, writeBatch);
 
             } catch (RocksDBException e) {
                 LOG.error("RocksDB exception", e);
@@ -613,6 +616,9 @@ public class RocksDBService extends AbstractFrontierService {
                 LOG.error("Closing ", e);
             }
         }
+
+        // released once the db is closed and no write can be in flight anymore
+        writeOptions.close();
     }
 
     /**
