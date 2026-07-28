@@ -21,14 +21,21 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "PutURLs", description = "Send URLs from a file into a Frontier")
 public class PutURLs implements Callable<Integer> {
+
+    /** how often the intermediate throughput is displayed */
+    private static final long REPORT_INTERVAL_SEC = 30;
 
     @ParentCommand private Client parent;
 
@@ -102,6 +109,35 @@ public class PutURLs implements Callable<Integer> {
 
         Instant start = Instant.now();
 
+        // reports the throughput at regular intervals so that any degradation over time is visible
+        ScheduledExecutorService reporter =
+                Executors.newSingleThreadScheduledExecutor(
+                        r -> {
+                            Thread t = new Thread(r, "PutURLs-OPS-reporter");
+                            t.setDaemon(true);
+                            return t;
+                        });
+
+        final AtomicInteger lastAcked = new AtomicInteger(0);
+        final AtomicLong lastReport = new AtomicLong(start.toEpochMilli());
+
+        reporter.scheduleAtFixedRate(
+                () -> {
+                    long now = Instant.now().toEpochMilli();
+                    long elapsed = now - lastReport.getAndSet(now);
+                    int current = acked.get();
+                    int delta = current - lastAcked.getAndSet(current);
+                    System.out.println(
+                            String.format(
+                                    "Acked: %d - OPS over the last %d sec: %.2f",
+                                    current,
+                                    Math.round(elapsed / 1000.0),
+                                    delta * 1000.0 / Math.max(1, elapsed)));
+                },
+                REPORT_INTERVAL_SEC,
+                REPORT_INTERVAL_SEC,
+                TimeUnit.SECONDS);
+
         boolean readError = false;
 
         // read the file line by line so that arbitrarily large inputs can be handled
@@ -160,6 +196,8 @@ public class PutURLs implements Callable<Integer> {
                 Thread.currentThread().interrupt();
             }
         }
+
+        reporter.shutdownNow();
 
         long timetaken = Instant.now().toEpochMilli() - start.toEpochMilli();
 
