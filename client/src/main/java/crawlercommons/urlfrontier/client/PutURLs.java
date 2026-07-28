@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import picocli.CommandLine.Command;
@@ -27,7 +28,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "PutURLs", description = "Send URLs from a file into a Frontier")
-public class PutURLs implements Runnable {
+public class PutURLs implements Callable<Integer> {
 
     @ParentCommand private Client parent;
 
@@ -46,7 +47,7 @@ public class PutURLs implements Runnable {
     private String crawl;
 
     @Override
-    public void run() {
+    public Integer call() {
 
         ManagedChannel channel =
                 ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
@@ -56,6 +57,9 @@ public class PutURLs implements Runnable {
         URLFrontierStub stub = URLFrontierGrpc.newStub(channel);
 
         final AtomicBoolean completed = new AtomicBoolean(false);
+        // set when the stream is terminated by an error: no further acks will
+        // ever be received, so we must not wait for the missing ones
+        final AtomicBoolean streamError = new AtomicBoolean(false);
         final AtomicInteger acked = new AtomicInteger(0);
         final AtomicInteger failed = new AtomicInteger(0);
         final AtomicInteger skipped = new AtomicInteger(0);
@@ -81,8 +85,9 @@ public class PutURLs implements Runnable {
 
                     @Override
                     public void onError(Throwable t) {
+                        streamError.set(true);
                         completed.set(true);
-                        t.printStackTrace();
+                        System.err.println("Error while sending the URLs: " + t.getMessage());
                     }
 
                     @Override
@@ -97,13 +102,20 @@ public class PutURLs implements Runnable {
 
         Instant start = Instant.now();
 
+        boolean readError = false;
+
         List<String> allLines;
         try {
             allLines = Files.readAllLines(Paths.get(file));
             for (String line : allLines) {
 
+                // the stream is dead, no point in sending anything else
+                if (streamError.get()) {
+                    break;
+                }
+
                 // don't sent too many in one go
-                while (sent > acked.get() + 10000) {
+                while (sent > acked.get() + 10000 && !streamError.get()) {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {
@@ -115,19 +127,33 @@ public class PutURLs implements Runnable {
                 if (item == null) {
                     System.err.println("Invalid input line " + linenum);
                 } else {
-                    streamObserver.onNext(parse(line, crawl));
-                    sent++;
+                    try {
+                        streamObserver.onNext(item);
+                        sent++;
+                    } catch (IllegalStateException e) {
+                        // the stream got terminated while we were sending
+                        break;
+                    }
                 }
                 linenum++;
             }
         } catch (IOException e1) {
-            e1.printStackTrace();
+            readError = true;
+            System.err.println("Error while reading " + file + ": " + e1.getMessage());
         }
 
-        streamObserver.onCompleted();
+        // the server has already terminated the stream on error
+        if (!streamError.get()) {
+            try {
+                streamObserver.onCompleted();
+            } catch (IllegalStateException e) {
+                // the stream got terminated in the meantime
+            }
+        }
 
-        // wait for completion
-        while (!completed.get() || sent != acked.get()) {
+        // wait for completion - stop straight away if the stream failed as the
+        // remaining items will never be acked
+        while (!completed.get() || (!streamError.get() && sent != acked.get())) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -143,9 +169,21 @@ public class PutURLs implements Runnable {
         System.out.println("Skipped: " + skipped.get());
         System.out.println("Failed: " + failed.get());
         System.out.println("Total time: " + timetaken + " msec");
-        System.out.println("Average OPS: " + acked.get() / Math.max(1, timetaken / 1000));
+        System.out.println(
+                String.format("Average OPS: %.2f", acked.get() * 1000.0 / Math.max(1, timetaken)));
+
+        if (streamError.get()) {
+            System.err.println(
+                    "The connection to the Frontier failed, "
+                            + (sent - acked.get())
+                            + " URLs out of "
+                            + sent
+                            + " sent were not confirmed");
+        }
 
         channel.shutdownNow();
+
+        return (streamError.get() || readError) ? 1 : 0;
     }
 
     /**
