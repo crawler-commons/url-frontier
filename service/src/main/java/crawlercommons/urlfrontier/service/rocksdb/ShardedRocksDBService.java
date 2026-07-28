@@ -30,7 +30,9 @@ public class ShardedRocksDBService extends DistributedFrontierService {
     private final RocksDBService instance;
 
     public ShardedRocksDBService(final Map<String, String> configuration, String host, int port) {
-        super(host, port);
+        // the executors of this instance are the ones serving the traffic, they must be
+        // sized from the configuration and not from the defaults
+        super(configuration, host, port);
 
         instance = new RocksDBService(configuration, host, port);
         // take coordinates of the nodes + able to identify itself in the list
