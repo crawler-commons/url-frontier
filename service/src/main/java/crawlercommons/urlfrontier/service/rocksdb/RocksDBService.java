@@ -37,13 +37,11 @@ import java.util.concurrent.locks.Lock;
 import org.apache.commons.lang3.StringUtils;
 import org.rocksdb.BlockBasedTableConfig;
 import org.rocksdb.BloomFilter;
-import org.rocksdb.Cache;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ColumnFamilyOptions;
 import org.rocksdb.DBOptions;
 import org.rocksdb.Filter;
-import org.rocksdb.LRUCache;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
@@ -73,11 +71,9 @@ public class RocksDBService extends AbstractFrontierService {
     // URL would be pure overhead on the write path
     private final WriteOptions writeOptions = new WriteOptions();
 
-    // native objects referenced by the table configuration, kept so that they can
-    // be released when the service is closed - null if the filters are disabled
+    // native object referenced by the table configuration, kept so that it can be
+    // released when the service is closed - null if the filters are disabled
     private Filter bloomFilter;
-
-    private Cache blockCache;
 
     private Statistics statistics;
 
@@ -201,8 +197,10 @@ public class RocksDBService extends AbstractFrontierService {
      * blocks of the SST files when the URL is not known yet. Universal compaction leaves several
      * sorted runs to look into, which is what makes them worth their memory here.
      *
-     * <p>The index and filter blocks are held in the block cache so that they stay bounded as the
-     * frontier grows, with a high priority so that data blocks get evicted before them.
+     * <p>Everything else is left to its RocksDB default, in particular the filters are not held in
+     * the block cache: they are not partitioned, so there is a single filter block per SST file and
+     * the files are large here. Caching them means evicting and re-reading several MB at a time,
+     * which costs far more than the data block reads the filters save.
      */
     private BlockBasedTableConfig buildTableConfig(final Map<String, String> configuration) {
 
@@ -212,27 +210,11 @@ public class RocksDBService extends AbstractFrontierService {
             bitsPerKey = Double.parseDouble(sBitsPerKey);
         }
 
-        long blockCacheSize = 256 * 1024 * 1024L;
-        final String sBlockCacheSize = configuration.get("rocksdb.block_cache_size");
-        if (sBlockCacheSize != null) {
-            blockCacheSize = Long.parseLong(sBlockCacheSize);
-        }
-
-        LOG.info(
-                "Configuring Bloom filters with {} bits per key and a block cache of {} bytes",
-                bitsPerKey,
-                blockCacheSize);
+        LOG.info("Configuring Bloom filters with {} bits per key", bitsPerKey);
 
         bloomFilter = new BloomFilter(bitsPerKey);
-        blockCache = new LRUCache(blockCacheSize);
 
-        return new BlockBasedTableConfig()
-                .setFilterPolicy(bloomFilter)
-                .setBlockCache(blockCache)
-                .setCacheIndexAndFilterBlocks(true)
-                .setCacheIndexAndFilterBlocksWithHighPriority(true)
-                .setPinL0FilterAndIndexBlocksInCache(true)
-                .setOptimizeFiltersForMemory(true);
+        return new BlockBasedTableConfig().setFilterPolicy(bloomFilter);
     }
 
     private void recovery() {
@@ -683,10 +665,6 @@ public class RocksDBService extends AbstractFrontierService {
 
         if (bloomFilter != null) {
             bloomFilter.close();
-        }
-
-        if (blockCache != null) {
-            blockCache.close();
         }
     }
 
