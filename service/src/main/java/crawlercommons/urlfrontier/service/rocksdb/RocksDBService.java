@@ -75,8 +75,7 @@ public class RocksDBService extends AbstractFrontierService {
         this(new HashMap<>(), host, port);
     }
 
-    private final ConcurrentHashMap<QueueWithinCrawl, QueueWithinCrawl> queuesBeingDeleted =
-            new ConcurrentHashMap<>();
+    private final Set<QueueWithinCrawl> queuesBeingDeleted = ConcurrentHashMap.newKeySet();
 
     public RocksDBService(final Map<String, String> configuration, String host, int port) {
 
@@ -391,7 +390,7 @@ public class RocksDBService extends AbstractFrontierService {
         final QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
 
         // ignore this url if the queue is being deleted
-        if (queuesBeingDeleted.containsKey(qk)) {
+        if (queuesBeingDeleted.contains(qk)) {
             LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
             return Status.SKIPPED;
         }
@@ -528,47 +527,48 @@ public class RocksDBService extends AbstractFrontierService {
 
         // is this queue already being deleted?
         // no need to do it again
-        if (queuesBeingDeleted.contains(qc)) {
+        if (!queuesBeingDeleted.add(qc)) {
             return sizeQueue;
         }
 
-        queuesBeingDeleted.put(qc, qc);
-
-        String prefixed_queue = qc.toString() + "_";
-
-        // find the next key by alphabetical order, taking the separator into account
-        QueueWithinCrawl[] array = getQueues().keySet().toArray(new QueueWithinCrawl[0]);
-        String[] prefixed_queues = new String[array.length];
-        for (int i = 0; i < array.length; i++) {
-            prefixed_queues[i] = array[i] + "_";
-        }
-        Arrays.sort(prefixed_queues);
-        byte[] startKey = null;
-        byte[] endKey = null;
-        for (String p_queue : prefixed_queues) {
-            if (startKey != null) {
-                endKey = p_queue.getBytes(StandardCharsets.UTF_8);
-                break;
-            } else if (prefixed_queue.equals(p_queue)) {
-                startKey = prefixed_queue.getBytes(StandardCharsets.UTF_8);
-            }
-        }
-
         try {
-            deleteRanges(startKey, endKey);
-        } catch (RocksDBException e) {
-            LOG.error(
-                    "Exception caught when deleting ranges - {} - {}",
-                    asString(startKey),
-                    asString(endKey),
-                    e);
+            String prefixed_queue = qc.toString() + "_";
+
+            // find the next key by alphabetical order, taking the separator into account
+            QueueWithinCrawl[] array = getQueues().keySet().toArray(new QueueWithinCrawl[0]);
+            String[] prefixed_queues = new String[array.length];
+            for (int i = 0; i < array.length; i++) {
+                prefixed_queues[i] = array[i] + "_";
+            }
+            Arrays.sort(prefixed_queues);
+            byte[] startKey = null;
+            byte[] endKey = null;
+            for (String p_queue : prefixed_queues) {
+                if (startKey != null) {
+                    endKey = p_queue.getBytes(StandardCharsets.UTF_8);
+                    break;
+                } else if (prefixed_queue.equals(p_queue)) {
+                    startKey = prefixed_queue.getBytes(StandardCharsets.UTF_8);
+                }
+            }
+
+            try {
+                deleteRanges(startKey, endKey);
+            } catch (RocksDBException e) {
+                LOG.error(
+                        "Exception caught when deleting ranges - {} - {}",
+                        asString(startKey),
+                        asString(endKey),
+                        e);
+            }
+
+            QueueInterface q = getQueues().remove(qc);
+            sizeQueue += q.countActive();
+            sizeQueue += q.getCountCompleted();
+        } finally {
+            queuesBeingDeleted.remove(qc);
         }
 
-        QueueInterface q = getQueues().remove(qc);
-        sizeQueue += q.countActive();
-        sizeQueue += q.getCountCompleted();
-
-        queuesBeingDeleted.remove(qc);
         return sizeQueue;
     }
 
@@ -751,17 +751,18 @@ public class RocksDBService extends AbstractFrontierService {
             }
 
             for (QueueWithinCrawl quid : toDelete) {
-                if (queuesBeingDeleted.contains(quid)) {
+                // already being deleted by another thread?
+                if (!queuesBeingDeleted.add(quid)) {
                     continue;
-                } else {
-                    queuesBeingDeleted.put(quid, quid);
                 }
 
-                QueueInterface q = getQueues().remove(quid);
-                total += q.countActive();
-                total += q.getCountCompleted();
-
-                queuesBeingDeleted.remove(quid);
+                try {
+                    QueueInterface q = getQueues().remove(quid);
+                    total += q.countActive();
+                    total += q.getCountCompleted();
+                } finally {
+                    queuesBeingDeleted.remove(quid);
+                }
             }
         }
         return total;
