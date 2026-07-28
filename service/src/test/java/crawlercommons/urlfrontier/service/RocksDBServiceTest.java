@@ -24,9 +24,12 @@ import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
 import io.grpc.stub.StreamObserver;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,6 +43,8 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.rocksdb.ColumnFamilyHandle;
+import org.rocksdb.RocksDB;
 import org.slf4j.LoggerFactory;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -898,6 +903,134 @@ class RocksDBServiceTest {
 
         rocksDBService.countURLs(countParams, countObserver);
         assertEquals(4L, count.get());
+    }
+
+    /**
+     * URLs stored before the creationDates column family was introduced have no creation date. The
+     * service must return them with a creation date of 0 instead of throwing a NPE, see #164.
+     */
+    @Test
+    @Order(93)
+    void testMissingCreationDate() throws Exception {
+
+        final String crawlId = "crawl_id";
+        final String url = "https://www.nocreationdate.com/page";
+        final String key = "nocreationdate_queue";
+
+        URLInfo info = URLInfo.newBuilder().setUrl(url).setCrawlID(crawlId).setKey(key).build();
+
+        crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder builder = URLItem.newBuilder();
+        builder.setDiscovered(DiscoveredURLItem.newBuilder().setInfo(info).build());
+        builder.setID(crawlId + "_" + url);
+
+        final AtomicBoolean putCompleted = new AtomicBoolean(false);
+        StreamObserver<AckMessage> ackObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(AckMessage value) {
+                        assertEquals(AckMessage.Status.OK, value.getStatus());
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                        fail();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        putCompleted.set(true);
+                    }
+                };
+
+        StreamObserver<URLItem> putObserver = rocksDBService.putURLs(ackObserver);
+        putObserver.onNext(builder.build());
+        putObserver.onCompleted();
+        assertTrue(putCompleted.get());
+
+        // simulate a URL without a creation date by removing the entry from the
+        // creationDates column family
+        deleteCreationDate(crawlId, key, url);
+
+        final AtomicInteger count = new AtomicInteger(0);
+        final AtomicInteger errors = new AtomicInteger(0);
+        final AtomicBoolean completed = new AtomicBoolean(false);
+
+        StreamObserver<URLItem> statusObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(URLItem value) {
+                        logURLItem(value);
+                        assertEquals(0, value.getCreationDate());
+                        count.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                        errors.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        completed.set(true);
+                    }
+                };
+
+        URLStatusRequest request =
+                URLStatusRequest.newBuilder().setCrawlID(crawlId).setKey(key).setUrl(url).build();
+
+        rocksDBService.getURLStatus(request, statusObserver);
+
+        assertEquals(0, errors.get());
+        assertEquals(1, count.get());
+        assertTrue(completed.get());
+
+        // the iterator used by listURLs must cope with it as well
+        final AtomicInteger listed = new AtomicInteger(0);
+        StreamObserver<URLItem> listObserver =
+                new StreamObserver<>() {
+
+                    @Override
+                    public void onNext(URLItem value) {
+                        assertEquals(0, value.getCreationDate());
+                        listed.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        t.printStackTrace();
+                        fail();
+                    }
+
+                    @Override
+                    public void onCompleted() {}
+                };
+
+        ListUrlParams params =
+                ListUrlParams.newBuilder().setCrawlID(crawlId).setKey(key).setSize(100).build();
+
+        rocksDBService.listURLs(params, listObserver);
+        assertEquals(1, listed.get());
+    }
+
+    /** Removes the creation date of a URL straight from the underlying RocksDB instance. */
+    @SuppressWarnings("unchecked")
+    private static void deleteCreationDate(String crawlId, String key, String url)
+            throws Exception {
+        Field dbField = RocksDBService.class.getDeclaredField("rocksDB");
+        dbField.setAccessible(true);
+        RocksDB db = (RocksDB) dbField.get(rocksDBService);
+
+        Field handlesField = RocksDBService.class.getDeclaredField("columnFamilyHandleList");
+        handlesField.setAccessible(true);
+        List<ColumnFamilyHandle> handles =
+                (List<ColumnFamilyHandle>) handlesField.get(rocksDBService);
+
+        String existenceKey = QueueWithinCrawl.get(key, crawlId).toString() + "_" + url;
+        db.delete(handles.get(3), existenceKey.getBytes(StandardCharsets.UTF_8));
     }
 
     @Test

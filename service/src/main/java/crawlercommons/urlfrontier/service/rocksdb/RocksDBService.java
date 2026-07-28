@@ -858,6 +858,7 @@ public class RocksDBService extends AbstractFrontierService {
                         LOG.error(e.getMessage(), e);
                         responseObserver.onError(
                                 io.grpc.Status.fromThrowable(e).asRuntimeException());
+                        return;
                     }
 
                     found = true;
@@ -879,10 +880,15 @@ public class RocksDBService extends AbstractFrontierService {
 
             try {
                 byte[] baCreatDt = rocksDB.get(columnFamilyHandleList.get(3), existenceKey);
-                creatDt = ByteBuffer.wrap(baCreatDt).getLong();
+                // no creation date stored for this URL e.g. it predates the
+                // creationDates column family
+                if (baCreatDt != null) {
+                    creatDt = ByteBuffer.wrap(baCreatDt).getLong();
+                }
             } catch (RocksDBException e) {
                 LOG.error("Cannot read creation date ", e);
                 responseObserver.onError(io.grpc.Status.fromThrowable(e).asRuntimeException());
+                return;
             }
 
             responseObserver.onNext(buildURLItem(builder, knownbuilder, info, fromEpoch, creatDt));
@@ -1031,8 +1037,8 @@ public class RocksDBService extends AbstractFrontierService {
                     hasNext = rocksIterator.isValid();
                 }
 
-                ByteBuffer lCreated = ByteBuffer.wrap(created);
-                return buildURLItem(builder, knownBuilder, info, fromEpoch, lCreated.getLong());
+                long createdEpoch = created == null ? 0L : ByteBuffer.wrap(created).getLong();
+                return buildURLItem(builder, knownBuilder, info, fromEpoch, createdEpoch);
             }
 
             return null; // Shouldn't happen
