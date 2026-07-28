@@ -9,7 +9,6 @@ import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -183,24 +182,6 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     }
 
     @Override
-    public Set<Map.Entry<K, V>> entrySetView() {
-        LinkedHashSet<Map.Entry<K, V>> entrySet = new LinkedHashSet<>(valueMap.size());
-        insertionOrderMap.forEach(
-                (order, key) -> {
-                    ValueEntry valueEntry = valueMap.get(key);
-                    if (valueEntry != null) {
-                        entrySet.add(new AbstractMap.SimpleImmutableEntry<>(key, valueEntry.value));
-                    } else {
-                        LOG.warn(
-                                "Inconsistent state (entrySetView): key {} exists in order map but not in value map",
-                                key);
-                    }
-                });
-
-        return entrySet;
-    }
-
-    @Override
     public Set<Map.Entry<K, V>> entrySet() {
         return new AbstractSet<Map.Entry<K, V>>() {
             @Override
@@ -209,17 +190,19 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                     final Iterator<Entry<Long, K>> orderedIterator =
                             insertionOrderMap.entrySet().iterator();
 
-                    Entry<Long, K> nextEntry = null;
+                    // resolved by hasNext() so that next() cannot fail on a key which
+                    // has been removed by another thread in the meantime
+                    Map.Entry<K, V> nextEntry = null;
 
                     @Override
                     public boolean hasNext() {
                         while (nextEntry == null && orderedIterator.hasNext()) {
-                            Entry<Long, K> entry = orderedIterator.next();
-                            K key = entry.getValue();
+                            K key = orderedIterator.next().getValue();
                             ValueEntry valueEntry = valueMap.get(key);
                             if (valueEntry != null) {
-                                this.nextEntry = entry;
-                                return true;
+                                this.nextEntry =
+                                        new AbstractMap.SimpleImmutableEntry<>(
+                                                key, valueEntry.value);
                             }
                         }
                         return nextEntry != null;
@@ -227,16 +210,14 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
 
                     @Override
                     public Map.Entry<K, V> next() {
-                        Entry<Long, K> entry = this.nextEntry;
-                        this.nextEntry = null;
-
-                        K key = entry.getValue();
-                        ValueEntry valueEntry = valueMap.get(key);
-                        if (valueEntry == null) {
+                        if (!hasNext()) {
                             throw new NoSuchElementException();
                         }
 
-                        return new AbstractMap.SimpleImmutableEntry<>(key, valueEntry.value);
+                        Map.Entry<K, V> entry = this.nextEntry;
+                        this.nextEntry = null;
+
+                        return entry;
                     }
                 };
             }
@@ -448,31 +429,29 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                     final Iterator<Entry<Long, K>> orderedIterator =
                             insertionOrderMap.entrySet().iterator();
 
-                    Entry<Long, K> nextEntry = null;
+                    // resolved by hasNext() so that next() cannot fail on a key which
+                    // has been removed by another thread in the meantime
+                    ValueEntry nextEntry = null;
 
                     @Override
                     public boolean hasNext() {
                         while (nextEntry == null && orderedIterator.hasNext()) {
-                            Entry<Long, K> entry = orderedIterator.next();
-                            K key = entry.getValue();
-                            if (valueMap.containsKey(key)) {
-                                nextEntry = entry;
-                                return true;
-                            }
+                            K key = orderedIterator.next().getValue();
+                            nextEntry = valueMap.get(key);
                         }
                         return nextEntry != null;
                     }
 
                     @Override
                     public V next() {
-                        Entry<Long, K> entry = nextEntry;
-                        nextEntry = null;
-                        K key = entry.getValue();
-                        ValueEntry valueEntry = valueMap.get(key);
-                        if (valueEntry == null) {
+                        if (!hasNext()) {
                             throw new NoSuchElementException();
                         }
-                        return valueEntry.value;
+
+                        ValueEntry entry = nextEntry;
+                        nextEntry = null;
+
+                        return entry.value;
                     }
                 };
             }

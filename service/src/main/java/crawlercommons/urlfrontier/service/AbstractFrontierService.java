@@ -40,7 +40,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -440,45 +439,43 @@ public abstract class AbstractFrontierService
         final Map<String, Long> s = new HashMap<>();
 
         int inProc = 0;
-        int numQueues = 0;
-        int size = 0;
+        long numQueues = 0;
+        long size = 0;
         long completed = 0;
         long activeQueues = 0;
 
-        List<QueueInterface> lqueues = new LinkedList<>();
-
         final String normalisedCrawlID = CrawlID.normaliseCrawlID(request.getCrawlID());
+
+        // the queues are aggregated as they are iterated over: a frontier can hold
+        // millions of them, holding them all in a collection would blow the heap
+        final Iterator<QueueInterface> queues;
 
         // specific queue?
         if (!request.getKey().isEmpty()) {
             QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
             QueueInterface q = getQueues().get(qwc);
             if (q != null) {
-                lqueues.add(q);
+                queues = List.of(q).iterator();
             } else {
                 // TODO notify an error to the client
+                queues = Collections.emptyIterator();
             }
         }
         // all the queues within the crawlID
         else {
-
-            // check that the queues belong to the crawlid specified
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    getQueues().entrySetView().iterator();
-            while (iterator.hasNext()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
-                QueueWithinCrawl qwc = e.getKey();
-                if (qwc.getCrawlid().equals(normalisedCrawlID)) {
-                    lqueues.add(e.getValue());
-                }
-            }
+            // the iterator is weakly consistent, no risk of
+            // ConcurrentModificationException
+            queues =
+                    getQueues().entrySet().stream()
+                            .filter(e -> e.getKey().getCrawlid().equals(normalisedCrawlID))
+                            .map(Entry::getValue)
+                            .iterator();
         }
-        // backed by the queues so can result in a
-        // ConcurrentModificationException
 
         long now = Instant.now().getEpochSecond();
 
-        for (QueueInterface q : lqueues) {
+        while (queues.hasNext()) {
+            QueueInterface q = queues.next();
             final int inProcForQ = q.getInProcess(now);
             final int activeForQ = q.countActive();
             if (inProcForQ > 0 || activeForQ > 0) {
@@ -1017,7 +1014,7 @@ public abstract class AbstractFrontierService
         long sentCount = 0;
 
         Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
-                getQueues().entrySetView().iterator();
+                getQueues().entrySet().iterator();
 
         while (qiterator.hasNext() && sentCount < maxURLs) {
             Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
@@ -1111,7 +1108,7 @@ public abstract class AbstractFrontierService
         long totalCount = 0;
 
         Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
-                getQueues().entrySetView().iterator();
+                getQueues().entrySet().iterator();
 
         while (qiterator.hasNext()) {
             Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
@@ -1183,7 +1180,7 @@ public abstract class AbstractFrontierService
 
         synchronized (getQueues()) {
             Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
-                    getQueues().entrySetView().iterator();
+                    getQueues().entrySet().iterator();
 
             while (qiterator.hasNext()) {
                 Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
