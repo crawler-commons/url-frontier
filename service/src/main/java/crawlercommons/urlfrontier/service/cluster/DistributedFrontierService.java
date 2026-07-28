@@ -33,6 +33,7 @@ import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
+import crawlercommons.urlfrontier.service.AsyncCompletion;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
@@ -50,8 +51,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.LoggerFactory;
 
 public abstract class DistributedFrontierService extends AbstractFrontierService {
@@ -73,6 +78,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     /** Maximum time granted to a forwarded control call before failing the caller. */
     static final int FORWARD_DEADLINE_SECONDS = 30;
+
+    /** How often the items forwarded to other nodes are checked for expiry. */
+    static final int INPROCESS_CLEANUP_SECONDS = 10;
 
     private final CacheLoader<String, ManagedChannel> channelLoader =
             new CacheLoader<String, ManagedChannel>() {
@@ -337,36 +345,28 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                                 crawlercommons.urlfrontier.Urlfrontier.AckMessage
                                                         value) {
 
-                                            // go back to the client
-                                            // and notify that it has worked
-                                            // we know that the observer in the cache
-                                            // is a synchronized one
-                                            StreamObserver<AckMessage> stream =
-                                                    inprocesscache.getIfPresent(value.getID());
-                                            if (stream != null) {
-                                                LOG.debug(
-                                                        "Got stream to ack back for {} with status {}",
-                                                        value.getID(),
-                                                        value.getStatus());
-                                                try {
-                                                    stream.onNext(value);
-                                                } catch (Exception e) {
-                                                    LOG.error(
-                                                            "Error while communicating back with the client: {} ",
-                                                            e.getLocalizedMessage());
-                                                }
-                                            } else {
+                                            // the ID carried by the ack is the correlation
+                                            // token we generated when forwarding the item;
+                                            // remove it whether we can return the value or not
+                                            final PendingAck pending =
+                                                    inprocesscache.asMap().remove(value.getID());
+
+                                            if (pending == null) {
                                                 LOG.error(
                                                         "No stream found to ack back for {} with status {}",
                                                         value.getID(),
                                                         value.getStatus());
+                                                return;
                                             }
-                                            // remove it whether we have been able to return the
-                                            // value or not
-                                            // this is an issue if 2 or more instances of the same
-                                            // URL
-                                            // are sent within a short period of time
-                                            inprocesscache.invalidate(value.getID());
+
+                                            LOG.debug(
+                                                    "Got stream to ack back for {} with status {}",
+                                                    pending.clientID,
+                                                    value.getStatus());
+
+                                            // go back to the client and notify that it has
+                                            // worked, under the ID the client knows about
+                                            pending.ack(value.getStatus());
                                         }
 
                                         @Override
@@ -412,46 +412,102 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     .expireAfterAccess(1, TimeUnit.MINUTES)
                     .build((CacheLoader) observerloader);
 
-    private final RemovalListener<
-                    String, StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>>
-            inProcessRemovalListener =
-                    new RemovalListener<>() {
-                        @Override
-                        public void onRemoval(
-                                RemovalNotification<String, StreamObserver<AckMessage>>
-                                        notification) {
-                            // try to notify the client if something was sent to another instance
-                            // but never
-                            // came back?
-                            if (notification.wasEvicted()) {
-                                String ID = notification.getKey();
-                                LOG.debug(
-                                        "Trying to notify original stream about eviction of {}",
-                                        ID);
-                                StreamObserver<AckMessage> stream = notification.getValue();
-                                if (stream != null) {
-                                    try {
-                                        stream.onNext(
-                                                AckMessage.newBuilder()
-                                                        .setID(ID)
-                                                        .setStatus(Status.FAIL)
-                                                        .build());
-                                    } catch (Exception e) {
-                                        LOG.error(
-                                                "Error while communicating back with the client: {} ",
-                                                e.getLocalizedMessage());
-                                    }
-                                }
-                            }
-                        }
-                    };
+    /**
+     * An item forwarded to another node, waiting for that node to ack it back. Held in {@link
+     * #inprocesscache} under a correlation token: the ID given by the client can be repeated within
+     * a stream or across streams, a token never is.
+     */
+    private static final class PendingAck {
 
-    private Cache<String, StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>>
-            inprocesscache =
-                    CacheBuilder.newBuilder()
-                            .expireAfterAccess(1, TimeUnit.MINUTES)
-                            .removalListener(inProcessRemovalListener)
-                            .build();
+        private final String clientID;
+
+        /** the synchronized observer of the client stream the item came from */
+        private final StreamObserver<AckMessage> client;
+
+        /** completion of that stream: this item is one of its outstanding tasks */
+        private final AsyncCompletion completion;
+
+        private final AtomicBoolean acked = new AtomicBoolean();
+
+        PendingAck(String clientID, StreamObserver<AckMessage> client, AsyncCompletion completion) {
+            this.clientID = clientID;
+            this.client = client;
+            this.completion = completion;
+        }
+
+        /**
+         * Sends the status back to the client under its own ID and releases the item. Subsequent
+         * calls do nothing: the ack coming back from the remote node can race with the eviction of
+         * an item given up on.
+         */
+        void ack(Status status) {
+            if (!acked.compareAndSet(false, true)) {
+                return;
+            }
+            try {
+                client.onNext(AckMessage.newBuilder().setID(clientID).setStatus(status).build());
+            } catch (Exception e) {
+                LOG.error(
+                        "Error while communicating back with the client: {} ",
+                        e.getLocalizedMessage());
+            } finally {
+                completion.taskDone();
+            }
+        }
+    }
+
+    private final RemovalListener<String, PendingAck> inProcessRemovalListener =
+            new RemovalListener<>() {
+                @Override
+                public void onRemoval(RemovalNotification<String, PendingAck> notification) {
+                    // try to notify the client if something was sent to another instance but never
+                    // came back?
+                    if (notification.wasEvicted()) {
+                        PendingAck pending = notification.getValue();
+                        if (pending != null) {
+                            LOG.debug(
+                                    "Trying to notify original stream about eviction of {}",
+                                    pending.clientID);
+                            pending.ack(Status.FAIL);
+                        }
+                    }
+                }
+            };
+
+    private Cache<String, PendingAck> inprocesscache =
+            CacheBuilder.newBuilder()
+                    .expireAfterAccess(1, TimeUnit.MINUTES)
+                    .removalListener(inProcessRemovalListener)
+                    .build();
+
+    /**
+     * Guava evicts only during cache activity: without a heartbeat, a stream whose remote acks
+     * never come back would stay open instead of being failed by the expiry above.
+     */
+    private final ScheduledExecutorService inprocessCacheCleaner =
+            Executors.newSingleThreadScheduledExecutor(
+                    r -> {
+                        Thread t = new Thread(r, "inprocesscache-cleanup");
+                        t.setDaemon(true);
+                        return t;
+                    });
+
+    {
+        inprocessCacheCleaner.scheduleWithFixedDelay(
+                () -> {
+                    try {
+                        inprocesscache.cleanUp();
+                    } catch (Exception e) {
+                        LOG.error("Exception while cleaning up the in-process cache", e);
+                    }
+                },
+                INPROCESS_CLEANUP_SECONDS,
+                INPROCESS_CLEANUP_SECONDS,
+                TimeUnit.SECONDS);
+    }
+
+    /** Correlation tokens for the items forwarded to other nodes; unique within this instance. */
+    private final AtomicLong correlationSequence = new AtomicLong();
 
     /** Delete the queue based on the key in parameter */
     @Override
@@ -656,6 +712,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
     @Override
     public void close() throws IOException {
         super.close();
+        inprocessCacheCleaner.shutdownNow();
         // close all the connections
         channelCache.invalidateAll();
     }
@@ -678,7 +735,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
         return new StreamObserver<URLItem>() {
 
-            final AtomicInteger unacked = new AtomicInteger();
+            // closes the response once the client has stopped sending and every item has
+            // been written locally or acked back by the node it was forwarded to
+            final AsyncCompletion completion = new AsyncCompletion(sso::onCompleted);
 
             @Override
             public void onNext(URLItem value) {
@@ -734,16 +793,28 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 LOG.trace("LocalNodeIndex {}", localNodeIndex);
 
                 if (partition == localNodeIndex) {
-                    unacked.incrementAndGet();
+                    completion.taskStarted();
 
-                    writeExecutorService.execute(
-                            () -> {
-                                final Status s = putURLItem(value);
-                                LOG.debug("Local putURL -> {} got status {}", url, s);
-                                final AckMessage ackedMessage = ack.setStatus(s).build();
-                                sso.onNext(ackedMessage);
-                                unacked.decrementAndGet();
-                            });
+                    try {
+                        writeExecutorService.execute(
+                                () -> {
+                                    try {
+                                        final Status s = putURLItem(value);
+                                        LOG.debug("Local putURL -> {} got status {}", url, s);
+                                        final AckMessage ackedMessage = ack.setStatus(s).build();
+                                        sso.onNext(ackedMessage);
+                                    } finally {
+                                        // whatever happens the item must be released or the
+                                        // response is never closed
+                                        completion.taskDone();
+                                    }
+                                });
+                    } catch (RejectedExecutionException e) {
+                        // the task never started: tell the client instead of leaving it waiting
+                        LOG.error("Executor rejected putURLs task for {}", url, e);
+                        sso.onNext(ack.setStatus(Status.FAIL).build());
+                        completion.taskDone();
+                    }
                 } else {
                     // forward to non-local node
                     LOG.debug(
@@ -752,22 +823,36 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                             partition,
                             getNodes().get(partition));
 
-                    // if the same ID is already being processed by
-                    // a remote Frontier, just wait until it has been completed
-                    while (inprocesscache.getIfPresent(ack.getID()) != null) {
-                        try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt(); // set the flag back to <code>true
-                        }
+                    // the item goes out under a correlation token of ours rather than the
+                    // client's ID: the same ID can legitimately be sent more than once, in
+                    // which case the acks could no longer be told apart
+                    final String token = Long.toString(correlationSequence.incrementAndGet());
+                    final PendingAck pending = new PendingAck(ack.getID(), sso, completion);
+
+                    completion.taskStarted();
+
+                    // store the tuple to return in a temporary cache; must be in place
+                    // before the item goes out as the ack can come back at any point
+                    inprocesscache.put(token, pending);
+
+                    try {
+                        // get the stream observer for the node in charge of the partition
+                        // and give it the value to process
+                        observercache
+                                .getUnchecked(partition)
+                                .onNext(URLItem.newBuilder(value).setID(token).build());
+                    } catch (Exception e) {
+                        LOG.error(
+                                "Error while sending {} to partition {}: {}",
+                                url,
+                                partition,
+                                e.getLocalizedMessage());
+                        // no ack will ever come back for it: fail it now instead of
+                        // waiting for the entry to expire
+                        observercache.invalidate(partition);
+                        inprocesscache.invalidate(token);
+                        pending.ack(Status.FAIL);
                     }
-
-                    // store the tuple to return in a temporary cache
-                    inprocesscache.put(ack.getID(), sso);
-
-                    // get the stream observer for the node in charge of the partition
-                    // and give it the value to process
-                    observercache.getUnchecked(partition).onNext(value);
                 }
             }
 
@@ -787,15 +872,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
             @Override
             public void onCompleted() {
-                // check that all the work for this stream has ended
-                while (unacked.get() != 0 || inprocesscache.asMap().containsValue(sso)) {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-                sso.onCompleted();
+                // the response is closed here if all the work for this stream has already
+                // ended, or by the last item to be acked otherwise
+                completion.noMoreTasks();
             }
         };
     }
