@@ -343,7 +343,7 @@ public abstract class AbstractFrontierService
         Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
                 getQueues().entrySet().iterator();
 
-        while (iterator.hasNext() && sent <= maxQueues) {
+        while (iterator.hasNext() && sent < maxQueues) {
             Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
             pos++;
 
