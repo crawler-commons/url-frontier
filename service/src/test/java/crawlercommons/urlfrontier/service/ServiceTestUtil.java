@@ -20,6 +20,26 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class ServiceTestUtil {
 
+    /**
+     * Waits for a putURLs response stream to be closed, i.e. for the flag set by its onCompleted.
+     * Calling onCompleted on the request stream only signals that the client has stopped sending:
+     * the response is closed later, by the last item to be acked.
+     */
+    public static void awaitStreamClosed(AtomicBoolean completed) {
+        final long deadline = System.currentTimeMillis() + 10_000;
+        while (!completed.get()) {
+            if (System.currentTimeMillis() > deadline) {
+                fail("the putURLs response stream was not closed in time");
+            }
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                fail("interrupted while waiting for the putURLs response stream to close");
+            }
+        }
+    }
+
     public static void initURLs(AbstractFrontierService service) {
 
         String crawlId = "crawl_id";

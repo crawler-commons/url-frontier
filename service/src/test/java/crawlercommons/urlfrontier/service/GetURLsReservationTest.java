@@ -145,9 +145,10 @@ class GetURLsReservationTest {
         GetParams request =
                 GetParams.newBuilder().setMaxUrlsPerQueue(1).setDelayRequestable(30).build();
 
+        // the rotation path hands the queues to the read executor and returns: the send
+        // is still in flight when the call comes back
         CollectingObserver first = new CollectingObserver();
-        Thread t1 = new Thread(() -> service.getURLs(request, first));
-        t1.start();
+        service.getURLs(request, first);
         assertTrue(service.enteredSend.await(5, TimeUnit.SECONDS), "first send never started");
 
         // while the first send is in flight, a concurrent request must skip the queue
@@ -156,7 +157,7 @@ class GetURLsReservationTest {
         assertTrue(second.completed.await(5, TimeUnit.SECONDS));
 
         service.releaseSend.countDown();
-        t1.join(5000);
+        assertTrue(first.completed.await(5, TimeUnit.SECONDS), "first request never completed");
 
         assertEquals(
                 1,
@@ -258,9 +259,10 @@ class GetURLsReservationTest {
         GetParams request =
                 GetParams.newBuilder().setMaxUrlsPerQueue(1).setDelayRequestable(30).build();
 
-        // without the try/finally around sendURLsForQueue this call never returns
+        // without the try/finally around sendURLsForQueue the response is never closed
         CollectingObserver first = new CollectingObserver();
         assertTimeoutPreemptively(Duration.ofSeconds(5), () -> service.getURLs(request, first));
+        assertTrue(first.completed.await(5, TimeUnit.SECONDS), "the response was never closed");
 
         // fail-closed: outcome unknown, so the politeness window is enforced
         assertNotEquals(AbstractFrontierService.RESERVATION_IN_PROGRESS, queue.getLastProduced());

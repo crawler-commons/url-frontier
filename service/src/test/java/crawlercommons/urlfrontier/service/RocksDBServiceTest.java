@@ -619,6 +619,7 @@ class RocksDBServiceTest {
         StreamObserver<URLItem> streamObserver = rocksDBService.putURLs(responseObserver);
         streamObserver.onNext(builder1.build());
         streamObserver.onCompleted();
+        ServiceTestUtil.awaitStreamClosed(completed);
 
         assertEquals(1, skipped.get());
 
@@ -760,6 +761,7 @@ class RocksDBServiceTest {
         StreamObserver<URLItem> streamObserver = rocksDBService.putURLs(responseObserver);
         streamObserver.onNext(builder1.build());
         streamObserver.onCompleted();
+        ServiceTestUtil.awaitStreamClosed(completed);
 
         // Verify it has been skipped
         // Once a URL is "known", it can't be set back to "discovered"
@@ -824,6 +826,7 @@ class RocksDBServiceTest {
         StreamObserver<URLItem> streamObserver2 = rocksDBService.putURLs(responseObserver2);
         streamObserver2.onNext(builder1.build());
         streamObserver2.onCompleted();
+        ServiceTestUtil.awaitStreamClosed(completed2);
 
         assertEquals(1, ok2.get());
 
@@ -947,6 +950,7 @@ class RocksDBServiceTest {
         StreamObserver<URLItem> putObserver = rocksDBService.putURLs(ackObserver);
         putObserver.onNext(builder.build());
         putObserver.onCompleted();
+        ServiceTestUtil.awaitStreamClosed(putCompleted);
         assertTrue(putCompleted.get());
 
         // simulate a URL without a creation date by removing the entry from the

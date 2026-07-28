@@ -602,6 +602,7 @@ class MemoryFrontierServiceTest {
         StreamObserver<URLItem> streamObserver = memoryFrontierService.putURLs(responseObserver);
         streamObserver.onNext(builder1.build());
         streamObserver.onCompleted();
+        ServiceTestUtil.awaitStreamClosed(completed);
 
         assertEquals(1, skipped.get());
 

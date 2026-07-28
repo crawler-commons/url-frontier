@@ -35,6 +35,8 @@ import io.grpc.stub.StreamObserver;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -452,6 +454,63 @@ class DistributedFrontierServiceTest {
                                         .setCrawlID("DEFAULT")
                                         .setLimit(1)
                                         .build()));
+    }
+
+    @Test
+    @Order(17)
+    void repeatedIdsForwardedToTheOwnerAreAllAckedUnderTheClientId() throws Exception {
+        // issue #170: forwarded items are correlated by an internal token rather than by
+        // the ID given by the client, which can legitimately be repeated
+        final String key = keyOwnedBy(1, "dupack");
+        final String id = "repeated-id";
+        final int copies = 20;
+
+        final List<AckMessage> acks = Collections.synchronizedList(new ArrayList<>());
+        final CountDownLatch latch = new CountDownLatch(1);
+        StreamObserver<URLItem> input =
+                URLFrontierGrpc.newStub(channelA)
+                        .putURLs(
+                                new StreamObserver<AckMessage>() {
+                                    @Override
+                                    public void onNext(AckMessage value) {
+                                        acks.add(value);
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable t) {
+                                        latch.countDown();
+                                    }
+
+                                    @Override
+                                    public void onCompleted() {
+                                        latch.countDown();
+                                    }
+                                });
+
+        URLInfo info =
+                URLInfo.newBuilder()
+                        .setUrl("https://" + key + "/repeated")
+                        .setKey(key)
+                        .setCrawlID("DEFAULT")
+                        .build();
+        for (int i = 0; i < copies; i++) {
+            input.onNext(
+                    URLItem.newBuilder()
+                            .setID(id)
+                            .setDiscovered(DiscoveredURLItem.newBuilder().setInfo(info).build())
+                            .build());
+        }
+        input.onCompleted();
+
+        assertTrue(latch.await(20, TimeUnit.SECONDS), "putURLs did not complete in time");
+        assertEquals(copies, acks.size(), "every item must be acked exactly once");
+        for (AckMessage ack : acks) {
+            assertEquals(id, ack.getID(), "acks must carry the ID given by the client");
+            assertNotEquals(
+                    AckMessage.Status.FAIL,
+                    ack.getStatus(),
+                    "no item must be left to expire in the in-process cache");
+        }
     }
 
     @Test
