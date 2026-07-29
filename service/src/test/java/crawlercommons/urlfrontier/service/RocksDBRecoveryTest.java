@@ -55,12 +55,16 @@ class RocksDBRecoveryTest {
     }
 
     private RocksDBService restart(boolean checkOnRecovery) throws IOException {
+        return restart(
+                checkOnRecovery
+                        ? Map.of("rocksdb.recovery.check", "true")
+                        : Map.<String, String>of());
+    }
+
+    private RocksDBService restart(Map<String, String> extraConf) throws IOException {
         stop();
-        Map<String, String> conf = new HashMap<>();
+        Map<String, String> conf = new HashMap<>(extraConf);
         conf.put("rocksdb.path", ROCKSDB_PATH);
-        if (checkOnRecovery) {
-            conf.put("rocksdb.recovery.check", "true");
-        }
         service = new RocksDBService(conf, "localhost", 7071);
         return service;
     }
@@ -100,6 +104,27 @@ class RocksDBRecoveryTest {
         // any entry left over from the previous restart would be resurrected here
         frontier = restart();
         assertEquals(0, frontier.getQueues().size());
+    }
+
+    /**
+     * With the WAL disabled, a clean shutdown flushes the memtables: everything written must
+     * survive a restart. The recovery check on the second start-up scans the URL tables themselves,
+     * so it fails if their content was lost with the memtables.
+     */
+    @Test
+    void urlsSurviveCleanRestartWithoutWAL() throws IOException {
+
+        RocksDBService frontier = restart(Map.of("rocksdb.wal.disable", "true"));
+        ServiceTestUtil.initURLs(frontier);
+        final Set<QueueWithinCrawl> expected = new HashSet<>(frontier.getQueues().keySet());
+        assertEquals(3, expected.size());
+
+        frontier =
+                restart(
+                        Map.of(
+                                "rocksdb.wal.disable", "true",
+                                "rocksdb.recovery.check", "true"));
+        assertEquals(expected, new HashSet<>(frontier.getQueues().keySet()));
     }
 
     /** The queues must all be recovered when the previous instance did not shut down cleanly * */

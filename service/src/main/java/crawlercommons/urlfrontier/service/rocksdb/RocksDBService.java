@@ -41,6 +41,7 @@ import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ColumnFamilyOptions;
 import org.rocksdb.DBOptions;
 import org.rocksdb.Filter;
+import org.rocksdb.FlushOptions;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
@@ -67,6 +68,9 @@ public class RocksDBService extends AbstractFrontierService {
     // the same options are used for every write: allocating a native object per
     // URL would be pure overhead on the write path
     private final WriteOptions writeOptions = new WriteOptions();
+
+    // without a WAL the memtables are lost unless they are flushed when closing
+    private final boolean walDisabled;
 
     // native object referenced by the table configuration, kept so that it can be
     // released when the service is closed - null if the filters are disabled
@@ -107,6 +111,12 @@ public class RocksDBService extends AbstractFrontierService {
 
         boolean bloomFilters = useBloomFilters(configuration);
 
+        walDisabled = disableWAL(configuration);
+        if (walDisabled) {
+            LOG.info("WAL disabled - writes are made durable at flush time only");
+            writeOptions.setDisableWAL(true);
+        }
+
         try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()) {
 
             String sMaxBytesForLevelBase = configuration.get("rocksdb.max_bytes_for_level_base");
@@ -133,6 +143,12 @@ public class RocksDBService extends AbstractFrontierService {
 
             try (final DBOptions options = new DBOptions()) {
                 options.setCreateIfMissing(true).setCreateMissingColumnFamilies(true);
+
+                // the WAL is what keeps the column families consistent with each other
+                // on recovery; without it the flushes must be atomic across them
+                if (walDisabled) {
+                    options.setAtomicFlush(true);
+                }
 
                 String smaxBackgroundJobs = configuration.get("rocksdb.max_background_jobs");
                 if (smaxBackgroundJobs != null) {
@@ -186,6 +202,20 @@ public class RocksDBService extends AbstractFrontierService {
             return true;
         }
         final String value = configuration.get("rocksdb.bloom.filters");
+        return value == null || value.isEmpty() || Boolean.parseBoolean(value);
+    }
+
+    /**
+     * The WAL is enabled by default: disabling it roughly halves the bytes written per URL but
+     * loses whatever was in the memtables if the service dies without closing cleanly. The URLs
+     * concerned get rediscovered by the crawl, so this is a reasonable trade for write-heavy
+     * setups.
+     */
+    static boolean disableWAL(final Map<String, String> configuration) {
+        if (!configuration.containsKey("rocksdb.wal.disable")) {
+            return false;
+        }
+        final String value = configuration.get("rocksdb.wal.disable");
         return value == null || value.isEmpty() || Boolean.parseBoolean(value);
     }
 
@@ -640,6 +670,16 @@ public class RocksDBService extends AbstractFrontierService {
             rocksDB.destroyColumnFamilyHandle(columnFamilyHandleList.get(2));
         }
 
+        // without a WAL the content of the memtables only exists in memory:
+        // flush them before the handles are closed or the data is lost
+        if (walDisabled) {
+            try (final FlushOptions flushOptions = new FlushOptions().setWaitForFlush(true)) {
+                rocksDB.flush(flushOptions, columnFamilyHandleList);
+            } catch (RocksDBException e) {
+                LOG.error("Flushing on close ", e);
+            }
+        }
+
         for (final ColumnFamilyHandle columnFamilyHandle : columnFamilyHandleList) {
             columnFamilyHandle.close();
         }
@@ -650,7 +690,9 @@ public class RocksDBService extends AbstractFrontierService {
 
         if (rocksDB != null) {
             try {
-                rocksDB.syncWal();
+                if (!walDisabled) {
+                    rocksDB.syncWal();
+                }
                 rocksDB.closeE();
             } catch (Exception e) {
                 LOG.error("Closing ", e);
