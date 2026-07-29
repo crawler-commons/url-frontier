@@ -575,12 +575,13 @@ public class RocksDBService extends AbstractFrontierService {
      * Writes a whole batch of discovered URLs as a single RocksDB write, which amortises the
      * per-write overhead the individual puts pay.
      *
-     * <p>The stripe locks of every URL in the batch are taken upfront, in the deadlock-free order
-     * provided by the striped collection, and held until the write has landed: this is what stops
-     * another thread from concluding in the meantime that one of these URLs is unknown, the same
-     * guarantee the lock held across get-then-write gives the individual puts. A batch holds many
-     * of the 128 stripes at once, so concurrent writers serialise against it, which costs little:
-     * the write threads spend most of their time idle.
+     * <p>The existence checks run first, without any lock: a large share of what a crawl discovers
+     * is already known, and finding that out is the expensive part of the job - it reads data
+     * blocks - so it must stay parallel across the writer threads. Only the URLs which look new
+     * then take their stripe locks, in the deadlock-free order provided by the striped collection,
+     * and get checked again: the blocks are warm by then, so the re-check is cheap, and the locks
+     * are held until the write has landed, which is the same guarantee the lock held across
+     * get-then-write gives the individual puts.
      */
     @Override
     protected Status[] putDiscoveredItems(List<URLInfo> items) {
@@ -595,11 +596,14 @@ public class RocksDBService extends AbstractFrontierService {
         putURLs_urls_count.inc(items.size());
         putURLs_discovered_count.labels("true").inc(items.size());
 
-        // worked out upfront so that the locks can be taken in bulk
         final URLInfo[] infos = new URLInfo[items.size()];
         final QueueWithinCrawl[] queueKeys = new QueueWithinCrawl[items.size()];
         final String[] existenceKeys = new String[items.size()];
-        final List<String> lockKeys = new ArrayList<>(items.size());
+        final byte[][] existenceKeyBytes = new byte[items.size()][];
+
+        // the DB cannot see the entries accumulated in the batch, so a URL sent
+        // twice in it has to be caught here
+        final Set<String> seenInBatch = new HashSet<>();
 
         for (int i = 0; i < items.size(); i++) {
             URLInfo info = items.get(i);
@@ -635,10 +639,54 @@ public class RocksDBService extends AbstractFrontierService {
                 continue;
             }
 
+            final String existenceKeyString = qk.toString() + "_" + url;
+            if (!seenInBatch.add(existenceKeyString)) {
+                putURLs_alreadyknown_count.inc();
+                statuses[i] = Status.SKIPPED;
+                continue;
+            }
+
             infos[i] = info;
             queueKeys[i] = qk;
-            existenceKeys[i] = qk.toString() + "_" + url;
-            lockKeys.add(existenceKeys[i]);
+            existenceKeys[i] = existenceKeyString;
+            existenceKeyBytes[i] = existenceKeyString.getBytes(StandardCharsets.UTF_8);
+        }
+
+        // first pass, without any lock: weed out the URLs which are already known,
+        // in one multiGet for the whole batch
+        final List<Integer> candidates = new ArrayList<>(items.size());
+        final List<byte[]> keysToCheck = new ArrayList<>(items.size());
+        for (int i = 0; i < items.size(); i++) {
+            if (statuses[i] == null) {
+                candidates.add(i);
+                keysToCheck.add(existenceKeyBytes[i]);
+            }
+        }
+
+        if (candidates.isEmpty()) {
+            return statuses;
+        }
+
+        final List<String> lockKeys = new ArrayList<>(candidates.size());
+        try {
+            final List<byte[]> found = rocksDB.multiGetAsList(keysToCheck);
+            for (int c = candidates.size() - 1; c >= 0; c--) {
+                if (found.get(c) != null) {
+                    putURLs_alreadyknown_count.inc();
+                    statuses[candidates.get(c)] = Status.SKIPPED;
+                    candidates.remove(c);
+                }
+            }
+        } catch (RocksDBException e) {
+            LOG.error("RocksDB exception", e);
+            for (int idx : candidates) {
+                statuses[idx] = Status.FAIL;
+            }
+            return statuses;
+        }
+
+        for (int idx : candidates) {
+            lockKeys.add(existenceKeys[idx]);
         }
 
         final List<Lock> locks = new ArrayList<>();
@@ -651,13 +699,10 @@ public class RocksDBService extends AbstractFrontierService {
 
         try (final WriteBatch writeBatch = new WriteBatch()) {
 
-            // the DB cannot see the entries accumulated in the batch, so a URL sent
-            // twice in it has to be caught here
-            final Set<String> seenInBatch = new HashSet<>();
             // indices of the URLs the batch holds a write for, only OK once it lands
-            final List<Integer> written = new ArrayList<>(items.size());
+            final List<Integer> written = new ArrayList<>(candidates.size());
             // queues to update, applied only once the write has succeeded
-            final List<QueueWithinCrawl> increments = new ArrayList<>(items.size());
+            final List<QueueWithinCrawl> increments = new ArrayList<>(candidates.size());
 
             final long now = Instant.now().getEpochSecond();
             final String paddedNow = paddedDate(now);
@@ -666,26 +711,15 @@ public class RocksDBService extends AbstractFrontierService {
             // the JNI layer copies the arrays handed to the batch, reusing them is fine
             final byte[] creationDate = buffer.array();
 
-            for (int i = 0; i < items.size(); i++) {
-                if (statuses[i] != null) {
-                    continue;
-                }
+            for (int i : candidates) {
                 if (isClosing()) {
                     statuses[i] = Status.FAIL;
                     continue;
                 }
 
-                final String existenceKeyString = existenceKeys[i];
-                if (!seenInBatch.add(existenceKeyString)) {
-                    putURLs_alreadyknown_count.inc();
-                    statuses[i] = Status.SKIPPED;
-                    continue;
-                }
-
-                final byte[] existenceKey = existenceKeyString.getBytes(StandardCharsets.UTF_8);
-
-                // is this URL already known?
-                if (rocksDB.get(existenceKey) != null) {
+                // another thread may have added it between the unlocked check and
+                // the lock; the blocks are warm now, this get is cheap
+                if (rocksDB.get(existenceKeyBytes[i]) != null) {
                     putURLs_alreadyknown_count.inc();
                     statuses[i] = Status.SKIPPED;
                     continue;
@@ -697,8 +731,8 @@ public class RocksDBService extends AbstractFrontierService {
 
                 writeBatch.put(
                         columnFamilyHandleList.get(1), schedulingKey, infos[i].toByteArray());
-                writeBatch.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
-                writeBatch.put(columnFamilyHandleList.get(3), existenceKey, creationDate);
+                writeBatch.put(columnFamilyHandleList.get(0), existenceKeyBytes[i], schedulingKey);
+                writeBatch.put(columnFamilyHandleList.get(3), existenceKeyBytes[i], creationDate);
 
                 written.add(i);
                 increments.add(queueKeys[i]);
