@@ -21,7 +21,6 @@ import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,8 +53,6 @@ import org.slf4j.LoggerFactory;
 public class RocksDBService extends AbstractFrontierService {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RocksDBService.class);
-
-    private static final DecimalFormat DF = new DecimalFormat("0000000000");
 
     static {
         RocksDB.loadLibrary();
@@ -495,7 +492,7 @@ public class RocksDBService extends AbstractFrontierService {
                     // it is either brand new or already known
                     // create a scheduling key for it
                     schedulingKey =
-                            (qk.toString() + "_" + DF.format(nextFetchDate) + "_" + url)
+                            (qk.toString() + "_" + paddedDate(nextFetchDate) + "_" + url)
                                     .getBytes(StandardCharsets.UTF_8);
                     // add to the scheduling
                     if (isClosing()) {
@@ -1106,6 +1103,23 @@ public class RocksDBService extends AbstractFrontierService {
 
     private static Lock lockFor(String compositeKey) {
         return STRIPED_LOCKS.get(compositeKey);
+    }
+
+    /**
+     * Zero-pads an epoch in seconds to 10 digits so that the scheduling keys of a queue sort
+     * chronologically. Called concurrently by the write threads, which rules out a shared
+     * DecimalFormat.
+     */
+    static String paddedDate(final long epochSeconds) {
+        final String digits = Long.toString(epochSeconds);
+        if (digits.length() >= 10) {
+            return digits;
+        }
+        final StringBuilder sb = new StringBuilder(10);
+        for (int i = digits.length(); i < 10; i++) {
+            sb.append('0');
+        }
+        return sb.append(digits).toString();
     }
 
     @Override
