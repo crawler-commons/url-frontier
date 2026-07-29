@@ -572,6 +572,169 @@ public class RocksDBService extends AbstractFrontierService {
     }
 
     /**
+     * Writes a whole batch of discovered URLs as a single RocksDB write, which amortises the
+     * per-write overhead the individual puts pay.
+     *
+     * <p>The stripe locks of every URL in the batch are taken upfront, in the deadlock-free order
+     * provided by the striped collection, and held until the write has landed: this is what stops
+     * another thread from concluding in the meantime that one of these URLs is unknown, the same
+     * guarantee the lock held across get-then-write gives the individual puts. A batch holds many
+     * of the 128 stripes at once, so concurrent writers serialise against it, which costs little:
+     * the write threads spend most of their time idle.
+     */
+    @Override
+    protected Status[] putDiscoveredItems(List<URLInfo> items) {
+
+        final Status[] statuses = new Status[items.size()];
+
+        if (isClosing()) {
+            Arrays.fill(statuses, Status.FAIL);
+            return statuses;
+        }
+
+        putURLs_urls_count.inc(items.size());
+        putURLs_discovered_count.labels("true").inc(items.size());
+
+        // worked out upfront so that the locks can be taken in bulk
+        final URLInfo[] infos = new URLInfo[items.size()];
+        final QueueWithinCrawl[] queueKeys = new QueueWithinCrawl[items.size()];
+        final String[] existenceKeys = new String[items.size()];
+        final List<String> lockKeys = new ArrayList<>(items.size());
+
+        for (int i = 0; i < items.size(); i++) {
+            URLInfo info = items.get(i);
+            String Qkey = info.getKey();
+            final String url = info.getUrl();
+            final String crawlID = CrawlID.normaliseCrawlID(info.getCrawlID());
+
+            // has a queue key been defined? if not use the hostname
+            if (Qkey.equals("")) {
+                LOG.debug("key missing for {}", url);
+                Qkey = provideMissingKey(url);
+                if (Qkey == null) {
+                    LOG.error("Malformed URL {}", url);
+                    statuses[i] = Status.SKIPPED;
+                    continue;
+                }
+                info = URLInfo.newBuilder(info).setKey(Qkey).setCrawlID(crawlID).build();
+            }
+
+            // check that the key is not too long
+            if (Qkey.length() > 255) {
+                LOG.error("Key too long: {}", Qkey);
+                statuses[i] = Status.SKIPPED;
+                continue;
+            }
+
+            final QueueWithinCrawl qk = QueueWithinCrawl.get(Qkey, crawlID);
+
+            // ignore this url if the queue is being deleted
+            if (queuesBeingDeleted.contains(qk)) {
+                LOG.info("Not adding {} as its queue {} is being deleted", url, Qkey);
+                statuses[i] = Status.SKIPPED;
+                continue;
+            }
+
+            infos[i] = info;
+            queueKeys[i] = qk;
+            existenceKeys[i] = qk.toString() + "_" + url;
+            lockKeys.add(existenceKeys[i]);
+        }
+
+        final List<Lock> locks = new ArrayList<>();
+        for (Lock lock : STRIPED_LOCKS.bulkGet(lockKeys)) {
+            locks.add(lock);
+        }
+        for (Lock lock : locks) {
+            lock.lock();
+        }
+
+        try (final WriteBatch writeBatch = new WriteBatch()) {
+
+            // the DB cannot see the entries accumulated in the batch, so a URL sent
+            // twice in it has to be caught here
+            final Set<String> seenInBatch = new HashSet<>();
+            // indices of the URLs the batch holds a write for, only OK once it lands
+            final List<Integer> written = new ArrayList<>(items.size());
+            // queues to update, applied only once the write has succeeded
+            final List<QueueWithinCrawl> increments = new ArrayList<>(items.size());
+
+            final long now = Instant.now().getEpochSecond();
+            final String paddedNow = paddedDate(now);
+            final ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+            buffer.putLong(now);
+            // the JNI layer copies the arrays handed to the batch, reusing them is fine
+            final byte[] creationDate = buffer.array();
+
+            for (int i = 0; i < items.size(); i++) {
+                if (statuses[i] != null) {
+                    continue;
+                }
+                if (isClosing()) {
+                    statuses[i] = Status.FAIL;
+                    continue;
+                }
+
+                final String existenceKeyString = existenceKeys[i];
+                if (!seenInBatch.add(existenceKeyString)) {
+                    putURLs_alreadyknown_count.inc();
+                    statuses[i] = Status.SKIPPED;
+                    continue;
+                }
+
+                final byte[] existenceKey = existenceKeyString.getBytes(StandardCharsets.UTF_8);
+
+                // is this URL already known?
+                if (rocksDB.get(existenceKey) != null) {
+                    putURLs_alreadyknown_count.inc();
+                    statuses[i] = Status.SKIPPED;
+                    continue;
+                }
+
+                final byte[] schedulingKey =
+                        (queueKeys[i].toString() + "_" + paddedNow + "_" + infos[i].getUrl())
+                                .getBytes(StandardCharsets.UTF_8);
+
+                writeBatch.put(
+                        columnFamilyHandleList.get(1), schedulingKey, infos[i].toByteArray());
+                writeBatch.put(columnFamilyHandleList.get(0), existenceKey, schedulingKey);
+                writeBatch.put(columnFamilyHandleList.get(3), existenceKey, creationDate);
+
+                written.add(i);
+                increments.add(queueKeys[i]);
+            }
+
+            if (!written.isEmpty()) {
+                rocksDB.write(writeOptions, writeBatch);
+            }
+
+            for (int idx : written) {
+                statuses[idx] = Status.OK;
+            }
+            for (QueueWithinCrawl qk : increments) {
+                ((QueueMetadata) getQueues().computeIfAbsent(qk, s -> new QueueMetadata()))
+                        .incrementActive();
+            }
+
+        } catch (RocksDBException e) {
+            LOG.error("RocksDB exception", e);
+        } finally {
+            for (Lock lock : locks) {
+                lock.unlock();
+            }
+        }
+
+        // covers the URLs whose write never landed
+        for (int i = 0; i < statuses.length; i++) {
+            if (statuses[i] == null) {
+                statuses[i] = Status.FAIL;
+            }
+        }
+
+        return statuses;
+    }
+
+    /**
      *
      *
      * <pre>
