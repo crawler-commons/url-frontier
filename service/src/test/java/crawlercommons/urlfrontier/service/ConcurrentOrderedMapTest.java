@@ -483,6 +483,40 @@ class ConcurrentOrderedMapTest {
     }
 
     @Test
+    void testUnorderedEntriesSeeAllKeysWhileRotating() throws InterruptedException {
+        int keyCount = 16;
+        Set<String> expected = new HashSet<>();
+        for (int i = 0; i < keyCount; i++) {
+            String key = "key" + i;
+            expected.add(key);
+            map.put(key, "value" + i);
+        }
+
+        AtomicBoolean running = new AtomicBoolean(true);
+        Thread rotator =
+                new Thread(
+                        () -> {
+                            while (running.get()) {
+                                assertNotNull(map.rotateFirstEntry());
+                            }
+                        });
+        rotator.start();
+
+        try {
+            for (int pass = 0; pass < 200; pass++) {
+                Set<String> seen = new HashSet<>();
+                for (Map.Entry<String, String> entry : map.unorderedEntries()) {
+                    seen.add(entry.getKey());
+                }
+                assertEquals(expected, seen);
+            }
+        } finally {
+            running.set(false);
+            rotator.join();
+        }
+    }
+
+    @Test
     void testConcurrentRotateRemoveAndRecreateKeepsOneLiveEntryPerKey()
             throws InterruptedException {
         int keyCount = 8;

@@ -508,4 +508,24 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
             }
         };
     }
+
+    @Override
+    public Iterable<Map.Entry<K, V>> unorderedEntries() {
+        return () ->
+                new Iterator<>() {
+                    final Iterator<Entry<K, ValueEntry>> iterator = valueMap.entrySet().iterator();
+
+                    @Override
+                    public boolean hasNext() {
+                        return iterator.hasNext();
+                    }
+
+                    @Override
+                    public Map.Entry<K, V> next() {
+                        Entry<K, ValueEntry> entry = iterator.next();
+                        return new AbstractMap.SimpleImmutableEntry<>(
+                                entry.getKey(), entry.getValue().value);
+                    }
+                };
+    }
 }
