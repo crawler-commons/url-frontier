@@ -124,7 +124,12 @@ public class RocksDBService extends AbstractFrontierService {
                 cfOpts.setMaxBytesForLevelBase(Long.parseLong(sMaxBytesForLevelBase));
             }
 
-            cfOpts.optimizeUniversalStyleCompaction();
+            String sMemtableBudget = configuration.get("rocksdb.memtable_memory_budget");
+            if (sMemtableBudget != null) {
+                cfOpts.optimizeUniversalStyleCompaction(Long.parseLong(sMemtableBudget));
+            } else {
+                cfOpts.optimizeUniversalStyleCompaction();
+            }
 
             if (bloomFilters) {
                 cfOpts.setTableFormatConfig(buildTableConfig(configuration));
