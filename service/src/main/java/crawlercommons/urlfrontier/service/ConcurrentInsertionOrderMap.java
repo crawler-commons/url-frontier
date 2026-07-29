@@ -9,8 +9,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Interface for a Concurrent Map which preserves insertion order and allows to retrieve its first
- * element.
+ * Interface for a concurrent map which preserves insertion order and exposes weakly consistent
+ * ordered iteration.
+ *
+ * <p>Per-key operations are atomic. Ordered views are backed by the insertion-order index and are
+ * weakly consistent: they may miss keys rotated concurrently, and they do not become atomic if the
+ * map instance is wrapped in external {@code synchronized} blocks.
  *
  * @param <K>
  * @param <V>
@@ -22,6 +26,14 @@ public interface ConcurrentInsertionOrderMap<K, V> extends ConcurrentMap<K, V> {
 
     /** Remove and returns the first entry according to insertion order */
     Entry<K, V> pollFirstEntry();
+
+    /**
+     * Atomically moves the first entry to the tail and returns it.
+     *
+     * <p>The mapping stays present in the value map for the whole operation. Returns {@code null}
+     * if the map is empty.
+     */
+    Entry<K, V> rotateFirstEntry();
 
     /**
      * Returns a set containing the keys in this map. The iterator returned by this set is weakly
