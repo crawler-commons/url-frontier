@@ -21,6 +21,8 @@
 		<mockito.version>5.13.0</mockito.version>
 		<commons.io.version>2.20.0</commons.io.version>
 		<commons.lang.version>3.19.0</commons.lang.version>
+		<!-- keep in line with grpc.version in the API module -->
+		<grpc.version>1.76.0</grpc.version>
 	</properties>
 
 	<build>
@@ -114,6 +116,14 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- lets the tests run gRPC calls against the service without a socket -->
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-inprocess</artifactId>
+			<version>${grpc.version}</version>
 			<scope>test</scope>
 		</dependency>
 
