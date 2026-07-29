@@ -730,8 +730,12 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                             LOG.error("Client cancelled");
                         });
 
-        // wrap the response observer as a synchronized one
-        StreamObserver<AckMessage> sso = SynchronizedStreamObserver.wrapping(responseObserver, -1);
+        // wrap the response observer as a synchronized one; the in-flight budget
+        // counts items forwarded to other nodes too, since their ack - and therefore
+        // the next request - only comes once the remote node has answered
+        StreamObserver<AckMessage> sso =
+                SynchronizedStreamObserver.wrapping(
+                        limitInFlight(responseObserver, putURLsMaxInFlight), -1);
 
         return new StreamObserver<URLItem>() {
 

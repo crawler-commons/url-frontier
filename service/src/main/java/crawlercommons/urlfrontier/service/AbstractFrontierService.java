@@ -27,6 +27,7 @@ import crawlercommons.urlfrontier.Urlfrontier.StringList;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Summary;
@@ -132,6 +133,10 @@ public abstract class AbstractFrontierService
     protected final ExecutorService readExecutorService;
     protected final ExecutorService writeExecutorService;
 
+    // how many URLs a putURLs stream may have in flight before the server stops
+    // reading from it, 0 or less to let the client send as fast as it likes
+    protected final int putURLsMaxInFlight;
+
     protected AbstractFrontierService(String host, int port) {
         this(Collections.emptyMap(), host, port);
     }
@@ -152,6 +157,11 @@ public abstract class AbstractFrontierService
                         configuration.getOrDefault("write.thread.num", defaultParallelism));
         writeExecutorService = Executors.newFixedThreadPool(wthreadNum);
         LOG.info("Using {} threads for writing to queues", wthreadNum);
+        putURLsMaxInFlight =
+                Integer.parseInt(configuration.getOrDefault("putURLs.max.inflight", "1024"));
+        if (putURLsMaxInFlight > 0) {
+            LOG.info("Limiting putURLs streams to {} URLs in flight", putURLsMaxInFlight);
+        }
     }
 
     public ConcurrentInsertionOrderMap<QueueWithinCrawl, QueueInterface> getQueues() {
@@ -847,6 +857,52 @@ public abstract class AbstractFrontierService
         responseObserver.onCompleted();
     }
 
+    /**
+     * Caps the number of URLs a stream may have in flight by taking over its inbound flow control:
+     * the call starts with a budget of maxInFlight messages and every ack sent releases one more.
+     * Without this a client can send faster than the write threads drain and the backlog
+     * accumulates on the heap; with it the excess stays on the wire, where HTTP/2 flow control
+     * pushes back onto the sender.
+     *
+     * <p>Returns the observer the acks must be sent through: an ack bypassing it would not
+     * replenish the budget and the stream would eventually starve. Observers which do not belong to
+     * a gRPC call, as used by the tests, are returned unchanged, as is everything when maxInFlight
+     * is 0 or less.
+     */
+    protected static StreamObserver<AckMessage> limitInFlight(
+            StreamObserver<AckMessage> responseObserver, int maxInFlight) {
+        if (maxInFlight <= 0 || !(responseObserver instanceof ServerCallStreamObserver)) {
+            return responseObserver;
+        }
+        final ServerCallStreamObserver<AckMessage> call =
+                (ServerCallStreamObserver<AckMessage>) responseObserver;
+        call.disableAutoRequest();
+        call.request(maxInFlight);
+        return new StreamObserver<>() {
+            @Override
+            public void onNext(AckMessage value) {
+                call.onNext(value);
+                // the ack releases one more URL from the stream; the client may
+                // have gone away in the meantime, which is its problem, not ours
+                try {
+                    call.request(1);
+                } catch (RuntimeException e) {
+                    LOG.debug("request() on a terminated call", e);
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                call.onError(t);
+            }
+
+            @Override
+            public void onCompleted() {
+                call.onCompleted();
+            }
+        };
+    }
+
     @Override
     public StreamObserver<URLItem> putURLs(
             StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> responseObserver) {
@@ -854,7 +910,8 @@ public abstract class AbstractFrontierService
         putURLs_calls.inc();
 
         StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> sso =
-                SynchronizedStreamObserver.wrapping(responseObserver, -1);
+                SynchronizedStreamObserver.wrapping(
+                        limitInFlight(responseObserver, putURLsMaxInFlight), -1);
 
         return new StreamObserver<URLItem>() {
 
