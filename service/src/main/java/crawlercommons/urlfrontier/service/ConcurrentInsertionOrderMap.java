@@ -14,7 +14,8 @@ import java.util.concurrent.ConcurrentMap;
  *
  * <p>Per-key operations are atomic. Ordered views are backed by the insertion-order index and are
  * weakly consistent: they may miss keys rotated concurrently, and they do not become atomic if the
- * map instance is wrapped in external {@code synchronized} blocks.
+ * map instance is wrapped in external {@code synchronized} blocks. Use {@link #unorderedEntries()}
+ * for complete scans that do not care about insertion order.
  *
  * @param <K>
  * @param <V>
@@ -34,6 +35,14 @@ public interface ConcurrentInsertionOrderMap<K, V> extends ConcurrentMap<K, V> {
      * if the map is empty.
      */
     Entry<K, V> rotateFirstEntry();
+
+    /**
+     * Returns a weakly consistent live view backed by the value map.
+     *
+     * <p>Unlike ordered iteration, this view is unaffected by {@link #rotateFirstEntry()} because
+     * rotation does not remove the mapping from the value map.
+     */
+    Iterable<Map.Entry<K, V>> unorderedEntries();
 
     /**
      * Returns a set containing the keys in this map. The iterator returned by this set is weakly
