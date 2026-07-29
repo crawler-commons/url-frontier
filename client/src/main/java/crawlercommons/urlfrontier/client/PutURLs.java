@@ -14,6 +14,8 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.ClientCallStreamObserver;
+import io.grpc.stub.ClientResponseObserver;
 import io.grpc.stub.StreamObserver;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
@@ -216,37 +219,68 @@ public class PutURLs implements Callable<Integer> {
             // errors on this stream only, the shared flag is for the exit code
             final AtomicBoolean thisStreamFailed = new AtomicBoolean(false);
 
-            StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> responseObserver =
-                    new StreamObserver<>() {
+            // the sender waits on this when it is not allowed to send: an ack frees a
+            // slot in the window, the transport becoming ready frees the wire
+            final Object flow = new Object();
 
-                        @Override
-                        public void onNext(
-                                crawlercommons.urlfrontier.Urlfrontier.AckMessage value) {
-                            // receives confirmation that the value has been received
-                            streamAcked.incrementAndGet();
-                            acked.addAndGet(1);
-                            if (value.getStatus().equals(AckMessage.Status.SKIPPED)) {
-                                skipped.getAndIncrement();
-                            } else if (value.getStatus().equals(AckMessage.Status.FAIL)) {
-                                failed.getAndIncrement();
-                            } else if (value.getStatus().equals(AckMessage.Status.OK)) {
-                                ok.getAndIncrement();
-                            }
-                        }
+            // the stream seen from the transport side, needed for isReady(); set before
+            // putURLs returns
+            final AtomicReference<ClientCallStreamObserver<URLItem>> requestStream =
+                    new AtomicReference<>();
 
-                        @Override
-                        public void onError(Throwable t) {
-                            thisStreamFailed.set(true);
-                            streamError.set(true);
-                            System.err.println("Error while sending the URLs: " + t.getMessage());
-                            finished.countDown();
-                        }
+            ClientResponseObserver<URLItem, crawlercommons.urlfrontier.Urlfrontier.AckMessage>
+                    responseObserver =
+                            new ClientResponseObserver<>() {
 
-                        @Override
-                        public void onCompleted() {
-                            finished.countDown();
-                        }
-                    };
+                                @Override
+                                public void beforeStart(ClientCallStreamObserver<URLItem> stream) {
+                                    requestStream.set(stream);
+                                    stream.setOnReadyHandler(
+                                            () -> {
+                                                synchronized (flow) {
+                                                    flow.notifyAll();
+                                                }
+                                            });
+                                }
+
+                                @Override
+                                public void onNext(
+                                        crawlercommons.urlfrontier.Urlfrontier.AckMessage value) {
+                                    // receives confirmation that the value has been received
+                                    streamAcked.incrementAndGet();
+                                    acked.addAndGet(1);
+                                    if (value.getStatus().equals(AckMessage.Status.SKIPPED)) {
+                                        skipped.getAndIncrement();
+                                    } else if (value.getStatus().equals(AckMessage.Status.FAIL)) {
+                                        failed.getAndIncrement();
+                                    } else if (value.getStatus().equals(AckMessage.Status.OK)) {
+                                        ok.getAndIncrement();
+                                    }
+                                    synchronized (flow) {
+                                        flow.notifyAll();
+                                    }
+                                }
+
+                                @Override
+                                public void onError(Throwable t) {
+                                    thisStreamFailed.set(true);
+                                    streamError.set(true);
+                                    System.err.println(
+                                            "Error while sending the URLs: " + t.getMessage());
+                                    finished.countDown();
+                                    synchronized (flow) {
+                                        flow.notifyAll();
+                                    }
+                                }
+
+                                @Override
+                                public void onCompleted() {
+                                    finished.countDown();
+                                    synchronized (flow) {
+                                        flow.notifyAll();
+                                    }
+                                }
+                            };
 
             final StreamObserver<URLItem> streamObserver = stub.putURLs(responseObserver);
 
@@ -280,16 +314,23 @@ public class PutURLs implements Callable<Integer> {
                         continue;
                     }
 
-                    // don't sent too many in one go
-                    while (streamSent.get() > streamAcked.get() + window
-                            && !thisStreamFailed.get()) {
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            interrupted = true;
-                            break outer;
+                    // don't send too many in one go: wait for room in the window and
+                    // for the transport to be able to take the item without buffering
+                    // it, woken by the acks and by the transport itself. The timeout is
+                    // a backstop, not a poll interval.
+                    try {
+                        final ClientCallStreamObserver<URLItem> transport = requestStream.get();
+                        synchronized (flow) {
+                            while (!thisStreamFailed.get()
+                                    && (streamSent.get() > streamAcked.get() + window
+                                            || (transport != null && !transport.isReady()))) {
+                                flow.wait(100);
+                            }
                         }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        interrupted = true;
+                        break outer;
                     }
 
                     if (thisStreamFailed.get()) {
