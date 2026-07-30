@@ -17,6 +17,7 @@ import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -270,8 +271,13 @@ public class MemoryFrontierService extends AbstractFrontierService {
             this.qentry = qentry;
             this.start = start;
             this.maxURLs = maxURLs;
-            iter = ((URLQueue) qentry.getValue()).iterator();
-            iterCompleted = ((URLQueue) qentry.getValue()).getCompleted().iterator();
+            URLQueue queue = (URLQueue) qentry.getValue();
+            InternalURL[] activeSnapshot;
+            synchronized (queue) {
+                activeSnapshot = queue.toArray(new InternalURL[0]);
+            }
+            iter = Arrays.asList(activeSnapshot).iterator();
+            iterCompleted = queue.getCompleted().iterator();
         }
 
         @Override
