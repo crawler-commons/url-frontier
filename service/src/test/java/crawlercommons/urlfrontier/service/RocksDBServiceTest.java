@@ -1127,4 +1127,27 @@ class RocksDBServiceTest {
                 QueueWithinCrawlParams.newBuilder().setCrawlID("crawl_id").build();
         rocksDBService.getStats(qwcp, statsObserver);
     }
+
+    @Test
+    @Order(94)
+    void testDeleteUnknownURLItemIsANoOp() {
+        // a URL whose entries are already gone (never put, or wiped by a concurrent
+        // deleteCrawl range delete) must not blow up the delete path
+        URLInfo info =
+                URLInfo.newBuilder()
+                        .setUrl("https://unknown.invalid/nowhere")
+                        .setKey("queue_unknown")
+                        .setCrawlID("crawl_id")
+                        .build();
+        URLItem item =
+                URLItem.newBuilder()
+                        .setKnown(
+                                KnownURLItem.newBuilder()
+                                        .setInfo(info)
+                                        .setRefetchableFromDate(0)
+                                        .build())
+                        .build();
+
+        rocksDBService.deleteURLItem(item);
+    }
 }
