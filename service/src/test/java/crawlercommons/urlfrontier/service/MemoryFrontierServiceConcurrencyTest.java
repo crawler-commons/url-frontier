@@ -11,11 +11,14 @@ import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.PurgeUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
+import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
 import crawlercommons.urlfrontier.service.memory.URLQueue;
 import io.grpc.stub.StreamObserver;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -152,6 +155,112 @@ class MemoryFrontierServiceConcurrencyTest {
         if (failure.get() != null) {
             fail(failure.get());
         }
+    }
+
+    @Test
+    void purgeNeverDeletesUrlsRefreshedDuringThePurge() throws Exception {
+        MemoryFrontierService service = new MemoryFrontierService("localhost", 0);
+
+        long future = Instant.now().getEpochSecond() + 3600;
+        for (int i = 0; i < 200; i++) {
+            putOne(service, known("https://example.com/stale-" + i, future));
+        }
+        // creation dates have second resolution: make the seeds strictly older than the cutoff
+        Thread.sleep(1100);
+
+        int refreshedCount = 20;
+        CountDownLatch start = new CountDownLatch(1);
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+
+        Thread refresher =
+                new Thread(
+                        () -> {
+                            try {
+                                start.await();
+                                for (int round = 0; round < 30; round++) {
+                                    for (int i = 0; i < refreshedCount; i++) {
+                                        putOne(
+                                                service,
+                                                known("https://example.com/stale-" + i, future));
+                                    }
+                                }
+                            } catch (Throwable t) {
+                                failure.compareAndSet(null, t);
+                            }
+                        });
+
+        Thread purger =
+                new Thread(
+                        () -> {
+                            try {
+                                start.await();
+                                service.purgeURLs(
+                                        PurgeUrlParams.newBuilder()
+                                                .setCrawlID(CRAWL_ID)
+                                                .setKey(KEY)
+                                                .setDays(0)
+                                                .build(),
+                                        new StreamObserver<>() {
+                                            @Override
+                                            public void onNext(
+                                                    crawlercommons.urlfrontier.Urlfrontier.Long
+                                                            value) {}
+
+                                            @Override
+                                            public void onError(Throwable t) {
+                                                failure.compareAndSet(null, t);
+                                            }
+
+                                            @Override
+                                            public void onCompleted() {}
+                                        });
+                            } catch (Throwable t) {
+                                failure.compareAndSet(null, t);
+                            }
+                        });
+
+        refresher.start();
+        purger.start();
+        start.countDown();
+        refresher.join();
+        purger.join();
+
+        if (failure.get() != null) {
+            fail(failure.get());
+        }
+
+        // every refreshed URL was re-put with a creation date at or after the purge cutoff:
+        // with scan+delete atomic per queue none of them may end up deleted
+        for (int i = 0; i < refreshedCount; i++) {
+            assertTrue(
+                    urlIsKnown(service, "https://example.com/stale-" + i),
+                    "URL refreshed during the purge was deleted: stale-" + i);
+        }
+    }
+
+    private static boolean urlIsKnown(MemoryFrontierService service, String url) throws Exception {
+        CountDownLatch done = new CountDownLatch(1);
+        AtomicBoolean found = new AtomicBoolean(false);
+        service.getURLStatus(
+                URLStatusRequest.newBuilder().setUrl(url).setKey(KEY).setCrawlID(CRAWL_ID).build(),
+                new StreamObserver<>() {
+                    @Override
+                    public void onNext(URLItem value) {
+                        found.set(true);
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        done.countDown();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        done.countDown();
+                    }
+                });
+        assertTrue(done.await(5, TimeUnit.SECONDS));
+        return found.get();
     }
 
     private static URLItem discovered(String url) {
