@@ -4,17 +4,21 @@
 package crawlercommons.urlfrontier.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
+import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
+import crawlercommons.urlfrontier.service.memory.URLQueue;
 import io.grpc.stub.StreamObserver;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,6 +28,83 @@ class MemoryFrontierServiceConcurrencyTest {
 
     private static final String CRAWL_ID = "crawl_id";
     private static final String KEY = "queue_mysite";
+
+    @Test
+    void concurrentPutUrlsOnANewKeyCreatesOneQueueAndKeepsBothUrls() throws Exception {
+        MemoryFrontierService service = new MemoryFrontierService("localhost", 0);
+        CountDownLatch start = new CountDownLatch(1);
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+
+        Thread t1 =
+                new Thread(
+                        () ->
+                                putOneAfterStart(
+                                        service,
+                                        discovered("https://example.com/a"),
+                                        start,
+                                        failure));
+        Thread t2 =
+                new Thread(
+                        () ->
+                                putOneAfterStart(
+                                        service,
+                                        discovered("https://example.com/b"),
+                                        start,
+                                        failure));
+
+        t1.start();
+        t2.start();
+        start.countDown();
+        t1.join();
+        t2.join();
+
+        if (failure.get() != null) {
+            fail(failure.get());
+        }
+
+        assertEquals(1, service.getQueues().size());
+        assertEquals(2, ServiceTestUtil.countAllURLs(service));
+        URLQueue queue = (URLQueue) service.getQueues().get(QueueWithinCrawl.get(KEY, CRAWL_ID));
+        assertEquals(2, queue.countActive());
+    }
+
+    @Test
+    void knownNeverUrlOnFreshQueueStartsCompletedAndIsNotServed() throws Exception {
+        MemoryFrontierService service = new MemoryFrontierService("localhost", 0);
+        putOne(service, known("https://example.com/completed", 0));
+
+        URLQueue queue = (URLQueue) service.getQueues().get(QueueWithinCrawl.get(KEY, CRAWL_ID));
+        assertEquals(0, queue.countActive());
+        assertEquals(1, queue.getCountCompleted());
+
+        AtomicInteger received = new AtomicInteger();
+        CountDownLatch completed = new CountDownLatch(1);
+        service.getURLs(
+                GetParams.newBuilder()
+                        .setKey(KEY)
+                        .setCrawlID(CRAWL_ID)
+                        .setMaxUrlsPerQueue(1)
+                        .build(),
+                new StreamObserver<>() {
+                    @Override
+                    public void onNext(crawlercommons.urlfrontier.Urlfrontier.URLInfo value) {
+                        received.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        completed.countDown();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        completed.countDown();
+                    }
+                });
+
+        assertTrue(completed.await(5, TimeUnit.SECONDS));
+        assertEquals(0, received.get());
+    }
 
     @Test
     void urlIteratorSnapshotSurvivesConcurrentQueueMutation() throws Exception {
