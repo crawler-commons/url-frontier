@@ -17,6 +17,7 @@ import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -127,24 +128,26 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
         QueueWithinCrawl qk = QueueWithinCrawl.get(key, iu.crawlID);
 
-        // get the priority queue or create one
-        synchronized (getQueues()) {
-            URLQueue queue = (URLQueue) getQueues().get(qk);
-            if (queue == null) {
-                queue = new URLQueue(iu);
-                getQueues().put(qk, queue);
-                creationDates.put(iu.url, Instant.now().getEpochSecond());
-
-                // If known and nextFetchDate, set to completed
-                if (!discovered && iu.nextFetchDate == 0) {
-                    queue.remove(iu);
-                    putURLs_completed_count.inc();
-                    queue.addToCompleted(iu.url);
-                }
-
-                return Status.OK;
+        URLQueue queue = (URLQueue) getQueues().get(qk);
+        if (queue == null) {
+            URLQueue created = new URLQueue(iu);
+            if (!discovered && iu.nextFetchDate == 0) {
+                created.remove(iu);
+                created.addToCompleted(iu.url);
             }
 
+            URLQueue existing = (URLQueue) getQueues().putIfAbsent(qk, created);
+            if (existing == null) {
+                creationDates.put(iu.url, Instant.now().getEpochSecond());
+                if (!discovered && iu.nextFetchDate == 0) {
+                    putURLs_completed_count.inc();
+                }
+                return Status.OK;
+            }
+            queue = existing;
+        }
+
+        synchronized (queue) {
             // check whether the URL already exists
             if (queue.contains(iu)) {
                 if (discovered) {
@@ -270,8 +273,13 @@ public class MemoryFrontierService extends AbstractFrontierService {
             this.qentry = qentry;
             this.start = start;
             this.maxURLs = maxURLs;
-            iter = ((URLQueue) qentry.getValue()).iterator();
-            iterCompleted = ((URLQueue) qentry.getValue()).getCompleted().iterator();
+            URLQueue queue = (URLQueue) qentry.getValue();
+            InternalURL[] activeSnapshot;
+            synchronized (queue) {
+                activeSnapshot = queue.toArray(new InternalURL[0]);
+            }
+            iter = Arrays.asList(activeSnapshot).iterator();
+            iterCompleted = queue.getCompleted().iterator();
         }
 
         @Override
@@ -344,9 +352,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
         InternalURL iu = (InternalURL) parsed[2];
 
         final QueueWithinCrawl qwc = QueueWithinCrawl.get(info.getKey(), info.getCrawlID());
-        synchronized (getQueues()) {
-            URLQueue queue = (URLQueue) getQueues().get(qwc);
-
+        URLQueue queue = (URLQueue) getQueues().get(qwc);
+        synchronized (queue) {
             if (queue.isCompleted(info.getUrl())) {
                 queue.getCompleted().remove(info.getUrl());
                 creationDates.remove(info.getUrl());
@@ -354,6 +361,15 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 queue.remove(iu);
                 creationDates.remove(info.getUrl());
             }
+        }
+    }
+
+    @Override
+    protected long purgeQueue(Entry<QueueWithinCrawl, QueueInterface> e, Instant cutoff) {
+        // scan+delete must be atomic against this queue's writers: InternalURL equality is
+        // by URL only, so a URL refreshed after the purge decision would be deleted
+        synchronized (e.getValue()) {
+            return super.purgeQueue(e, cutoff);
         }
     }
 }
