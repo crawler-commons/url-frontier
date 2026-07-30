@@ -915,6 +915,9 @@ public class RocksDBService extends AbstractFrontierService {
      *
      * @throws RocksDBException
      */
+    // Persists the per-queue counts at shutdown. The unordered view guarantees every
+    // queue is visited even under concurrent rotation; counts racing an in-flight
+    // delete may be off by that delta, as they already were with puts before.
     private void writeQueueInfos() throws RocksDBException {
         long start = System.currentTimeMillis();
         int queuesWritten = 0;
@@ -1386,6 +1389,12 @@ public class RocksDBService extends AbstractFrontierService {
             // Delete scheduling entry if exists
             byte[] schedulingKey = rocksDB.get(columnFamilyHandleList.get(0), key);
 
+            // the URL is unknown, or a concurrent deleteCrawl/deleteQueue already
+            // removed its range: nothing left to delete
+            if (schedulingKey == null) {
+                return;
+            }
+
             // check the value - if it is an empty byte array it means that the URL has been
             // processed and is not scheduled
             // otherwise it is scheduled
@@ -1395,8 +1404,10 @@ public class RocksDBService extends AbstractFrontierService {
 
             if (!completed) {
                 rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
-                queueMD.decrementActive();
-            } else {
+                if (queueMD != null) {
+                    queueMD.decrementActive();
+                }
+            } else if (queueMD != null) {
                 queueMD.decrementCompleted();
             }
 
