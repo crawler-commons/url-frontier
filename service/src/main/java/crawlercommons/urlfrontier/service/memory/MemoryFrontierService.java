@@ -363,4 +363,13 @@ public class MemoryFrontierService extends AbstractFrontierService {
             }
         }
     }
+
+    @Override
+    protected long purgeQueue(Entry<QueueWithinCrawl, QueueInterface> e, Instant cutoff) {
+        // scan+delete must be atomic against this queue's writers: InternalURL equality is
+        // by URL only, so a URL refreshed after the purge decision would be deleted
+        synchronized (e.getValue()) {
+            return super.purgeQueue(e, cutoff);
+        }
+    }
 }

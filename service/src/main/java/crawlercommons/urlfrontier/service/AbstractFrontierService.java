@@ -270,10 +270,7 @@ public abstract class AbstractFrontierService
 
             final Set<QueueWithinCrawl> toDelete = new HashSet<>();
 
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    getQueues().entrySet().iterator();
-            while (iterator.hasNext()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+            for (Entry<QueueWithinCrawl, QueueInterface> e : getQueues().unorderedEntries()) {
                 QueueWithinCrawl qwc = e.getKey();
                 if (qwc.getCrawlid().equals(normalisedCrawlID)) {
                     toDelete.add(qwc);
@@ -1365,47 +1362,54 @@ public abstract class AbstractFrontierService
         // Cutoff date  = now - number of days we want to keep
         Instant cutoff = Instant.now().minus(Period.ofDays(days));
 
-        synchronized (getQueues()) {
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
-                    getQueues().entrySet().iterator();
+        for (Entry<QueueWithinCrawl, QueueInterface> e : getQueues().unorderedEntries()) {
 
-            while (qiterator.hasNext()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
-
-                // check that it is within the right crawlID
-                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
-                    continue;
-                }
-
-                // check that it is within the right key/queue
-                if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
-                    continue;
-                }
-
-                try (CloseableIterator<URLItem> urliter = urlIterator(e)) {
-                    List<URLItem> toDelete = new ArrayList<>();
-
-                    while (urliter.hasNext()) {
-                        URLItem cur = urliter.next();
-
-                        if (Instant.ofEpochSecond(cur.getCreationDate()).isBefore(cutoff)) {
-                            // Add to deletion list (should not delete while iterating URLItem in
-                            // queue)
-                            toDelete.add(cur);
-                            deletedCount++;
-                        }
-                    }
-
-                    toDelete.stream().forEach(x -> deleteURLItem(x));
-
-                } catch (Exception e1) {
-                    LOG.warn(e1.getMessage(), e1);
-                }
+            // check that it is within the right crawlID
+            if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                continue;
             }
+
+            // check that it is within the right key/queue
+            if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
+                continue;
+            }
+
+            deletedCount += purgeQueue(e, cutoff);
         }
 
         responseObserver.onNext(Urlfrontier.Long.newBuilder().setValue(deletedCount).build());
         responseObserver.onCompleted();
+    }
+
+    /**
+     * Purges the stale URLs of a single queue: scans, collects, then deletes. Backends that need
+     * the scan and the deletions to be atomic against their writers (see the memory backend, where
+     * URL equality ignores the version) override this and wrap it in the queue's monitor.
+     *
+     * @return the number of URLs deleted
+     */
+    protected long purgeQueue(Entry<QueueWithinCrawl, QueueInterface> e, Instant cutoff) {
+        long deletedCount = 0;
+        try (CloseableIterator<URLItem> urliter = urlIterator(e)) {
+            List<URLItem> toDelete = new ArrayList<>();
+
+            while (urliter.hasNext()) {
+                URLItem cur = urliter.next();
+
+                if (Instant.ofEpochSecond(cur.getCreationDate()).isBefore(cutoff)) {
+                    // Add to deletion list (should not delete while iterating URLItem in
+                    // queue)
+                    toDelete.add(cur);
+                    deletedCount++;
+                }
+            }
+
+            toDelete.stream().forEach(x -> deleteURLItem(x));
+
+        } catch (Exception e1) {
+            LOG.warn(e1.getMessage(), e1);
+        }
+        return deletedCount;
     }
 
     /**

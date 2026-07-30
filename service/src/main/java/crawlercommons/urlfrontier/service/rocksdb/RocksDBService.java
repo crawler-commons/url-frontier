@@ -920,19 +920,17 @@ public class RocksDBService extends AbstractFrontierService {
         int queuesWritten = 0;
         if (!getQueues().isEmpty()) {
             ByteBuffer bb = ByteBuffer.allocate(8);
-            synchronized (getQueues()) {
-                for (Entry<QueueWithinCrawl, QueueInterface> entry : getQueues().entrySet()) {
-                    queuesWritten++;
-                    int active = entry.getValue().countActive();
-                    int completed = entry.getValue().getCountCompleted();
-                    bb.putInt(active);
-                    bb.putInt(completed);
-                    rocksDB.put(
-                            columnFamilyHandleList.get(2),
-                            entry.getKey().toString().getBytes(),
-                            bb.array());
-                    bb.clear();
-                }
+            for (Entry<QueueWithinCrawl, QueueInterface> entry : getQueues().unorderedEntries()) {
+                queuesWritten++;
+                int active = entry.getValue().countActive();
+                int completed = entry.getValue().getCountCompleted();
+                bb.putInt(active);
+                bb.putInt(completed);
+                rocksDB.put(
+                        columnFamilyHandleList.get(2),
+                        entry.getKey().toString().getBytes(),
+                        bb.array());
+                bb.clear();
             }
         }
         long end = System.currentTimeMillis();
@@ -1004,59 +1002,61 @@ public class RocksDBService extends AbstractFrontierService {
 
         final Set<QueueWithinCrawl> toDelete = new HashSet<>();
 
-        synchronized (getQueues()) {
+        ArrayList<QueueWithinCrawl> queues = new ArrayList<>();
+        for (Entry<QueueWithinCrawl, QueueInterface> entry : getQueues().unorderedEntries()) {
+            queues.add(entry.getKey());
+        }
 
-            // find the crawlIDs
-            QueueWithinCrawl[] array = getQueues().keySet().toArray(new QueueWithinCrawl[0]);
-            Arrays.sort(array);
+        // find the crawlIDs
+        QueueWithinCrawl[] array = queues.toArray(new QueueWithinCrawl[0]);
+        Arrays.sort(array);
 
-            byte[] startKey = null;
-            byte[] endKey = null;
-            for (QueueWithinCrawl prefixed_queue : array) {
-                boolean samePrefix = prefixed_queue.getCrawlid().equals(normalisedCrawlID);
-                if (samePrefix) {
-                    if (startKey == null) {
-                        startKey =
-                                (prefixed_queue.getCrawlid().replace("_", "%5F") + "_")
-                                        .getBytes(StandardCharsets.UTF_8);
-                    }
-                    toDelete.add(prefixed_queue);
-                } else if (startKey != null) {
-                    endKey =
+        byte[] startKey = null;
+        byte[] endKey = null;
+        for (QueueWithinCrawl prefixed_queue : array) {
+            boolean samePrefix = prefixed_queue.getCrawlid().equals(normalisedCrawlID);
+            if (samePrefix) {
+                if (startKey == null) {
+                    startKey =
                             (prefixed_queue.getCrawlid().replace("_", "%5F") + "_")
                                     .getBytes(StandardCharsets.UTF_8);
-                    break;
                 }
+                toDelete.add(prefixed_queue);
+            } else if (startKey != null) {
+                endKey =
+                        (prefixed_queue.getCrawlid().replace("_", "%5F") + "_")
+                                .getBytes(StandardCharsets.UTF_8);
+                break;
             }
+        }
 
-            // no queues found - nothing to delete
-            if (startKey == null) {
-                return 0;
+        // no queues found - nothing to delete
+        if (startKey == null) {
+            return 0;
+        }
+
+        try {
+            deleteRanges(startKey, endKey);
+        } catch (RocksDBException e) {
+            LOG.error(
+                    "Exception caught when deleting ranges - {} - {}",
+                    asString(startKey),
+                    asString(endKey),
+                    e);
+        }
+
+        for (QueueWithinCrawl quid : toDelete) {
+            // already being deleted by another thread?
+            if (!queuesBeingDeleted.add(quid)) {
+                continue;
             }
 
             try {
-                deleteRanges(startKey, endKey);
-            } catch (RocksDBException e) {
-                LOG.error(
-                        "Exception caught when deleting ranges - {} - {}",
-                        asString(startKey),
-                        asString(endKey),
-                        e);
-            }
-
-            for (QueueWithinCrawl quid : toDelete) {
-                // already being deleted by another thread?
-                if (!queuesBeingDeleted.add(quid)) {
-                    continue;
-                }
-
-                try {
-                    QueueInterface q = getQueues().remove(quid);
-                    total += q.countActive();
-                    total += q.getCountCompleted();
-                } finally {
-                    queuesBeingDeleted.remove(quid);
-                }
+                QueueInterface q = getQueues().remove(quid);
+                total += q.countActive();
+                total += q.getCountCompleted();
+            } finally {
+                queuesBeingDeleted.remove(quid);
             }
         }
         return total;
@@ -1382,33 +1382,31 @@ public class RocksDBService extends AbstractFrontierService {
         final String existenceKeyString = (qk.toString() + "_" + info.getUrl());
         byte[] key = existenceKeyString.getBytes(StandardCharsets.UTF_8);
 
-        synchronized (getQueues()) {
-            try {
-                // Delete scheduling entry if exists
-                byte[] schedulingKey = rocksDB.get(columnFamilyHandleList.get(0), key);
+        try {
+            // Delete scheduling entry if exists
+            byte[] schedulingKey = rocksDB.get(columnFamilyHandleList.get(0), key);
 
-                // check the value - if it is an empty byte array it means that the URL has been
-                // processed and is not scheduled
-                // otherwise it is scheduled
-                boolean completed = schedulingKey.length == 0;
+            // check the value - if it is an empty byte array it means that the URL has been
+            // processed and is not scheduled
+            // otherwise it is scheduled
+            boolean completed = schedulingKey.length == 0;
 
-                QueueMetadata queueMD = (QueueMetadata) getQueues().get(qk);
+            QueueMetadata queueMD = (QueueMetadata) getQueues().get(qk);
 
-                if (!completed) {
-                    rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
-                    queueMD.decrementActive();
-                } else {
-                    queueMD.decrementCompleted();
-                }
-
-                // Delete the creation date
-                rocksDB.delete(columnFamilyHandleList.get(3), key);
-
-                // Delete the existence key
-                rocksDB.delete(columnFamilyHandleList.get(0), key);
-            } catch (RocksDBException e1) {
-                LOG.error(e1.getMessage());
+            if (!completed) {
+                rocksDB.delete(columnFamilyHandleList.get(1), schedulingKey);
+                queueMD.decrementActive();
+            } else {
+                queueMD.decrementCompleted();
             }
+
+            // Delete the creation date
+            rocksDB.delete(columnFamilyHandleList.get(3), key);
+
+            // Delete the existence key
+            rocksDB.delete(columnFamilyHandleList.get(0), key);
+        } catch (RocksDBException e1) {
+            LOG.error(e1.getMessage());
         }
     }
 }
