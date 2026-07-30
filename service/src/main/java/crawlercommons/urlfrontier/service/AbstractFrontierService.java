@@ -760,21 +760,18 @@ public abstract class AbstractFrontierService
             final QueueInterface currentQueue;
             final QueueWithinCrawl currentCrawlQueue;
 
-            synchronized (getQueues()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = getQueues().firstEntry();
-                currentQueue = e.getValue();
-                currentCrawlQueue = e.getKey();
+            Entry<QueueWithinCrawl, QueueInterface> rotated = getQueues().rotateFirstEntry();
+            if (rotated == null) {
+                break;
+            }
+            currentQueue = rotated.getValue();
+            currentCrawlQueue = rotated.getKey();
 
-                // to make sure we don't loop over the ones we already processed
-                if (firstCrawlQueue == null) {
-                    firstCrawlQueue = currentCrawlQueue;
-                } else if (firstCrawlQueue.equals(currentCrawlQueue)) {
-                    break;
-                }
-
-                // We remove the entry and put it at the end of the map
-                Entry<QueueWithinCrawl, QueueInterface> first = getQueues().pollFirstEntry();
-                getQueues().put(first.getKey(), first.getValue());
+            // to make sure we don't loop over the ones we already processed
+            if (firstCrawlQueue == null) {
+                firstCrawlQueue = currentCrawlQueue;
+            } else if (firstCrawlQueue.equals(currentCrawlQueue)) {
+                break;
             }
 
             // if a crawlID has been specified make sure it matches
