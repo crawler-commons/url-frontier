@@ -128,24 +128,26 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
         QueueWithinCrawl qk = QueueWithinCrawl.get(key, iu.crawlID);
 
-        // get the priority queue or create one
-        synchronized (getQueues()) {
-            URLQueue queue = (URLQueue) getQueues().get(qk);
-            if (queue == null) {
-                queue = new URLQueue(iu);
-                getQueues().put(qk, queue);
-                creationDates.put(iu.url, Instant.now().getEpochSecond());
-
-                // If known and nextFetchDate, set to completed
-                if (!discovered && iu.nextFetchDate == 0) {
-                    queue.remove(iu);
-                    putURLs_completed_count.inc();
-                    queue.addToCompleted(iu.url);
-                }
-
-                return Status.OK;
+        URLQueue queue = (URLQueue) getQueues().get(qk);
+        if (queue == null) {
+            URLQueue created = new URLQueue(iu);
+            if (!discovered && iu.nextFetchDate == 0) {
+                created.remove(iu);
+                created.addToCompleted(iu.url);
             }
 
+            URLQueue existing = (URLQueue) getQueues().putIfAbsent(qk, created);
+            if (existing == null) {
+                creationDates.put(iu.url, Instant.now().getEpochSecond());
+                if (!discovered && iu.nextFetchDate == 0) {
+                    putURLs_completed_count.inc();
+                }
+                return Status.OK;
+            }
+            queue = existing;
+        }
+
+        synchronized (queue) {
             // check whether the URL already exists
             if (queue.contains(iu)) {
                 if (discovered) {
@@ -350,9 +352,8 @@ public class MemoryFrontierService extends AbstractFrontierService {
         InternalURL iu = (InternalURL) parsed[2];
 
         final QueueWithinCrawl qwc = QueueWithinCrawl.get(info.getKey(), info.getCrawlID());
-        synchronized (getQueues()) {
-            URLQueue queue = (URLQueue) getQueues().get(qwc);
-
+        URLQueue queue = (URLQueue) getQueues().get(qwc);
+        synchronized (queue) {
             if (queue.isCompleted(info.getUrl())) {
                 queue.getCompleted().remove(info.getUrl());
                 creationDates.remove(info.getUrl());
