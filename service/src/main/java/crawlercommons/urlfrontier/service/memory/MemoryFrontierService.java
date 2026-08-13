@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.LoggerFactory;
@@ -294,42 +295,40 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
         @Override
         public URLItem next() {
-            if (iterCompleted.hasNext()) {
-                String curcomplete = iterCompleted.next();
-                pos++;
-                URLInfo info =
-                        URLInfo.newBuilder()
-                                .setCrawlID(qentry.getKey().getCrawlid())
-                                .setKey(qentry.getKey().getQueue())
-                                .setUrl(curcomplete)
-                                .build();
-                if (pos >= start) {
-                    sent++;
-                    long creatDt = creationDates.get(curcomplete);
-                    return buildURLItem(builder, knownBuilder, info, 0, creatDt);
-                } else {
-                    return next();
-                }
-            } else {
-                if (sent < maxURLs && iter.hasNext()) {
+            while (sent < maxURLs) {
+                if (iterCompleted.hasNext()) {
+                    String curcomplete = iterCompleted.next();
+                    pos++;
+                    URLInfo info =
+                            URLInfo.newBuilder()
+                                    .setCrawlID(qentry.getKey().getCrawlid())
+                                    .setKey(qentry.getKey().getQueue())
+                                    .setUrl(curcomplete)
+                                    .build();
+                    if (pos > start) {
+                        sent++;
+                        long creatDt = creationDates.get(curcomplete);
+                        return buildURLItem(builder, knownBuilder, info, 0, creatDt);
+                    }
+                } else if (iter.hasNext()) {
                     try {
                         InternalURL item = iter.next();
                         pos++;
                         URLInfo info = item.toURLInfo(qentry.getKey());
-                        if (pos >= start) {
+                        if (pos > start) {
                             sent++;
                             long creatDt = creationDates.get(item.url);
                             return buildURLItem(
                                     builder, knownBuilder, info, item.nextFetchDate, creatDt);
-                        } else {
-                            return next();
                         }
                     } catch (InvalidProtocolBufferException e) {
                         LOG.error(e.getMessage(), e);
                     }
+                } else {
+                    break;
                 }
             }
-            return null; // shouldn't happen
+            throw new NoSuchElementException();
         }
 
         @Override
@@ -353,6 +352,10 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
         final QueueWithinCrawl qwc = QueueWithinCrawl.get(info.getKey(), info.getCrawlID());
         URLQueue queue = (URLQueue) getQueues().get(qwc);
+        if (queue == null) {
+            return;
+        }
+
         synchronized (queue) {
             if (queue.isCompleted(info.getUrl())) {
                 queue.getCompleted().remove(info.getUrl());
