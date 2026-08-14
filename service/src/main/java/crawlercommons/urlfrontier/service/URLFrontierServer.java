@@ -143,9 +143,22 @@ public class URLFrontierServer implements Callable<Integer> {
             }
         }
 
-        // get the implementation class from the config if set
-        implementationClassName =
-                configuration.getOrDefault("implementation", implementationClassName);
+        // Validate known numeric config keys so errors name the offending key at startup
+        validateNumericConfig(
+                configuration,
+                LOG,
+                "read.thread.num",
+                "write.thread.num",
+                "putURLs.max.inflight",
+                "putDiscovered.max.inflight",
+                "rocksdb.max_background_jobs",
+                "rocksdb.max_subcompactions");
+
+        // get the implementation class from the config if set (ignore empty/flag-style values)
+        String impl = configuration.get("implementation");
+        if (impl != null && !impl.isEmpty()) {
+            implementationClassName = impl;
+        }
 
         Class<?> implementationClass = Class.forName(implementationClassName);
 
@@ -254,7 +267,29 @@ public class URLFrontierServer implements Callable<Integer> {
         }
     }
 
-    private static final void addToConfig(final Map<String, String> config, String line) {
+    /** Validate that known numeric config keys hold parseable integer values. */
+    private static void validateNumericConfig(
+            final Map<String, String> configuration,
+            final org.slf4j.Logger log,
+            final String... keys) {
+        for (String key : keys) {
+            String val = configuration.get(key);
+            if (val != null && !val.isEmpty()) {
+                try {
+                    Integer.parseInt(val);
+                } catch (NumberFormatException e) {
+                    log.error("Invalid numeric config value for '{}': '{}'", key, val);
+                    System.exit(-1);
+                }
+            }
+        }
+    }
+
+    /**
+     * Parse a single config line into the map. Lines without '=' are treated as flag-style keys
+     * with an empty string value (preserves containsKey, fixes getOrDefault).
+     */
+    static final void addToConfig(final Map<String, String> config, String line) {
         if (line == null || line.length() == 0) return;
 
         line = line.trim();
@@ -263,9 +298,9 @@ public class URLFrontierServer implements Callable<Integer> {
 
         // = to separate key from value
         int pos = line.indexOf('=');
-        // no value
+        // no '=' -> flag-style key with empty value (preserves containsKey, fixes getOrDefault)
         if (pos == -1) {
-            config.put(line, null);
+            config.put(line, "");
             return;
         }
         String key = line.substring(0, pos).trim();

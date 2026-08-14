@@ -93,7 +93,8 @@ public class RocksDBService extends AbstractFrontierService {
         super(configuration, host, port);
 
         // where to store it?
-        String path = configuration.getOrDefault("rocksdb.path", "./rocksdb");
+        String sPath = configuration.get("rocksdb.path");
+        String path = (sPath != null && !sPath.isEmpty()) ? sPath : "./rocksdb";
 
         LOG.info("RocksDB data stored in {} ", path);
 
@@ -120,12 +121,12 @@ public class RocksDBService extends AbstractFrontierService {
         try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()) {
 
             String sMaxBytesForLevelBase = configuration.get("rocksdb.max_bytes_for_level_base");
-            if (sMaxBytesForLevelBase != null) {
+            if (sMaxBytesForLevelBase != null && !sMaxBytesForLevelBase.isEmpty()) {
                 cfOpts.setMaxBytesForLevelBase(Long.parseLong(sMaxBytesForLevelBase));
             }
 
             String sMemtableBudget = configuration.get("rocksdb.memtable_memory_budget");
-            if (sMemtableBudget != null) {
+            if (sMemtableBudget != null && !sMemtableBudget.isEmpty()) {
                 cfOpts.optimizeUniversalStyleCompaction(Long.parseLong(sMemtableBudget));
             } else {
                 cfOpts.optimizeUniversalStyleCompaction();
@@ -156,13 +157,13 @@ public class RocksDBService extends AbstractFrontierService {
                 }
 
                 String smaxBackgroundJobs = configuration.get("rocksdb.max_background_jobs");
-                if (smaxBackgroundJobs != null) {
+                if (smaxBackgroundJobs != null && !smaxBackgroundJobs.isEmpty()) {
                     options.setMaxBackgroundJobs(Integer.parseInt(smaxBackgroundJobs));
                 }
 
                 // Options.max_subcompactions: 1
                 String smax_subcompactions = configuration.get("rocksdb.max_subcompactions");
-                if (smax_subcompactions != null) {
+                if (smax_subcompactions != null && !smax_subcompactions.isEmpty()) {
                     options.setMaxSubcompactions(Integer.parseInt(smax_subcompactions));
                 }
 
@@ -238,7 +239,7 @@ public class RocksDBService extends AbstractFrontierService {
 
         double bitsPerKey = 10d;
         final String sBitsPerKey = configuration.get("rocksdb.bloom.filters.bits_per_key");
-        if (sBitsPerKey != null) {
+        if (sBitsPerKey != null && !sBitsPerKey.isEmpty()) {
             bitsPerKey = Double.parseDouble(sBitsPerKey);
         }
 

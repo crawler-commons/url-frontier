@@ -160,22 +160,37 @@ public abstract class AbstractFrontierService
         LOG.info("Available processor(s) {}", availableProcessor);
         // by default uses 1/4 of the available processors
         final String defaultParallelism = Integer.toString(Math.max(availableProcessor / 4, 1));
+        final String sReadThreads = configuration.get("read.thread.num");
         final int rthreadNum =
-                Integer.parseInt(configuration.getOrDefault("read.thread.num", defaultParallelism));
+                Integer.parseInt(
+                        sReadThreads != null && !sReadThreads.isEmpty()
+                                ? sReadThreads
+                                : defaultParallelism);
         LOG.info("Using {} threads for reading from queues", rthreadNum);
         readExecutorService = Executors.newFixedThreadPool(rthreadNum);
+        final String sWriteThreads = configuration.get("write.thread.num");
         final int wthreadNum =
                 Integer.parseInt(
-                        configuration.getOrDefault("write.thread.num", defaultParallelism));
+                        sWriteThreads != null && !sWriteThreads.isEmpty()
+                                ? sWriteThreads
+                                : defaultParallelism);
         writeExecutorService = Executors.newFixedThreadPool(wthreadNum);
         LOG.info("Using {} threads for writing to queues", wthreadNum);
+        final String sPutURLsMaxInFlight = configuration.get("putURLs.max.inflight");
         putURLsMaxInFlight =
-                Integer.parseInt(configuration.getOrDefault("putURLs.max.inflight", "1024"));
+                Integer.parseInt(
+                        sPutURLsMaxInFlight != null && !sPutURLsMaxInFlight.isEmpty()
+                                ? sPutURLsMaxInFlight
+                                : "1024");
         if (putURLsMaxInFlight > 0) {
             LOG.info("Limiting putURLs streams to {} URLs in flight", putURLsMaxInFlight);
         }
+        final String sPutDiscoveredMaxInFlight = configuration.get("putDiscovered.max.inflight");
         putDiscoveredMaxInFlight =
-                Integer.parseInt(configuration.getOrDefault("putDiscovered.max.inflight", "16"));
+                Integer.parseInt(
+                        sPutDiscoveredMaxInFlight != null && !sPutDiscoveredMaxInFlight.isEmpty()
+                                ? sPutDiscoveredMaxInFlight
+                                : "16");
         if (putDiscoveredMaxInFlight > 0) {
             LOG.info(
                     "Limiting putDiscovered streams to {} batches in flight",
