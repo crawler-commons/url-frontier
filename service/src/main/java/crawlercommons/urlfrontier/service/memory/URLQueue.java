@@ -4,7 +4,6 @@
 package crawlercommons.urlfrontier.service.memory;
 
 import crawlercommons.urlfrontier.service.QueueInterface;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
@@ -31,14 +30,13 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
 
     @Override
     public int getInProcess(long now) {
-        // a URL in process has a heldUntil and is at the beginning of a queue
-        Iterator<InternalURL> iter = this.iterator();
+        // heldUntil is not part of the sort order and the iterator follows the backing heap
+        // array anyway, so every element has to be checked
         int inproc = 0;
-        while (iter.hasNext()) {
-            InternalURL iu = iter.next();
-            if (iu.heldUntil > now) inproc++;
-            // can stop if no heldUntil at all
-            else if (iu.heldUntil == -1) return inproc;
+        for (InternalURL iu : this) {
+            if (iu.heldUntil > now) {
+                inproc++;
+            }
         }
         return inproc;
     }

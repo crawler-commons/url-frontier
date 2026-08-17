@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +57,17 @@ public class MemoryFrontierService extends AbstractFrontierService {
             int secsUntilRequestable,
             long now,
             SynchronizedStreamObserver<URLInfo> responseObserver) {
-        Iterator<InternalURL> iter = ((PriorityQueue<InternalURL>) queue).iterator();
+        final URLQueue pq = (URLQueue) queue;
+
+        // PriorityQueue.iterator() walks the backing heap array and is not in sort order: only
+        // the head is guaranteed to be the minimum. Use it as a cheap way to rule out the common
+        // case where nothing is due, and sort explicitly when there is something to send.
+        final InternalURL head = pq.peek();
+        if (head == null || head.nextFetchDate > now) {
+            return 0;
+        }
+
+        Iterator<InternalURL> iter = pq.stream().sorted().iterator();
         int alreadySent = 0;
 
         while (iter.hasNext() && alreadySent < maxURLsPerQueue) {
@@ -66,7 +75,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
             // check that is is due
             if (item.nextFetchDate > now) {
-                // they are sorted by date no need to go further
+                // sorted by date, no need to go further
                 return alreadySent;
             }
 
