@@ -42,6 +42,13 @@ service URLFrontier {
      /** Push URL items to the server; they get created (if they don't already exist) in case of DiscoveredURLItems or updated if KnownURLItems **/
      rpc PutURLs(stream URLItem) returns (stream AckMessage) {}
 
+     /** Push batches of discovered URLs to the server; a URL gets created unless it is already known, in which case it is ignored.
+      The outlinks of a page form a natural batch. Sending them in one message rather than one each amortises the per-message cost,
+      which is what limits the ingestion rate: use this for the discovered URLs, which are the bulk of what a crawl writes, and
+      PutURLs for the updates of URLs which have been fetched. Each batch is acked as a whole, with one status per URL in the same
+      order as the batch. **/
+     rpc PutDiscovered(stream DiscoveredBatch) returns (stream BatchAck) {}
+
      /** Return stats for a specific queue or an entire crawl. Does not aggregate the stats across different crawlids. **/
      rpc GetStats(QueueWithinCrawlParams) returns (Stats) {}
      
@@ -285,6 +292,24 @@ message KnownURLItem {
 **/
 message DiscoveredURLItem {
   URLInfo info = 1;
+}
+
+/**
+ A batch of URLs discovered during the crawl, typically the outlinks of one page.
+ Each of them might already be known in the URL Frontier or not.
+**/
+message DiscoveredBatch {
+  /** Identifier specified by the client, echoed in the BatchAck **/
+  string ID = 1;
+  repeated URLInfo items = 2;
+}
+
+/** Acknowledges a whole DiscoveredBatch **/
+message BatchAck {
+  /** ID which had been specified by the client **/
+  string ID = 1;
+  /** one status per URL of the batch, in the order they were sent **/
+  repeated AckMessage.Status statuses = 2;
 }
 
 /**

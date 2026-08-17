@@ -9,6 +9,8 @@ import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
+import crawlercommons.urlfrontier.Urlfrontier.BatchAck;
+import crawlercommons.urlfrontier.Urlfrontier.DiscoveredBatch;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
@@ -77,10 +79,32 @@ public class PutURLs implements Callable<Integer> {
                             + " (default to 10000)")
     private int inFlight;
 
+    @Option(
+            names = {"-b", "--batch"},
+            defaultValue = "0",
+            paramLabel = "NUM",
+            description =
+                    "number of discovered URLs to send per message through the PutDiscovered"
+                            + " endpoint, which amortises the per-message cost (default to 0,"
+                            + " i.e. every URL is sent individually through PutURLs). Known URLs"
+                            + " always go through PutURLs. Falls back to sending everything"
+                            + " individually if the server has no PutDiscovered.")
+    private int batch;
+
+    /** value of {@link #batch} actually applied, 0 when the server has no PutDiscovered */
+    private int effectiveBatch;
+
     @Override
     public Integer call() {
 
         final int streams = Math.max(1, threads);
+
+        effectiveBatch = batch;
+        if (effectiveBatch > 0 && !serverSupportsPutDiscovered()) {
+            System.err.println(
+                    "Server does not support PutDiscovered - sending the URLs individually");
+            effectiveBatch = 0;
+        }
 
         final AtomicInteger sent = new AtomicInteger(0);
         final AtomicInteger acked = new AtomicInteger(0);
@@ -185,6 +209,103 @@ public class PutURLs implements Callable<Integer> {
     }
 
     /**
+     * Probes the server with an empty batch: an old server answers the call itself with
+     * UNIMPLEMENTED, a current one acks it.
+     */
+    private boolean serverSupportsPutDiscovered() {
+        final ManagedChannel channel =
+                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
+                        .usePlaintext()
+                        .build();
+        try {
+            final CountDownLatch done = new CountDownLatch(1);
+            final AtomicBoolean supported = new AtomicBoolean(false);
+            StreamObserver<DiscoveredBatch> stream =
+                    URLFrontierGrpc.newStub(channel)
+                            .putDiscovered(
+                                    new StreamObserver<BatchAck>() {
+                                        @Override
+                                        public void onNext(BatchAck value) {
+                                            supported.set(true);
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable t) {
+                                            done.countDown();
+                                        }
+
+                                        @Override
+                                        public void onCompleted() {
+                                            done.countDown();
+                                        }
+                                    });
+            try {
+                stream.onNext(DiscoveredBatch.newBuilder().setID("probe").build());
+                stream.onCompleted();
+            } catch (IllegalStateException e) {
+                // the call got terminated straight away
+            }
+            try {
+                done.await(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return supported.get();
+        } finally {
+            channel.shutdownNow();
+        }
+    }
+
+    /**
+     * Waits for room in the window and for the transport, then sends the buffered items as one
+     * batch. Returns false when the stream died or the thread got interrupted.
+     */
+    private static boolean flushBatch(
+            final List<URLInfo> buffer,
+            final StreamObserver<DiscoveredBatch> batchStream,
+            final ClientCallStreamObserver<DiscoveredBatch> transport,
+            final Object flow,
+            final int window,
+            final AtomicInteger streamSent,
+            final AtomicInteger streamAcked,
+            final AtomicInteger sent,
+            final AtomicBoolean thisStreamFailed,
+            final AtomicInteger batchSequence) {
+        if (buffer.isEmpty()) {
+            return true;
+        }
+        try {
+            synchronized (flow) {
+                while (!thisStreamFailed.get()
+                        && (streamSent.get() > streamAcked.get() + window
+                                || (transport != null && !transport.isReady()))) {
+                    flow.wait(100);
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+        if (thisStreamFailed.get()) {
+            return false;
+        }
+        try {
+            batchStream.onNext(
+                    DiscoveredBatch.newBuilder()
+                            .setID(Integer.toString(batchSequence.incrementAndGet()))
+                            .addAllItems(buffer)
+                            .build());
+            streamSent.addAndGet(buffer.size());
+            sent.addAndGet(buffer.size());
+            buffer.clear();
+            return true;
+        } catch (IllegalStateException e) {
+            // the stream got terminated while we were sending
+            return false;
+        }
+    }
+
+    /**
      * Sends URLs taken from the shared source on a stream of its own until the source is exhausted,
      * then waits for the Frontier to confirm every one of them.
      */
@@ -212,9 +333,9 @@ public class PutURLs implements Callable<Integer> {
             final AtomicInteger streamSent = new AtomicInteger(0);
             final AtomicInteger streamAcked = new AtomicInteger(0);
 
-            // counted down when the Frontier closes the stream, which it only does once
+            // counted down when the Frontier closes the streams, which it only does once
             // everything it received has been acked
-            final CountDownLatch finished = new CountDownLatch(1);
+            final CountDownLatch finished = new CountDownLatch(effectiveBatch > 0 ? 2 : 1);
 
             // errors on this stream only, the shared flag is for the exit code
             final AtomicBoolean thisStreamFailed = new AtomicBoolean(false);
@@ -284,6 +405,72 @@ public class PutURLs implements Callable<Integer> {
 
             final StreamObserver<URLItem> streamObserver = stub.putURLs(responseObserver);
 
+            // the discovered URLs accumulate here and leave as one message per batch
+            // on a PutDiscovered stream of their own; known URLs keep using PutURLs
+            final List<URLInfo> buffer = new ArrayList<>(Math.max(1, effectiveBatch));
+            final AtomicInteger batchSequence = new AtomicInteger();
+            final AtomicReference<ClientCallStreamObserver<DiscoveredBatch>> batchTransport =
+                    new AtomicReference<>();
+
+            StreamObserver<DiscoveredBatch> batchStream = null;
+            if (effectiveBatch > 0) {
+                batchStream =
+                        stub.putDiscovered(
+                                new ClientResponseObserver<DiscoveredBatch, BatchAck>() {
+
+                                    @Override
+                                    public void beforeStart(
+                                            ClientCallStreamObserver<DiscoveredBatch> stream) {
+                                        batchTransport.set(stream);
+                                        stream.setOnReadyHandler(
+                                                () -> {
+                                                    synchronized (flow) {
+                                                        flow.notifyAll();
+                                                    }
+                                                });
+                                    }
+
+                                    @Override
+                                    public void onNext(BatchAck value) {
+                                        final int n = value.getStatusesCount();
+                                        streamAcked.addAndGet(n);
+                                        acked.addAndGet(n);
+                                        for (AckMessage.Status status : value.getStatusesList()) {
+                                            if (status.equals(AckMessage.Status.SKIPPED)) {
+                                                skipped.getAndIncrement();
+                                            } else if (status.equals(AckMessage.Status.FAIL)) {
+                                                failed.getAndIncrement();
+                                            } else if (status.equals(AckMessage.Status.OK)) {
+                                                ok.getAndIncrement();
+                                            }
+                                        }
+                                        synchronized (flow) {
+                                            flow.notifyAll();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable t) {
+                                        thisStreamFailed.set(true);
+                                        streamError.set(true);
+                                        System.err.println(
+                                                "Error while sending the URLs: " + t.getMessage());
+                                        finished.countDown();
+                                        synchronized (flow) {
+                                            flow.notifyAll();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCompleted() {
+                                        finished.countDown();
+                                        synchronized (flow) {
+                                            flow.notifyAll();
+                                        }
+                                    }
+                                });
+            }
+
             boolean interrupted = false;
 
             outer:
@@ -311,6 +498,27 @@ public class PutURLs implements Callable<Integer> {
                     URLItem item = parse(chunk.lines.get(i), crawl);
                     if (item == null) {
                         System.err.println("Invalid input line " + (chunk.firstLineNumber + i));
+                        continue;
+                    }
+
+                    // discovered URLs travel in batches when the option is on
+                    if (effectiveBatch > 0 && item.hasDiscovered()) {
+                        buffer.add(item.getDiscovered().getInfo());
+                        if (buffer.size() >= effectiveBatch
+                                && !flushBatch(
+                                        buffer,
+                                        batchStream,
+                                        batchTransport.get(),
+                                        flow,
+                                        window,
+                                        streamSent,
+                                        streamAcked,
+                                        sent,
+                                        thisStreamFailed,
+                                        batchSequence)) {
+                            interrupted = Thread.currentThread().isInterrupted();
+                            break outer;
+                        }
                         continue;
                     }
 
@@ -348,11 +556,33 @@ public class PutURLs implements Callable<Integer> {
                 }
             }
 
-            // the server has already terminated the stream on error
-            if (!thisStreamFailed.get()) {
+            // whatever remains in the buffer goes out before the streams are closed
+            if (effectiveBatch > 0 && !interrupted) {
+                flushBatch(
+                        buffer,
+                        batchStream,
+                        batchTransport.get(),
+                        flow,
+                        window,
+                        streamSent,
+                        streamAcked,
+                        sent,
+                        thisStreamFailed,
+                        batchSequence);
+            }
+
+            // both streams are completed even if one of them failed: the healthy one
+            // only counts the latch down once the server has closed it, which the
+            // server only does after everything it received has been acked
+            try {
+                streamObserver.onCompleted();
+            } catch (RuntimeException e) {
+                // the stream got terminated in the meantime
+            }
+            if (batchStream != null) {
                 try {
-                    streamObserver.onCompleted();
-                } catch (IllegalStateException e) {
+                    batchStream.onCompleted();
+                } catch (RuntimeException e) {
                     // the stream got terminated in the meantime
                 }
             }

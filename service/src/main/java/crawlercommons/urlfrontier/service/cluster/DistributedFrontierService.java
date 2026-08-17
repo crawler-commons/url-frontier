@@ -884,4 +884,26 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
     }
 
     protected abstract Status putURLItem(URLItem item);
+
+    /**
+     * A batch typically spans several partitions and would have to be split and re-batched per
+     * node, which is not implemented yet: clients fall back to the per-URL stream instead.
+     */
+    @Override
+    public io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.DiscoveredBatch>
+            putDiscovered(
+                    io.grpc.stub.StreamObserver<crawlercommons.urlfrontier.Urlfrontier.BatchAck>
+                            responseObserver) {
+        responseObserver.onError(io.grpc.Status.UNIMPLEMENTED.asRuntimeException());
+        return new io.grpc.stub.StreamObserver<>() {
+            @Override
+            public void onNext(crawlercommons.urlfrontier.Urlfrontier.DiscoveredBatch value) {}
+
+            @Override
+            public void onError(Throwable t) {}
+
+            @Override
+            public void onCompleted() {}
+        };
+    }
 }

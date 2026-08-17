@@ -6,10 +6,19 @@ package crawlercommons.urlfrontier.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -363,5 +372,212 @@ class ConcurrentOrderedMapTest {
         // All entries should have been polled exactly once
         assertEquals(NUM_ITERATIONS, polledKeys.size());
         assertTrue(map.isEmpty());
+    }
+
+    @Test
+    void testRotateFirstEntryMovesHeadToTail() {
+        map.put("key1", "value1");
+        map.put("key2", "value2");
+        map.put("key3", "value3");
+
+        Map.Entry<String, String> rotated = map.rotateFirstEntry();
+
+        assertEquals("key1", rotated.getKey());
+        assertEquals("value1", rotated.getValue());
+
+        Iterator<String> iterator = map.keySet().iterator();
+        assertEquals("key2", iterator.next());
+        assertEquals("key3", iterator.next());
+        assertEquals("key1", iterator.next());
+    }
+
+    @Test
+    void testRotateFirstEntryOnEmptyMapReturnsNull() {
+        assertNull(map.rotateFirstEntry());
+    }
+
+    @Test
+    void testConcurrentRotateFirstEntryPreservesSequentialOrder() throws InterruptedException {
+        map.put("key1", "value1");
+        map.put("key2", "value2");
+        map.put("key3", "value3");
+
+        CountDownLatch start = new CountDownLatch(1);
+        AtomicReference<Map.Entry<String, String>> first = new AtomicReference<>();
+        AtomicReference<Map.Entry<String, String>> second = new AtomicReference<>();
+
+        Thread t1 =
+                new Thread(
+                        () -> {
+                            await(start);
+                            first.set(map.rotateFirstEntry());
+                        });
+        Thread t2 =
+                new Thread(
+                        () -> {
+                            await(start);
+                            second.set(map.rotateFirstEntry());
+                        });
+
+        t1.start();
+        t2.start();
+        start.countDown();
+        t1.join();
+        t2.join();
+
+        Set<String> returned = Set.of(first.get().getKey(), second.get().getKey());
+        assertEquals(Set.of("key1", "key2"), returned);
+
+        Iterator<String> iterator = map.keySet().iterator();
+        assertEquals("key3", iterator.next());
+        assertEquals("key1", iterator.next());
+        assertEquals("key2", iterator.next());
+    }
+
+    @Test
+    void testSingleKeyConcurrentRotationsNeverReturnNull() throws Exception {
+        map.put("key1", "value1");
+
+        int threads = 2;
+        int iterations = 5_000;
+        ExecutorService pool = Executors.newFixedThreadPool(threads);
+        List<Future<?>> futures = new ArrayList<>();
+        for (int t = 0; t < threads; t++) {
+            futures.add(
+                    pool.submit(
+                            () -> {
+                                for (int i = 0; i < iterations; i++) {
+                                    assertNotNull(map.rotateFirstEntry());
+                                }
+                            }));
+        }
+        for (Future<?> f : futures) {
+            f.get();
+        }
+        pool.shutdown();
+        assertEquals(1, map.size());
+    }
+
+    @Test
+    void testGetNeverNullWhileRotating() throws Exception {
+        for (int i = 0; i < 8; i++) {
+            map.put("key" + i, "value" + i);
+        }
+        AtomicBoolean running = new AtomicBoolean(true);
+        Thread rotator =
+                new Thread(
+                        () -> {
+                            while (running.get()) {
+                                map.rotateFirstEntry();
+                            }
+                        });
+        rotator.start();
+        try {
+            for (int pass = 0; pass < 100_000; pass++) {
+                assertNotNull(map.get("key" + (pass % 8)));
+            }
+        } finally {
+            running.set(false);
+            rotator.join();
+        }
+    }
+
+    @Test
+    void testUnorderedEntriesSeeAllKeysWhileRotating() throws InterruptedException {
+        int keyCount = 16;
+        Set<String> expected = new HashSet<>();
+        for (int i = 0; i < keyCount; i++) {
+            String key = "key" + i;
+            expected.add(key);
+            map.put(key, "value" + i);
+        }
+
+        AtomicBoolean running = new AtomicBoolean(true);
+        Thread rotator =
+                new Thread(
+                        () -> {
+                            while (running.get()) {
+                                assertNotNull(map.rotateFirstEntry());
+                            }
+                        });
+        rotator.start();
+
+        try {
+            for (int pass = 0; pass < 200; pass++) {
+                Set<String> seen = new HashSet<>();
+                for (Map.Entry<String, String> entry : map.unorderedEntries()) {
+                    seen.add(entry.getKey());
+                }
+                assertEquals(expected, seen);
+            }
+        } finally {
+            running.set(false);
+            rotator.join();
+        }
+    }
+
+    @Test
+    void testConcurrentRotateRemoveAndRecreateKeepsOneLiveEntryPerKey()
+            throws InterruptedException {
+        int keyCount = 8;
+        List<String> keys = new ArrayList<>();
+        for (int i = 0; i < keyCount; i++) {
+            String key = "key" + i;
+            keys.add(key);
+            map.put(key, "value" + i);
+        }
+
+        AtomicBoolean running = new AtomicBoolean(true);
+        AtomicBoolean rotateReturnedNull = new AtomicBoolean(false);
+
+        Thread rotator =
+                new Thread(
+                        () -> {
+                            while (running.get()) {
+                                if (map.rotateFirstEntry() == null) {
+                                    rotateReturnedNull.set(true);
+                                }
+                            }
+                        });
+        Thread recreator =
+                new Thread(
+                        () -> {
+                            for (int i = 0; i < 10_000; i++) {
+                                String key = keys.get(i % keys.size());
+                                map.remove(key);
+                                map.putIfAbsent(key, "recreated-" + i);
+                            }
+                        });
+
+        rotator.start();
+        recreator.start();
+        recreator.join();
+        running.set(false);
+        rotator.join();
+
+        assertFalse(rotateReturnedNull.get(), "rotation returned null while the map stayed live");
+        assertEquals(keyCount, map.size());
+
+        Set<String> fromEntrySet = new HashSet<>();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            assertTrue(
+                    fromEntrySet.add(entry.getKey()),
+                    "duplicate ordered entry for " + entry.getKey());
+        }
+
+        assertEquals(keyCount, fromEntrySet.size());
+        for (String key : keys) {
+            assertTrue(fromEntrySet.contains(key));
+            assertNotNull(map.get(key));
+        }
+    }
+
+    private static void await(CountDownLatch latch) {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 }

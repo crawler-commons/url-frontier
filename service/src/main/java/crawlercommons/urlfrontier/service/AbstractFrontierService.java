@@ -10,10 +10,13 @@ import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage.Status;
+import crawlercommons.urlfrontier.Urlfrontier.BatchAck;
 import crawlercommons.urlfrontier.Urlfrontier.BlockQueueParams;
 import crawlercommons.urlfrontier.Urlfrontier.Boolean;
 import crawlercommons.urlfrontier.Urlfrontier.CountUrlParams;
 import crawlercommons.urlfrontier.Urlfrontier.CrawlLimitParams;
+import crawlercommons.urlfrontier.Urlfrontier.DiscoveredBatch;
+import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.Empty;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
@@ -87,6 +90,12 @@ public abstract class AbstractFrontierService
                     .help("Number of times putURLs has been called.")
                     .register();
 
+    protected static final Counter putDiscovered_calls =
+            Counter.build()
+                    .name("frontier_putDiscovered_calls_total")
+                    .help("Number of times putDiscovered has been called.")
+                    .register();
+
     protected static final Counter putURLs_urls_count =
             Counter.build()
                     .name("frontier_putURLs_total")
@@ -137,6 +146,9 @@ public abstract class AbstractFrontierService
     // reading from it, 0 or less to let the client send as fast as it likes
     protected final int putURLsMaxInFlight;
 
+    // same thing for putDiscovered, counted in batches rather than URLs
+    protected final int putDiscoveredMaxInFlight;
+
     protected AbstractFrontierService(String host, int port) {
         this(Collections.emptyMap(), host, port);
     }
@@ -161,6 +173,13 @@ public abstract class AbstractFrontierService
                 Integer.parseInt(configuration.getOrDefault("putURLs.max.inflight", "1024"));
         if (putURLsMaxInFlight > 0) {
             LOG.info("Limiting putURLs streams to {} URLs in flight", putURLsMaxInFlight);
+        }
+        putDiscoveredMaxInFlight =
+                Integer.parseInt(configuration.getOrDefault("putDiscovered.max.inflight", "16"));
+        if (putDiscoveredMaxInFlight > 0) {
+            LOG.info(
+                    "Limiting putDiscovered streams to {} batches in flight",
+                    putDiscoveredMaxInFlight);
         }
     }
 
@@ -251,10 +270,7 @@ public abstract class AbstractFrontierService
 
             final Set<QueueWithinCrawl> toDelete = new HashSet<>();
 
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                    getQueues().entrySet().iterator();
-            while (iterator.hasNext()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
+            for (Entry<QueueWithinCrawl, QueueInterface> e : getQueues().unorderedEntries()) {
                 QueueWithinCrawl qwc = e.getKey();
                 if (qwc.getCrawlid().equals(normalisedCrawlID)) {
                     toDelete.add(qwc);
@@ -263,7 +279,9 @@ public abstract class AbstractFrontierService
 
             for (QueueWithinCrawl quid : toDelete) {
                 QueueInterface q = getQueues().remove(quid);
-                total += q.countActive();
+                if (q != null) {
+                    total += q.countActive();
+                }
             }
         }
         responseObserver.onNext(
@@ -431,7 +449,9 @@ public abstract class AbstractFrontierService
         if (!isClosing()) {
             QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
             QueueInterface q = getQueues().remove(qwc);
-            countActive = q.countActive();
+            if (q != null) {
+                countActive = q.countActive();
+            }
         }
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
@@ -741,21 +761,18 @@ public abstract class AbstractFrontierService
             final QueueInterface currentQueue;
             final QueueWithinCrawl currentCrawlQueue;
 
-            synchronized (getQueues()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = getQueues().firstEntry();
-                currentQueue = e.getValue();
-                currentCrawlQueue = e.getKey();
+            Entry<QueueWithinCrawl, QueueInterface> rotated = getQueues().rotateFirstEntry();
+            if (rotated == null) {
+                break;
+            }
+            currentQueue = rotated.getValue();
+            currentCrawlQueue = rotated.getKey();
 
-                // to make sure we don't loop over the ones we already processed
-                if (firstCrawlQueue == null) {
-                    firstCrawlQueue = currentCrawlQueue;
-                } else if (firstCrawlQueue.equals(currentCrawlQueue)) {
-                    break;
-                }
-
-                // We remove the entry and put it at the end of the map
-                Entry<QueueWithinCrawl, QueueInterface> first = getQueues().pollFirstEntry();
-                getQueues().put(first.getKey(), first.getValue());
+            // to make sure we don't loop over the ones we already processed
+            if (firstCrawlQueue == null) {
+                firstCrawlQueue = currentCrawlQueue;
+            } else if (firstCrawlQueue.equals(currentCrawlQueue)) {
+                break;
             }
 
             // if a crawlID has been specified make sure it matches
@@ -869,20 +886,19 @@ public abstract class AbstractFrontierService
      * a gRPC call, as used by the tests, are returned unchanged, as is everything when maxInFlight
      * is 0 or less.
      */
-    protected static StreamObserver<AckMessage> limitInFlight(
-            StreamObserver<AckMessage> responseObserver, int maxInFlight) {
+    protected static <V> StreamObserver<V> limitInFlight(
+            StreamObserver<V> responseObserver, int maxInFlight) {
         if (maxInFlight <= 0 || !(responseObserver instanceof ServerCallStreamObserver)) {
             return responseObserver;
         }
-        final ServerCallStreamObserver<AckMessage> call =
-                (ServerCallStreamObserver<AckMessage>) responseObserver;
+        final ServerCallStreamObserver<V> call = (ServerCallStreamObserver<V>) responseObserver;
         call.disableAutoRequest();
         call.request(maxInFlight);
         return new StreamObserver<>() {
             @Override
-            public void onNext(AckMessage value) {
+            public void onNext(V value) {
                 call.onNext(value);
-                // the ack releases one more URL from the stream; the client may
+                // the ack releases one more message from the stream; the client may
                 // have gone away in the meantime, which is its problem, not ours
                 try {
                     call.request(1);
@@ -994,6 +1010,121 @@ public abstract class AbstractFrontierService
      * succeeded
      */
     protected abstract AckMessage.Status putURLItem(URLItem value);
+
+    @Override
+    public StreamObserver<DiscoveredBatch> putDiscovered(
+            StreamObserver<BatchAck> responseObserver) {
+
+        putDiscovered_calls.inc();
+
+        final StreamObserver<BatchAck> sso =
+                SynchronizedStreamObserver.wrapping(
+                        limitInFlight(responseObserver, putDiscoveredMaxInFlight), -1);
+
+        return new StreamObserver<>() {
+
+            // closes the response once the client has stopped sending and every batch
+            // handed to the write executor has been acked
+            final AsyncCompletion completion = new AsyncCompletion(sso::onCompleted);
+
+            @Override
+            public void onNext(DiscoveredBatch batch) {
+
+                final BatchAck.Builder ack = BatchAck.newBuilder().setID(batch.getID());
+
+                // do not add new stuff if we are in the process of closing
+                if (isClosing()) {
+                    for (int i = 0; i < batch.getItemsCount(); i++) {
+                        ack.addStatuses(Status.FAIL);
+                    }
+                    sso.onNext(ack.build());
+                    return;
+                }
+
+                completion.taskStarted();
+
+                try {
+                    writeExecutorService.execute(
+                            () -> {
+                                try {
+                                    for (Status status : putDiscoveredItems(batch.getItemsList())) {
+                                        ack.addStatuses(status);
+                                    }
+                                } catch (RuntimeException e) {
+                                    LOG.error(
+                                            "Caught exception while adding a batch of {} URLs",
+                                            batch.getItemsCount(),
+                                            e);
+                                    ack.clearStatuses();
+                                    for (int i = 0; i < batch.getItemsCount(); i++) {
+                                        ack.addStatuses(Status.FAIL);
+                                    }
+                                } finally {
+                                    // the ack must go out whatever happened or the stream
+                                    // never gets closed and its budget never replenished
+                                    try {
+                                        sso.onNext(ack.build());
+                                    } finally {
+                                        completion.taskDone();
+                                    }
+                                }
+                            });
+                } catch (RejectedExecutionException e) {
+                    // the task never started: tell the client instead of leaving it waiting
+                    LOG.error(
+                            "Executor rejected putDiscovered batch of {} URLs",
+                            batch.getItemsCount(),
+                            e);
+                    for (int i = 0; i < batch.getItemsCount(); i++) {
+                        ack.addStatuses(Status.FAIL);
+                    }
+                    sso.onNext(ack.build());
+                    completion.taskDone();
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                if (t instanceof StatusRuntimeException) {
+                    // ignore messages about the client having cancelled
+                    if (((StatusRuntimeException) t)
+                            .getStatus()
+                            .getCode()
+                            .equals(io.grpc.Status.Code.CANCELLED)) {
+                        return;
+                    }
+                }
+                LOG.error("Error reported {}", t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                // the response is closed here if all the work for this stream has already
+                // ended, or by the last batch to be acked otherwise
+                completion.noMoreTasks();
+            }
+        };
+    }
+
+    /**
+     * Processes a batch of discovered URLs and returns one status per item, in the order they were
+     * given. This default goes through {@link #putURLItem(URLItem)} one URL at a time;
+     * implementations can override it to share work across the batch.
+     */
+    protected Status[] putDiscoveredItems(List<URLInfo> items) {
+        final Status[] statuses = new Status[items.size()];
+        for (int i = 0; i < items.size(); i++) {
+            statuses[i] =
+                    putURLItem(
+                            URLItem.newBuilder()
+                                    .setDiscovered(
+                                            DiscoveredURLItem.newBuilder()
+                                                    .setInfo(items.get(i))
+                                                    .build())
+                                    .build());
+        }
+        return statuses;
+    }
 
     @Override
     public void close() throws IOException {
@@ -1235,47 +1366,54 @@ public abstract class AbstractFrontierService
         // Cutoff date  = now - number of days we want to keep
         Instant cutoff = Instant.now().minus(Period.ofDays(days));
 
-        synchronized (getQueues()) {
-            Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
-                    getQueues().entrySet().iterator();
+        for (Entry<QueueWithinCrawl, QueueInterface> e : getQueues().unorderedEntries()) {
 
-            while (qiterator.hasNext()) {
-                Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
-
-                // check that it is within the right crawlID
-                if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
-                    continue;
-                }
-
-                // check that it is within the right key/queue
-                if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
-                    continue;
-                }
-
-                try (CloseableIterator<URLItem> urliter = urlIterator(e)) {
-                    List<URLItem> toDelete = new ArrayList<>();
-
-                    while (urliter.hasNext()) {
-                        URLItem cur = urliter.next();
-
-                        if (Instant.ofEpochSecond(cur.getCreationDate()).isBefore(cutoff)) {
-                            // Add to deletion list (should not delete while iterating URLItem in
-                            // queue)
-                            toDelete.add(cur);
-                            deletedCount++;
-                        }
-                    }
-
-                    toDelete.stream().forEach(x -> deleteURLItem(x));
-
-                } catch (Exception e1) {
-                    LOG.warn(e1.getMessage(), e1);
-                }
+            // check that it is within the right crawlID
+            if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
+                continue;
             }
+
+            // check that it is within the right key/queue
+            if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
+                continue;
+            }
+
+            deletedCount += purgeQueue(e, cutoff);
         }
 
         responseObserver.onNext(Urlfrontier.Long.newBuilder().setValue(deletedCount).build());
         responseObserver.onCompleted();
+    }
+
+    /**
+     * Purges the stale URLs of a single queue: scans, collects, then deletes. Backends that need
+     * the scan and the deletions to be atomic against their writers (see the memory backend, where
+     * URL equality ignores the version) override this and wrap it in the queue's monitor.
+     *
+     * @return the number of URLs deleted
+     */
+    protected long purgeQueue(Entry<QueueWithinCrawl, QueueInterface> e, Instant cutoff) {
+        long deletedCount = 0;
+        try (CloseableIterator<URLItem> urliter = urlIterator(e)) {
+            List<URLItem> toDelete = new ArrayList<>();
+
+            while (urliter.hasNext()) {
+                URLItem cur = urliter.next();
+
+                if (Instant.ofEpochSecond(cur.getCreationDate()).isBefore(cutoff)) {
+                    // Add to deletion list (should not delete while iterating URLItem in
+                    // queue)
+                    toDelete.add(cur);
+                    deletedCount++;
+                }
+            }
+
+            toDelete.stream().forEach(x -> deleteURLItem(x));
+
+        } catch (Exception e1) {
+            LOG.warn(e1.getMessage(), e1);
+        }
+        return deletedCount;
     }
 
     /**

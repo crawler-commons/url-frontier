@@ -96,6 +96,70 @@ class GetURLsReservationTest {
         }
     }
 
+    static class SelfDeletingQueue implements QueueInterface {
+        private final MemoryFrontierService service;
+        private final QueueWithinCrawl qwc;
+        private final AtomicBoolean removed = new AtomicBoolean();
+        private volatile long lastProduced;
+
+        SelfDeletingQueue(MemoryFrontierService service, QueueWithinCrawl qwc) {
+            this.service = service;
+            this.qwc = qwc;
+        }
+
+        @Override
+        public long getBlockedUntil() {
+            if (removed.compareAndSet(false, true)) {
+                service.getQueues().remove(qwc);
+            }
+            return Long.MAX_VALUE;
+        }
+
+        @Override
+        public int getDelay() {
+            return 0;
+        }
+
+        @Override
+        public void setLastProduced(long lastProduced) {
+            this.lastProduced = lastProduced;
+        }
+
+        @Override
+        public long getLastProduced() {
+            return lastProduced;
+        }
+
+        @Override
+        public int getInProcess(long now) {
+            return 0;
+        }
+
+        @Override
+        public int getCountCompleted() {
+            return 0;
+        }
+
+        @Override
+        public int countActive() {
+            return 0;
+        }
+
+        @Override
+        public Boolean isLimitReached() {
+            return false;
+        }
+
+        @Override
+        public void setDelay(int delayRequestable) {}
+
+        @Override
+        public void setBlockedUntil(long until) {}
+
+        @Override
+        public void setCrawlLimit(int crawlLimit) {}
+    }
+
     /** Seeds two due URLs into KEY/CRAWL_ID and returns the queue with its delay set to 300s. */
     static QueueInterface seedQueue(InstrumentedMemoryService service) throws Exception {
         AtomicBoolean done = new AtomicBoolean(false);
@@ -298,6 +362,21 @@ class GetURLsReservationTest {
                 0,
                 service.sendInvocations.get(),
                 "a queue past its crawl limit must not be served on the keyed path");
+    }
+
+    @Test
+    void rotationPathHandlesQueueDeletedBetweenIterations() throws Exception {
+        MemoryFrontierService service = new MemoryFrontierService("localhost", 0);
+        QueueWithinCrawl qwc = QueueWithinCrawl.get(KEY, CRAWL_ID);
+        service.getQueues().put(qwc, new SelfDeletingQueue(service, qwc));
+
+        GetParams request =
+                GetParams.newBuilder().setMaxUrlsPerQueue(1).setDelayRequestable(30).build();
+        CollectingObserver observer = new CollectingObserver();
+
+        assertTimeoutPreemptively(Duration.ofSeconds(5), () -> service.getURLs(request, observer));
+        assertTrue(observer.completed.await(5, TimeUnit.SECONDS));
+        assertEquals(0, observer.received.get());
     }
 
     @Test

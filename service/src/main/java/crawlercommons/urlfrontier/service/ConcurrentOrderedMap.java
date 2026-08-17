@@ -21,12 +21,16 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.LoggerFactory;
 
 /**
- * Concurrent version of LinkedHashMap Design goal is the same as for ConcurrentHashMap: Maintain
- * concurrent readability (typically method get(), but also iterators and related methods) while
- * minimizing update contention.
+ * Concurrent version of LinkedHashMap. The design goal is the same as for ConcurrentHashMap:
+ * maintain concurrent readability (typically method get(), but also iterators and related methods)
+ * while minimizing update contention.
  *
- * <p>This implementation is based on ConcurrentSkipListMap for order preservation and Guava Striped
+ * <p>This implementation is based on ConcurrentSkipListMap for order preservation and Guava striped
  * locks for concurrency.
+ *
+ * <p>Atomicity is per key. Ordered views are weakly consistent and may miss keys rotated
+ * concurrently because rotation only changes the position in the order index. External
+ * synchronization on the map instance does not provide a map-wide lock for compound actions.
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
@@ -48,6 +52,8 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     private static final int DEFAULT_SIZE = DEFAULT_CONCURRENCY * 16;
 
     private final Striped<Lock> striped;
+
+    private final ReentrantLock orderMutationLock = new ReentrantLock();
 
     class ValueEntry {
         public ValueEntry(V v, long o) {
@@ -74,6 +80,22 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
 
     private Lock getStripe(Object key) {
         return striped.get(Objects.hashCode(key));
+    }
+
+    private ValueEntry pollFirstLiveValueEntry(Entry<Long, K> removed) {
+        K key = removed.getValue();
+        Lock stripe = getStripe(key);
+        stripe.lock();
+        try {
+            ValueEntry valueEntry = valueMap.get(key);
+            if (valueEntry == null || valueEntry.order != removed.getKey()) {
+                return null;
+            }
+            valueMap.remove(key);
+            return valueEntry;
+        } finally {
+            stripe.unlock();
+        }
     }
 
     private void lockAllStripes() {
@@ -242,7 +264,8 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
         try {
             valueMap.clear();
             insertionOrderMap.clear();
-            insertionCounter.set(0);
+            // the counter is deliberately NOT reset: insertion-order numbers double as
+            // version stamps for rotateFirstEntry/pollFirstEntry and must never be reused
 
         } finally {
             unlockAllStripes();
@@ -349,32 +372,55 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
     /*
      * Remove & Returns the first entry according to insertion order
      */
-    public synchronized Entry<K, V> pollFirstEntry() {
-        K key;
-
-        Entry<Long, K> removed = insertionOrderMap.pollFirstEntry();
-        if (removed == null) {
-            return null;
-        }
-
-        // Get and remove from value map
-        key = removed.getValue();
-
-        Lock stripe = getStripe(key);
-        stripe.lock();
-
+    public Entry<K, V> pollFirstEntry() {
+        orderMutationLock.lock();
         try {
-            ValueEntry valueEntry = valueMap.remove(key);
-            if (valueEntry == null) {
-                LOG.error(
-                        "Inconsistent state (pollFirstEntry): key {} exists in order map but not in value map",
-                        key);
-                return null;
-            }
+            while (true) {
+                Entry<Long, K> removed = insertionOrderMap.pollFirstEntry();
+                if (removed == null) {
+                    return null;
+                }
 
-            return new AbstractMap.SimpleImmutableEntry<>(key, valueEntry.value);
+                ValueEntry valueEntry = pollFirstLiveValueEntry(removed);
+                if (valueEntry != null) {
+                    return new AbstractMap.SimpleImmutableEntry<>(
+                            removed.getValue(), valueEntry.value);
+                }
+            }
         } finally {
-            stripe.unlock();
+            orderMutationLock.unlock();
+        }
+    }
+
+    @Override
+    public Entry<K, V> rotateFirstEntry() {
+        orderMutationLock.lock();
+        try {
+            while (true) {
+                Entry<Long, K> first = insertionOrderMap.pollFirstEntry();
+                if (first == null) {
+                    return null;
+                }
+
+                K key = first.getValue();
+                Lock stripe = getStripe(key);
+                stripe.lock();
+                try {
+                    ValueEntry valueEntry = valueMap.get(key);
+                    if (valueEntry == null || valueEntry.order != first.getKey()) {
+                        continue;
+                    }
+
+                    long newOrder = insertionCounter.getAndIncrement();
+                    valueEntry.order = newOrder;
+                    insertionOrderMap.put(newOrder, key);
+                    return new AbstractMap.SimpleImmutableEntry<>(key, valueEntry.value);
+                } finally {
+                    stripe.unlock();
+                }
+            }
+        } finally {
+            orderMutationLock.unlock();
         }
     }
 
@@ -461,5 +507,25 @@ public class ConcurrentOrderedMap<K, V> implements ConcurrentInsertionOrderMap<K
                 return valueMap.size();
             }
         };
+    }
+
+    @Override
+    public Iterable<Map.Entry<K, V>> unorderedEntries() {
+        return () ->
+                new Iterator<>() {
+                    final Iterator<Entry<K, ValueEntry>> iterator = valueMap.entrySet().iterator();
+
+                    @Override
+                    public boolean hasNext() {
+                        return iterator.hasNext();
+                    }
+
+                    @Override
+                    public Map.Entry<K, V> next() {
+                        Entry<K, ValueEntry> entry = iterator.next();
+                        return new AbstractMap.SimpleImmutableEntry<>(
+                                entry.getKey(), entry.getValue().value);
+                    }
+                };
     }
 }

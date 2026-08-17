@@ -4,7 +4,10 @@
 package crawlercommons.urlfrontier.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
@@ -19,9 +22,13 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.memory.MemoryFrontierService;
 import io.grpc.stub.StreamObserver;
+import java.io.IOException;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -374,6 +381,219 @@ class MemoryFrontierServiceTest {
 
         assertEquals(2, nbQueues);
         assertEquals(4, nbUrls);
+    }
+
+    @Test
+    @Order(13)
+    void testMemoryIteratorPagination() {
+        int count = 0;
+        for (Entry<QueueWithinCrawl, QueueInterface> cur :
+                memoryFrontierService.getQueues().entrySet()) {
+            Iterator<URLItem> iter = memoryFrontierService.urlIterator(cur, 0, 2);
+            while (iter.hasNext()) {
+                URLItem url = iter.next();
+                LOG.info(url.toString());
+                count++;
+            }
+        }
+        assertEquals(4, count);
+
+        count = 0;
+        Entry<QueueWithinCrawl, QueueInterface> firstQueue =
+                memoryFrontierService.getQueues().entrySet().iterator().next();
+        Iterator<URLItem> iterFirst = memoryFrontierService.urlIterator(firstQueue, 0, 3);
+        while (iterFirst.hasNext()) {
+            iterFirst.next();
+            count++;
+        }
+        assertEquals(3, count);
+
+        assertThrows(
+                NoSuchElementException.class,
+                () -> {
+                    Entry<QueueWithinCrawl, QueueInterface> firstQueue2 =
+                            memoryFrontierService.getQueues().entrySet().iterator().next();
+                    Iterator<URLItem> iterFirst2 =
+                            memoryFrontierService.urlIterator(firstQueue2, 4, 10);
+                    while (iterFirst2.hasNext()) {
+                        iterFirst2.next();
+                    }
+                });
+    }
+
+    @Test
+    @Order(14)
+    void testMemoryIteratorCompletedUrlsFirst() {
+        boolean seenCompleted = false;
+        boolean seenActive = false;
+
+        for (Entry<QueueWithinCrawl, QueueInterface> cur :
+                memoryFrontierService.getQueues().entrySet()) {
+            Iterator<URLItem> iter = memoryFrontierService.urlIterator(cur, 0, 100);
+            while (iter.hasNext()) {
+                URLItem item = iter.next();
+                if (item.hasKnown() && item.getKnown().getRefetchableFromDate() == 0) {
+                    seenCompleted = true;
+                    assertFalse(seenActive, "Completed URLs must come before active URLs");
+                } else {
+                    seenActive = true;
+                }
+            }
+        }
+        assertTrue(seenCompleted);
+    }
+
+    @Test
+    @Order(15)
+    void testMemoryIteratorEmptyQueue() {
+        MemoryFrontierService service = new MemoryFrontierService("localhost", 7072);
+        String crawlId = "empty_crawl";
+        String key = "empty_queue";
+        String url = "https://example.com/empty";
+
+        URLInfo info = URLInfo.newBuilder().setUrl(url).setCrawlID(crawlId).setKey(key).build();
+        KnownURLItem knownItem =
+                KnownURLItem.newBuilder().setInfo(info).setRefetchableFromDate(0).build();
+        URLItem item = URLItem.newBuilder().setKnown(knownItem).setID(crawlId + "_" + url).build();
+
+        final AtomicBoolean completed = new AtomicBoolean(false);
+        final AtomicInteger acked = new AtomicInteger(0);
+
+        StreamObserver<AckMessage> responseObserver =
+                new StreamObserver<>() {
+                    @Override
+                    public void onNext(AckMessage value) {
+                        acked.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        completed.set(true);
+                        fail("Error putting URLs: " + t.getMessage());
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        completed.set(true);
+                    }
+                };
+
+        StreamObserver<URLItem> streamObserver = service.putURLs(responseObserver);
+        streamObserver.onNext(item);
+        streamObserver.onCompleted();
+
+        ServiceTestUtil.awaitStreamClosed(completed);
+
+        service.deleteURLItem(item);
+
+        for (Entry<QueueWithinCrawl, QueueInterface> cur : service.getQueues().entrySet()) {
+            Iterator<URLItem> iter = service.urlIterator(cur, 0, 100);
+            assertFalse(iter.hasNext(), "Empty queue should have no elements");
+        }
+        try {
+            service.close();
+        } catch (IOException e) {
+            LOG.warn(e.getMessage(), e);
+        }
+    }
+
+    @Test
+    @Order(16)
+    void testMemoryIteratorMaxUrlsLimit() {
+        for (Entry<QueueWithinCrawl, QueueInterface> cur :
+                memoryFrontierService.getQueues().entrySet()) {
+            Iterator<URLItem> iter = memoryFrontierService.urlIterator(cur, 0, 1);
+            int count = 0;
+            while (iter.hasNext() && count < 5) {
+                iter.next();
+                count++;
+            }
+            assertEquals(1, count, "Should only return maxURLs items");
+        }
+    }
+
+    @Test
+    @Order(17)
+    void testMemoryIteratorNoStackOverflow() {
+        Map<String, String> conf = new HashMap<>();
+        conf.put("putURLs.max.inflight", "0");
+        conf.put("putDiscovered.max.inflight", "0");
+
+        MemoryFrontierService service = new MemoryFrontierService(conf, "localhost", 7073);
+        String crawlId = "large_crawl";
+        String key = "large_queue";
+        int numUrls = 20_000;
+        int start = 19_000;
+
+        final AtomicBoolean completed = new AtomicBoolean(false);
+        final AtomicInteger acked = new AtomicInteger(0);
+
+        StreamObserver<AckMessage> responseObserver =
+                new StreamObserver<>() {
+                    @Override
+                    public void onNext(AckMessage value) {
+                        acked.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        completed.set(true);
+                        fail("Error putting URLs: " + t.getMessage());
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        completed.set(true);
+                    }
+                };
+
+        LOG.info("Iterator stack overflow check...pushing {} URLs", numUrls);
+        StreamObserver<URLItem> streamObserver = service.putURLs(responseObserver);
+
+        URLInfo.Builder infoBuilder = URLInfo.newBuilder();
+        URLItem.Builder itemBuilder = URLItem.newBuilder();
+
+        for (int i = 0; i < numUrls; i++) {
+            String url = "https://example.com/url-" + i;
+            infoBuilder.clear();
+            URLInfo info = infoBuilder.setUrl(url).setCrawlID(crawlId).setKey(key).build();
+            KnownURLItem knownItem =
+                    KnownURLItem.newBuilder()
+                            .setInfo(info)
+                            .setRefetchableFromDate(Instant.now().getEpochSecond() + 3600)
+                            .build();
+            itemBuilder.clear();
+            URLItem item = itemBuilder.setKnown(knownItem).setID(crawlId + "_" + url).build();
+            streamObserver.onNext(item);
+        }
+
+        streamObserver.onCompleted();
+
+        LOG.info("Iterator stack overflow check...waiting for completion");
+        ServiceTestUtil.awaitStreamClosed(completed);
+
+        assertEquals(numUrls, acked.get());
+
+        LOG.info("Iterator stack overflow check...Iterating");
+        for (Entry<QueueWithinCrawl, QueueInterface> cur : service.getQueues().entrySet()) {
+            Iterator<URLItem> iter = service.urlIterator(cur, start, numUrls + 100);
+            int count = 0;
+            while (iter.hasNext()) {
+                iter.next();
+                count++;
+            }
+            assertEquals(
+                    numUrls - start,
+                    count,
+                    "Should iterate all " + (numUrls - start) + " URLs without StackOverflowError");
+        }
+
+        try {
+            service.close();
+        } catch (IOException e) {
+            LOG.warn(e.getMessage(), e);
+        }
+        LOG.info("Iterator stack overflow check...Iteration completed");
     }
 
     @Test
