@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 /** Tests for URLFrontierServer.addToConfig — config line parsing */
@@ -18,6 +19,7 @@ class URLFrontierServerConfigTest {
     void bareKeyStoredAsEmptyString() {
         Map<String, String> config = new HashMap<>();
         URLFrontierServer.addToConfig(config, "rocksdb.purge");
+
         assertTrue(config.containsKey("rocksdb.purge"));
         assertEquals("", config.get("rocksdb.purge"));
     }
@@ -26,28 +28,30 @@ class URLFrontierServerConfigTest {
     void keyWithValue() {
         Map<String, String> config = new HashMap<>();
         URLFrontierServer.addToConfig(config, "read.thread.num=8");
-        assertEquals("8", config.get("read.thread.num"));
+        assertEquals(
+                8, ParamHelper.getIntegerParameter(config, "read.thread.num", Optional.of(1234)));
     }
 
     @Test
     void keyWithEmptyValue() {
         Map<String, String> config = new HashMap<>();
         URLFrontierServer.addToConfig(config, "key=");
-        assertEquals("", config.get("key"));
+        assertEquals("", ParamHelper.getStringParameter(config, "key", null));
     }
 
     @Test
     void valueContainingEquals() {
         Map<String, String> config = new HashMap<>();
         URLFrontierServer.addToConfig(config, "key=a=b");
-        assertEquals("a=b", config.get("key"));
+
+        assertEquals("a=b", ParamHelper.getStringParameter(config, "key", null));
     }
 
     @Test
     void keyAndValueWithSpacesTrimmed() {
         Map<String, String> config = new HashMap<>();
         URLFrontierServer.addToConfig(config, "  key  =  value  ");
-        assertEquals("value", config.get("key"));
+        assertEquals("value", ParamHelper.getStringParameter(config, "key", null));
     }
 
     @Test
@@ -82,6 +86,7 @@ class URLFrontierServerConfigTest {
         assertTrue(config.containsKey("rocksdb.purge"));
         assertTrue(config.containsKey("rocksdb.recovery.check"));
         assertTrue(config.containsKey("rocksdb.bloom.filters"));
+        assertTrue(ParamHelper.getBooleanParameter(config, "rocksdb.bloom.filters", false));
     }
 
     @Test
@@ -93,6 +98,10 @@ class URLFrontierServerConfigTest {
         String result = config.getOrDefault("implementation", "default");
         assertNotNull(result);
         assertEquals("", result);
+        assertEquals("", ParamHelper.getStringParameter(config, "implementation", null));
+        assertEquals(
+                "", ParamHelper.getStringParameter(config, "implementation", Optional.empty()));
+        assertEquals("", ParamHelper.getStringParameter(config, "implementation", Optional.of("")));
     }
 
     @Test
@@ -100,6 +109,9 @@ class URLFrontierServerConfigTest {
         Map<String, String> config = new HashMap<>();
         String result = config.getOrDefault("absent.key", "default");
         assertEquals("default", result);
+        assertEquals(
+                "default",
+                ParamHelper.getStringParameter(config, "absent.key", Optional.of("default")));
     }
 
     @Test
@@ -120,5 +132,6 @@ class URLFrontierServerConfigTest {
         // Simulate positional arg override
         URLFrontierServer.addToConfig(config, "read.thread.num=8");
         assertEquals("8", config.get("read.thread.num"));
+        assertEquals(8, ParamHelper.getIntegerParameter(config, "read.thread.num", null));
     }
 }

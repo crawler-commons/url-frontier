@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -98,10 +99,16 @@ public class URLFrontierServer implements Callable<Integer> {
         return 0;
     }
 
+    /**
+     * @throws Exception
+     */
+    /**
+     * @throws Exception
+     */
+    /**
+     * @throws Exception
+     */
     public void start() throws Exception {
-
-        // default implementation
-        String implementationClassName = RocksDBService.class.getName();
 
         Map<String, String> configuration = new HashMap<>();
 
@@ -127,7 +134,9 @@ public class URLFrontierServer implements Callable<Integer> {
                 // populate the config with the content of the file
                 for (String line : Files.readAllLines(Paths.get(config))) {
                     line = line.trim();
-                    if (line.startsWith("#")) continue;
+                    if (line.startsWith("#")) {
+                        continue;
+                    }
                     addToConfig(configuration, line);
                 }
             } catch (Exception e) {
@@ -143,22 +152,12 @@ public class URLFrontierServer implements Callable<Integer> {
             }
         }
 
-        // Validate known numeric config keys so errors name the offending key at startup
-        validateNumericConfig(
-                configuration,
-                LOG,
-                "read.thread.num",
-                "write.thread.num",
-                "putURLs.max.inflight",
-                "putDiscovered.max.inflight",
-                "rocksdb.max_background_jobs",
-                "rocksdb.max_subcompactions");
-
-        // get the implementation class from the config if set (ignore empty/flag-style values)
-        String impl = configuration.get("implementation");
-        if (impl != null && !impl.isEmpty()) {
-            implementationClassName = impl;
-        }
+        // Get the implementation class from the config if set (default is RocksDBService)
+        String implementationClassName =
+                ParamHelper.getStringParameter(
+                        configuration,
+                        "implementation",
+                        Optional.of(RocksDBService.class.getName()));
 
         Class<?> implementationClass = Class.forName(implementationClassName);
 
@@ -264,24 +263,6 @@ public class URLFrontierServer implements Callable<Integer> {
     private void blockUntilShutdown() throws InterruptedException {
         if (server != null) {
             server.awaitTermination();
-        }
-    }
-
-    /** Validate that known numeric config keys hold parseable integer values. */
-    private static void validateNumericConfig(
-            final Map<String, String> configuration,
-            final org.slf4j.Logger log,
-            final String... keys) {
-        for (String key : keys) {
-            String val = configuration.get(key);
-            if (val != null && !val.isEmpty()) {
-                try {
-                    Integer.parseInt(val);
-                } catch (NumberFormatException e) {
-                    log.error("Invalid numeric config value for '{}': '{}'", key, val);
-                    System.exit(-1);
-                }
-            }
         }
     }
 

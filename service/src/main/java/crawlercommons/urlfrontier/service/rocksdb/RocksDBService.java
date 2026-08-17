@@ -14,6 +14,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.CloseableIterator;
+import crawlercommons.urlfrontier.service.ParamHelper;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -93,8 +95,9 @@ public class RocksDBService extends AbstractFrontierService {
         super(configuration, host, port);
 
         // where to store it?
-        String sPath = configuration.get("rocksdb.path");
-        String path = (sPath != null && !sPath.isEmpty()) ? sPath : "./rocksdb";
+        String path =
+                ParamHelper.getStringParameter(
+                        configuration, "rocksdb.path", Optional.of("./rocksdb"));
 
         LOG.info("RocksDB data stored in {} ", path);
 
@@ -110,9 +113,24 @@ public class RocksDBService extends AbstractFrontierService {
 
         boolean checkOnRecovery = configuration.containsKey("rocksdb.recovery.check");
 
-        boolean bloomFilters = useBloomFilters(configuration);
+        /**
+         * The filters are enabled by default: every URL sent to putURLItem needs a lookup to find
+         * out whether it is already known and most of them are not, which is the case they make
+         * cheap.
+         *
+         * <p>They used to be enabled with a valueless <i>rocksdb.bloom.filters</i> flag, so the
+         * mere presence of the key is still taken to mean 'enabled'.
+         */
+        boolean bloomFilters =
+                ParamHelper.getBooleanParameter(configuration, "rocksdb.bloom.filters", true);
 
-        walDisabled = disableWAL(configuration);
+        /**
+         * The WAL is enabled by default: disabling it roughly halves the bytes written per URL but
+         * loses whatever was in the memtables if the service dies without closing cleanly. The URLs
+         * concerned get rediscovered by the crawl, so this is a reasonable trade for write-heavy
+         * setups.
+         */
+        walDisabled = ParamHelper.getBooleanParameter(configuration, "rocksdb.wal.disable", false);
         if (walDisabled) {
             LOG.info("WAL disabled - writes are made durable at flush time only");
             writeOptions.setDisableWAL(true);
@@ -120,14 +138,18 @@ public class RocksDBService extends AbstractFrontierService {
 
         try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()) {
 
-            String sMaxBytesForLevelBase = configuration.get("rocksdb.max_bytes_for_level_base");
-            if (sMaxBytesForLevelBase != null && !sMaxBytesForLevelBase.isEmpty()) {
-                cfOpts.setMaxBytesForLevelBase(Long.parseLong(sMaxBytesForLevelBase));
+            long maxBytesForLevelBase =
+                    ParamHelper.getLongParameter(
+                            configuration, "rocksdb.max_bytes_for_level_base", null);
+            if (maxBytesForLevelBase > 0) {
+                cfOpts.setMaxBytesForLevelBase(maxBytesForLevelBase);
             }
 
-            String sMemtableBudget = configuration.get("rocksdb.memtable_memory_budget");
-            if (sMemtableBudget != null && !sMemtableBudget.isEmpty()) {
-                cfOpts.optimizeUniversalStyleCompaction(Long.parseLong(sMemtableBudget));
+            long memTableBudget =
+                    ParamHelper.getLongParameter(
+                            configuration, "rocksdb.memtable_memory_budget", null);
+            if (memTableBudget > 0) {
+                cfOpts.optimizeUniversalStyleCompaction(memTableBudget);
             } else {
                 cfOpts.optimizeUniversalStyleCompaction();
             }
@@ -156,15 +178,19 @@ public class RocksDBService extends AbstractFrontierService {
                     options.setAtomicFlush(true);
                 }
 
-                String smaxBackgroundJobs = configuration.get("rocksdb.max_background_jobs");
-                if (smaxBackgroundJobs != null && !smaxBackgroundJobs.isEmpty()) {
-                    options.setMaxBackgroundJobs(Integer.parseInt(smaxBackgroundJobs));
+                int maxBackgroundJobs =
+                        ParamHelper.getIntegerParameter(
+                                configuration, "rocksdb.max_background_jobs", null);
+                if (maxBackgroundJobs > 0) {
+                    options.setMaxBackgroundJobs(maxBackgroundJobs);
                 }
 
                 // Options.max_subcompactions: 1
-                String smax_subcompactions = configuration.get("rocksdb.max_subcompactions");
-                if (smax_subcompactions != null && !smax_subcompactions.isEmpty()) {
-                    options.setMaxSubcompactions(Integer.parseInt(smax_subcompactions));
+                int maxSubcompactions =
+                        ParamHelper.getIntegerParameter(
+                                configuration, "rocksdb.max_subcompactions", null);
+                if (maxSubcompactions > 0) {
+                    options.setMaxSubcompactions(maxSubcompactions);
                 }
 
                 if (statistics != null) {
@@ -197,35 +223,6 @@ public class RocksDBService extends AbstractFrontierService {
     }
 
     /**
-     * The filters are enabled by default: every URL sent to putURLItem needs a lookup to find out
-     * whether it is already known and most of them are not, which is the case they make cheap.
-     *
-     * <p>They used to be enabled with a valueless <i>rocksdb.bloom.filters</i> flag, so the mere
-     * presence of the key is still taken to mean 'enabled'.
-     */
-    static boolean useBloomFilters(final Map<String, String> configuration) {
-        if (!configuration.containsKey("rocksdb.bloom.filters")) {
-            return true;
-        }
-        final String value = configuration.get("rocksdb.bloom.filters");
-        return value == null || value.isEmpty() || Boolean.parseBoolean(value);
-    }
-
-    /**
-     * The WAL is enabled by default: disabling it roughly halves the bytes written per URL but
-     * loses whatever was in the memtables if the service dies without closing cleanly. The URLs
-     * concerned get rediscovered by the crawl, so this is a reasonable trade for write-heavy
-     * setups.
-     */
-    static boolean disableWAL(final Map<String, String> configuration) {
-        if (!configuration.containsKey("rocksdb.wal.disable")) {
-            return false;
-        }
-        final String value = configuration.get("rocksdb.wal.disable");
-        return value == null || value.isEmpty() || Boolean.parseBoolean(value);
-    }
-
-    /**
      * The filters spare the lookup done for every URL in putURLItem from having to read the data
      * blocks of the SST files when the URL is not known yet. Universal compaction leaves several
      * sorted runs to look into, which is what makes them worth their memory here.
@@ -237,12 +234,9 @@ public class RocksDBService extends AbstractFrontierService {
      */
     private BlockBasedTableConfig buildTableConfig(final Map<String, String> configuration) {
 
-        double bitsPerKey = 10d;
-        final String sBitsPerKey = configuration.get("rocksdb.bloom.filters.bits_per_key");
-        if (sBitsPerKey != null && !sBitsPerKey.isEmpty()) {
-            bitsPerKey = Double.parseDouble(sBitsPerKey);
-        }
-
+        double bitsPerKey =
+                ParamHelper.getDoubleParameter(
+                        configuration, "rocksdb.bloom.filters.bits_per_key", Optional.of(10d));
         LOG.info("Configuring Bloom filters with {} bits per key", bitsPerKey);
 
         bloomFilter = new BloomFilter(bitsPerKey);

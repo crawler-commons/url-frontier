@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -159,38 +160,30 @@ public abstract class AbstractFrontierService
         final int availableProcessor = Runtime.getRuntime().availableProcessors();
         LOG.info("Available processor(s) {}", availableProcessor);
         // by default uses 1/4 of the available processors
-        final String defaultParallelism = Integer.toString(Math.max(availableProcessor / 4, 1));
-        final String sReadThreads = configuration.get("read.thread.num");
+        final Integer defaultParallelism = Math.max(availableProcessor / 4, 1);
+
         final int rthreadNum =
-                Integer.parseInt(
-                        sReadThreads != null && !sReadThreads.isEmpty()
-                                ? sReadThreads
-                                : defaultParallelism);
+                ParamHelper.getIntegerParameter(
+                        configuration, "read.thread.num", Optional.of(defaultParallelism));
         LOG.info("Using {} threads for reading from queues", rthreadNum);
         readExecutorService = Executors.newFixedThreadPool(rthreadNum);
-        final String sWriteThreads = configuration.get("write.thread.num");
+
         final int wthreadNum =
-                Integer.parseInt(
-                        sWriteThreads != null && !sWriteThreads.isEmpty()
-                                ? sWriteThreads
-                                : defaultParallelism);
+                ParamHelper.getIntegerParameter(
+                        configuration, "write.thread.num", Optional.of(defaultParallelism));
         writeExecutorService = Executors.newFixedThreadPool(wthreadNum);
         LOG.info("Using {} threads for writing to queues", wthreadNum);
-        final String sPutURLsMaxInFlight = configuration.get("putURLs.max.inflight");
+
         putURLsMaxInFlight =
-                Integer.parseInt(
-                        sPutURLsMaxInFlight != null && !sPutURLsMaxInFlight.isEmpty()
-                                ? sPutURLsMaxInFlight
-                                : "1024");
+                ParamHelper.getIntegerParameter(
+                        configuration, "putURLs.max.inflight", Optional.of(1024));
         if (putURLsMaxInFlight > 0) {
             LOG.info("Limiting putURLs streams to {} URLs in flight", putURLsMaxInFlight);
         }
-        final String sPutDiscoveredMaxInFlight = configuration.get("putDiscovered.max.inflight");
+
         putDiscoveredMaxInFlight =
-                Integer.parseInt(
-                        sPutDiscoveredMaxInFlight != null && !sPutDiscoveredMaxInFlight.isEmpty()
-                                ? sPutDiscoveredMaxInFlight
-                                : "16");
+                ParamHelper.getIntegerParameter(
+                        configuration, "putDiscovered.max.inflight", Optional.of(16));
         if (putDiscoveredMaxInFlight > 0) {
             LOG.info(
                     "Limiting putDiscovered streams to {} batches in flight",
