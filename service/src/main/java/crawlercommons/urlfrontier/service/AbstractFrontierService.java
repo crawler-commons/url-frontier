@@ -279,7 +279,9 @@ public abstract class AbstractFrontierService
 
             for (QueueWithinCrawl quid : toDelete) {
                 QueueInterface q = getQueues().remove(quid);
-                total += q.countActive();
+                if (q != null) {
+                    total += q.countActive();
+                }
             }
         }
         responseObserver.onNext(
@@ -447,7 +449,9 @@ public abstract class AbstractFrontierService
         if (!isClosing()) {
             QueueWithinCrawl qwc = QueueWithinCrawl.get(request.getKey(), request.getCrawlID());
             QueueInterface q = getQueues().remove(qwc);
-            countActive = q.countActive();
+            if (q != null) {
+                countActive = q.countActive();
+            }
         }
         responseObserver.onNext(
                 crawlercommons.urlfrontier.Urlfrontier.Long.newBuilder()
