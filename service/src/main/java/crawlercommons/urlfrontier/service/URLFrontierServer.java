@@ -186,7 +186,7 @@ public class URLFrontierServer implements Callable<Integer> {
         }
 
         boolean enableReflection =
-                ParamHelper.getFlagParameter(configuration, "server.enable_reflection", false);
+                ParamHelper.getBooleanParameter(configuration, "server.enable_reflection", false);
 
         ServerBuilder builder = ServerBuilder.forPort(port).addService(service);
 

@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import org.junit.jupiter.api.Test;
@@ -122,7 +123,40 @@ class ParamHelperTest {
         assertEquals(42L, ParamHelper.getLongParameter(config, "test.long", 999L));
     }
 
-    // --- getDoubleParameter ---
+    // --- getDoubleParameter (OptionalDouble return) ---
+
+    @Test
+    void getDoubleParameter_noDefault_withValue_returnsParsedValue() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.double", "3.14");
+        OptionalDouble result = ParamHelper.getDoubleParameter(config, "test.double");
+        assertTrue(result.isPresent());
+        assertEquals(3.14, result.getAsDouble(), 0.001);
+    }
+
+    @Test
+    void getDoubleParameter_noDefault_missingKey_returnsEmpty() {
+        Map<String, String> config = new HashMap<>();
+        assertTrue(ParamHelper.getDoubleParameter(config, "missing").isEmpty());
+    }
+
+    @Test
+    void getDoubleParameter_noDefault_emptyString_returnsEmpty() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.double", "");
+        assertTrue(ParamHelper.getDoubleParameter(config, "test.double").isEmpty());
+    }
+
+    @Test
+    void getDoubleParameter_noDefault_invalidValue_throwsException() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.double", "not-a-double");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ParamHelper.getDoubleParameter(config, "test.double"));
+    }
+
+    // --- getDoubleParameter with default ---
 
     @Test
     void getDoubleParameter_withValue_returnsParsedValue() {

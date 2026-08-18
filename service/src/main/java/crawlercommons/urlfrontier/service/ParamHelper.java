@@ -4,55 +4,15 @@
 package crawlercommons.urlfrontier.service;
 
 import java.util.Map;
-import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
-import java.util.function.Function;
-import org.slf4j.LoggerFactory;
 
 /** Utility functions to retrieve and parse configuration parameters. */
 public final class ParamHelper {
 
     private ParamHelper() {
         // utility class
-    }
-
-    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ParamHelper.class);
-
-    /**
-     * Retrieves and parses a configuration parameter using the provided parser function.
-     *
-     * @param config The configuration map holding parameter names and values.
-     * @param paramName The name of the configuration parameter to retrieve.
-     * @param defaultVal An optional default value if the parameter is not set.
-     * @param parser Function to parse the string value to the target type.
-     * @param fallback Value to use if parameter is not set and no default provided.
-     * @param <T> The target type.
-     * @return The parsed parameter value, default value, or fallback.
-     * @throws IllegalArgumentException if the config value cannot be parsed.
-     */
-    private static <T> T parseParameter(
-            Map<String, String> config,
-            String paramName,
-            Optional<T> defaultVal,
-            Function<String, T> parser,
-            T fallback) {
-
-        String stringVal = config.get(paramName);
-
-        T val = defaultVal.orElse(fallback);
-        if (stringVal != null && !stringVal.isEmpty()) {
-            try {
-                val = parser.apply(stringVal);
-            } catch (NumberFormatException e) {
-                LOG.error("Cannot parse value '{}' for config parameter {}", stringVal, paramName);
-                throw new IllegalArgumentException(
-                        "Cannot parse value '" + stringVal + "' for config parameter " + paramName,
-                        e);
-            }
-        }
-
-        return val;
     }
 
     /**
@@ -71,7 +31,6 @@ public final class ParamHelper {
         try {
             return OptionalInt.of(Integer.parseInt(stringVal));
         } catch (NumberFormatException e) {
-            LOG.error("Cannot parse value '{}' for config parameter {}", stringVal, paramName);
             throw new IllegalArgumentException(
                     "Cannot parse value '" + stringVal + "' for config parameter " + paramName, e);
         }
@@ -107,7 +66,6 @@ public final class ParamHelper {
         try {
             return OptionalLong.of(Long.parseLong(stringVal));
         } catch (NumberFormatException e) {
-            LOG.error("Cannot parse value '{}' for config parameter {}", stringVal, paramName);
             throw new IllegalArgumentException(
                     "Cannot parse value '" + stringVal + "' for config parameter " + paramName, e);
         }
@@ -132,14 +90,43 @@ public final class ParamHelper {
      *
      * @param config The configuration map holding parameter names and values.
      * @param paramName The name of the configuration parameter to retrieve.
+     * @return An OptionalDouble containing the parsed value if the parameter is set and non-empty;
+     *     empty otherwise. Throws IllegalArgumentException if the value cannot be parsed.
+     */
+    public static OptionalDouble getDoubleParameter(Map<String, String> config, String paramName) {
+        String stringVal = config.get(paramName);
+        if (stringVal == null || stringVal.isEmpty()) {
+            return OptionalDouble.empty();
+        }
+        try {
+            return OptionalDouble.of(Double.parseDouble(stringVal));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "Cannot parse value '" + stringVal + "' for config parameter " + paramName, e);
+        }
+    }
+
+    /**
+     * Retrieves a double configuration parameter from the map.
+     *
+     * @param config The configuration map holding parameter names and values.
+     * @param paramName The name of the configuration parameter to retrieve.
      * @param defaultVal The default value if the parameter is not set or empty.
      * @return The double parameter value if defined and parsable; otherwise the default value.
      * @throws IllegalArgumentException if the parameter value cannot be parsed as a double.
      */
     public static double getDoubleParameter(
             Map<String, String> config, String paramName, double defaultVal) {
-        return parseParameter(
-                config, paramName, Optional.of(defaultVal), Double::parseDouble, Double.NaN);
+        String stringVal = config.get(paramName);
+        if (stringVal == null || stringVal.isEmpty()) {
+            return defaultVal;
+        }
+        try {
+            return Double.parseDouble(stringVal);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "Cannot parse value '" + stringVal + "' for config parameter " + paramName, e);
+        }
     }
 
     /**
