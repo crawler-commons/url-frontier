@@ -64,6 +64,11 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
     public DistributedFrontierService(
             final Map<String, String> configuration, String host, int port) {
         super(configuration, host, port);
+        forwardDeadlineSeconds =
+                Integer.parseInt(
+                        configuration.getOrDefault(
+                                "forward.deadline.seconds",
+                                Integer.toString(FORWARD_DEADLINE_SECONDS)));
     }
 
     // no explicit config
@@ -76,8 +81,14 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     protected boolean clusterMode = false;
 
-    /** Maximum time granted to a forwarded control call before failing the caller. */
+    /** Default for {@link #forwardDeadlineSeconds}. */
     static final int FORWARD_DEADLINE_SECONDS = 30;
+
+    /**
+     * Maximum time granted to a forwarded control call before failing the caller. Configurable with
+     * 'forward.deadline.seconds'.
+     */
+    private final int forwardDeadlineSeconds;
 
     /** How often the items forwarded to other nodes are checked for expiry. */
     static final int INPROCESS_CLEANUP_SECONDS = 10;
@@ -101,8 +112,21 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
     private LoadingCache<String, ManagedChannel> channelCache =
             CacheBuilder.newBuilder().removalListener(channelRemovalListener).build(channelLoader);
 
-    private URLFrontierBlockingStub getFrontier(String target) {
-        return URLFrontierGrpc.newBlockingStub(channelCache.getUnchecked(target));
+    /**
+     * A deadline is mandatory on forwarded blocking calls: without one an unresponsive node holds
+     * the caller's gRPC handler thread for ever, and since each of these calls is a fan-out one bad
+     * node takes down the cluster-wide view for every client that asks. Callers pass a single
+     * deadline for the whole fan-out rather than one per hop, so that querying N nodes is bounded
+     * once instead of N times.
+     */
+    private URLFrontierBlockingStub getFrontier(String target, Deadline deadline) {
+        return URLFrontierGrpc.newBlockingStub(channelCache.getUnchecked(target))
+                .withDeadline(deadline);
+    }
+
+    /** Deadline shared by every hop of a fan-out, see {@link #getFrontier(String, Deadline)}. */
+    private Deadline forwardDeadline() {
+        return Deadline.after(forwardDeadlineSeconds, TimeUnit.SECONDS);
     }
 
     /**
@@ -126,7 +150,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     private URLFrontierStub getAsyncFrontier(String target) {
         return URLFrontierGrpc.newStub(channelCache.getUnchecked(target))
-                .withDeadlineAfter(FORWARD_DEADLINE_SECONDS, TimeUnit.SECONDS);
+                .withDeadlineAfter(forwardDeadlineSeconds, TimeUnit.SECONDS);
     }
 
     /**
@@ -293,7 +317,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     "Found conf 'nodes' but current node's address not in the list");
         }
         // one deadline for the whole aggregation, not per node
-        final Deadline deadline = Deadline.after(FORWARD_DEADLINE_SECONDS, TimeUnit.SECONDS);
+        final Deadline deadline = forwardDeadline();
         final Local localRequest = Local.newBuilder().setLocal(true).build();
         final boolean localState = isActive();
         boolean allActive = localState;
@@ -308,7 +332,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                 // queried, an unreachable one fails the call instead of being
                 // silently folded into a false
                 final boolean nodeActive =
-                        getFrontier(node).withDeadline(deadline).getActive(localRequest).getState();
+                        getFrontier(node, deadline).getActive(localRequest).getState();
                 allActive &= nodeActive;
                 sawActive |= nodeActive;
                 sawInactive |= !nodeActive;
@@ -509,7 +533,12 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
     /** Correlation tokens for the items forwarded to other nodes; unique within this instance. */
     private final AtomicLong correlationSequence = new AtomicLong();
 
-    /** Delete the queue based on the key in parameter */
+    /**
+     * Delete the queue based on the key in parameter. In cluster mode the deletion is fanned out to
+     * every other node under a single deadline; an unreachable node fails the call instead of
+     * silently returning a partial count. The operation is not atomic: the nodes reached may have
+     * deleted their share when an error is returned, but repeating the deletion is idempotent.
+     */
     @Override
     public void deleteQueue(
             crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams request,
@@ -520,16 +549,21 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         int sizeQueue = 0;
 
         if (!request.getLocal() && clusterMode) {
-            for (String node : getNodes()) {
-                if (node.equals(address)) continue;
-                // call the delete endpoint in the target node
-                // force to local so that remote node don't go recursive
-                QueueWithinCrawlParams local =
-                        QueueWithinCrawlParams.newBuilder(request).setLocal(true).build();
-                URLFrontierBlockingStub blockingFrontier = getFrontier(node);
-                crawlercommons.urlfrontier.Urlfrontier.Long total =
-                        blockingFrontier.deleteQueue(local);
-                sizeQueue += total.getValue();
+            // force to local so that remote node don't go recursive
+            QueueWithinCrawlParams local =
+                    QueueWithinCrawlParams.newBuilder(request).setLocal(true).build();
+            final Deadline deadline = forwardDeadline();
+            try {
+                for (String node : getNodes()) {
+                    if (node.equals(address)) continue;
+                    // call the delete endpoint in the target node
+                    crawlercommons.urlfrontier.Urlfrontier.Long total =
+                            getFrontier(node, deadline).deleteQueue(local);
+                    sizeQueue += total.getValue();
+                }
+            } catch (StatusRuntimeException e) {
+                responseObserver.onError(e);
+                return;
             }
         }
         // delete the queue held by this node
@@ -544,6 +578,10 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
     protected abstract int deleteLocalQueue(final QueueWithinCrawl qc);
 
+    /**
+     * Same fan-out contract as {@link #deleteQueue}: bounded by a single deadline, an unreachable
+     * node fails the call rather than under-reporting the number of URLs deleted.
+     */
     @Override
     public void deleteCrawl(
             crawlercommons.urlfrontier.Urlfrontier.DeleteCrawlMessage message,
@@ -566,13 +604,18 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                             .setLocal(true)
                             .setValue(message.getValue())
                             .build();
-            for (String node : getNodes()) {
-                if (node.equals(address)) continue;
-                // call the delete endpoint in the target node
-                URLFrontierBlockingStub blockingFrontier = getFrontier(node);
-                crawlercommons.urlfrontier.Urlfrontier.Long localCount =
-                        blockingFrontier.deleteCrawl(local);
-                total += localCount.getValue();
+            final Deadline deadline = forwardDeadline();
+            try {
+                for (String node : getNodes()) {
+                    if (node.equals(address)) continue;
+                    // call the delete endpoint in the target node
+                    crawlercommons.urlfrontier.Urlfrontier.Long localCount =
+                            getFrontier(node, deadline).deleteCrawl(local);
+                    total += localCount.getValue();
+                }
+            } catch (StatusRuntimeException e) {
+                responseObserver.onError(e);
+                return;
             }
         }
 
@@ -606,20 +649,28 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         // force to local so that remote nodes don't go recursive
         QueueWithinCrawlParams local =
                 QueueWithinCrawlParams.newBuilder(request).setLocal(true).build();
-        for (String node : getNodes()) {
-            URLFrontierBlockingStub blockingFrontier = getFrontier(node);
-            Stats localStats = blockingFrontier.getStats(local);
-            numQueues += localStats.getNumberOfQueues();
-            size += localStats.getSize();
-            inProc += localStats.getInProcess();
-            for (Entry<String, Long> entry : localStats.getCountsMap().entrySet()) {
-                counts.compute(
-                        entry.getKey(),
-                        (w, prev) ->
-                                prev != null
-                                        ? prev + entry.getValue().longValue()
-                                        : entry.getValue().longValue());
+        // one deadline for the whole aggregation, not per node
+        final Deadline deadline = forwardDeadline();
+        try {
+            for (String node : getNodes()) {
+                Stats localStats = getFrontier(node, deadline).getStats(local);
+                numQueues += localStats.getNumberOfQueues();
+                size += localStats.getSize();
+                inProc += localStats.getInProcess();
+                for (Entry<String, Long> entry : localStats.getCountsMap().entrySet()) {
+                    counts.compute(
+                            entry.getKey(),
+                            (w, prev) ->
+                                    prev != null
+                                            ? prev + entry.getValue().longValue()
+                                            : entry.getValue().longValue());
+                }
             }
+        } catch (StatusRuntimeException e) {
+            // an unreachable node surfaces an error rather than silently deflating the
+            // cluster-wide figures
+            responseObserver.onError(e);
+            return;
         }
 
         Stats stats =
@@ -639,11 +690,18 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         if (!request.getLocal() && clusterMode) {
             // force to local so that remote node don't go recursive
             LogLevelParams local = LogLevelParams.newBuilder(request).setLocal(true).build();
-            for (String node : getNodes()) {
-                // exclude the local node
-                if (node.equals(address)) continue;
-                URLFrontierBlockingStub blockingFrontier = getFrontier(node);
-                blockingFrontier.setLogLevel(local);
+            final Deadline deadline = forwardDeadline();
+            try {
+                for (String node : getNodes()) {
+                    // exclude the local node
+                    if (node.equals(address)) continue;
+                    getFrontier(node, deadline).setLogLevel(local);
+                }
+            } catch (StatusRuntimeException e) {
+                // the level is not applied locally either: the call is idempotent, a retry
+                // once the node is back sets it everywhere
+                responseObserver.onError(e);
+                return;
             }
         }
         super.setLogLevel(request, responseObserver);
@@ -660,14 +718,21 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         if (!request.getLocal() && clusterMode) {
             // force to local so that remote node don't go recursive
             Local local = Local.newBuilder().setLocal(true).build();
-            for (String node : getNodes()) {
-                // exclude the local node
-                if (node.equals(address)) continue;
-                URLFrontierBlockingStub blockingFrontier = getFrontier(node);
-                StringList results = blockingFrontier.listCrawls(local);
-                for (String s : results.getValuesList()) {
-                    crawlIDs.add(s);
+            // one deadline for the whole aggregation, not per node
+            final Deadline deadline = forwardDeadline();
+            try {
+                for (String node : getNodes()) {
+                    // exclude the local node
+                    if (node.equals(address)) continue;
+                    StringList results = getFrontier(node, deadline).listCrawls(local);
+                    for (String s : results.getValuesList()) {
+                        crawlIDs.add(s);
+                    }
                 }
+            } catch (StatusRuntimeException e) {
+                // an unreachable node surfaces an error rather than an incomplete list
+                responseObserver.onError(e);
+                return;
             }
         }
 
@@ -695,12 +760,19 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         Set<String> dedup = new HashSet<>();
 
         Pagination localPagination = Pagination.newBuilder(request).setLocal(true).build();
-        for (String node : getNodes()) {
-            URLFrontierBlockingStub blockingFrontier = getFrontier(node);
-            QueueList listqueues = blockingFrontier.listQueues(localPagination);
-            for (String s : listqueues.getValuesList()) {
-                dedup.add(s);
+        // one deadline for the whole aggregation, not per node
+        final Deadline deadline = forwardDeadline();
+        try {
+            for (String node : getNodes()) {
+                QueueList listqueues = getFrontier(node, deadline).listQueues(localPagination);
+                for (String s : listqueues.getValuesList()) {
+                    dedup.add(s);
+                }
             }
+        } catch (StatusRuntimeException e) {
+            // an unreachable node surfaces an error rather than an incomplete list
+            responseObserver.onError(e);
+            return;
         }
 
         crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder list = QueueList.newBuilder();
