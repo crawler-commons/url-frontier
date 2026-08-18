@@ -34,6 +34,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.service.AbstractFrontierService;
 import crawlercommons.urlfrontier.service.AsyncCompletion;
+import crawlercommons.urlfrontier.service.ParamHelper;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
@@ -66,10 +67,8 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             final Map<String, String> configuration, String host, int port) {
         super(configuration, host, port);
         forwardDeadlineSeconds =
-                Integer.parseInt(
-                        configuration.getOrDefault(
-                                "forward.deadline.seconds",
-                                Integer.toString(FORWARD_DEADLINE_SECONDS)));
+                ParamHelper.getIntegerParameter(
+                        configuration, "forward.deadline.seconds", FORWARD_DEADLINE_SECONDS);
     }
 
     // no explicit config

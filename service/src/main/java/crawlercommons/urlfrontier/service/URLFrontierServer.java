@@ -98,19 +98,15 @@ public class URLFrontierServer implements Callable<Integer> {
         return 0;
     }
 
+    /** Starts the URL Frontier server. */
     public void start() throws Exception {
-
-        // default implementation
-        String implementationClassName = RocksDBService.class.getName();
 
         Map<String, String> configuration = new HashMap<>();
 
         // Do we want to expose Metrics via a Prometheus server?
         if (prometheus_server > 0) {
-            /**
-             * Register Prometheus collectors for garbage collection, memory pools, classloading,
-             * and thread counts.
-             */
+            // Register Prometheus collectors for garbage collection, memory pools, classloading,
+            // and thread counts.
             DefaultExports.initialize();
 
             LOG.info("Starting Prometheus server on port {}", prometheus_server);
@@ -127,7 +123,9 @@ public class URLFrontierServer implements Callable<Integer> {
                 // populate the config with the content of the file
                 for (String line : Files.readAllLines(Paths.get(config))) {
                     line = line.trim();
-                    if (line.startsWith("#")) continue;
+                    if (line.startsWith("#")) {
+                        continue;
+                    }
                     addToConfig(configuration, line);
                 }
             } catch (Exception e) {
@@ -143,9 +141,10 @@ public class URLFrontierServer implements Callable<Integer> {
             }
         }
 
-        // get the implementation class from the config if set
-        implementationClassName =
-                configuration.getOrDefault("implementation", implementationClassName);
+        // Get the implementation class from the config if set (default is RocksDBService)
+        String implementationClassName =
+                ParamHelper.getStringParameter(
+                        configuration, "implementation", RocksDBService.class.getName());
 
         Class<?> implementationClass = Class.forName(implementationClassName);
 
@@ -186,9 +185,8 @@ public class URLFrontierServer implements Callable<Integer> {
             }
         }
 
-        Boolean enableReflection =
-                Boolean.parseBoolean(
-                        configuration.getOrDefault("server.enable_reflection", "false"));
+        boolean enableReflection =
+                ParamHelper.getBooleanParameter(configuration, "server.enable_reflection", false);
 
         ServerBuilder builder = ServerBuilder.forPort(port).addService(service);
 
@@ -254,7 +252,11 @@ public class URLFrontierServer implements Callable<Integer> {
         }
     }
 
-    private static final void addToConfig(final Map<String, String> config, String line) {
+    /**
+     * Parse a single config line into the map. Lines without '=' are treated as flag-style keys
+     * with an empty string value (preserves containsKey, fixes getOrDefault).
+     */
+    static final void addToConfig(final Map<String, String> config, String line) {
         if (line == null || line.length() == 0) return;
 
         line = line.trim();
@@ -263,9 +265,9 @@ public class URLFrontierServer implements Callable<Integer> {
 
         // = to separate key from value
         int pos = line.indexOf('=');
-        // no value
+        // no '=' -> flag-style key with empty value (preserves containsKey, fixes getOrDefault)
         if (pos == -1) {
-            config.put(line, null);
+            config.put(line, "");
             return;
         }
         String key = line.substring(0, pos).trim();

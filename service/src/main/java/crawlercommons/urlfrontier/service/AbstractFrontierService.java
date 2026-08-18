@@ -159,23 +159,28 @@ public abstract class AbstractFrontierService
         final int availableProcessor = Runtime.getRuntime().availableProcessors();
         LOG.info("Available processor(s) {}", availableProcessor);
         // by default uses 1/4 of the available processors
-        final String defaultParallelism = Integer.toString(Math.max(availableProcessor / 4, 1));
+        final int defaultParallelism = Math.max(availableProcessor / 4, 1);
+
         final int rthreadNum =
-                Integer.parseInt(configuration.getOrDefault("read.thread.num", defaultParallelism));
+                ParamHelper.getIntegerParameter(
+                        configuration, "read.thread.num", defaultParallelism);
         LOG.info("Using {} threads for reading from queues", rthreadNum);
         readExecutorService = Executors.newFixedThreadPool(rthreadNum);
+
         final int wthreadNum =
-                Integer.parseInt(
-                        configuration.getOrDefault("write.thread.num", defaultParallelism));
+                ParamHelper.getIntegerParameter(
+                        configuration, "write.thread.num", defaultParallelism);
         writeExecutorService = Executors.newFixedThreadPool(wthreadNum);
         LOG.info("Using {} threads for writing to queues", wthreadNum);
+
         putURLsMaxInFlight =
-                Integer.parseInt(configuration.getOrDefault("putURLs.max.inflight", "1024"));
+                ParamHelper.getIntegerParameter(configuration, "putURLs.max.inflight", 1024);
         if (putURLsMaxInFlight > 0) {
             LOG.info("Limiting putURLs streams to {} URLs in flight", putURLsMaxInFlight);
         }
+
         putDiscoveredMaxInFlight =
-                Integer.parseInt(configuration.getOrDefault("putDiscovered.max.inflight", "16"));
+                ParamHelper.getIntegerParameter(configuration, "putDiscovered.max.inflight", 16);
         if (putDiscoveredMaxInFlight > 0) {
             LOG.info(
                     "Limiting putDiscovered streams to {} batches in flight",

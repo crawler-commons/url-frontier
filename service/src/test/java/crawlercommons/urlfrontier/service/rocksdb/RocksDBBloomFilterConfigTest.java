@@ -6,6 +6,7 @@ package crawlercommons.urlfrontier.service.rocksdb;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import crawlercommons.urlfrontier.service.ParamHelper;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,9 @@ class RocksDBBloomFilterConfigTest {
 
     @Test
     void enabledWhenNotConfigured() {
-        assertTrue(RocksDBService.useBloomFilters(new HashMap<>()));
+        boolean bloomFilters =
+                ParamHelper.getFlagParameter(new HashMap<>(), "rocksdb.bloom.filters", true);
+        assertTrue(bloomFilters);
     }
 
     /** the key used to be a flag without a value */
@@ -23,23 +26,31 @@ class RocksDBBloomFilterConfigTest {
     void enabledWhenKeyHasNoValue() {
         final Map<String, String> conf = new HashMap<>();
         conf.put("rocksdb.bloom.filters", null);
-        assertTrue(RocksDBService.useBloomFilters(conf));
+        boolean bloomFilters = ParamHelper.getFlagParameter(conf, "rocksdb.bloom.filters", true);
+
+        assertTrue(bloomFilters);
 
         conf.put("rocksdb.bloom.filters", "");
-        assertTrue(RocksDBService.useBloomFilters(conf));
+        bloomFilters = ParamHelper.getFlagParameter(conf, "rocksdb.bloom.filters", true);
+
+        assertTrue(bloomFilters);
     }
 
     @Test
     void enabledWhenSetToTrue() {
         final Map<String, String> conf = new HashMap<>();
         conf.put("rocksdb.bloom.filters", "true");
-        assertTrue(RocksDBService.useBloomFilters(conf));
+        boolean bloomFilters = ParamHelper.getFlagParameter(conf, "rocksdb.bloom.filters", true);
+
+        assertTrue(bloomFilters);
     }
 
     @Test
     void disabledWhenSetToFalse() {
         final Map<String, String> conf = new HashMap<>();
         conf.put("rocksdb.bloom.filters", "false");
-        assertFalse(RocksDBService.useBloomFilters(conf));
+        boolean bloomFilters = ParamHelper.getFlagParameter(conf, "rocksdb.bloom.filters", true);
+
+        assertFalse(bloomFilters);
     }
 }

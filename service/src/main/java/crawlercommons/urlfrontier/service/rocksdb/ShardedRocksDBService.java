@@ -10,6 +10,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
 import crawlercommons.urlfrontier.service.CloseableIterator;
 import crawlercommons.urlfrontier.service.ConcurrentInsertionOrderMap;
+import crawlercommons.urlfrontier.service.ParamHelper;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
@@ -36,8 +37,8 @@ public class ShardedRocksDBService extends DistributedFrontierService {
 
         instance = new RocksDBService(configuration, host, port);
         // take coordinates of the nodes + able to identify itself in the list
-        final String snodes = configuration.get("nodes");
-        if (snodes == null) {
+        final String snodes = ParamHelper.getStringParameter(configuration, "nodes");
+        if (snodes.isEmpty()) {
             throw new RuntimeException(
                     "ShardedRocksDBService requires configuration 'nodes' to be set");
         }
