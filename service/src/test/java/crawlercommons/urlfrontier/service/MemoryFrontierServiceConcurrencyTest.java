@@ -12,6 +12,8 @@ import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.PurgeUrlParams;
+import crawlercommons.urlfrontier.Urlfrontier.QueueWithinCrawlParams;
+import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLStatusRequest;
@@ -154,6 +156,99 @@ class MemoryFrontierServiceConcurrencyTest {
         writer.join();
         if (failure.get() != null) {
             fail(failure.get());
+        }
+    }
+
+    @Test
+    void queueContentReadersSurviveConcurrentQueueMutation() throws Exception {
+        MemoryFrontierService service = new MemoryFrontierService("localhost", 0);
+        for (int i = 0; i < 100; i++) {
+            putOne(service, discovered("https://example.com/seed-" + i));
+        }
+
+        CountDownLatch start = new CountDownLatch(1);
+        AtomicBoolean running = new AtomicBoolean(true);
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+
+        Thread writer =
+                new Thread(
+                        () -> {
+                            try {
+                                start.await();
+                                for (int i = 0; i < 500; i++) {
+                                    putOne(service, discovered("https://example.com/live-" + i));
+                                }
+                            } catch (Throwable t) {
+                                failure.compareAndSet(null, t);
+                            } finally {
+                                running.set(false);
+                            }
+                        });
+
+        // getStats walks every URL of the queue through getInProcess
+        Thread statsReader =
+                new Thread(
+                        () -> {
+                            try {
+                                start.await();
+                                while (running.get()) {
+                                    readStats(service);
+                                }
+                            } catch (Throwable t) {
+                                failure.compareAndSet(null, t);
+                            }
+                        });
+
+        // getURLStatus scans the queue for a URL that is never there
+        Thread statusReader =
+                new Thread(
+                        () -> {
+                            try {
+                                start.await();
+                                while (running.get()) {
+                                    urlIsKnown(service, "https://example.com/absent");
+                                }
+                            } catch (Throwable t) {
+                                failure.compareAndSet(null, t);
+                            }
+                        });
+
+        writer.start();
+        statsReader.start();
+        statusReader.start();
+        start.countDown();
+        writer.join();
+        statsReader.join();
+        statusReader.join();
+
+        if (failure.get() != null) {
+            fail(failure.get());
+        }
+    }
+
+    private static void readStats(MemoryFrontierService service) throws Exception {
+        CountDownLatch done = new CountDownLatch(1);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+        service.getStats(
+                QueueWithinCrawlParams.newBuilder().setCrawlID(CRAWL_ID).build(),
+                new StreamObserver<>() {
+                    @Override
+                    public void onNext(Stats value) {}
+
+                    @Override
+                    public void onError(Throwable t) {
+                        error.set(t);
+                        done.countDown();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        done.countDown();
+                    }
+                });
+        assertTrue(done.await(5, TimeUnit.SECONDS));
+        if (error.get() != null) {
+            throw new IllegalStateException("getStats failed", error.get());
         }
     }
 

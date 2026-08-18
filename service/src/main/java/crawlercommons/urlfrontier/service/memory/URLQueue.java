@@ -41,14 +41,19 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
     @Override
     public int getInProcess(long now) {
         // heldUntil is not part of the sort order and the iterator follows the backing heap
-        // array anyway, so every element has to be checked
-        int inproc = 0;
-        for (InternalURL iu : this) {
-            if (iu.heldUntil > now) {
-                inproc++;
+        // array anyway, so every element has to be checked.
+        // PriorityQueue's iterator is fail-fast: getStats calls this without holding the queue
+        // monitor, so take it here. It is the same monitor as tryReserveQueue's, which calls
+        // this method too, and monitors are reentrant.
+        synchronized (this) {
+            int inproc = 0;
+            for (InternalURL iu : this) {
+                if (iu.heldUntil > now) {
+                    inproc++;
+                }
             }
+            return inproc;
         }
-        return inproc;
     }
 
     @Override
