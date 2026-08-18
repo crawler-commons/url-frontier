@@ -115,6 +115,7 @@ public class DumpURLs implements Callable<Integer> {
             final Instant start = Instant.now();
             final boolean toFile = !output.isEmpty();
 
+            boolean success = false;
             try {
                 OutputStream os = toFile ? new FileOutputStream(output) : System.out;
                 if (toFile && output.endsWith(".gz")) {
@@ -122,22 +123,10 @@ public class DumpURLs implements Callable<Integer> {
                 }
                 out = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
 
-                final boolean success;
                 if (threads > 1) {
                     success = dumpParallel(blockingFrontier, crawlIDs);
                 } else {
                     success = dumpSequential(blockingFrontier, crawlIDs);
-                }
-
-                if (toFile) {
-                    out.close();
-                } else {
-                    out.flush();
-                }
-
-                if (!success) {
-                    System.err.println("The dump is incomplete");
-                    return 1;
                 }
             } catch (IOException e) {
                 System.err.println(
@@ -145,6 +134,29 @@ public class DumpURLs implements Callable<Integer> {
                                 + (toFile ? output : "to the standard output")
                                 + ": "
                                 + e.getMessage());
+            } finally {
+                // whatever happened, finish the output so that what was dumped so far
+                // stays usable: a gzip stream without its trailer would be invalid
+                if (out != null) {
+                    try {
+                        if (toFile) {
+                            out.close();
+                        } else {
+                            out.flush();
+                        }
+                    } catch (IOException e) {
+                        success = false;
+                        System.err.println(
+                                "Error while writing "
+                                        + (toFile ? output : "to the standard output")
+                                        + ": "
+                                        + e.getMessage());
+                    }
+                }
+            }
+
+            if (!success) {
+                System.err.println("The dump is incomplete");
                 return 1;
             }
 
