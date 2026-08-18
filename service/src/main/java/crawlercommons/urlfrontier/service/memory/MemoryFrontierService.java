@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -34,10 +33,6 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(MemoryFrontierService.class);
-
-    // written by the putURLs worker threads, read without synchronization by
-    // getURLStatus and the URL iterators
-    private Map<String, Long> creationDates = new ConcurrentHashMap<>();
 
     public MemoryFrontierService(final Map<String, String> configuration, String host, int port) {
         super(configuration, host, port);
@@ -156,7 +151,6 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
             URLQueue existing = (URLQueue) getQueues().putIfAbsent(qk, created);
             if (existing == null) {
-                creationDates.put(iu.url, Instant.now().getEpochSecond());
                 if (!discovered && iu.nextFetchDate == 0) {
                     putURLs_completed_count.inc();
                 }
@@ -178,7 +172,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
                 }
             }
 
-            creationDates.put(iu.url, Instant.now().getEpochSecond());
+            queue.setCreationDateIfAbsent(iu.url, Instant.now().getEpochSecond());
 
             // add the new item
             // unless it is an update and it's nextFetchDate is 0 == NEVER
@@ -231,7 +225,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
 
         if (queue.isCompleted(url)) {
             found = true;
-            long creatDt = creationDates.get(url);
+            long creatDt = queue.getCreationDate(url);
             responseObserver.onNext(buildURLItem(builder, knownBuilder, info, 0, creatDt));
         } else {
             Iterator<InternalURL> iter = queue.iterator();
@@ -252,7 +246,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
                     }
 
                     builder.setKnown(knownBuilder.build());
-                    builder.setCreationDate(creationDates.get(url));
+                    builder.setCreationDate(queue.getCreationDate(url));
                     found = true;
                     responseObserver.onNext(builder.build());
                     break;
@@ -277,6 +271,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
         private final org.slf4j.Logger LOG = LoggerFactory.getLogger(MemoryURLItemIterator.class);
 
         private final Entry<QueueWithinCrawl, QueueInterface> qentry;
+        private final URLQueue queue;
         private final long start;
         private final long maxURLs;
         private long pos = 0;
@@ -291,7 +286,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
             this.qentry = qentry;
             this.start = start;
             this.maxURLs = maxURLs;
-            URLQueue queue = (URLQueue) qentry.getValue();
+            this.queue = (URLQueue) qentry.getValue();
             InternalURL[] activeSnapshot;
             synchronized (queue) {
                 activeSnapshot = queue.toArray(new InternalURL[0]);
@@ -324,7 +319,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
                                     .build();
                     if (pos > start) {
                         sent++;
-                        long creatDt = creationDates.get(curcomplete);
+                        long creatDt = queue.getCreationDate(curcomplete);
                         return buildURLItem(builder, knownBuilder, info, 0, creatDt);
                     }
                 } else if (iter.hasNext()) {
@@ -334,7 +329,7 @@ public class MemoryFrontierService extends AbstractFrontierService {
                         URLInfo info = item.toURLInfo(qentry.getKey());
                         if (pos > start) {
                             sent++;
-                            long creatDt = creationDates.get(item.url);
+                            long creatDt = queue.getCreationDate(item.url);
                             return buildURLItem(
                                     builder, knownBuilder, info, item.nextFetchDate, creatDt);
                         }
@@ -376,10 +371,10 @@ public class MemoryFrontierService extends AbstractFrontierService {
         synchronized (queue) {
             if (queue.isCompleted(info.getUrl())) {
                 queue.getCompleted().remove(info.getUrl());
-                creationDates.remove(info.getUrl());
+                queue.removeCreationDate(info.getUrl());
             } else if (queue.contains(iu)) {
                 queue.remove(iu);
-                creationDates.remove(info.getUrl());
+                queue.removeCreationDate(info.getUrl());
             }
         }
     }
