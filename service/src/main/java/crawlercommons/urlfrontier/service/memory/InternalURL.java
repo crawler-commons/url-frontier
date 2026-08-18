@@ -24,7 +24,8 @@ class InternalURL implements Comparable<InternalURL>, Serializable {
 
     // this is set when the URL is sent for processing
     // so that a subsequent call to getURLs does not send it again
-    public long heldUntil = -1;
+    // written by sendURLsForQueue outside the queue monitor, read by getInProcess
+    public volatile long heldUntil = -1;
 
     private InternalURL() {}
 

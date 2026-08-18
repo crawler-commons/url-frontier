@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
-import java.util.PriorityQueue;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -55,15 +54,33 @@ public class MemoryFrontierService extends AbstractFrontierService {
             int secsUntilRequestable,
             long now,
             SynchronizedStreamObserver<URLInfo> responseObserver) {
-        Iterator<InternalURL> iter = ((PriorityQueue<InternalURL>) queue).iterator();
+        final URLQueue pq = (URLQueue) queue;
+
+        // PriorityQueue.iterator() walks the backing heap array and is not in sort order: only
+        // the head is guaranteed to be the minimum, so the whole queue has to be sorted. Take a
+        // snapshot under the queue monitor, as the URL iterator does: sending happens outside it
+        // so that a slow consumer cannot block the putURLs workers.
+        final InternalURL[] snapshot;
+        synchronized (pq) {
+            // cheap way to rule out the common case where nothing is due
+            final InternalURL head = pq.peek();
+            if (head == null || head.nextFetchDate > now) {
+                return 0;
+            }
+            snapshot = pq.toArray(new InternalURL[0]);
+        }
+        Arrays.sort(snapshot);
+
         int alreadySent = 0;
 
-        while (iter.hasNext() && alreadySent < maxURLsPerQueue) {
-            InternalURL item = iter.next();
+        for (InternalURL item : snapshot) {
+            if (alreadySent >= maxURLsPerQueue) {
+                break;
+            }
 
             // check that is is due
             if (item.nextFetchDate > now) {
-                // they are sorted by date no need to go further
+                // sorted by date, no need to go further
                 return alreadySent;
             }
 
