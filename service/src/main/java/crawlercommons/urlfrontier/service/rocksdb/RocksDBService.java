@@ -31,7 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -95,9 +96,7 @@ public class RocksDBService extends AbstractFrontierService {
         super(configuration, host, port);
 
         // where to store it?
-        String path =
-                ParamHelper.getStringParameter(
-                        configuration, "rocksdb.path", Optional.of("./rocksdb"));
+        String path = ParamHelper.getStringParameter(configuration, "rocksdb.path", "./rocksdb");
 
         LOG.info("RocksDB data stored in {} ", path);
 
@@ -113,24 +112,18 @@ public class RocksDBService extends AbstractFrontierService {
 
         boolean checkOnRecovery = configuration.containsKey("rocksdb.recovery.check");
 
-        /**
-         * The filters are enabled by default: every URL sent to putURLItem needs a lookup to find
-         * out whether it is already known and most of them are not, which is the case they make
-         * cheap.
-         *
-         * <p>They used to be enabled with a valueless <i>rocksdb.bloom.filters</i> flag, so the
-         * mere presence of the key is still taken to mean 'enabled'.
-         */
+        // The filters are enabled by default: every URL sent to putURLItem needs a lookup to find
+        // out whether it is already known and most of them are not, which is the case they make
+        // cheap. They used to be enabled with a valueless rocksdb.bloom.filters flag, so the
+        // mere presence of the key is still taken to mean 'enabled'.
         boolean bloomFilters =
-                ParamHelper.getBooleanParameter(configuration, "rocksdb.bloom.filters", true);
+                ParamHelper.getFlagParameter(configuration, "rocksdb.bloom.filters", true);
 
-        /**
-         * The WAL is enabled by default: disabling it roughly halves the bytes written per URL but
-         * loses whatever was in the memtables if the service dies without closing cleanly. The URLs
-         * concerned get rediscovered by the crawl, so this is a reasonable trade for write-heavy
-         * setups.
-         */
-        walDisabled = ParamHelper.getBooleanParameter(configuration, "rocksdb.wal.disable", false);
+        // The WAL is enabled by default: disabling it roughly halves the bytes written per URL but
+        // loses whatever was in the memtables if the service dies without closing cleanly. The URLs
+        // concerned get rediscovered by the crawl, so this is a reasonable trade for write-heavy
+        // setups.
+        walDisabled = ParamHelper.getFlagParameter(configuration, "rocksdb.wal.disable", false);
         if (walDisabled) {
             LOG.info("WAL disabled - writes are made durable at flush time only");
             writeOptions.setDisableWAL(true);
@@ -138,18 +131,16 @@ public class RocksDBService extends AbstractFrontierService {
 
         try (final ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()) {
 
-            long maxBytesForLevelBase =
-                    ParamHelper.getLongParameter(
-                            configuration, "rocksdb.max_bytes_for_level_base", null);
-            if (maxBytesForLevelBase > 0) {
-                cfOpts.setMaxBytesForLevelBase(maxBytesForLevelBase);
+            OptionalLong maxBytesForLevelBase =
+                    ParamHelper.getLongParameter(configuration, "rocksdb.max_bytes_for_level_base");
+            if (maxBytesForLevelBase.isPresent()) {
+                cfOpts.setMaxBytesForLevelBase(maxBytesForLevelBase.getAsLong());
             }
 
-            long memTableBudget =
-                    ParamHelper.getLongParameter(
-                            configuration, "rocksdb.memtable_memory_budget", null);
-            if (memTableBudget > 0) {
-                cfOpts.optimizeUniversalStyleCompaction(memTableBudget);
+            OptionalLong memTableBudget =
+                    ParamHelper.getLongParameter(configuration, "rocksdb.memtable_memory_budget");
+            if (memTableBudget.isPresent()) {
+                cfOpts.optimizeUniversalStyleCompaction(memTableBudget.getAsLong());
             } else {
                 cfOpts.optimizeUniversalStyleCompaction();
             }
@@ -178,19 +169,19 @@ public class RocksDBService extends AbstractFrontierService {
                     options.setAtomicFlush(true);
                 }
 
-                int maxBackgroundJobs =
+                OptionalInt maxBackgroundJobs =
                         ParamHelper.getIntegerParameter(
-                                configuration, "rocksdb.max_background_jobs", null);
-                if (maxBackgroundJobs > 0) {
-                    options.setMaxBackgroundJobs(maxBackgroundJobs);
+                                configuration, "rocksdb.max_background_jobs");
+                if (maxBackgroundJobs.isPresent()) {
+                    options.setMaxBackgroundJobs(maxBackgroundJobs.getAsInt());
                 }
 
                 // Options.max_subcompactions: 1
-                int maxSubcompactions =
+                OptionalInt maxSubcompactions =
                         ParamHelper.getIntegerParameter(
-                                configuration, "rocksdb.max_subcompactions", null);
-                if (maxSubcompactions > 0) {
-                    options.setMaxSubcompactions(maxSubcompactions);
+                                configuration, "rocksdb.max_subcompactions");
+                if (maxSubcompactions.isPresent()) {
+                    options.setMaxSubcompactions(maxSubcompactions.getAsInt());
                 }
 
                 if (statistics != null) {
@@ -236,7 +227,7 @@ public class RocksDBService extends AbstractFrontierService {
 
         double bitsPerKey =
                 ParamHelper.getDoubleParameter(
-                        configuration, "rocksdb.bloom.filters.bits_per_key", Optional.of(10d));
+                        configuration, "rocksdb.bloom.filters.bits_per_key", 10d);
         LOG.info("Configuring Bloom filters with {} bits per key", bitsPerKey);
 
         bloomFilter = new BloomFilter(bitsPerKey);

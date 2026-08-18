@@ -17,7 +17,7 @@ class RocksDBWALConfigTest {
     @Test
     void enabledWhenNotConfigured() {
         boolean walDisabled =
-                ParamHelper.getBooleanParameter(new HashMap<>(), "rocksdb.wal.disable", false);
+                ParamHelper.getFlagParameter(new HashMap<>(), "rocksdb.wal.disable", false);
 
         assertFalse(walDisabled);
     }
@@ -27,11 +27,11 @@ class RocksDBWALConfigTest {
     void disabledWhenKeyHasNoValue() {
         final Map<String, String> conf = new HashMap<>();
         conf.put("rocksdb.wal.disable", null);
-        boolean walDisabled = ParamHelper.getBooleanParameter(conf, "rocksdb.wal.disable", false);
+        boolean walDisabled = ParamHelper.getFlagParameter(conf, "rocksdb.wal.disable", false);
         assertTrue(walDisabled);
 
         conf.put("rocksdb.wal.disable", "");
-        walDisabled = ParamHelper.getBooleanParameter(conf, "rocksdb.wal.disable", false);
+        walDisabled = ParamHelper.getFlagParameter(conf, "rocksdb.wal.disable", false);
         assertTrue(walDisabled);
     }
 
@@ -39,7 +39,7 @@ class RocksDBWALConfigTest {
     void disabledWhenSetToTrue() {
         final Map<String, String> conf = new HashMap<>();
         conf.put("rocksdb.wal.disable", "true");
-        boolean walDisabled = ParamHelper.getBooleanParameter(conf, "rocksdb.wal.disable", false);
+        boolean walDisabled = ParamHelper.getFlagParameter(conf, "rocksdb.wal.disable", false);
         assertTrue(walDisabled);
     }
 
@@ -47,7 +47,7 @@ class RocksDBWALConfigTest {
     void enabledWhenSetToFalse() {
         final Map<String, String> conf = new HashMap<>();
         conf.put("rocksdb.wal.disable", "false");
-        boolean walDisabled = ParamHelper.getBooleanParameter(conf, "rocksdb.wal.disable", false);
+        boolean walDisabled = ParamHelper.getFlagParameter(conf, "rocksdb.wal.disable", false);
         assertFalse(walDisabled);
     }
 }

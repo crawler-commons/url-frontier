@@ -47,7 +47,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -160,30 +159,28 @@ public abstract class AbstractFrontierService
         final int availableProcessor = Runtime.getRuntime().availableProcessors();
         LOG.info("Available processor(s) {}", availableProcessor);
         // by default uses 1/4 of the available processors
-        final Integer defaultParallelism = Math.max(availableProcessor / 4, 1);
+        final int defaultParallelism = Math.max(availableProcessor / 4, 1);
 
         final int rthreadNum =
                 ParamHelper.getIntegerParameter(
-                        configuration, "read.thread.num", Optional.of(defaultParallelism));
+                        configuration, "read.thread.num", defaultParallelism);
         LOG.info("Using {} threads for reading from queues", rthreadNum);
         readExecutorService = Executors.newFixedThreadPool(rthreadNum);
 
         final int wthreadNum =
                 ParamHelper.getIntegerParameter(
-                        configuration, "write.thread.num", Optional.of(defaultParallelism));
+                        configuration, "write.thread.num", defaultParallelism);
         writeExecutorService = Executors.newFixedThreadPool(wthreadNum);
         LOG.info("Using {} threads for writing to queues", wthreadNum);
 
         putURLsMaxInFlight =
-                ParamHelper.getIntegerParameter(
-                        configuration, "putURLs.max.inflight", Optional.of(1024));
+                ParamHelper.getIntegerParameter(configuration, "putURLs.max.inflight", 1024);
         if (putURLsMaxInFlight > 0) {
             LOG.info("Limiting putURLs streams to {} URLs in flight", putURLsMaxInFlight);
         }
 
         putDiscoveredMaxInFlight =
-                ParamHelper.getIntegerParameter(
-                        configuration, "putDiscovered.max.inflight", Optional.of(16));
+                ParamHelper.getIntegerParameter(configuration, "putDiscovered.max.inflight", 16);
         if (putDiscoveredMaxInFlight > 0) {
             LOG.info(
                     "Limiting putDiscovered streams to {} batches in flight",

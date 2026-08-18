@@ -1,172 +1,275 @@
-// SPDX-FileCopyrightText: 2025 Crawler-commons
+// SPDX-FileCopyrightText: 2026 Crawler-commons
 // SPDX-License-Identifier: Apache-2.0
 
 package crawlercommons.urlfrontier.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import org.junit.jupiter.api.Test;
 
 /** Tests for ParamHelper parameter parsing */
 class ParamHelperTest {
 
+    // --- getIntegerParameter (OptionalInt return) ---
+
     @Test
     void getIntegerParameter_withValue_returnsParsedValue() {
         Map<String, String> config = new HashMap<>();
         config.put("test.int", "42");
-        assertEquals(42, ParamHelper.getIntegerParameter(config, "test.int", Optional.empty()));
+        OptionalInt result = ParamHelper.getIntegerParameter(config, "test.int");
+        assertTrue(result.isPresent());
+        assertEquals(42, result.getAsInt());
     }
+
+    @Test
+    void getIntegerParameter_missingKey_returnsEmpty() {
+        Map<String, String> config = new HashMap<>();
+        assertTrue(ParamHelper.getIntegerParameter(config, "missing").isEmpty());
+    }
+
+    @Test
+    void getIntegerParameter_emptyString_returnsEmpty() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.int", "");
+        assertTrue(ParamHelper.getIntegerParameter(config, "test.int").isEmpty());
+    }
+
+    @Test
+    void getIntegerParameter_invalidValue_throwsException() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.int", "not-a-number");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ParamHelper.getIntegerParameter(config, "test.int"));
+    }
+
+    // --- getIntegerParameter with default ---
 
     @Test
     void getIntegerParameter_withDefault_returnsDefaultWhenMissing() {
         Map<String, String> config = new HashMap<>();
-        assertEquals(100, ParamHelper.getIntegerParameter(config, "missing", Optional.of(100)));
+        assertEquals(100, ParamHelper.getIntegerParameter(config, "missing", 100));
     }
 
     @Test
-    void getIntegerParameter_noDefault_returnsFallbackWhenMissing() {
+    void getIntegerParameter_withDefault_returnsParsedWhenSet() {
         Map<String, String> config = new HashMap<>();
-        assertEquals(-1, ParamHelper.getIntegerParameter(config, "missing", Optional.empty()));
+        config.put("test.int", "42");
+        assertEquals(42, ParamHelper.getIntegerParameter(config, "test.int", 100));
     }
 
     @Test
-    void getIntegerParameter_emptyString_returnsDefault() {
+    void getIntegerParameter_withDefault_returnsDefaultWhenEmpty() {
         Map<String, String> config = new HashMap<>();
         config.put("test.int", "");
-        assertEquals(50, ParamHelper.getIntegerParameter(config, "test.int", Optional.of(50)));
+        assertEquals(50, ParamHelper.getIntegerParameter(config, "test.int", 50));
     }
 
     @Test
-    void getIntegerParameter_invalidValue_exitsProgram() {
+    void getIntegerParameter_withDefault_invalidValue_throwsException() {
         Map<String, String> config = new HashMap<>();
         config.put("test.int", "not-a-number");
-        // System.exit is called, so we can't easily test this without mocking
-        // This test documents the behavior
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ParamHelper.getIntegerParameter(config, "test.int", 10));
     }
+
+    // --- getLongParameter (OptionalLong return) ---
 
     @Test
     void getLongParameter_withValue_returnsParsedValue() {
         Map<String, String> config = new HashMap<>();
         config.put("test.long", "1234567890");
-        assertEquals(1234567890L, ParamHelper.getLongParameter(config, "test.long", Optional.empty()));
+        OptionalLong result = ParamHelper.getLongParameter(config, "test.long");
+        assertTrue(result.isPresent());
+        assertEquals(1234567890L, result.getAsLong());
     }
+
+    @Test
+    void getLongParameter_missingKey_returnsEmpty() {
+        Map<String, String> config = new HashMap<>();
+        assertTrue(ParamHelper.getLongParameter(config, "missing").isEmpty());
+    }
+
+    @Test
+    void getLongParameter_invalidValue_throwsException() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.long", "not-a-long");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ParamHelper.getLongParameter(config, "test.long"));
+    }
+
+    // --- getLongParameter with default ---
 
     @Test
     void getLongParameter_withDefault_returnsDefaultWhenMissing() {
         Map<String, String> config = new HashMap<>();
-        assertEquals(999L, ParamHelper.getLongParameter(config, "missing", Optional.of(999L)));
+        assertEquals(999L, ParamHelper.getLongParameter(config, "missing", 999L));
     }
 
     @Test
-    void getLongParameter_noDefault_returnsFallbackWhenMissing() {
+    void getLongParameter_withDefault_returnsParsedWhenSet() {
         Map<String, String> config = new HashMap<>();
-        assertEquals(-1L, ParamHelper.getLongParameter(config, "missing", Optional.empty()));
+        config.put("test.long", "42");
+        assertEquals(42L, ParamHelper.getLongParameter(config, "test.long", 999L));
     }
+
+    // --- getDoubleParameter ---
 
     @Test
     void getDoubleParameter_withValue_returnsParsedValue() {
         Map<String, String> config = new HashMap<>();
         config.put("test.double", "3.14");
-        assertEquals(3.14, ParamHelper.getDoubleParameter(config, "test.double", Optional.empty()));
+        assertEquals(3.14, ParamHelper.getDoubleParameter(config, "test.double", 0.0), 0.001);
     }
 
     @Test
     void getDoubleParameter_withDefault_returnsDefaultWhenMissing() {
         Map<String, String> config = new HashMap<>();
-        assertEquals(2.71, ParamHelper.getDoubleParameter(config, "missing", Optional.of(2.71)));
+        assertEquals(2.71, ParamHelper.getDoubleParameter(config, "missing", 2.71), 0.001);
     }
 
     @Test
-    void getDoubleParameter_noDefault_returnsNaNWhenMissing() {
+    void getDoubleParameter_withDefault_returnsDefaultWhenEmpty() {
         Map<String, String> config = new HashMap<>();
-        assertTrue(Double.isNaN(ParamHelper.getDoubleParameter(config, "missing", Optional.empty())));
+        config.put("test.double", "");
+        assertEquals(2.71, ParamHelper.getDoubleParameter(config, "test.double", 2.71), 0.001);
     }
+
+    @Test
+    void getDoubleParameter_invalidValue_throwsException() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.double", "not-a-double");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ParamHelper.getDoubleParameter(config, "test.double", 0.0));
+    }
+
+    // --- getStringParameter ---
 
     @Test
     void getStringParameter_withValue_returnsValue() {
         Map<String, String> config = new HashMap<>();
         config.put("test.str", "hello");
-        assertEquals("hello", ParamHelper.getStringParameter(config, "test.str", Optional.empty()));
+        assertEquals("hello", ParamHelper.getStringParameter(config, "test.str"));
+    }
+
+    @Test
+    void getStringParameter_missingKey_returnsEmpty() {
+        Map<String, String> config = new HashMap<>();
+        assertEquals("", ParamHelper.getStringParameter(config, "missing"));
     }
 
     @Test
     void getStringParameter_withDefault_returnsDefaultWhenMissing() {
         Map<String, String> config = new HashMap<>();
-        assertEquals("default", ParamHelper.getStringParameter(config, "missing", Optional.of("default")));
+        assertEquals("default", ParamHelper.getStringParameter(config, "missing", "default"));
     }
 
     @Test
-    void getStringParameter_noDefault_returnsEmptyWhenMissing() {
+    void getStringParameter_withDefault_returnsValueWhenSet() {
         Map<String, String> config = new HashMap<>();
-        assertEquals("", ParamHelper.getStringParameter(config, "missing", Optional.empty()));
+        config.put("test.str", "hello");
+        assertEquals("hello", ParamHelper.getStringParameter(config, "test.str", "default"));
     }
 
     @Test
-    void getStringParameter_nullDefault_returnsEmptyWhenMissing() {
-        Map<String, String> config = new HashMap<>();
-        assertEquals("", ParamHelper.getStringParameter(config, "missing", null));
-    }
-
-    @Test
-    void getStringParameter_emptyStringInConfig_returnsDefault() {
+    void getStringParameter_withDefault_returnsDefaultWhenEmpty() {
         Map<String, String> config = new HashMap<>();
         config.put("test.str", "");
-        assertEquals("default", ParamHelper.getStringParameter(config, "test.str", Optional.of("default")));
+        assertEquals("default", ParamHelper.getStringParameter(config, "test.str", "default"));
     }
 
-    @Test
-    void getStringParameter_optionalWithNull_returnsEmpty() {
-        Map<String, String> config = new HashMap<>();
-        assertEquals("", ParamHelper.getStringParameter(config, "missing", Optional.ofNullable(null)));
-    }
+    // --- getBooleanParameter ---
 
     @Test
     void getBooleanParameter_withTrueValue_returnsTrue() {
         Map<String, String> config = new HashMap<>();
         config.put("test.bool", "true");
-        assertEquals(true, ParamHelper.getBooleanParameter(config, "test.bool", false));
+        assertTrue(ParamHelper.getBooleanParameter(config, "test.bool", false));
     }
 
     @Test
     void getBooleanParameter_withFalseValue_returnsFalse() {
         Map<String, String> config = new HashMap<>();
         config.put("test.bool", "false");
-        assertEquals(false, ParamHelper.getBooleanParameter(config, "test.bool", true));
+        assertFalse(ParamHelper.getBooleanParameter(config, "test.bool", true));
     }
 
     @Test
-    void getBooleanParameter_emptyString_returnsTrue() {
+    void getBooleanParameter_emptyString_returnsDefault() {
         Map<String, String> config = new HashMap<>();
         config.put("test.bool", "");
-        assertEquals(true, ParamHelper.getBooleanParameter(config, "test.bool", false));
+        assertFalse(ParamHelper.getBooleanParameter(config, "test.bool", false));
+        assertTrue(ParamHelper.getBooleanParameter(config, "test.bool", true));
     }
-    
+
     @Test
     void getBooleanParameter_nullValue_returnsDefault() {
         Map<String, String> config = new HashMap<>();
         config.put("test.bool", null);
-        assertEquals(true, ParamHelper.getBooleanParameter(config, "test.bool", true));
+        assertFalse(ParamHelper.getBooleanParameter(config, "test.bool", false));
+        assertTrue(ParamHelper.getBooleanParameter(config, "test.bool", true));
     }
 
     @Test
     void getBooleanParameter_missingKey_returnsDefault() {
         Map<String, String> config = new HashMap<>();
-        assertEquals(true, ParamHelper.getBooleanParameter(config, "missing", true));
-        assertEquals(false, ParamHelper.getBooleanParameter(config, "missing", false));
+        assertTrue(ParamHelper.getBooleanParameter(config, "missing", true));
+        assertFalse(ParamHelper.getBooleanParameter(config, "missing", false));
     }
 
     @Test
     void getBooleanParameter_nonBooleanString_returnsFalse() {
-        // Boolean.parseBoolean returns true for any non-null, non-"true" string
         Map<String, String> config = new HashMap<>();
         config.put("test.bool", "yes");
-        assertEquals(false, ParamHelper.getBooleanParameter(config, "test.bool", false));
+        assertFalse(ParamHelper.getBooleanParameter(config, "test.bool", false));
         config.put("test.bool", "1");
-        assertEquals(false, ParamHelper.getBooleanParameter(config, "test.bool", false));
+        assertFalse(ParamHelper.getBooleanParameter(config, "test.bool", false));
+    }
+
+    // --- getFlagParameter ---
+
+    @Test
+    void getFlagParameter_missingKey_returnsDefault() {
+        Map<String, String> config = new HashMap<>();
+        assertTrue(ParamHelper.getFlagParameter(config, "missing", true));
+        assertFalse(ParamHelper.getFlagParameter(config, "missing", false));
+    }
+
+    @Test
+    void getFlagParameter_emptyString_returnsTrue() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.flag", "");
+        assertTrue(ParamHelper.getFlagParameter(config, "test.flag", false));
+    }
+
+    @Test
+    void getFlagParameter_nullValue_returnsTrue() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.flag", null);
+        assertTrue(ParamHelper.getFlagParameter(config, "test.flag", false));
+    }
+
+    @Test
+    void getFlagParameter_trueValue_returnsTrue() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.flag", "true");
+        assertTrue(ParamHelper.getFlagParameter(config, "test.flag", false));
+    }
+
+    @Test
+    void getFlagParameter_falseValue_returnsFalse() {
+        Map<String, String> config = new HashMap<>();
+        config.put("test.flag", "false");
+        assertFalse(ParamHelper.getFlagParameter(config, "test.flag", true));
     }
 }

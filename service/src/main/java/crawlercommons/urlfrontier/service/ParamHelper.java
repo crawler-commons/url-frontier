@@ -1,14 +1,21 @@
-// SPDX-FileCopyrightText: 2025 Crawler-commons
+// SPDX-FileCopyrightText: 2026 Crawler-commons
 // SPDX-License-Identifier: Apache-2.0
 
 package crawlercommons.urlfrontier.service;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
+import java.util.function.Function;
 import org.slf4j.LoggerFactory;
 
-/** Utility functions to retrieve and parse configuration parameters */
-public class ParamHelper {
+/** Utility functions to retrieve and parse configuration parameters. */
+public final class ParamHelper {
+
+    private ParamHelper() {
+        // utility class
+    }
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ParamHelper.class);
 
@@ -22,28 +29,26 @@ public class ParamHelper {
      * @param fallback Value to use if parameter is not set and no default provided.
      * @param <T> The target type.
      * @return The parsed parameter value, default value, or fallback.
+     * @throws IllegalArgumentException if the config value cannot be parsed.
      */
     private static <T> T parseParameter(
             Map<String, String> config,
             String paramName,
             Optional<T> defaultVal,
-            java.util.function.Function<String, T> parser,
+            Function<String, T> parser,
             T fallback) {
 
         String stringVal = config.get(paramName);
 
-        // defaultValue could potentially contain null but the public methods
-        // pass primitive types (int, long, double) or empty String so should not happen.
-        T val = (defaultVal != null) ? defaultVal.orElse(fallback) : fallback;
+        T val = defaultVal.orElse(fallback);
         if (stringVal != null && !stringVal.isEmpty()) {
             try {
                 val = parser.apply(stringVal);
             } catch (NumberFormatException e) {
-                LOG.error(
-                        "Error parsing {} for config parameter {}",
-                        parser.getClass().getSimpleName(),
-                        paramName);
-                System.exit(-1);
+                LOG.error("Cannot parse value '{}' for config parameter {}", stringVal, paramName);
+                throw new IllegalArgumentException(
+                        "Cannot parse value '" + stringVal + "' for config parameter " + paramName,
+                        e);
             }
         }
 
@@ -55,13 +60,35 @@ public class ParamHelper {
      *
      * @param config The configuration map holding parameter names and values.
      * @param paramName The name of the configuration parameter to retrieve.
-     * @param defaultVal An optional default value if the parameter is not set.
-     * @return The integer parameter value if defined and parsable; otherwise the default value or
-     *     -1. Exits the program if the parameter value cannot be parsed as an integer.
+     * @return An OptionalInt containing the parsed value if the parameter is set and non-empty;
+     *     empty otherwise. Throws IllegalArgumentException if the value cannot be parsed.
+     */
+    public static OptionalInt getIntegerParameter(Map<String, String> config, String paramName) {
+        String stringVal = config.get(paramName);
+        if (stringVal == null || stringVal.isEmpty()) {
+            return OptionalInt.empty();
+        }
+        try {
+            return OptionalInt.of(Integer.parseInt(stringVal));
+        } catch (NumberFormatException e) {
+            LOG.error("Cannot parse value '{}' for config parameter {}", stringVal, paramName);
+            throw new IllegalArgumentException(
+                    "Cannot parse value '" + stringVal + "' for config parameter " + paramName, e);
+        }
+    }
+
+    /**
+     * Retrieves an integer configuration parameter from the map.
+     *
+     * @param config The configuration map holding parameter names and values.
+     * @param paramName The name of the configuration parameter to retrieve.
+     * @param defaultVal The default value if the parameter is not set or empty.
+     * @return The integer parameter value if defined and parsable; otherwise the default value.
+     * @throws IllegalArgumentException if the parameter value cannot be parsed as an integer.
      */
     public static int getIntegerParameter(
-            Map<String, String> config, String paramName, Optional<Integer> defaultVal) {
-        return parseParameter(config, paramName, defaultVal, Integer::parseInt, -1);
+            Map<String, String> config, String paramName, int defaultVal) {
+        return getIntegerParameter(config, paramName).orElse(defaultVal);
     }
 
     /**
@@ -69,13 +96,35 @@ public class ParamHelper {
      *
      * @param config The configuration map holding parameter names and values.
      * @param paramName The name of the configuration parameter to retrieve.
-     * @param defaultVal An optional default value if the parameter is not set.
-     * @return The long parameter value if defined and parsable; otherwise the default value or -1.
-     *     Exits the program if the parameter value cannot be parsed as a long.
+     * @return An OptionalLong containing the parsed value if the parameter is set and non-empty;
+     *     empty otherwise. Throws IllegalArgumentException if the value cannot be parsed.
+     */
+    public static OptionalLong getLongParameter(Map<String, String> config, String paramName) {
+        String stringVal = config.get(paramName);
+        if (stringVal == null || stringVal.isEmpty()) {
+            return OptionalLong.empty();
+        }
+        try {
+            return OptionalLong.of(Long.parseLong(stringVal));
+        } catch (NumberFormatException e) {
+            LOG.error("Cannot parse value '{}' for config parameter {}", stringVal, paramName);
+            throw new IllegalArgumentException(
+                    "Cannot parse value '" + stringVal + "' for config parameter " + paramName, e);
+        }
+    }
+
+    /**
+     * Retrieves a long configuration parameter from the map.
+     *
+     * @param config The configuration map holding parameter names and values.
+     * @param paramName The name of the configuration parameter to retrieve.
+     * @param defaultVal The default value if the parameter is not set or empty.
+     * @return The long parameter value if defined and parsable; otherwise the default value.
+     * @throws IllegalArgumentException if the parameter value cannot be parsed as a long.
      */
     public static long getLongParameter(
-            Map<String, String> config, String paramName, Optional<Long> defaultVal) {
-        return parseParameter(config, paramName, defaultVal, Long::parseLong, -1L);
+            Map<String, String> config, String paramName, long defaultVal) {
+        return getLongParameter(config, paramName).orElse(defaultVal);
     }
 
     /**
@@ -83,13 +132,14 @@ public class ParamHelper {
      *
      * @param config The configuration map holding parameter names and values.
      * @param paramName The name of the configuration parameter to retrieve.
-     * @param defaultVal An optional default value if the parameter is not set.
-     * @return The double parameter value if defined and parsable; otherwise the default value or
-     *     NaN. Exits the program if the parameter value cannot be parsed as a double.
+     * @param defaultVal The default value if the parameter is not set or empty.
+     * @return The double parameter value if defined and parsable; otherwise the default value.
+     * @throws IllegalArgumentException if the parameter value cannot be parsed as a double.
      */
     public static double getDoubleParameter(
-            Map<String, String> config, String paramName, Optional<Double> defaultVal) {
-        return parseParameter(config, paramName, defaultVal, Double::parseDouble, Double.NaN);
+            Map<String, String> config, String paramName, double defaultVal) {
+        return parseParameter(
+                config, paramName, Optional.of(defaultVal), Double::parseDouble, Double.NaN);
     }
 
     /**
@@ -97,14 +147,25 @@ public class ParamHelper {
      *
      * @param config The configuration map holding parameter names and values.
      * @param paramName The name of the configuration parameter to retrieve.
-     * @param defaultVal An optional default value if the parameter is not set.
-     * @return The string parameter value if defined and non-empty; otherwise the default value if
-     *     provided (empty string if default is empty), or empty string if no default provided.
+     * @return The string parameter value if defined and non-empty; otherwise empty string.
+     */
+    public static String getStringParameter(Map<String, String> config, String paramName) {
+        String stringVal = config.get(paramName);
+        return (stringVal != null && !stringVal.isEmpty()) ? stringVal : "";
+    }
+
+    /**
+     * Retrieves a string configuration parameter from the map.
+     *
+     * @param config The configuration map holding parameter names and values.
+     * @param paramName The name of the configuration parameter to retrieve.
+     * @param defaultVal The default value if the parameter is not set or empty.
+     * @return The string parameter value if defined and non-empty; otherwise the default value.
      */
     public static String getStringParameter(
-            Map<String, String> config, String paramName, Optional<String> defaultVal) {
-
-        return parseParameter(config, paramName, defaultVal, s -> s, "");
+            Map<String, String> config, String paramName, String defaultVal) {
+        String stringVal = config.get(paramName);
+        return (stringVal != null && !stringVal.isEmpty()) ? stringVal : defaultVal;
     }
 
     /**
@@ -112,17 +173,39 @@ public class ParamHelper {
      *
      * @param config The configuration map holding parameter names and values.
      * @param paramName The name of the configuration parameter to retrieve.
-     * @param defaultVal The default value if the parameter is not set.
-     * @return The boolean parameter value if defined; otherwise the default value. Empty string or
-     *     null values are treated as true.
+     * @param defaultVal The default value if the parameter is not set, null, or empty.
+     * @return The boolean parameter value if defined and non-empty; otherwise the default value.
      */
     public static boolean getBooleanParameter(
             final Map<String, String> config, String paramName, boolean defaultVal) {
         if (!config.containsKey(paramName)) {
             return defaultVal;
-        } else {
-            String value = config.get(paramName);
-            return value == null || value.isEmpty() || Boolean.parseBoolean(value);
         }
+        String value = config.get(paramName);
+        if (value == null || value.isEmpty()) {
+            return defaultVal;
+        }
+        return Boolean.parseBoolean(value);
+    }
+
+    /**
+     * Retrieves a flag-style configuration parameter from the map. Flag-style keys are those where
+     * the mere presence of the key (with no value or an empty value) means "true". Used for legacy
+     * config keys like {@code rocksdb.bloom.filters} and {@code rocksdb.wal.disable} which
+     * historically were set as bare keys without a value.
+     *
+     * @param config The configuration map holding parameter names and values.
+     * @param paramName The name of the configuration parameter to retrieve.
+     * @param defaultVal The default value if the parameter is not present.
+     * @return {@code true} if the key is present (even with null or empty value), or if the value
+     *     is "true"; otherwise the result of {@link Boolean#parseBoolean(String)} or the default.
+     */
+    public static boolean getFlagParameter(
+            final Map<String, String> config, String paramName, boolean defaultVal) {
+        if (!config.containsKey(paramName)) {
+            return defaultVal;
+        }
+        String value = config.get(paramName);
+        return value == null || value.isEmpty() || Boolean.parseBoolean(value);
     }
 }

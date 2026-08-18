@@ -17,7 +17,7 @@ class RocksDBBloomFilterConfigTest {
     @Test
     void enabledWhenNotConfigured() {
         boolean bloomFilters =
-                ParamHelper.getBooleanParameter(new HashMap<>(), "rocksdb.bloom.filters", true);
+                ParamHelper.getFlagParameter(new HashMap<>(), "rocksdb.bloom.filters", true);
         assertTrue(bloomFilters);
     }
 
@@ -26,12 +26,12 @@ class RocksDBBloomFilterConfigTest {
     void enabledWhenKeyHasNoValue() {
         final Map<String, String> conf = new HashMap<>();
         conf.put("rocksdb.bloom.filters", null);
-        boolean bloomFilters = ParamHelper.getBooleanParameter(conf, "rocksdb.bloom.filters", true);
+        boolean bloomFilters = ParamHelper.getFlagParameter(conf, "rocksdb.bloom.filters", true);
 
         assertTrue(bloomFilters);
 
         conf.put("rocksdb.bloom.filters", "");
-        bloomFilters = ParamHelper.getBooleanParameter(conf, "rocksdb.bloom.filters", true);
+        bloomFilters = ParamHelper.getFlagParameter(conf, "rocksdb.bloom.filters", true);
 
         assertTrue(bloomFilters);
     }
@@ -40,7 +40,7 @@ class RocksDBBloomFilterConfigTest {
     void enabledWhenSetToTrue() {
         final Map<String, String> conf = new HashMap<>();
         conf.put("rocksdb.bloom.filters", "true");
-        boolean bloomFilters = ParamHelper.getBooleanParameter(conf, "rocksdb.bloom.filters", true);
+        boolean bloomFilters = ParamHelper.getFlagParameter(conf, "rocksdb.bloom.filters", true);
 
         assertTrue(bloomFilters);
     }
@@ -49,7 +49,7 @@ class RocksDBBloomFilterConfigTest {
     void disabledWhenSetToFalse() {
         final Map<String, String> conf = new HashMap<>();
         conf.put("rocksdb.bloom.filters", "false");
-        boolean bloomFilters = ParamHelper.getBooleanParameter(conf, "rocksdb.bloom.filters", true);
+        boolean bloomFilters = ParamHelper.getFlagParameter(conf, "rocksdb.bloom.filters", true);
 
         assertFalse(bloomFilters);
     }

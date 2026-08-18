@@ -18,7 +18,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -99,25 +98,15 @@ public class URLFrontierServer implements Callable<Integer> {
         return 0;
     }
 
-    /**
-     * @throws Exception
-     */
-    /**
-     * @throws Exception
-     */
-    /**
-     * @throws Exception
-     */
+    /** Starts the URL Frontier server. */
     public void start() throws Exception {
 
         Map<String, String> configuration = new HashMap<>();
 
         // Do we want to expose Metrics via a Prometheus server?
         if (prometheus_server > 0) {
-            /**
-             * Register Prometheus collectors for garbage collection, memory pools, classloading,
-             * and thread counts.
-             */
+            // Register Prometheus collectors for garbage collection, memory pools, classloading,
+            // and thread counts.
             DefaultExports.initialize();
 
             LOG.info("Starting Prometheus server on port {}", prometheus_server);
@@ -155,9 +144,7 @@ public class URLFrontierServer implements Callable<Integer> {
         // Get the implementation class from the config if set (default is RocksDBService)
         String implementationClassName =
                 ParamHelper.getStringParameter(
-                        configuration,
-                        "implementation",
-                        Optional.of(RocksDBService.class.getName()));
+                        configuration, "implementation", RocksDBService.class.getName());
 
         Class<?> implementationClass = Class.forName(implementationClassName);
 
@@ -198,9 +185,8 @@ public class URLFrontierServer implements Callable<Integer> {
             }
         }
 
-        Boolean enableReflection =
-                Boolean.parseBoolean(
-                        configuration.getOrDefault("server.enable_reflection", "false"));
+        boolean enableReflection =
+                ParamHelper.getFlagParameter(configuration, "server.enable_reflection", false);
 
         ServerBuilder builder = ServerBuilder.forPort(port).addService(service);
 
