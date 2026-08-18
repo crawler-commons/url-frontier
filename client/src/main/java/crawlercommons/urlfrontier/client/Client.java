@@ -27,7 +27,8 @@ import picocli.CommandLine.Option;
             SetCrawlLimit.class,
             GetURLStatus.class,
             CountURLs.class,
-            PurgeURLs.class
+            PurgeURLs.class,
+            DumpURLs.class
         },
         description = "Interacts with a URL Frontier from the command line")
 public class Client {

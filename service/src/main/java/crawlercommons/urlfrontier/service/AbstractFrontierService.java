@@ -1201,19 +1201,27 @@ public abstract class AbstractFrontierService
         long pos = -1; // Current position in the list of (filtered) URLs
         long sentCount = 0;
 
-        Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
-                getQueues().entrySet().iterator();
+        // a specific queue is targeted: look it up directly instead of scanning the
+        // whole map, so that listing a large frontier queue by queue does not cost a
+        // full scan per queue
+        final Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator;
+        if (key != null && !key.isEmpty()) {
+            final QueueWithinCrawl qwc = QueueWithinCrawl.get(key, normalisedCrawlID);
+            final QueueInterface queue = getQueues().get(qwc);
+            if (queue == null) {
+                responseObserver.onCompleted();
+                return;
+            }
+            qiterator = List.of(Map.entry(qwc, queue)).iterator();
+        } else {
+            qiterator = getQueues().entrySet().iterator();
+        }
 
         while (qiterator.hasNext() && sentCount < maxURLs) {
             Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
 
             // check that it is within the right crawlID
             if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
-                continue;
-            }
-
-            // check that it is within the right key/queue
-            if (key != null && !key.isEmpty() && !e.getKey().getQueue().equals(key)) {
                 continue;
             }
 
