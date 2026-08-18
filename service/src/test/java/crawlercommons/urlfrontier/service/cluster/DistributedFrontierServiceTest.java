@@ -41,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -510,6 +512,98 @@ class DistributedFrontierServiceTest {
                     AckMessage.Status.FAIL,
                     ack.getStatus(),
                     "no item must be left to expire in the in-process cache");
+        }
+    }
+
+    @Test
+    @Order(18)
+    void concurrentStreamsForwardingToTheSameOwnerAreAllAcked() throws Exception {
+        // issue #69: every client stream forwards through the same per-partition
+        // stream, which must therefore be written to under mutual exclusion (gRPC
+        // serializes the callbacks of one stream but not across streams) and must
+        // not be bound to the Context of whichever server call created it
+        final int streams = 8;
+        final int itemsPerStream = 250;
+        final String key = keyOwnedBy(1, "concurrent");
+
+        final List<AckMessage> acks = Collections.synchronizedList(new ArrayList<>());
+        final List<Throwable> errors = Collections.synchronizedList(new ArrayList<>());
+        final CountDownLatch start = new CountDownLatch(1);
+        final CountDownLatch done = new CountDownLatch(streams);
+        final ExecutorService pool = Executors.newFixedThreadPool(streams);
+        try {
+            for (int s = 0; s < streams; s++) {
+                final int stream = s;
+                pool.execute(
+                        () -> {
+                            StreamObserver<URLItem> input =
+                                    URLFrontierGrpc.newStub(channelA)
+                                            .putURLs(
+                                                    new StreamObserver<AckMessage>() {
+                                                        @Override
+                                                        public void onNext(AckMessage value) {
+                                                            acks.add(value);
+                                                        }
+
+                                                        @Override
+                                                        public void onError(Throwable t) {
+                                                            errors.add(t);
+                                                            done.countDown();
+                                                        }
+
+                                                        @Override
+                                                        public void onCompleted() {
+                                                            done.countDown();
+                                                        }
+                                                    });
+                            try {
+                                // all the streams push at once: the forwarding
+                                // observer must be hit from several threads
+                                start.await();
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                return;
+                            }
+                            for (int i = 0; i < itemsPerStream; i++) {
+                                URLInfo info =
+                                        URLInfo.newBuilder()
+                                                .setUrl("https://" + key + "/s" + stream + "-" + i)
+                                                .setKey(key)
+                                                .setCrawlID("DEFAULT")
+                                                .build();
+                                input.onNext(
+                                        URLItem.newBuilder()
+                                                .setID(stream + "-" + i)
+                                                .setDiscovered(
+                                                        DiscoveredURLItem.newBuilder()
+                                                                .setInfo(info)
+                                                                .build())
+                                                .build());
+                            }
+                            input.onCompleted();
+                        });
+            }
+            start.countDown();
+            assertTrue(
+                    done.await(60, TimeUnit.SECONDS),
+                    "concurrent putURLs streams did not complete in time: acks="
+                            + acks.size()
+                            + " streamsLeft="
+                            + done.getCount()
+                            + " errors="
+                            + errors);
+        } finally {
+            pool.shutdownNow();
+        }
+
+        assertTrue(errors.isEmpty(), "no stream must fail: " + errors);
+        assertEquals(
+                streams * itemsPerStream, acks.size(), "every item must be acked exactly once");
+        for (AckMessage ack : acks) {
+            assertNotEquals(
+                    AckMessage.Status.FAIL,
+                    ack.getStatus(),
+                    "no forwarded item must be lost when streams run concurrently");
         }
     }
 

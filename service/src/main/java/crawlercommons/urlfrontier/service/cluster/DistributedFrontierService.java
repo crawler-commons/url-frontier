@@ -37,6 +37,7 @@ import crawlercommons.urlfrontier.service.AsyncCompletion;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
+import io.grpc.Context;
 import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -418,14 +419,27 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                         }
                                     };
 
-                    return stub.putURLs(observer);
+                    // this stream is shared by every client stream forwarding to that
+                    // node, so it must not inherit the Context of whichever server call
+                    // happened to trigger the load: that call ending would cancel the
+                    // stream for everyone and strand the items already in flight on it
+                    final Context previous = Context.ROOT.attach();
+                    try {
+                        // gRPC serializes the callbacks of a single stream but not across
+                        // streams, and concurrent onNext on one client call corrupts its
+                        // outbound buffers; -1 disables the token budget, the wrapper is
+                        // used here for its mutual exclusion only
+                        return SynchronizedStreamObserver.wrapping(stub.putURLs(observer), -1);
+                    } finally {
+                        Context.ROOT.detach(previous);
+                    }
                 }
             };
 
-    private final RemovalListener<String, StreamObserver<URLItem>> observerlistener =
+    private final RemovalListener<Integer, StreamObserver<URLItem>> observerlistener =
             new RemovalListener<>() {
                 @Override
-                public void onRemoval(RemovalNotification<String, StreamObserver<URLItem>> n) {
+                public void onRemoval(RemovalNotification<Integer, StreamObserver<URLItem>> n) {
                     LOG.info("Removed StreamObserver {} with key {}", n.getValue(), n.getKey());
                 }
             };
@@ -434,7 +448,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
             CacheBuilder.newBuilder()
                     .removalListener(observerlistener)
                     .expireAfterAccess(1, TimeUnit.MINUTES)
-                    .build((CacheLoader) observerloader);
+                    .build(observerloader);
 
     /**
      * An item forwarded to another node, waiting for that node to ack it back. Held in {@link
