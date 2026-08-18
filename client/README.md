@@ -31,4 +31,31 @@ Commands:
   DeleteCrawl  Delete an entire crawl from the Frontier
   SetLogLevel  Change the log level of a package in the Frontier service
   CountURLs    Counts the number of URLs in a Frontier
+  DumpURLs     Export all the URLs of a Frontier as JSON, one per line, in the
+                 format taken by PutURLs; used to migrate the data to a
+                 different backend or version.
 ```
+
+## Exporting and re-importing the data
+
+`DumpURLs` writes every URL of a Frontier, with its queue key, crawl ID, metadata and scheduling
+information, as one JSON object per line - the exact format `PutURLs` takes as input. This makes it
+possible to migrate the data to a different backend implementation or a different major version:
+
+```
+java -jar ./target/urlfrontier-client*.jar DumpURLs -o frontier.jsonl.gz
+java -jar ./target/urlfrontier-client*.jar -t newhost PutURLs -f frontier.jsonl.gz
+```
+
+By default the content is streamed one crawl at a time; with `-t` the client lists the queues
+first and several threads dump them in parallel, which spreads the work over the server's cores:
+
+```
+java -jar ./target/urlfrontier-client*.jar DumpURLs -t 8 -o frontier.jsonl.gz
+```
+
+The dump covers only the node the client connects to; in a cluster, dump every node and
+concatenate the files before re-importing. For a complete and consistent dump, deactivate the
+Frontier (`SetActive -s false`) and stop injecting URLs while it runs. Note that the creation date
+of the URLs is not preserved by a dump / re-import cycle: the target Frontier assigns it at import
+time, which affects `PurgeURLs`.

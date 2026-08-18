@@ -21,6 +21,9 @@ import io.grpc.stub.ClientResponseObserver;
 import io.grpc.stub.StreamObserver;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -35,6 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.zip.GZIPInputStream;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
@@ -51,7 +55,9 @@ public class PutURLs implements Callable<Integer> {
             names = {"-f", "--file"},
             required = true,
             paramLabel = "STRING",
-            description = "path to file containing the URLs to inject into the Frontier")
+            description =
+                    "path to file containing the URLs to inject into the Frontier, decompressed"
+                            + " with gzip if its name ends in .gz")
     private String file;
 
     @Option(
@@ -149,7 +155,7 @@ public class PutURLs implements Callable<Integer> {
 
         // the file is read once and the lines handed out in chunks, so that adding threads
         // multiplies the parsing and sending but not the reading
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(file))) {
+        try (BufferedReader reader = openInput(file)) {
 
             final LineSource lines = new LineSource(reader);
 
@@ -206,6 +212,14 @@ public class PutURLs implements Callable<Integer> {
         }
 
         return (streamError.get() || readError.get()) ? 1 : 0;
+    }
+
+    private static BufferedReader openInput(String file) throws IOException {
+        InputStream is = Files.newInputStream(Paths.get(file));
+        if (file.endsWith(".gz")) {
+            is = new GZIPInputStream(is);
+        }
+        return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
     }
 
     /**
