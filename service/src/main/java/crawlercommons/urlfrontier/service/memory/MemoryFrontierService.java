@@ -17,9 +17,11 @@ import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
@@ -57,38 +59,45 @@ public class MemoryFrontierService extends AbstractFrontierService {
         final URLQueue pq = (URLQueue) queue;
 
         // PriorityQueue.iterator() walks the backing heap array and is not in sort order: only
-        // the head is guaranteed to be the minimum, so the whole queue has to be sorted. Take a
-        // snapshot under the queue monitor, as the URL iterator does: sending happens outside it
-        // so that a slow consumer cannot block the putURLs workers.
-        final InternalURL[] snapshot;
+        // the head is guaranteed to be the minimum. Polling hands the URLs over in sort order
+        // and stops as soon as one is not due, so the selection costs O(k.log n) instead of the
+        // O(n) copy plus O(n.log n) sort a full snapshot needs. Everything polled is put back
+        // before the monitor is released: the queue is left exactly as it was found. Sending
+        // happens outside the monitor so that a slow consumer cannot block the putURLs workers.
+        final List<InternalURL> selected = new ArrayList<>();
         synchronized (pq) {
             // cheap way to rule out the common case where nothing is due
             final InternalURL head = pq.peek();
             if (head == null || head.nextFetchDate > now) {
                 return 0;
             }
-            snapshot = pq.toArray(new InternalURL[0]);
+            // URLs already being processed are due but not sendable, and the ones behind them
+            // are only reachable by polling them out. tryReserveQueue caps the number in
+            // process for a queue at maxURLsPerQueue and no other send can be in flight for
+            // it, so the number of polls stays bounded by twice that.
+            final List<InternalURL> polled = new ArrayList<>();
+            try {
+                while (selected.size() < maxURLsPerQueue) {
+                    final InternalURL next = pq.peek();
+                    // sorted by date, no need to go further
+                    if (next == null || next.nextFetchDate > now) {
+                        break;
+                    }
+                    pq.poll();
+                    polled.add(next);
+                    // check that the URL is not already being processed
+                    if (next.heldUntil <= now) {
+                        selected.add(next);
+                    }
+                }
+            } finally {
+                pq.addAll(polled);
+            }
         }
-        Arrays.sort(snapshot);
 
         int alreadySent = 0;
 
-        for (InternalURL item : snapshot) {
-            if (alreadySent >= maxURLsPerQueue) {
-                break;
-            }
-
-            // check that is is due
-            if (item.nextFetchDate > now) {
-                // sorted by date, no need to go further
-                return alreadySent;
-            }
-
-            // check that the URL is not already being processed
-            if (item.heldUntil > now) {
-                continue;
-            }
-
+        for (InternalURL item : selected) {
             // this one is good to go
             try {
                 // check that we haven't already reached the number of queues

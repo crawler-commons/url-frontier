@@ -138,6 +138,71 @@ class MemoryQueueOrderingTest {
         assertEquals(0, service.sendURLsForQueue(queue, QWC, 10, 30, NOW, wrap(second)));
     }
 
+    /** Ten URLs, all due at {@link #NOW}, added in an order that does not match their dates. */
+    private static URLQueue allDueQueue() {
+        URLQueue queue = new URLQueue(known("https://www.mysite.com/url-5", NOW - 50));
+        for (int i = 0; i < 10; i++) {
+            if (i != 5) {
+                queue.add(known("https://www.mysite.com/url-" + i, NOW - 100 + i * 10));
+            }
+        }
+        return queue;
+    }
+
+    private static List<String> sortedURLs(URLQueue queue) {
+        List<InternalURL> content = new ArrayList<>(queue);
+        content.sort(null);
+        List<String> urls = new ArrayList<>();
+        for (InternalURL iu : content) {
+            urls.add(iu.url);
+        }
+        return urls;
+    }
+
+    @Test
+    void sendingLeavesTheQueueUnchanged() {
+        MemoryFrontierService service = new MemoryFrontierService("localhost", 0);
+        URLQueue queue = allDueQueue();
+
+        List<String> before = sortedURLs(queue);
+
+        // fewer than the queue holds, so the selection stops part way through it
+        assertEquals(
+                3,
+                service.sendURLsForQueue(queue, QWC, 3, 30, NOW, wrap(new CollectingObserver())));
+
+        assertEquals(
+                10, queue.countActive(), "polling the selection out must not shrink the queue");
+        assertEquals(before, sortedURLs(queue), "the queue must hold the same URLs as before");
+        assertEquals(
+                "https://www.mysite.com/url-0",
+                queue.peek().url,
+                "the head must still be the oldest URL");
+    }
+
+    @Test
+    void dueURLsBehindHeldOnesAreSent() {
+        MemoryFrontierService service = new MemoryFrontierService("localhost", 0);
+        URLQueue queue = allDueQueue();
+
+        // hold the three oldest, which sit at the front of the sort order
+        for (InternalURL iu : queue) {
+            if (iu.url.endsWith("-0") || iu.url.endsWith("-1") || iu.url.endsWith("-2")) {
+                iu.setHeldUntil(NOW + 60);
+            }
+        }
+
+        CollectingObserver observer = new CollectingObserver();
+        int sent = service.sendURLsForQueue(queue, QWC, 2, 30, NOW, wrap(observer));
+
+        assertEquals(2, sent);
+        assertEquals(
+                List.of("https://www.mysite.com/url-3", "https://www.mysite.com/url-4"),
+                observer.received,
+                "the selection must poll past the held URLs to the due ones behind them");
+        assertEquals(10, queue.countActive());
+    }
+
     @Test
     void inProcessCountsHeldURLsAnywhereInTheHeap() {
         URLQueue queue = interleavedQueue();
