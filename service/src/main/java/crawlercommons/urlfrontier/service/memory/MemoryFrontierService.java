@@ -228,29 +228,34 @@ public class MemoryFrontierService extends AbstractFrontierService {
             long creatDt = queue.getCreationDate(url);
             responseObserver.onNext(buildURLItem(builder, knownBuilder, info, 0, creatDt));
         } else {
-            Iterator<InternalURL> iter = queue.iterator();
-
-            while (iter.hasNext()) {
-                InternalURL item = iter.next();
-
-                if (url.equals(item.url)) {
-
-                    try {
-                        knownBuilder.setInfo(item.toURLInfo(qwc));
-                        knownBuilder.setRefetchableFromDate(item.nextFetchDate);
-                    } catch (InvalidProtocolBufferException e) {
-                        LOG.error(e.getMessage(), e);
-                        responseObserver.onError(
-                                io.grpc.Status.fromThrowable(e).asRuntimeException());
-                        return;
+            // PriorityQueue's iterator is fail-fast and the putURLs workers mutate the queue
+            // structurally, so the scan has to happen under the queue monitor. Only the match
+            // is kept: InternalURL is immutable apart from heldUntil, which this path does not
+            // read, so the response can be built outside the lock.
+            InternalURL match = null;
+            synchronized (queue) {
+                for (InternalURL item : queue) {
+                    if (url.equals(item.url)) {
+                        match = item;
+                        break;
                     }
-
-                    builder.setKnown(knownBuilder.build());
-                    builder.setCreationDate(queue.getCreationDate(url));
-                    found = true;
-                    responseObserver.onNext(builder.build());
-                    break;
                 }
+            }
+
+            if (match != null) {
+                try {
+                    knownBuilder.setInfo(match.toURLInfo(qwc));
+                    knownBuilder.setRefetchableFromDate(match.nextFetchDate);
+                } catch (InvalidProtocolBufferException e) {
+                    LOG.error(e.getMessage(), e);
+                    responseObserver.onError(io.grpc.Status.fromThrowable(e).asRuntimeException());
+                    return;
+                }
+
+                builder.setKnown(knownBuilder.build());
+                builder.setCreationDate(queue.getCreationDate(url));
+                found = true;
+                responseObserver.onNext(builder.build());
             }
         }
 
