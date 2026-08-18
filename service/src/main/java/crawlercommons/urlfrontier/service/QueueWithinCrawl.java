@@ -68,6 +68,9 @@ public class QueueWithinCrawl implements Comparable<QueueWithinCrawl> {
 
     public static final QueueWithinCrawl parseAndDeNormalise(final String currentKey) {
         final int pos = currentKey.indexOf('_');
+        if (pos == -1) {
+            throw new IllegalArgumentException("Not a normalised queue key: " + currentKey);
+        }
         final String crawlID = currentKey.substring(0, pos).replace("%5F", "_");
         int pos2 = currentKey.indexOf('_', pos + 1);
         // no separator? just normalise whatever is left

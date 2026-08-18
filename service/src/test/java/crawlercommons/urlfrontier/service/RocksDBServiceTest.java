@@ -5,6 +5,7 @@ package crawlercommons.urlfrontier.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -32,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -410,6 +412,38 @@ class RocksDBServiceTest {
 
         assertEquals(2, nbQueues);
         assertEquals(4, nbUrls);
+    }
+
+    /**
+     * The URLs of the last queue are also the last records of the column family: draining that
+     * queue leaves the underlying RocksIterator invalid, which the iterator must detect without
+     * reading its key.
+     */
+    @Test
+    @Order(8)
+    void testUrlIteratorLastQueueOfTheDatabase() throws IOException {
+
+        // the existence keys are sorted by their normalised form, so the last queue
+        // of the database is the one whose normalised key sorts last
+        Entry<QueueWithinCrawl, QueueInterface> last = null;
+        for (Entry<QueueWithinCrawl, QueueInterface> cur : rocksDBService.getQueues().entrySet()) {
+            if (last == null || cur.getKey().toString().compareTo(last.getKey().toString()) > 0) {
+                last = cur;
+            }
+        }
+
+        assertEquals("queue_mysite", last.getKey().getQueue());
+
+        int nbUrls = 0;
+        try (CloseableIterator<URLItem> iter = rocksDBService.urlIterator(last, 0, 100)) {
+            while (iter.hasNext()) {
+                assertTrue(iter.next().getCreationDate() > 0);
+                nbUrls++;
+            }
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+
+        assertEquals(3, nbUrls);
     }
 
     @Test

@@ -1326,13 +1326,14 @@ public class RocksDBService extends AbstractFrontierService {
                 sent++;
                 rocksIterator.next();
 
-                currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
-                Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
-
-                if (!queueID.equals(Qkey.getCrawlid(), Qkey.getQueue())) {
+                // key() is only defined on a valid iterator: the record just returned
+                // may have been the last one of the column family
+                if (!rocksIterator.isValid()) {
                     hasNext = false;
                 } else {
-                    hasNext = rocksIterator.isValid();
+                    currentKey = new String(rocksIterator.key(), StandardCharsets.UTF_8);
+                    Qkey = QueueWithinCrawl.parseAndDeNormalise(currentKey);
+                    hasNext = queueID.equals(Qkey.getCrawlid(), Qkey.getQueue());
                 }
 
                 long createdEpoch = created == null ? 0L : ByteBuffer.wrap(created).getLong();
