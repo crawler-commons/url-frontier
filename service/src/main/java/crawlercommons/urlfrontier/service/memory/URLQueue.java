@@ -4,7 +4,9 @@
 package crawlercommons.urlfrontier.service.memory;
 
 import crawlercommons.urlfrontier.service.QueueInterface;
+import java.time.Instant;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
@@ -14,12 +16,20 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
 
     public URLQueue(InternalURL initial) {
         this.add(initial);
+        setCreationDateIfAbsent(initial.url, Instant.now().getEpochSecond());
     }
 
     // keep a hash of the completed URLs
     // these won't be refetched
     // written by the putURLs worker threads, read by the getURLs gate via isLimitReached
     private Set<String> completed = ConcurrentHashMap.newKeySet();
+
+    // creation date of every URL held by this queue, active or completed
+    // scoped to the queue so that the entries go away with it and so that the same URL in
+    // another queue or crawl keeps its own date
+    // written by the putURLs worker threads, read without synchronization by getURLStatus
+    // and the URL iterators
+    private final Map<String, Long> creationDates = new ConcurrentHashMap<>();
 
     private Optional<Integer> limit = Optional.empty();
 
@@ -54,6 +64,25 @@ public class URLQueue extends PriorityQueue<InternalURL> implements QueueInterfa
 
     public void addToCompleted(String url) {
         completed.add(url);
+    }
+
+    /**
+     * Records when a URL was first added to this queue. Later versions of the same URL keep the
+     * date of the first one, like the RocksDB backend does.
+     */
+    public void setCreationDateIfAbsent(String url, long epochSeconds) {
+        creationDates.putIfAbsent(url, epochSeconds);
+    }
+
+    /**
+     * @return the epoch seconds at which the URL was added to this queue, 0 if unknown
+     */
+    public long getCreationDate(String url) {
+        return creationDates.getOrDefault(url, 0L);
+    }
+
+    public void removeCreationDate(String url) {
+        creationDates.remove(url);
     }
 
     @Override
