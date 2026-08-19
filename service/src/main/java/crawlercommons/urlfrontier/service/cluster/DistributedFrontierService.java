@@ -59,6 +59,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.LoggerFactory;
 
 public abstract class DistributedFrontierService extends AbstractFrontierService {
@@ -359,6 +360,11 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     final URLFrontierStub stub =
                             URLFrontierGrpc.newStub(channelCache.getUnchecked(nodeAddress));
 
+                    // the stream removes itself from the cache when it ends; it is held
+                    // here so that only this stream is ever removed and never a
+                    // replacement created for the same partition in the meantime
+                    final AtomicReference<StreamObserver<URLItem>> self = new AtomicReference<>();
+
                     // pass an observer for the results coming back from that node
                     final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
                             observer =
@@ -395,7 +401,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
                                         @Override
                                         public void onError(Throwable t) {
-                                            observercache.invalidate(index);
+                                            discardForwardingStream(index, self.get());
                                             if (t instanceof StatusRuntimeException) {
                                                 // ignore messages about the client having cancelled
                                                 if (((StatusRuntimeException) t)
@@ -413,8 +419,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
                                         @Override
                                         public void onCompleted() {
-                                            // finished?
-                                            observercache.invalidate(index);
+                                            // the remote side will not ack anything else on
+                                            // this stream: it must not be handed out again
+                                            discardForwardingStream(index, self.get());
                                         }
                                     };
 
@@ -422,32 +429,82 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     // node, so it must not inherit the Context of whichever server call
                     // happened to trigger the load: that call ending would cancel the
                     // stream for everyone and strand the items already in flight on it
+                    final StreamObserver<URLItem> forwarder;
                     final Context previous = Context.ROOT.attach();
                     try {
                         // gRPC serializes the callbacks of a single stream but not across
                         // streams, and concurrent onNext on one client call corrupts its
                         // outbound buffers; -1 disables the token budget, the wrapper is
                         // used here for its mutual exclusion only
-                        return SynchronizedStreamObserver.wrapping(stub.putURLs(observer), -1);
+                        forwarder = SynchronizedStreamObserver.wrapping(stub.putURLs(observer), -1);
                     } finally {
                         Context.ROOT.detach(previous);
                     }
+                    self.set(forwarder);
+                    return forwarder;
                 }
             };
 
+    /**
+     * Removing a stream from the cache closes it: the call is half-closed, so the node keeps the
+     * items already forwarded on it and acks them back on the response side, which stays open until
+     * it has answered them all. Dropping the entry without this leaves the call half-open on both
+     * nodes until the channel is shut down (issue #207).
+     */
     private final RemovalListener<Integer, StreamObserver<URLItem>> observerlistener =
             new RemovalListener<>() {
                 @Override
                 public void onRemoval(RemovalNotification<Integer, StreamObserver<URLItem>> n) {
                     LOG.info("Removed StreamObserver {} with key {}", n.getValue(), n.getKey());
+                    final StreamObserver<URLItem> observer = n.getValue();
+                    if (observer == null) {
+                        return;
+                    }
+                    try {
+                        observer.onCompleted();
+                    } catch (RuntimeException e) {
+                        // a stream is usually discarded *because* it has already failed
+                        LOG.debug(
+                                "Error while closing the stream forwarding to partition {}: {}",
+                                n.getKey(),
+                                e.getLocalizedMessage());
+                    }
                 }
             };
 
-    private LoadingCache<Integer, StreamObserver<URLItem>> observercache =
-            CacheBuilder.newBuilder()
-                    .removalListener(observerlistener)
-                    .expireAfterAccess(1, TimeUnit.MINUTES)
-                    .build(observerloader);
+    /**
+     * One forwarding stream per partition, held for the lifetime of the service. There is no expiry
+     * on purpose: the node list is fixed at startup so there is nothing to reclaim by dropping
+     * streams, and a stream cannot be closed on a timer without stranding the items it still has in
+     * flight or racing with a concurrent onNext (issue #207). An entry is removed only once its
+     * stream has ended - the remote side completing or erroring, or a failed onNext - and by {@link
+     * #close()}, so a broken stream is never handed out for long.
+     */
+    private final LoadingCache<Integer, StreamObserver<URLItem>> observercache =
+            CacheBuilder.newBuilder().removalListener(observerlistener).build(observerloader);
+
+    /**
+     * Discards a forwarding stream, closing it, but only if it is still the one held for that
+     * partition: a stream that has ended must not take away the replacement another thread may have
+     * created for the same partition in the meantime. A null observer means the stream ended before
+     * the load which created it returned, in which case there is nothing cached to remove yet - the
+     * first item forwarded on it fails and discards it then.
+     */
+    private void discardForwardingStream(int partition, StreamObserver<URLItem> observer) {
+        if (observer == null) {
+            return;
+        }
+        observercache.asMap().remove(partition, observer);
+    }
+
+    /**
+     * Discards the forwarding stream held for a partition, if any. Visible for testing: in
+     * production the streams are discarded by {@link #discardForwardingStream(int, StreamObserver)}
+     * when they end, or by {@link #close()}.
+     */
+    void discardForwardingStream(int partition) {
+        observercache.invalidate(partition);
+    }
 
     /**
      * An item forwarded to another node, waiting for that node to ack it back. Held in {@link
@@ -798,6 +855,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
     public void close() throws IOException {
         super.close();
         inprocessCacheCleaner.shutdownNow();
+        // half-close the forwarding streams before the channels go, so that the items
+        // still in flight on them have a chance of being acked back
+        observercache.invalidateAll();
         // close all the connections
         channelCache.invalidateAll();
     }
@@ -924,12 +984,12 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     // before the item goes out as the ack can come back at any point
                     inprocesscache.put(token, pending);
 
+                    StreamObserver<URLItem> forwarder = null;
                     try {
                         // get the stream observer for the node in charge of the partition
                         // and give it the value to process
-                        observercache
-                                .getUnchecked(partition)
-                                .onNext(URLItem.newBuilder(value).setID(token).build());
+                        forwarder = observercache.getUnchecked(partition);
+                        forwarder.onNext(URLItem.newBuilder(value).setID(token).build());
                     } catch (Exception e) {
                         LOG.error(
                                 "Error while sending {} to partition {}: {}",
@@ -938,7 +998,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                 e.getLocalizedMessage());
                         // no ack will ever come back for it: fail it now instead of
                         // waiting for the entry to expire
-                        observercache.invalidate(partition);
+                        discardForwardingStream(partition, forwarder);
                         inprocesscache.invalidate(token);
                         pending.ack(Status.FAIL);
                     }
