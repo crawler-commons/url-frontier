@@ -267,7 +267,7 @@ public class URLFrontierServiceTest {
                         Urlfrontier.QueueWithinCrawlParams.newBuilder()
                                 .setKey("gac.icann.org")
                                 .build());
-        Assert.assertEquals("number of queues matching", 1, stats.getSize());
+        Assert.assertEquals("number of active URLs in the queue", 1, stats.getSize());
 
         crawlercommons.urlfrontier.Urlfrontier.Long deleted =
                 blockingFrontier.deleteQueue(

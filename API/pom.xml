@@ -17,6 +17,7 @@
 	<properties>
 		<grpc.version>1.76.0</grpc.version>
 		<protobuf-maven-plugin.version>3.10.2</protobuf-maven-plugin.version>
+		<protoc-gen-doc.version>1.5.1</protoc-gen-doc.version>
 	</properties>
 
 	<dependencies>
@@ -89,5 +90,53 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
+	<profiles>
+		<!-- Regenerates urlfrontier.md from the proto. Kept out of the default build so
+		     that it stays offline-friendly: run it whenever the proto changes and commit
+		     the result, with `mvn -Pprotodoc generate-sources -pl API`. -->
+		<profile>
+			<id>protodoc</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>io.github.ascopes</groupId>
+						<artifactId>protobuf-maven-plugin</artifactId>
+						<version>${protobuf-maven-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>generate-markdown-doc</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>generate</goal>
+								</goals>
+								<configuration>
+									<!-- only protoc-gen-doc here, the Java stubs are the job of
+									     the default execution -->
+									<javaEnabled>false</javaEnabled>
+									<binaryMavenPlugins>
+										<binaryMavenPlugin>
+											<groupId>io.github.pseudomuto</groupId>
+											<artifactId>protoc-gen-doc</artifactId>
+											<version>${protoc-gen-doc.version}</version>
+											<options>markdown,urlfrontier.md</options>
+											<!-- the generated doc is committed next to the README
+											     which links to it; cleanOutputDirectories must stay
+											     false, this is the module directory -->
+											<outputDirectory>${project.basedir}</outputDirectory>
+											<registerAsCompilationRoot>false</registerAsCompilationRoot>
+										</binaryMavenPlugin>
+									</binaryMavenPlugins>
+									<!-- always regenerate: the output lives outside target/ and the
+									     incremental cache would not notice it being deleted -->
+									<incrementalCompilation>false</incrementalCompilation>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

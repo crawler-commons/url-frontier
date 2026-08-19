@@ -37,6 +37,35 @@ If no path is set explicitly for RocksDB,  the default value _./rocksdb_ will be
 For implementation supporting a cluster mode, it is required to use the parameter `-h xxx.xxx.xxx.xxx` with the private IP or hostname
 on which it is running so that it can report its location with the heartbeat.
 
+### Configuration parameters
+
+| Parameter | Default | Description |
+|---|---|---|
+| `implementation` | `crawlercommons.urlfrontier.service.rocksdb.RocksDBService` | class of the service to run, must extend _AbstractFrontierService_ |
+| `server.enable_reflection` | `false` | exposes the gRPC reflection service, e.g. so that _grpcurl_ can be used against the Frontier |
+| `read.thread.num` | a quarter of the available processors, at least 1 | threads serving _GetURLs_ |
+| `write.thread.num` | a quarter of the available processors, at least 1 | threads applying _PutURLs_ and _PutDiscovered_ |
+| `putURLs.max.inflight` | `1024` | URLs a _PutURLs_ stream may have sent but not acked before the server stops reading from it; 0 or less lets a client send as fast as it likes, at the cost of the backlog piling up on the heap |
+| `putDiscovered.max.inflight` | `16` | same for _PutDiscovered_, counted in batches instead of URLs |
+| `rocksdb.path` | `./rocksdb` | directory holding the data |
+| `rocksdb.purge` | unset | **deletes the content of `rocksdb.path` at startup** |
+| `rocksdb.stats` | unset | collects RocksDB statistics and reports them with _GetStats_ |
+| `rocksdb.recovery.check` | unset | rescans every table at startup to rebuild the queues instead of using the queue metadata; slow on a large frontier |
+| `rocksdb.bloom.filters` | `true` | bloom filters spare the lookup done for every URL from reading the data blocks when the URL is not known yet |
+| `rocksdb.bloom.filters.bits_per_key` | `10` | size of the filters, only used when they are enabled |
+| `rocksdb.wal.disable` | `false` | halves the bytes written per URL but loses whatever is in the memtables if the service dies without closing cleanly; the URLs concerned get rediscovered by the crawl |
+| `rocksdb.memtable_memory_budget` | RocksDB default | memory budget passed to _optimizeUniversalStyleCompaction_ |
+| `rocksdb.max_bytes_for_level_base` | RocksDB default | see the RocksDB documentation |
+| `rocksdb.max_background_jobs` | RocksDB default | see the RocksDB documentation |
+| `rocksdb.max_subcompactions` | RocksDB default | see the RocksDB documentation |
+
+`rocksdb.purge`, `rocksdb.stats` and `rocksdb.recovery.check` are switched on by the presence of the key,
+whatever value follows it - including `false`. Leave them out to keep them off.
+
+`rocksdb.bloom.filters` and `rocksdb.wal.disable` are flag-style for backwards compatibility: they used
+to be set as a bare key, so `rocksdb.wal.disable` on its own means the same as `rocksdb.wal.disable = true`.
+They do take a value, so `rocksdb.bloom.filters = false` turns the filters off.
+
 ## Distributed mode
 
 The sharded implementation (`crawlercommons.urlfrontier.service.rocksdb.ShardedRocksDBService`) runs the Frontier as a cluster of nodes, each owning a partition of the queues.
@@ -90,7 +119,7 @@ See #148, #150, #151, #156 and #157 for the details behind these semantics.
 ## Logging configuration
 
 The logging is done with Logback. A default configuration is loaded and will dump logs on the console at INFO level and above but the configuration
-file can be overriden with
+file can be overridden with
 
 `java -Xmx2G -Dlogback.configurationFile=test.xml ...`
 
@@ -99,7 +128,7 @@ Alternatively, the Frontier service has a _SetLogLevel_ endpoint and the CLI all
 ## Metrics with Prometheus
 
 The service implementation takes a parameter *-s*, the value of which is used as port number to expose metrics for [Prometheus](https://prometheus.io/).
-A [dashboard](https://github.com/crawler-commons/url-frontier/blob/2.x/service/monitoring/provisioning/dashboards/URLFrontier-Prometheus.json) for Grafana is provided.
+A [dashboard](https://github.com/crawler-commons/url-frontier/blob/master/service/monitoring/provisioning/dashboards/URLFrontier-Prometheus.json) for Grafana is provided.
 
 ## Docker
 
@@ -119,5 +148,5 @@ docker run --rm --name frontier -v /pathOnDisk:/crawldir -p 7071:7071 crawlercom
 Specify a config file with a volume and the `-c` flag:
 
 ```
-docker run --rm --name frontier -p 7071:7071 -p 9100:9100 -v /path/to/config.ini:/config/config.ini ufrontier -s 9100 -c /config/config.ini
+docker run --rm --name frontier -p 7071:7071 -p 9100:9100 -v /path/to/config.ini:/config/config.ini crawlercommons/url-frontier -s 9100 -c /config/config.ini
 ```
