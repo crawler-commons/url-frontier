@@ -1,4 +1,7 @@
-FROM maven:3-eclipse-temurin-17 AS build
+# The shaded jar is platform-independent (no native classifiers; rocksdbjni and
+# grpc-netty-shaded ship the natives for every arch), so the build runs once on
+# the builder's own platform instead of once per target under emulation.
+FROM --platform=$BUILDPLATFORM maven:3-eclipse-temurin-17 AS build
 
 RUN useradd -m urlfrontier
 

@@ -93,8 +93,14 @@ class ForwardDeadlineTest {
         }
 
         @Override
-        public void close() throws IOException {
-            socket.close();
+        public void close() {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                // closing the listening socket while the accept thread is parked in a
+                // native accept() can fail to signal that thread (seen under emulation);
+                // the socket is closing either way and the thread is a daemon
+            }
             synchronized (accepted) {
                 for (Socket s : accepted) {
                     try {
