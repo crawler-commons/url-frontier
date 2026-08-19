@@ -28,3 +28,8 @@ hs_err_pid*
 */target/
 
 service/rocksdb/
+
+# Documentation tooling
+.venv/
+docs/site/
+docs/.cache/
