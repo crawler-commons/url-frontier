@@ -43,8 +43,11 @@ import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.ClientCallStreamObserver;
+import io.grpc.stub.ClientResponseObserver;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
+import io.prometheus.client.Counter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,7 +62,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.LoggerFactory;
 
 public abstract class DistributedFrontierService extends AbstractFrontierService {
@@ -70,6 +72,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         forwardDeadlineSeconds =
                 ParamHelper.getIntegerParameter(
                         configuration, "forward.deadline.seconds", FORWARD_DEADLINE_SECONDS);
+        forwardReadyTimeoutMillis =
+                ParamHelper.getIntegerParameter(
+                        configuration, "forward.ready.timeout.ms", forwardDeadlineSeconds * 1000);
     }
 
     // no explicit config
@@ -91,8 +96,29 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
      */
     private final int forwardDeadlineSeconds;
 
+    /**
+     * Maximum time an item waits for the stream forwarding to its owner to become writable before
+     * being failed back to the client. Configurable with 'forward.ready.timeout.ms', defaults to
+     * 'forward.deadline.seconds'; it must stay well under the expiry of {@link #inprocesscache} so
+     * that an item which did make it out has a chance of being acked back.
+     */
+    private final int forwardReadyTimeoutMillis;
+
+    /**
+     * Longest a caller sleeps before looking at the readiness of the stream again. Readiness is
+     * signalled, this only bounds the cost of a signal landing just before the caller waits for it.
+     */
+    static final long READY_POLL_MILLIS = 100;
+
     /** How often the items forwarded to other nodes are checked for expiry. */
     static final int INPROCESS_CLEANUP_SECONDS = 10;
+
+    protected static final Counter putURLs_forward_notready_count =
+            Counter.build()
+                    .name("frontier_putURLs_forward_notready_total")
+                    .help(
+                            "Number of URLs failed back to the client because the stream to the node owning them did not become writable in time")
+                    .register();
 
     private final CacheLoader<String, ManagedChannel> channelLoader =
             new CacheLoader<String, ManagedChannel>() {
@@ -349,26 +375,179 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         responseObserver.onCompleted();
     }
 
+    /**
+     * The putURLs stream forwarding to one owner node, shared by every client stream with items for
+     * that node. Writes are paced on the readiness of the transport: while the owner is not
+     * draining, the callers wait rather than pile serialised items onto the netty write queue of
+     * this node, where they are invisible, unbounded across concurrent client streams, and can
+     * expire from {@link #inprocesscache} before they even leave (issue #208).
+     *
+     * <p>Making the caller wait is the point of it: it is a putURLs handler thread, so it stops
+     * consuming from its own client, whose in-flight budget then stops being replenished and the
+     * backpressure reaches the crawler. It is never a transport thread - the server is built
+     * without a directExecutor - so blocking it holds up that one client stream and nothing else. A
+     * node which is not merely slow but wedged is not worth waiting for repeatedly: the wait is
+     * bounded, and once it has timed out the items are failed back without waiting again until the
+     * owner shows a sign of life.
+     */
+    private final class PacedForwarder implements StreamObserver<URLItem> {
+
+        private final int partition;
+
+        /** signalled when the stream becomes writable again, or when it has ended */
+        private final Object readyMonitor = new Object();
+
+        /**
+         * gRPC serializes the callbacks of a single stream but not across streams, and concurrent
+         * onNext on one client call corrupts its outbound buffers
+         */
+        private final Object sendLock = new Object();
+
+        /** set by {@link #bind} before the call starts, and therefore before any onNext */
+        private volatile ClientCallStreamObserver<URLItem> out;
+
+        /** a stream which has ended will never be ready again: waiting on it is pointless */
+        private volatile boolean ended;
+
+        /** found unwritable and no readiness signalled since, see {@link #awaitReady()} */
+        private volatile boolean stalled;
+
+        PacedForwarder(int partition) {
+            this.partition = partition;
+        }
+
+        /**
+         * Takes hold of the request stream of the call. Must be called from {@link
+         * ClientResponseObserver#beforeStart}: the handler can no longer be set once the call has
+         * started, which is before the stub returns the stream to us.
+         */
+        void bind(ClientCallStreamObserver<URLItem> stream) {
+            this.out = stream;
+            stream.setOnReadyHandler(this::wakeUp);
+        }
+
+        /** Releases whoever waits on this stream: the remote side has ended it. */
+        void streamEnded() {
+            ended = true;
+            wakeUp();
+        }
+
+        private void wakeUp() {
+            stalled = false;
+            synchronized (readyMonitor) {
+                readyMonitor.notifyAll();
+            }
+        }
+
+        /**
+         * Waits for the stream to be able to take another item. Returns false when it did not
+         * become writable in time, or when it has ended or the service is closing, in which case
+         * the caller must fail the item instead of sending it. Once a wait has timed out the
+         * following calls return false straight away, until the transport signals readiness again.
+         */
+        boolean awaitReady() {
+            if (out.isReady()) {
+                return true;
+            }
+            if (ended || isClosing()) {
+                return false;
+            }
+            // the stream was found unwritable already and has signalled nothing since: the
+            // timeout is paid once per stall and not once per item, otherwise one wedged
+            // owner would also hold up whatever the same client stream has for the others
+            if (stalled) {
+                return false;
+            }
+            final long deadline =
+                    System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(forwardReadyTimeoutMillis);
+            // readiness is deliberately read outside the monitor: gRPC may signal it from
+            // a transport thread holding locks of its own, and taking one of ours while it
+            // does would put the two in opposite orders. The window that opens between the
+            // read and the wait is what the poll interval below is for
+            while (!out.isReady()) {
+                if (ended || isClosing()) {
+                    return false;
+                }
+                final long remaining = TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());
+                if (remaining <= 0) {
+                    LOG.warn(
+                            "Stream forwarding to partition {} not writable after {} ms",
+                            partition,
+                            forwardReadyTimeoutMillis);
+                    stalled = true;
+                    return false;
+                }
+                synchronized (readyMonitor) {
+                    try {
+                        readyMonitor.wait(Math.min(remaining, READY_POLL_MILLIS));
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public void onNext(URLItem value) {
+            synchronized (sendLock) {
+                out.onNext(value);
+            }
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            // nothing more will go out on it: release the callers before closing, they
+            // would otherwise wait for a readiness which can no longer come
+            streamEnded();
+            synchronized (sendLock) {
+                out.onError(t);
+            }
+        }
+
+        @Override
+        public void onCompleted() {
+            streamEnded();
+            synchronized (sendLock) {
+                out.onCompleted();
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "PacedForwarder to partition " + partition;
+        }
+    }
+
     /** Create or return an existing stream to an external Frontier * */
-    private final CacheLoader<Integer, StreamObserver<URLItem>> observerloader =
+    private final CacheLoader<Integer, PacedForwarder> observerloader =
             new CacheLoader<>() {
                 @Override
-                public StreamObserver<URLItem> load(Integer index) {
+                public PacedForwarder load(Integer index) {
 
                     final String nodeAddress = getNodes().get(index);
 
                     final URLFrontierStub stub =
                             URLFrontierGrpc.newStub(channelCache.getUnchecked(nodeAddress));
 
-                    // the stream removes itself from the cache when it ends; it is held
-                    // here so that only this stream is ever removed and never a
-                    // replacement created for the same partition in the meantime
-                    final AtomicReference<StreamObserver<URLItem>> self = new AtomicReference<>();
+                    // created before the call: it is what beforeStart binds the request
+                    // stream to, and the stream removes itself from the cache when it ends,
+                    // so that only this stream is ever removed and never a replacement
+                    // created for the same partition in the meantime
+                    final PacedForwarder forwarder = new PacedForwarder(index);
 
                     // pass an observer for the results coming back from that node
-                    final StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage>
+                    final ClientResponseObserver<
+                                    URLItem, crawlercommons.urlfrontier.Urlfrontier.AckMessage>
                             observer =
-                                    new StreamObserver<>() {
+                                    new ClientResponseObserver<>() {
+
+                                        @Override
+                                        public void beforeStart(
+                                                ClientCallStreamObserver<URLItem> requestStream) {
+                                            forwarder.bind(requestStream);
+                                        }
 
                                         @Override
                                         public void onNext(
@@ -401,7 +580,8 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
 
                                         @Override
                                         public void onError(Throwable t) {
-                                            discardForwardingStream(index, self.get());
+                                            forwarder.streamEnded();
+                                            discardForwardingStream(index, forwarder);
                                             if (t instanceof StatusRuntimeException) {
                                                 // ignore messages about the client having cancelled
                                                 if (((StatusRuntimeException) t)
@@ -421,7 +601,8 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                                         public void onCompleted() {
                                             // the remote side will not ack anything else on
                                             // this stream: it must not be handed out again
-                                            discardForwardingStream(index, self.get());
+                                            forwarder.streamEnded();
+                                            discardForwardingStream(index, forwarder);
                                         }
                                     };
 
@@ -429,18 +610,15 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     // node, so it must not inherit the Context of whichever server call
                     // happened to trigger the load: that call ending would cancel the
                     // stream for everyone and strand the items already in flight on it
-                    final StreamObserver<URLItem> forwarder;
                     final Context previous = Context.ROOT.attach();
                     try {
-                        // gRPC serializes the callbacks of a single stream but not across
-                        // streams, and concurrent onNext on one client call corrupts its
-                        // outbound buffers; -1 disables the token budget, the wrapper is
-                        // used here for its mutual exclusion only
-                        forwarder = SynchronizedStreamObserver.wrapping(stub.putURLs(observer), -1);
+                        // the request stream it returns is the one already bound to the
+                        // forwarder by beforeStart, which is where the readiness handler
+                        // has to be set: the call is started by then
+                        stub.putURLs(observer);
                     } finally {
                         Context.ROOT.detach(previous);
                     }
-                    self.set(forwarder);
                     return forwarder;
                 }
             };
@@ -451,12 +629,12 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
      * it has answered them all. Dropping the entry without this leaves the call half-open on both
      * nodes until the channel is shut down (issue #207).
      */
-    private final RemovalListener<Integer, StreamObserver<URLItem>> observerlistener =
+    private final RemovalListener<Integer, PacedForwarder> observerlistener =
             new RemovalListener<>() {
                 @Override
-                public void onRemoval(RemovalNotification<Integer, StreamObserver<URLItem>> n) {
+                public void onRemoval(RemovalNotification<Integer, PacedForwarder> n) {
                     LOG.info("Removed StreamObserver {} with key {}", n.getValue(), n.getKey());
-                    final StreamObserver<URLItem> observer = n.getValue();
+                    final PacedForwarder observer = n.getValue();
                     if (observer == null) {
                         return;
                     }
@@ -480,26 +658,21 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
      * stream has ended - the remote side completing or erroring, or a failed onNext - and by {@link
      * #close()}, so a broken stream is never handed out for long.
      */
-    private final LoadingCache<Integer, StreamObserver<URLItem>> observercache =
+    private final LoadingCache<Integer, PacedForwarder> observercache =
             CacheBuilder.newBuilder().removalListener(observerlistener).build(observerloader);
 
     /**
      * Discards a forwarding stream, closing it, but only if it is still the one held for that
      * partition: a stream that has ended must not take away the replacement another thread may have
-     * created for the same partition in the meantime. A null observer means the stream ended before
-     * the load which created it returned, in which case there is nothing cached to remove yet - the
-     * first item forwarded on it fails and discards it then.
+     * created for the same partition in the meantime.
      */
-    private void discardForwardingStream(int partition, StreamObserver<URLItem> observer) {
-        if (observer == null) {
-            return;
-        }
+    private void discardForwardingStream(int partition, PacedForwarder observer) {
         observercache.asMap().remove(partition, observer);
     }
 
     /**
      * Discards the forwarding stream held for a partition, if any. Visible for testing: in
-     * production the streams are discarded by {@link #discardForwardingStream(int, StreamObserver)}
+     * production the streams are discarded by {@link #discardForwardingStream(int, PacedForwarder)}
      * when they end, or by {@link #close()}.
      */
     void discardForwardingStream(int partition) {
@@ -972,6 +1145,33 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                             partition,
                             getNodes().get(partition));
 
+                    final PacedForwarder forwarder;
+                    try {
+                        forwarder = observercache.getUnchecked(partition);
+                    } catch (Exception e) {
+                        LOG.error(
+                                "Error while getting the stream to partition {} for {}: {}",
+                                partition,
+                                url,
+                                e.getLocalizedMessage());
+                        sso.onNext(ack.setStatus(Status.FAIL).build());
+                        return;
+                    }
+
+                    // pace on the readiness of the stream to the owner before taking the
+                    // item on: a slow node must push back on the client rather than have
+                    // its items accumulate in the outbound buffers of this one. Done
+                    // before the item is registered below so that one given up on has
+                    // never occupied a correlation slot, and without discarding the
+                    // stream: it is slow, not broken, and it is shared by every client
+                    if (!forwarder.awaitReady()) {
+                        LOG.error(
+                                "Stream to partition {} not writable, failing {}", partition, url);
+                        putURLs_forward_notready_count.inc();
+                        sso.onNext(ack.setStatus(Status.FAIL).build());
+                        return;
+                    }
+
                     // the item goes out under a correlation token of ours rather than the
                     // client's ID: the same ID can legitimately be sent more than once, in
                     // which case the acks could no longer be told apart
@@ -984,11 +1184,9 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                     // before the item goes out as the ack can come back at any point
                     inprocesscache.put(token, pending);
 
-                    StreamObserver<URLItem> forwarder = null;
                     try {
-                        // get the stream observer for the node in charge of the partition
-                        // and give it the value to process
-                        forwarder = observercache.getUnchecked(partition);
+                        // give the value to the stream observer for the node in charge of
+                        // the partition
                         forwarder.onNext(URLItem.newBuilder(value).setID(token).build());
                     } catch (Exception e) {
                         LOG.error(
