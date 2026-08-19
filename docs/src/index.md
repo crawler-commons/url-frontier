@@ -1,4 +1,4 @@
-﻿# URL Frontier
+# URL Frontier
 
 URL Frontier provides a crawler- and language-neutral API for the operations
 web crawlers perform when interacting with a crawl frontier.

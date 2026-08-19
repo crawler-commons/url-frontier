@@ -1,4 +1,4 @@
-﻿# Getting Started
+# Getting Started
 
 URL Frontier provides a common API and reference service for managing URLs
 during web crawling.
