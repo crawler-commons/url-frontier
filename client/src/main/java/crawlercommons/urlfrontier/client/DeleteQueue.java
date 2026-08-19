@@ -29,7 +29,7 @@ public class DeleteQueue implements Runnable {
             names = {"-c", "--crawlID"},
             defaultValue = "DEFAULT",
             paramLabel = "STRING",
-            description = "crawl to get the stats for")
+            description = "crawl the queue belongs to")
     private String crawl;
 
     @Option(

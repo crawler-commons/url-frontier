@@ -64,7 +64,7 @@ public class PutURLs implements Callable<Integer> {
             names = {"-c", "--crawlID"},
             defaultValue = CrawlID.DEFAULT,
             paramLabel = "STRING",
-            description = "crawl to get the stats for")
+            description = "crawl to send the URLs to")
     private String crawl;
 
     @Option(

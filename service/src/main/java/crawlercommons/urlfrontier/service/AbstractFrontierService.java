@@ -367,17 +367,20 @@ public abstract class AbstractFrontierService
                 include_inactive);
 
         long now = Instant.now().getEpochSecond();
-        int pos = -1;
+        // position within the queues matching the request, not within the whole map:
+        // the client pages by incrementing start by the number of values it received
+        long pos = -1;
         int sent = 0;
 
         crawlercommons.urlfrontier.Urlfrontier.QueueList.Builder list = QueueList.newBuilder();
 
+        // unordered: the ordered view is rotated by getURLs, which would make a queue
+        // show up in two consecutive pages or in none
         Iterator<Entry<QueueWithinCrawl, QueueInterface>> iterator =
-                getQueues().entrySet().iterator();
+                getQueues().unorderedEntries().iterator();
 
         while (iterator.hasNext() && sent < maxQueues) {
             Entry<QueueWithinCrawl, QueueInterface> e = iterator.next();
-            pos++;
 
             // check that it is within the right crawlID
             if (!e.getKey().getCrawlid().equals(normalisedCrawlID)) {
@@ -390,13 +393,20 @@ public abstract class AbstractFrontierService
             }
 
             // ignore the nextfetchdate
-            if (include_inactive || e.getValue().countActive() > 0) {
-                if (pos >= start) {
-                    list.addValues(e.getKey().getQueue());
-                    sent++;
-                }
+            if (!include_inactive && e.getValue().countActive() == 0) {
+                continue;
+            }
+
+            pos++;
+
+            if (pos >= start) {
+                list.addValues(e.getKey().getQueue());
+                sent++;
             }
         }
+
+        // total is left unset: counting every matching queue would mean a full scan
+        list.setStart((int) start).setSize(sent).setCrawlID(normalisedCrawlID);
 
         responseObserver.onNext(list.build());
         responseObserver.onCompleted();
@@ -1219,7 +1229,9 @@ public abstract class AbstractFrontierService
             }
             qiterator = List.of(Map.entry(qwc, queue)).iterator();
         } else {
-            qiterator = getQueues().entrySet().iterator();
+            // unordered: the ordered view is rotated by getURLs, which would make a
+            // queue show up in two consecutive pages or in none
+            qiterator = getQueues().unorderedEntries().iterator();
         }
 
         while (qiterator.hasNext() && sentCount < maxURLs) {
@@ -1308,8 +1320,10 @@ public abstract class AbstractFrontierService
 
         long totalCount = 0;
 
+        // unordered: nothing here depends on the order and the ordered view is
+        // rotated by getURLs, which could yield a queue twice or skip it
         Iterator<Entry<QueueWithinCrawl, QueueInterface>> qiterator =
-                getQueues().entrySet().iterator();
+                getQueues().unorderedEntries().iterator();
 
         while (qiterator.hasNext()) {
             Entry<QueueWithinCrawl, QueueInterface> e = qiterator.next();
@@ -1350,7 +1364,7 @@ public abstract class AbstractFrontierService
      *
      * @param cur The URLItem to be filtered
      * @param text The string to search for
-     * @param ignoreCase if the filter should be case insentive
+     * @param ignoreCase if the filter should be case insensitive
      * @return true if the URLItem matches the filter
      */
     private boolean filterURL(URLItem cur, String text, boolean ignoreCase) {
