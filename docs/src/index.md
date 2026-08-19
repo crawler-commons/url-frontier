@@ -1,5 +1,7 @@
 # URL Frontier
 
+<img src="logo.svg" alt="URL Frontier" width="350">
+
 URL Frontier provides a crawler- and language-neutral API for the operations
 web crawlers perform when interacting with a crawl frontier.
 
@@ -35,3 +37,17 @@ The project is divided into several main components:
 - **Service** - the reference implementation of the URL Frontier service.
 - **Client** - a command-line client for interacting with a frontier.
 - **Tests** - a test suite for verifying URL Frontier implementations.
+
+## License
+
+URL Frontier is available as open source under the terms of the
+[Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+## Funding
+
+This project is funded through the
+[NGI0 Discovery Fund](https://nlnet.nl/discovery), a fund established by
+NLnet with financial support from the European Commission's
+[Next Generation Internet programme](https://ngi.eu/), under the aegis of
+DG Communications Networks, Content and Technology under grant agreement
+No 825322.
