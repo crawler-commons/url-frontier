@@ -1,0 +1,35 @@
+[project]
+
+site_name = "URL Frontier documentation"
+
+site_description = """
+Documentation for URL Frontier, a crawler- and language-neutral API
+for web crawler frontier operations.
+"""
+
+site_author = "crawler-commons"
+
+repo_url = "https://github.com/crawler-commons/url-frontier"
+
+docs_dir = "src"
+
+nav = [
+    {"Introduction" = "index.md"},
+    {"Getting Started" = "getting-started.md"},
+    {"Core Concepts" = "concepts.md"},
+    {"API" = "api.md"},
+    {"Service" = "service.md"},
+    {"Command-line Client" = "client.md"},
+    {"Logging and Monitoring" = "logging-monitoring.md"},
+    {"Contributing" = "contributing.md"},
+    {"Resources" = "resources.md"}
+]
+
+[project.theme]
+
+language = "en"
+
+features = [
+    "content.code.copy",
+    "navigation.footer"
+]
