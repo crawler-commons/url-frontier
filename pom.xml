@@ -291,6 +291,7 @@
 						<configuration>
 							<publishingServerId>central</publishingServerId>
 							<deploymentName>Crawler-Commons URLFrontier ${project.version}</deploymentName>
+							<autoPublish>true</autoPublish>
 						</configuration>
 					</plugin>
 				</plugins>
