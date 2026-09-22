@@ -7,7 +7,6 @@ import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.Long;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
@@ -34,10 +33,7 @@ public class DeleteCrawl implements Runnable {
 
     @Override
     public void run() {
-        ManagedChannel channel =
-                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
-                        .usePlaintext()
-                        .build();
+        ManagedChannel channel = parent.createChannel();
 
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 

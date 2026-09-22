@@ -8,7 +8,6 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.LogLevelParams.Level;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
@@ -44,10 +43,7 @@ public class SetLogLevel implements Runnable {
 
     @Override
     public void run() {
-        ManagedChannel channel =
-                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
-                        .usePlaintext()
-                        .build();
+        ManagedChannel channel = parent.createChannel();
 
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 

@@ -4,8 +4,11 @@
 package crawlercommons.urlfrontier.service;
 
 import crawlercommons.urlfrontier.service.rocksdb.RocksDBService;
+import io.grpc.Grpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.ServerCredentials;
+import io.grpc.TlsServerCredentials;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import io.prometheus.client.exporter.HTTPServer;
 import io.prometheus.client.hotspot.DefaultExports;
@@ -141,6 +144,9 @@ public class URLFrontierServer implements Callable<Integer> {
             }
         }
 
+        // fail on an invalid TLS configuration before the service opens its storage
+        ServerCredentials credentials = TlsConfig.serverCredentials(configuration);
+
         // Get the implementation class from the config if set (default is RocksDBService)
         String implementationClassName =
                 ParamHelper.getStringParameter(
@@ -188,7 +194,8 @@ public class URLFrontierServer implements Callable<Integer> {
         boolean enableReflection =
                 ParamHelper.getBooleanParameter(configuration, "server.enable_reflection", false);
 
-        ServerBuilder builder = ServerBuilder.forPort(port).addService(service);
+        ServerBuilder<?> builder =
+                Grpc.newServerBuilderForPort(port, credentials).addService(service);
 
         if (enableReflection) {
             builder.addService(ProtoReflectionService.newInstance());
@@ -197,10 +204,11 @@ public class URLFrontierServer implements Callable<Integer> {
         this.server = builder.build();
         this.server.start();
         LOG.info(
-                "Started URLFrontierServer [{}] on port {} as {}",
+                "Started URLFrontierServer [{}] on port {} as {} with {}",
                 service.getClass().getSimpleName(),
                 server.getPort(),
-                service.getAddress());
+                service.getAddress(),
+                credentials instanceof TlsServerCredentials ? "TLS" : "plaintext");
 
         registerShutdownHook();
 

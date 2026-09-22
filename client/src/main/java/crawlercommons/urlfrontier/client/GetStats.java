@@ -8,7 +8,6 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier;
 import crawlercommons.urlfrontier.Urlfrontier.Stats;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import java.util.Map;
 import java.util.Map.Entry;
 import picocli.CommandLine.Command;
@@ -44,10 +43,7 @@ public class GetStats implements Runnable {
 
     @Override
     public void run() {
-        ManagedChannel channel =
-                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
-                        .usePlaintext()
-                        .build();
+        ManagedChannel channel = parent.createChannel();
 
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 

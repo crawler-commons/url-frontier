@@ -11,12 +11,26 @@ Implemented in Java for simple interactions with a URLFrontier server
 `java -jar ./target/urlfrontier-client*.jar`
 
 ```
-Usage: Client [-hV] [-p=NUM] [-t=STRING] [COMMAND]
+Usage: Client [-hV] [--tls] [--tls-key-password[=STRING]] [-p=NUM] [-t=STRING]
+              [--tls-cert=FILE] [--tls-key=FILE] [--tls-trust-cert=FILE]
+              [COMMAND]
 Interacts with a URL Frontier from the command line
-  -h, --help          Show this help message and exit.
-  -p, --port=NUM      URL Frontier port (default to 7071)
-  -t, --host=STRING   URL Frontier hostname (defaults to 'localhost')
-  -V, --version       Print version information and exit.
+  -h, --help            Show this help message and exit.
+  -p, --port=NUM        URL Frontier port (default to 7071)
+  -t, --host=STRING     URL Frontier hostname (defaults to 'localhost')
+      --tls             Connect with TLS; implied by the other --tls-* options
+                          (defaults to plaintext)
+      --tls-cert=FILE   PEM file with the client certificate chain, for mutual
+                          TLS
+      --tls-key=FILE    PKCS#8 PEM file with the private key of the client
+                          certificate
+      --tls-key-password[=STRING]
+                        Password of the client private key; prompted for if the
+                          option is given without a value
+      --tls-trust-cert=FILE
+                        PEM file with the certificates trusted to sign the
+                          server certificate (defaults to the JVM trust store)
+  -V, --version         Print version information and exit.
 Commands:
   ListNodes      Prints out list of nodes forming the cluster
   ListQueues     Prints out active queues
@@ -40,6 +54,19 @@ Commands:
 ```
 
 Every command takes `--help`, which lists its own options.
+
+## TLS
+
+The client connects in plaintext unless it is given `--tls` or one of the `--tls-*` options, which
+come before the command name like `-t/--host`. The host name must match the certificate of the
+Frontier:
+
+```
+java -jar ./target/urlfrontier-client*.jar -t frontier.example.com --tls-trust-cert ca.pem GetStats
+```
+
+When the Frontier requires a client certificate, pass it with `--tls-cert` and `--tls-key`; add
+`--tls-key-password` without a value to be prompted for the password of an encrypted key.
 
 ## Injecting URLs
 

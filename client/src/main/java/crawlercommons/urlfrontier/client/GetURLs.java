@@ -10,7 +10,6 @@ import crawlercommons.urlfrontier.Urlfrontier.AnyCrawlID;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams.Builder;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import java.time.Instant;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -64,10 +63,7 @@ public class GetURLs implements Runnable {
     @Override
     public void run() {
 
-        ManagedChannel channel =
-                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
-                        .usePlaintext()
-                        .build();
+        ManagedChannel channel = parent.createChannel();
 
         URLFrontierBlockingStub stub = URLFrontierGrpc.newBlockingStub(channel);
 

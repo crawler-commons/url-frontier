@@ -43,6 +43,11 @@ on which it is running so that it can report its location with the heartbeat.
 |---|---|---|
 | `implementation` | `crawlercommons.urlfrontier.service.rocksdb.RocksDBService` | class of the service to run, must extend _AbstractFrontierService_ |
 | `server.enable_reflection` | `false` | exposes the gRPC reflection service, e.g. so that _grpcurl_ can be used against the Frontier |
+| `server.tls.cert.chain` | unset | PEM file with the certificate chain of the server; TLS is enabled when this and `server.tls.private.key` are set, see [Transport security](#transport-security) |
+| `server.tls.private.key` | unset | PKCS#8 PEM file with the private key of the server certificate |
+| `server.tls.private.key.password` | unset | password of the private key, if it is encrypted |
+| `server.tls.trust.cert.collection` | JVM trust store | PEM file with the certificates trusted to sign the client certificates and the certificates of the other nodes |
+| `server.tls.client.auth` | `none` | whether clients must present a certificate: `none`, `optional` or `require` |
 | `read.thread.num` | a quarter of the available processors, at least 1 | threads serving _GetURLs_ |
 | `write.thread.num` | a quarter of the available processors, at least 1 | threads applying _PutURLs_ and _PutDiscovered_ |
 | `putURLs.max.inflight` | `1024` | URLs a _PutURLs_ stream may have sent but not acked before the server stops reading from it; 0 or less lets a client send as fast as it likes, at the cost of the backlog piling up on the heap |
@@ -65,6 +70,32 @@ whatever value follows it - including `false`. Leave them out to keep them off.
 `rocksdb.bloom.filters` and `rocksdb.wal.disable` are flag-style for backwards compatibility: they used
 to be set as a bare key, so `rocksdb.wal.disable` on its own means the same as `rocksdb.wal.disable = true`.
 They do take a value, so `rocksdb.bloom.filters = false` turns the filters off.
+
+## Transport security
+
+The service is plaintext by default. It uses TLS when both `server.tls.cert.chain` and
+`server.tls.private.key` are set:
+
+```
+server.tls.cert.chain = /etc/urlfrontier/frontier.pem
+server.tls.private.key = /etc/urlfrontier/frontier-key.pem
+# to only accept clients with a certificate signed by one of these
+server.tls.trust.cert.collection = /etc/urlfrontier/clients-ca.pem
+server.tls.client.auth = require
+```
+
+Setting only one of the two, pointing at a file which cannot be read or giving an unknown value
+to `server.tls.client.auth` stops the service at startup.
+
+In distributed mode the same settings secure the channels between the nodes: a node checks the
+certificates of the other nodes against `server.tls.trust.cert.collection`, or the JVM trust store
+if not set, and presents its own certificate to them. The certificate of each node must therefore
+be valid for the host name under which it appears in `nodes` and, when `server.tls.client.auth` is
+`require`, also be usable as a client certificate. All the nodes of a cluster must have TLS on or
+all off.
+
+The command line client connects with TLS when given `--tls` or one of the `--tls-*` options, see
+its [README](../client/README.md).
 
 ## Distributed mode
 
@@ -112,7 +143,7 @@ After a restart, clients must re-assert the delays, blocks and limits they rely 
 
 ### Deployment and security assumptions
 
-Inter-node channels are plaintext and the RPCs are unauthenticated: the service must only be exposed on a private, trusted network. Coordinated upgrades of all nodes are recommended — in a mixed-version cluster, calls forwarded to an older node behave as that version did.
+Inter-node channels are plaintext unless TLS is configured, see [Transport security](#transport-security). Without `server.tls.client.auth = require` the RPCs are unauthenticated: the service must then only be exposed on a private, trusted network. Coordinated upgrades of all nodes are recommended — in a mixed-version cluster, calls forwarded to an older node behave as that version did.
 
 See #148, #150, #151, #156 and #157 for the details behind these semantics.
 

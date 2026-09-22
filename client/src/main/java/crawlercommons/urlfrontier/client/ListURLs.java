@@ -11,7 +11,6 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.ListUrlParams.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -141,10 +140,7 @@ public class ListURLs implements Runnable {
 
         Printer jprinter = JsonFormat.printer();
 
-        ManagedChannel channel =
-                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
-                        .usePlaintext()
-                        .build();
+        ManagedChannel channel = parent.createChannel();
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
         Iterator<URLItem> it = blockingFrontier.listURLs(builder.build());

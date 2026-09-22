@@ -12,6 +12,10 @@ By default, the client connects to:
 
 The host and port can be changed with command-line options.
 
+The client connects in plaintext unless it is given `--tls` or one of the
+`--tls-*` options, which set the trusted certificates and the client
+certificate for mutual TLS.
+
 ## Available operations
 
 The client provides commands for tasks such as:

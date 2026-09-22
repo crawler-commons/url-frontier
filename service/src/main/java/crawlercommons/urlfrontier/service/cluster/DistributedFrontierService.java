@@ -38,10 +38,12 @@ import crawlercommons.urlfrontier.service.ParamHelper;
 import crawlercommons.urlfrontier.service.QueueInterface;
 import crawlercommons.urlfrontier.service.QueueWithinCrawl;
 import crawlercommons.urlfrontier.service.SynchronizedStreamObserver;
+import crawlercommons.urlfrontier.service.TlsConfig;
+import io.grpc.ChannelCredentials;
 import io.grpc.Context;
 import io.grpc.Deadline;
+import io.grpc.Grpc;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
@@ -75,6 +77,7 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
         forwardReadyTimeoutMillis =
                 ParamHelper.getIntegerParameter(
                         configuration, "forward.ready.timeout.ms", forwardDeadlineSeconds * 1000);
+        channelCredentials = TlsConfig.channelCredentials(configuration);
     }
 
     // no explicit config
@@ -120,11 +123,14 @@ public abstract class DistributedFrontierService extends AbstractFrontierService
                             "Number of URLs failed back to the client because the stream to the node owning them did not become writable in time")
                     .register();
 
+    /** Credentials of the channels to the other nodes, TLS when the server uses it. */
+    private final ChannelCredentials channelCredentials;
+
     private final CacheLoader<String, ManagedChannel> channelLoader =
             new CacheLoader<String, ManagedChannel>() {
                 @Override
                 public ManagedChannel load(String target) {
-                    return ManagedChannelBuilder.forTarget(target).usePlaintext().build();
+                    return Grpc.newChannelBuilder(target, channelCredentials).build();
                 }
             };
 
