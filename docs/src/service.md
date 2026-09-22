@@ -26,6 +26,8 @@ Common configuration options include:
 - `implementation` - selects the frontier service implementation;
 - `rocksdb.path` - sets the RocksDB storage directory;
 - `server.enable_reflection` - enables gRPC reflection;
+- `server.tls.cert.chain` and `server.tls.private.key` - enable TLS, also
+  between the nodes of a cluster;
 - `read.thread.num` - controls threads serving `GetURLs`;
 - `write.thread.num` - controls threads applying URL updates.
 

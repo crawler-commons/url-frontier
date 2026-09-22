@@ -3,7 +3,6 @@ package crawlercommons.urlfrontier.client;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.Urlfrontier;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "SetCrawlLimit", description = "Set crawl limit for specific queue")
@@ -40,10 +39,7 @@ public class SetCrawlLimit implements Runnable {
 
     @Override
     public void run() {
-        ManagedChannel channel =
-                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
-                        .usePlaintext()
-                        .build();
+        ManagedChannel channel = parent.createChannel();
 
         URLFrontierGrpc.URLFrontierBlockingStub blockingFrontier =
                 URLFrontierGrpc.newBlockingStub(channel);

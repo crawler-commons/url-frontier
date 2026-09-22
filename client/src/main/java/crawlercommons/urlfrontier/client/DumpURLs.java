@@ -13,7 +13,6 @@ import crawlercommons.urlfrontier.Urlfrontier.Pagination;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -91,10 +90,7 @@ public class DumpURLs implements Callable<Integer> {
     @Override
     public Integer call() {
 
-        final ManagedChannel channel =
-                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
-                        .usePlaintext()
-                        .build();
+        final ManagedChannel channel = parent.createChannel();
 
         try {
             final URLFrontierBlockingStub blockingFrontier =
@@ -235,11 +231,7 @@ public class DumpURLs implements Callable<Integer> {
             Thread worker =
                     new Thread(
                             () -> {
-                                final ManagedChannel channel =
-                                        ManagedChannelBuilder.forAddress(
-                                                        parent.hostname, parent.port)
-                                                .usePlaintext()
-                                                .build();
+                                final ManagedChannel channel = parent.createChannel();
                                 try {
                                     final URLFrontierBlockingStub stub =
                                             URLFrontierGrpc.newBlockingStub(channel);

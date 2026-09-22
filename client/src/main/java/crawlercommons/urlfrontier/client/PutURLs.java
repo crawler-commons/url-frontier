@@ -15,7 +15,6 @@ import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
 import io.grpc.stub.StreamObserver;
@@ -227,10 +226,7 @@ public class PutURLs implements Callable<Integer> {
      * UNIMPLEMENTED, a current one acks it.
      */
     private boolean serverSupportsPutDiscovered() {
-        final ManagedChannel channel =
-                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
-                        .usePlaintext()
-                        .build();
+        final ManagedChannel channel = parent.createChannel();
         try {
             final CountDownLatch done = new CountDownLatch(1);
             final AtomicBoolean supported = new AtomicBoolean(false);
@@ -333,10 +329,7 @@ public class PutURLs implements Callable<Integer> {
             final AtomicBoolean streamError,
             final AtomicBoolean readError) {
 
-        final ManagedChannel channel =
-                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
-                        .usePlaintext()
-                        .build();
+        final ManagedChannel channel = parent.createChannel();
 
         try {
             final URLFrontierStub stub = URLFrontierGrpc.newStub(channel);

@@ -11,7 +11,6 @@ import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierBlockingStub;
 import crawlercommons.urlfrontier.Urlfrontier.Pagination.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.QueueList;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -69,10 +68,7 @@ public class ListQueues implements Runnable {
 
     @Override
     public void run() {
-        ManagedChannel channel =
-                ManagedChannelBuilder.forAddress(parent.hostname, parent.port)
-                        .usePlaintext()
-                        .build();
+        ManagedChannel channel = parent.createChannel();
         URLFrontierBlockingStub blockingFrontier = URLFrontierGrpc.newBlockingStub(channel);
 
         if (output.length() > 0) {
