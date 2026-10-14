@@ -344,7 +344,8 @@ public class RocksDBService extends AbstractFrontierService {
         }
 
         int alreadySent = 0;
-        final byte[] prefixKey = (queueID.toString() + "_").getBytes(StandardCharsets.UTF_8);
+        final String prefix = queueID.toString() + "_";
+        final byte[] prefixKey = prefix.getBytes(StandardCharsets.UTF_8);
         // scan the scheduling table
         try (final RocksIterator rocksIterator =
                 rocksDB.newIterator(columnFamilyHandleList.get(1))) {
@@ -359,12 +360,11 @@ public class RocksDBService extends AbstractFrontierService {
                 final int pos2 = currentKey.indexOf('_', pos + 1);
                 final int pos3 = currentKey.indexOf('_', pos2 + 1);
 
-                final String crawlPart = currentKey.substring(0, pos);
-                final String queuePart = currentKey.substring(pos + 1, pos2);
                 final String urlPart = currentKey.substring(pos3 + 1);
 
                 // not for this queue anymore?
-                if (!queueID.equals(crawlPart, queuePart)) {
+                // compare with the escaped prefix as the parts of the key are escaped
+                if (!currentKey.startsWith(prefix)) {
                     return alreadySent;
                 }
 
