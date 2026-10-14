@@ -16,6 +16,8 @@ public class SynchronizedStreamObserver<V> implements StreamObserver<V> {
 
     private int tokens;
 
+    private volatile boolean cancelled;
+
     SynchronizedStreamObserver(StreamObserver<V> underlying, int startTokens) {
         this.underlying = underlying;
         this.tokens = startTokens;
@@ -31,6 +33,9 @@ public class SynchronizedStreamObserver<V> implements StreamObserver<V> {
 
     public boolean tryTakingToken() {
         synchronized (this) {
+            if (cancelled) {
+                return false;
+            }
             // deactivated
             if (tokens < 0) {
                 return true;
@@ -40,6 +45,24 @@ public class SynchronizedStreamObserver<V> implements StreamObserver<V> {
             }
             return false;
         }
+    }
+
+    /**
+     * Returns true when no more values will be accepted, either because the call was cancelled or
+     * because all the tokens have been taken. Lets producers stop looking for values early.
+     */
+    public boolean isDone() {
+        if (cancelled) {
+            return true;
+        }
+        synchronized (this) {
+            return tokens == 0;
+        }
+    }
+
+    /** Marks the underlying call as cancelled: {@link #tryTakingToken()} fails from now on. */
+    public void markCancelled() {
+        cancelled = true;
     }
 
     @Override
