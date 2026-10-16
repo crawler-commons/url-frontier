@@ -678,6 +678,13 @@ public abstract class AbstractFrontierService
                 (SynchronizedStreamObserver<URLInfo>)
                         SynchronizedStreamObserver.wrapping(responseObserver, maxQueues);
 
+        // stop looking for URLs as soon as the client has gone away; with a handler set, gRPC
+        // also stops throwing on every onNext once the call is cancelled
+        if (responseObserver instanceof ServerCallStreamObserver) {
+            ((ServerCallStreamObserver<URLInfo>) responseObserver)
+                    .setOnCancelHandler(synchStreamObs::markCancelled);
+        }
+
         // want a specific key only?
         // default is an empty string so should never be null
         if (key != null && key.length() >= 1) {
@@ -771,7 +778,9 @@ public abstract class AbstractFrontierService
                             synchStreamObs.onCompleted();
                         });
 
-        while (numQueuesSent.get() < maxQueues) {
+        // stop when the call is cancelled or every token has been taken: the queues submitted
+        // from then on could not send anything
+        while (numQueuesSent.get() < maxQueues && !synchStreamObs.isDone()) {
 
             final QueueInterface currentQueue;
             final QueueWithinCrawl currentCrawlQueue;
@@ -795,6 +804,12 @@ public abstract class AbstractFrontierService
                 continue;
             }
 
+            // nothing scheduled: don't hand the queue over to the backend. Most queues are in
+            // this state late in a crawl, and probing them is what makes getURLs slow
+            if (currentQueue.countActive() == 0) {
+                continue;
+            }
+
             // atomically check the politeness gate and reserve the queue
             final long previousLastProduced = tryReserveQueue(currentQueue, now, maxURLsPerQueue);
             if (previousLastProduced == RESERVE_FAILED) {
@@ -810,14 +825,18 @@ public abstract class AbstractFrontierService
                             boolean completedNormally = false;
                             try {
                                 try {
-                                    sentForQ =
-                                            sendURLsForQueue(
-                                                    currentQueue,
-                                                    currentCrawlQueue,
-                                                    maxURLsPerQueue,
-                                                    secsUntilRequestable,
-                                                    now,
-                                                    synchStreamObs);
+                                    // the call may have been cancelled or filled while this
+                                    // task was waiting in the executor
+                                    if (!synchStreamObs.isDone()) {
+                                        sentForQ =
+                                                sendURLsForQueue(
+                                                        currentQueue,
+                                                        currentCrawlQueue,
+                                                        maxURLsPerQueue,
+                                                        secsUntilRequestable,
+                                                        now,
+                                                        synchStreamObs);
+                                    }
                                     completedNormally = true;
                                 } finally {
                                     finalizeReservation(

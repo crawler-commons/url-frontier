@@ -142,7 +142,8 @@ class GetURLsReservationTest {
 
         @Override
         public int countActive() {
-            return 0;
+            // non-empty, so that getURLs gets as far as the politeness gate
+            return 1;
         }
 
         @Override
