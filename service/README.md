@@ -181,3 +181,11 @@ Specify a config file with a volume and the `-c` flag:
 ```
 docker run --rm --name frontier -p 7071:7071 -p 9100:9100 -v /path/to/config.ini:/config/config.ini crawlercommons/url-frontier -s 9100 -c /config/config.ini
 ```
+
+The JVM runs with `-Xms2G -Xmx2G -XX:+UseG1GC` by default. Set the `JAVA_OPTS` environment variable to replace these options, for instance to give it a larger heap
+
+```
+docker run --rm --name frontier -p 7071:7071 -e JAVA_OPTS="-Xms4G -Xmx4G -XX:+UseG1GC" crawlercommons/url-frontier
+```
+
+RocksDB allocates its memory outside the Java heap, so if you limit the container with `--memory`, keep the heap well below that limit.

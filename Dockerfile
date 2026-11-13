@@ -31,4 +31,9 @@ COPY --chown=urlfrontier --from=build /home/urlfrontier/urlfrontier-service.jar 
 
 USER urlfrontier
 
-ENTRYPOINT ["java", "-Xms2G", "-Xmx2G", "-XX:+UseG1GC", "-jar", "urlfrontier-service.jar"]
+# JVM options, override with e.g. docker run -e JAVA_OPTS="-Xms4G -Xmx4G -XX:+UseG1GC"
+ENV JAVA_OPTS="-Xms2G -Xmx2G -XX:+UseG1GC"
+
+# shell form so that JAVA_OPTS is expanded; exec keeps java as PID 1 so that it gets the signals
+# from docker stop and "--" fills $0 so that the arguments of docker run are passed on as "$@"
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar urlfrontier-service.jar \"$@\"", "--"]

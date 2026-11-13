@@ -25,6 +25,17 @@ the container, mount a local directory:
 
     docker run --rm --name frontier -v /pathOnDisk:/crawldir -p 7071:7071 crawlercommons/url-frontier rocksdb.path=/crawldir/rocksdb
 
+## Memory
+
+The JVM in the container runs with a 2 GB heap (`-Xms2G -Xmx2G -XX:+UseG1GC`).
+To change it, set the `JAVA_OPTS` environment variable, which replaces these
+options entirely:
+
+    docker run --rm --name frontier -p 7071:7071 -e JAVA_OPTS="-Xms4G -Xmx4G -XX:+UseG1GC" crawlercommons/url-frontier
+
+RocksDB allocates its memory outside the Java heap, so if you limit the
+container with `--memory`, keep the heap well below that limit.
+
 ## Build from source
 
 Clone the repository:
